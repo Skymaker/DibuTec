@@ -6,12 +6,12 @@
   </defs>
   <rect width="512" height="512" rx="112" fill="#2f6fd0"/>
   <rect width="512" height="512" rx="112" fill="url(#cuadricula)"/>
+  <!-- Escuadra (45°) y cartabón (30°/60°) unidos por la hipotenusa -->
   <g stroke="#2d3047" stroke-linejoin="round" stroke-linecap="round">
-    <!-- Escuadra (45°) -->
-    <path d="M64 448V88L424 448Z M112 400H308L112 204Z" fill="#ffd166" fill-rule="evenodd" stroke-width="14"/>
-    <path d="M96 448v-18M128 448v-18M160 448v-28M192 448v-18" stroke-width="7"/>
-    <!-- Cartabón (30°/60°) -->
-    <path d="M448 448V48L217 448Z M400 400H300L400 227Z" fill="#f4f1ea" fill-rule="evenodd" stroke-width="14"/>
-    <path d="M448 96h-18M448 128h-18M448 160h-28M448 192h-18M448 224h-18M448 256h-28M448 288h-18M448 320h-18M448 352h-28M448 384h-18M448 416h-18" stroke-width="7"/>
+    <path d="M93.7 123.4L93.7 448.0L418.3 448.0Z M129.4 209.6L129.4 412.3L332.1 412.3Z" fill="#ffd166" fill-rule="evenodd" stroke-width="14"/>
+    <path d="M140.1 448.0l0.0 -18.0M186.4 448.0l0.0 -18.0M232.8 448.0l0.0 -28.0M279.2 448.0l0.0 -18.0M325.6 448.0l0.0 -18.0M371.9 448.0l0.0 -28.0" stroke-width="7"/>
+    <path d="M93.7 123.4L315.4 64.0L418.3 448.0Z M162.7 141.9L290.2 107.7L349.3 328.5Z" fill="#f4f1ea" fill-rule="evenodd" stroke-width="14"/>
+    <path d="M406.9 405.3l-17.4 4.7M395.4 362.7l-17.4 4.7M384.0 320.0l-27.0 7.2M372.6 277.3l-17.4 4.7M361.1 234.7l-17.4 4.7M349.7 192.0l-27.0 7.2M338.3 149.3l-17.4 4.7M326.8 106.7l-17.4 4.7" stroke-width="7"/>
   </g>
 </svg>
+
