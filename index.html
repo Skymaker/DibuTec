@@ -476,6 +476,11 @@ const Config = {
     modoGoma:       { def: 'trozos', ops: ['trozos', 'enteras'] },
     tamGoma:        { def: 6, min: 1, max: 40, paso: 1 },          // diámetro de la goma en mm
     exportarFondo:  { def: true,     ops: [true, false] },
+    colorInstrumentos: { def: 'verde', ops: ['verde', 'azul', 'rojo', 'naranja', 'morado', 'humo', 'cristal'] },
+    tamRegla:       { def: 30,       ops: [20, 30, 40] },        // cm graduados
+    tamEscuadra:    { def: 16,       ops: [12, 16, 20] },        // cm de cateto
+    tamCartabon:    { def: 23,       ops: [17, 23, 28] },        // cm del cateto mayor (a juego con la escuadra)
+    tamTransportador: { def: 13,     ops: [10, 13, 16] },        // cm de diámetro
   },
   valores: {},
   oyentes: [],
@@ -521,6 +526,18 @@ const Paleta = {
   papel:   { blanco: '#ffffff', crema: '#fbf5e3' },
   lineas:  { azul: '70, 125, 200', gris: '110, 112, 122', verde: '45, 145, 95' }, // rgb
   grafito: { gris: '#3b3b40', negro: '#141416', azul: '#2a4d8f' },
+  // Plástico de los instrumentos: relleno translúcido, borde, tinta de las escalas y color de la muestra
+  instrumentos: {
+    verde:   { relleno: 'rgba(14, 150, 52, .58)',   borde: 'rgba(8, 92, 34, .9)',    tinta: '#0c2414', muestra: '#1fa646' },
+    azul:    { relleno: 'rgba(40, 125, 215, .42)',  borde: 'rgba(16, 70, 140, .9)',  tinta: '#0b1a33', muestra: '#2f86dc' },
+    rojo:    { relleno: 'rgba(225, 50, 62, .40)',   borde: 'rgba(140, 20, 32, .9)',  tinta: '#2b0a0e', muestra: '#e0394a' },
+    naranja: { relleno: 'rgba(248, 145, 28, .44)',  borde: 'rgba(160, 82, 8, .9)',   tinta: '#2c1704', muestra: '#f7941d' },
+    morado:  { relleno: 'rgba(142, 72, 205, .40)',  borde: 'rgba(80, 32, 132, .9)',  tinta: '#1e0b30', muestra: '#8e48cd' },
+    humo:    { relleno: 'rgba(72, 74, 86, .34)',    borde: 'rgba(36, 38, 48, .9)',   tinta: '#101116', muestra: '#5a5c68' },
+    cristal: { relleno: 'rgba(214, 234, 250, .55)', borde: 'rgba(40, 90, 150, .7)',  tinta: '#1d2b44', muestra: '#d6eafa',
+               inversa: '#b23a2e' },
+  },
+  instrumento() { return this.instrumentos[Config.get('colorInstrumentos')] || this.instrumentos.verde; },
   lineasRGBA(a) { return `rgba(${this.lineas[Config.get('colorLineas')]}, ${a})`; },
 };
 
@@ -1625,7 +1642,10 @@ class Instrumento {
     this.asas = [];       // [{x, y, pivote: [x, y]}] asas de giro
     this.candado = null;  // [x, y] botón del candado
     this.origenIman = null;
+    this.rotulos = [];    // [{x, y, ang, texto, tam, marca}] nombre de la aplicación y tamaño, en mm locales
   }
+  // Recalcula la forma según el tamaño elegido en la configuración (el origen local no se mueve)
+  medir() {}
   get conArticulo() { return (this.g === 'a' ? 'la ' : 'el ') + this.nombre.toLowerCase(); }
 
   aMundo(lx, ly) {
@@ -1680,11 +1700,13 @@ class Instrumento {
   radioAsa() { return Math.max(5, 14 / Vista.escala); }
   radioCandado() { return Math.max(3.5, 11 / Vista.escala); }
 
-  // Agujero triangular: el triángulo escalado hacia su incentro
-  static agujeroTriangulo(v, k) {
+  // Agujero triangular: el triángulo escalado hacia su incentro, dejando un marco de «ancho» mm
+  static agujeroTriangulo(v, ancho) {
     const l = (p, q) => Math.hypot(q[0] - p[0], q[1] - p[1]);
     const a = l(v[1], v[2]), b = l(v[0], v[2]), c = l(v[0], v[1]), s = a + b + c;
     const I = [(a * v[0][0] + b * v[1][0] + c * v[2][0]) / s, (a * v[0][1] + b * v[1][1] + c * v[2][1]) / s];
+    const r = Math.sqrt((s / 2 - a) * (s / 2 - b) * (s / 2 - c) / (s / 2));   // radio inscrito
+    const k = Math.max(0.2, 1 - ancho / r);
     return v.map(p => [I[0] + k * (p[0] - I[0]), I[1] + k * (p[1] - I[1])]);
   }
 
@@ -1702,15 +1724,44 @@ class Instrumento {
     ctx.shadowColor = 'rgba(30, 40, 60, .22)';
     ctx.shadowBlur = 10 * Capas.dpr;
     ctx.shadowOffsetY = 3 * Capas.dpr;
-    ctx.fillStyle = this.bloqueado ? 'rgba(232, 226, 210, .6)' : 'rgba(214, 234, 250, .55)';
+    const e = Paleta.instrumento();
+    ctx.fillStyle = e.relleno;
     ctx.fill('evenodd');
     ctx.restore();
-    ctx.strokeStyle = this.bloqueado ? 'rgba(150, 110, 40, .8)' : 'rgba(40, 90, 150, .7)';
-    ctx.lineWidth = 1.2 / Vista.escala;
+    // Fijo con el candado: borde ámbar más grueso
+    ctx.strokeStyle = this.bloqueado ? 'rgba(200, 120, 20, .95)' : e.borde;
+    ctx.lineWidth = (this.bloqueado ? 2.4 : 1.2) / Vista.escala;
     ctx.stroke();
   }
   dibujarMarcas(ctx) {
     for (const k of this.cantos) if (k.graduado) this.graduar(ctx, k);
+    this.dibujarRotulos(ctx);
+  }
+  // Nombre de la aplicación y tamaño del instrumento, impresos en el plástico
+  dibujarRotulos(ctx) {
+    if (Vista.escala < 1) return;   // demasiado pequeños para leerse
+    const fuente = getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = Paleta.instrumento().tinta;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const r of this.rotulos) {
+      ctx.save();
+      ctx.translate(r.x, r.y);
+      ctx.rotate(r.ang || 0);
+      ctx.font = r.marca ? `italic 800 ${r.tam}px ${fuente}` : `600 ${r.tam}px ${fuente}`;
+      if (r.marca) this.logo(ctx, r.tam, ctx.measureText(r.texto).width);
+      ctx.fillText(r.texto, 0, 0);
+      ctx.restore();
+    }
+  }
+  // Escuadra y cartabón pequeños delante del nombre, como en el icono de la aplicación
+  logo(ctx, tam, ancho) {
+    const h = tam * 1.05, x = -ancho / 2 - h * 1.1, y = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y); ctx.lineTo(x + h, y); ctx.lineTo(x, y - h); ctx.closePath();
+    ctx.moveTo(x + h * 0.15, y - h * 0.15); ctx.lineTo(x + h * 0.15 + h * 0.5, y - h * 0.15); ctx.lineTo(x + h * 0.15, y - h * 0.15 - h * 0.87);
+    ctx.closePath();
+    ctx.fill('evenodd');
   }
   // Graduación en mm a lo largo de un canto, con las marcas hacia dentro
   graduar(ctx, k) {
@@ -1723,7 +1774,8 @@ class Instrumento {
     const o = k.origen, px = 1 / Vista.escala;
     const verMm = Vista.escala >= 2.5, verMedio = Vista.escala >= 1;
     const P = (mm, h) => [o[0] + d[0] * mm + m[0] * h, o[1] + d[1] * mm + m[1] * h];
-    ctx.strokeStyle = '#1d2b44';
+    const tinta = Paleta.instrumento().tinta;
+    ctx.strokeStyle = tinta;
     ctx.lineWidth = Math.max(0.12, 0.8 * px);
     ctx.beginPath();
     for (let i = 0; i <= k.max; i++) {
@@ -1746,7 +1798,7 @@ class Instrumento {
       ctx.fillText(t, 0, 0);
       ctx.restore();
     };
-    ctx.fillStyle = '#1d2b44';
+    ctx.fillStyle = tinta;
     const paso = Vista.escala * 10 < 14 ? 5 : 1;
     for (let c2 = 0; c2 * 10 <= k.max; c2 += paso) texto(String(c2), P(c2 * 10, 8.6), 3.2, 'center');
     texto('cm', P(1.5, 12.3), 2.6, 'left');
@@ -1819,19 +1871,27 @@ class Regla extends Instrumento {
   constructor() {
     super('regla', 'Regla', 'a');
     this.giraEnPuntos = true;   // con un punto marcado en un canto, gira alrededor de él
-    const L = 310, W = 32, cero = 5;   // la marca 0 está a 5 mm del extremo
+    this.medir();
+  }
+  medir() {
+    const cm = Config.get('tamRegla') || 30, max = cm * 10;
+    const cero = 5, L = max + 2 * cero, W = 32;   // la marca 0 está a 5 mm del extremo
     this.poligono = [[0, 0], [L, 0], [L, W], [0, W]];
     this.cantos = [
-      { i: 0, j: 1, graduado: true, origen: [cero, 0], max: 300 },
+      { i: 0, j: 1, graduado: true, origen: [cero, 0], max },
       { i: 3, j: 2 },
     ];
-    // Asa derecha: gira alrededor del 0; asa izquierda: alrededor del 30 cm
+    // Asa izquierda: gira alrededor del final de la escala; asa derecha: alrededor del 0
     this.asas = [
-      { x: 14, y: 22, pivote: [cero + 300, 0] },
+      { x: 14, y: 22, pivote: [cero + max, 0] },
       { x: L - 14, y: 22, pivote: [cero, 0] },
     ];
     this.candado = [L - 34, 22];
     this.origenIman = [cero, 0];
+    this.rotulos = [
+      { x: L / 2, y: 19.5, texto: 'DibuTec', tam: 4.6, marca: true },
+      { x: L / 2, y: 26.5, texto: `${cm} cm`, tam: 2.6 },
+    ];
   }
 }
 
@@ -1840,11 +1900,14 @@ class Escuadra extends Instrumento {
   constructor() {
     super('escuadra', 'Escuadra', 'a');
     this.giraEnPuntos = true;   // con un punto marcado en un canto, gira alrededor de él
-    const L = 160;
+    this.medir();
+  }
+  medir() {
+    const cm = Config.get('tamEscuadra') || 16, L = cm * 10;
     this.poligono = [[0, 0], [L, 0], [0, -L]];
-    this.agujero = Instrumento.agujeroTriangulo(this.poligono, 0.45);
+    this.agujero = Instrumento.agujeroTriangulo(this.poligono, 26);
     this.cantos = [
-      { i: 0, j: 1, graduado: true, origen: [5, 0], max: 140 },
+      { i: 0, j: 1, graduado: true, origen: [5, 0], max: Math.floor((L - 20) / 10) * 10 },
       { i: 0, j: 2 },
       { i: 1, j: 2 },
     ];
@@ -1854,6 +1917,12 @@ class Escuadra extends Instrumento {
     ];
     this.candado = [16, -18];
     this.origenIman = [5, 0];
+    // A lo largo del cateto vertical, leyéndose de abajo arriba
+    const y = -(L - 55 + 26) / 2 - 4;
+    this.rotulos = [
+      { x: 17, y, ang: -Math.PI / 2, texto: 'DibuTec', tam: 4.2, marca: true },
+      { x: 23, y, ang: -Math.PI / 2, texto: `45° · ${cm} cm`, tam: 2.4 },
+    ];
   }
 }
 
@@ -1862,20 +1931,31 @@ class Cartabon extends Instrumento {
   constructor() {
     super('cartabon', 'Cartabón', 'o');
     this.giraEnPuntos = true;   // con un punto marcado en un canto, gira alrededor de él
-    const Lg = 160 * Math.SQRT2, S = Lg / Math.sqrt(3);
+    this.medir();
+  }
+  medir() {
+    // El cateto mayor mide lo que la hipotenusa de la escuadra del mismo juego (12, 16 o 20 cm de cateto)
+    const cm = Config.get('tamCartabon') || 23;
+    const Lg = { 17: 120, 23: 160, 28: 200 }[cm] * Math.SQRT2, S = Lg / Math.sqrt(3);
     this.poligono = [[0, 0], [S, 0], [0, -Lg]];
-    this.agujero = Instrumento.agujeroTriangulo(this.poligono, 0.45);
+    this.agujero = Instrumento.agujeroTriangulo(this.poligono, 26);
     this.cantos = [
-      { i: 0, j: 2, graduado: true, origen: [0, -5], max: 200 },
+      { i: 0, j: 2, graduado: true, origen: [0, -5], max: Math.floor((Lg - 20) / 10) * 10 },
       { i: 0, j: 1 },
       { i: 1, j: 2 },
     ];
     this.asas = [
       { x: S - 50, y: -16, pivote: [0, -5] },
-      { x: 20, y: -151, pivote: [0, -5] },
+      { x: 20, y: -(Lg - 75), pivote: [0, -5] },
     ];
     this.candado = [17, -18];
     this.origenIman = [0, -5];
+    // Junto al cateto graduado, leyéndose de abajo arriba
+    const y = -(Lg - 75 + 30) / 2 - 2;
+    this.rotulos = [
+      { x: 16.5, y, ang: -Math.PI / 2, texto: 'DibuTec', tam: 4.2, marca: true },
+      { x: 22.5, y, ang: -Math.PI / 2, texto: `30°-60° · ${cm} cm`, tam: 2.4 },
+    ];
   }
 }
 
@@ -1985,7 +2065,8 @@ class Compas extends Instrumento {
     ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(k[0], k[1]); ctx.stroke();
     // Patas: metálica (punta seca) y de color (mina)
     this.pata(ctx, b, [0, 0], 5, 1.6, 'rgba(150, 160, 175, .92)', '#4b5363');
-    const finMina = this.pata(ctx, b, [this.r, 0], 5, 2.4, 'rgba(232, 93, 80, .92)', '#9c3a30');
+    const e = Paleta.instrumento();   // la pata de la mina es del color del juego (roja con el plástico transparente)
+    const finMina = this.pata(ctx, b, [this.r, 0], 5, 2.4, e.inversa ? 'rgba(232, 93, 80, .92)' : e.muestra, e.inversa ? '#9c3a30' : e.borde);
     ctx.restore();
     // Mina de grafito (más clara si está levantada)
     ctx.fillStyle = Paleta.grafito[Config.get('grafito')];
@@ -2031,20 +2112,53 @@ class Compas extends Instrumento {
 class Transportador extends Instrumento {
   constructor() {
     super('transportador', 'Transportador', 'o');
-    const Ro = this.Ro = 65;
+    this.medir();
+    this.ayuda = 'Transportador: pon el centro sobre el vértice, gira con las asas hasta que la base pase por la recta y, con el portaminas, toca el borde para marcar el ángulo.';
+  }
+  medir() {
+    const cm = Config.get('tamTransportador') || 13;
+    const Ro = this.Ro = cm * 5;
+    const ri = this.ri = Ro - 39;     // radio del hueco
     const arco = (r, a0, a1, paso) => {
       const v = [];
       for (let g = a0; g <= a1 + 1e-9; g += paso) v.push([r * Math.cos(g * Math.PI / 180), -r * Math.sin(g * Math.PI / 180)]);
       return v;
     };
     this.poligono = arco(Ro, 0, 180, 2);                 // de (Ro, 0) a (−Ro, 0); se cierra por la base
-    this.agujero = arco(26, 14, 166, 4);
+    this.agujero = arco(ri, 14, 166, 4);
     this.cantos = [{ i: this.poligono.length - 1, j: 0 }];
-    const asa = g => ({ x: 36 * Math.cos(g * Math.PI / 180), y: -36 * Math.sin(g * Math.PI / 180), pivote: [0, 0] });
+    const ra = Ro - 29;
+    const asa = g => ({ x: ra * Math.cos(g * Math.PI / 180), y: -ra * Math.sin(g * Math.PI / 180), pivote: [0, 0] });
     this.asas = [asa(35), asa(145)];
-    this.candado = [0, -36];
+    this.candado = [0, -ra];
     this.origenIman = [0, 0];
-    this.ayuda = 'Transportador: pon el centro sobre el vértice, gira con las asas hasta que la base pase por la recta y, con el portaminas, toca el borde para marcar el ángulo.';
+    this.cm = cm;
+  }
+  // Rótulos curvados entre el hueco y la escala: el nombre a la izquierda y el tamaño a la derecha
+  dibujarRotulos(ctx) {
+    if (Vista.escala < 1) return;
+    const fuente = getComputedStyle(document.body).fontFamily, r = this.Ro - 29;
+    ctx.fillStyle = Paleta.instrumento().tinta;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const curvo = (texto, gCentro, tam, peso) => {
+      ctx.font = `${peso} ${tam}px ${fuente}`;
+      const anchos = [...texto].map(c => ctx.measureText(c).width);
+      const total = anchos.reduce((a, b) => a + b, 0);
+      let a = gCentro * Math.PI / 180 + total / 2 / r;   // de izquierda a derecha = sentido horario
+      [...texto].forEach((c, i) => {
+        const m = a - anchos[i] / 2 / r;
+        ctx.save();
+        ctx.translate(r * Math.cos(m), -r * Math.sin(m));
+        ctx.rotate(Math.PI / 2 - m);
+        ctx.fillText(c, 0, 0);
+        ctx.restore();
+        a -= anchos[i] / r;
+      });
+    };
+    const k = Math.min(1, this.Ro / 65);
+    curvo('DibuTec', 117, 4 * k, 'italic 800');
+    if (this.Ro >= 60) curvo(`180° · ${this.cm} cm`, 63, 2.6, '600');
   }
   centroLocal() { return [0, -this.Ro * 0.42]; }
   zonaLapiz(info) {
@@ -2060,7 +2174,8 @@ class Transportador extends Instrumento {
     const Ro = this.Ro, px = 1 / Vista.escala;
     const verGrado = Ro * Math.PI / 180 * Vista.escala >= 2.5;
     const pt = (r, g) => [r * Math.cos(g * Math.PI / 180), -r * Math.sin(g * Math.PI / 180)];
-    ctx.strokeStyle = '#1d2b44';
+    const e = Paleta.instrumento();
+    ctx.strokeStyle = e.tinta;
     ctx.lineWidth = Math.max(0.12, 0.8 * px);
     ctx.beginPath();
     for (let g = 0; g <= 180; g++) {
@@ -2072,7 +2187,7 @@ class Transportador extends Instrumento {
       if (diez) { const c = pt(Ro - 18.5, g), d = pt(Ro - 20.5, g); ctx.moveTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); }
     }
     // Línea de 90° y cruz del centro
-    ctx.moveTo(0, -26); ctx.lineTo(0, 0);
+    ctx.moveTo(0, -this.ri); ctx.lineTo(0, 0);
     ctx.moveTo(-4, 0); ctx.lineTo(4, 0);
     ctx.stroke();
     ctx.beginPath();
@@ -2094,10 +2209,11 @@ class Transportador extends Instrumento {
     };
     const paso = Ro * Math.PI / 18 * Vista.escala < 18 ? 30 : 10;
     for (let g = 0; g <= 180; g += paso) {
-      const pos = g === 0 ? 3.5 : g === 180 ? 176.5 : g;   // el 0 y el 180 no caben sobre la base
-      numero(String(g), Ro - 9.5, pos, 3.2, '#1d2b44');
-      numero(String(180 - g), Ro - 15, pos, 2.6, '#b23a2e');
+      const m = 3.5 * 65 / Ro, pos = g === 0 ? m : g === 180 ? 180 - m : g;   // el 0 y el 180 no caben sobre la base
+      numero(String(g), Ro - 9.5, pos, 3.2, e.tinta);
+      numero(String(180 - g), Ro - 15, pos, 2.6, e.inversa || e.tinta);
     }
+    this.dibujarRotulos(ctx);
   }
 }
 
@@ -2136,6 +2252,13 @@ const Instrumentos = {
     inst.rot = 0;
     inst.x = cx - cl[0]; inst.y = cy - cl[1];
     inst.colocado = true;
+  },
+
+  // Aplica los tamaños de la configuración a todos los instrumentos
+  medir() {
+    if (Manip.estado) Manip.fin(false);
+    for (const inst of this.lista) inst.medir();
+    Render.pedir('instrumentos');
   },
 
   bandaPx(tipo) { return tipo === 'touch' ? 22 : 12; },
@@ -3179,6 +3302,19 @@ const Panel = {
     this.fila(c, 'Goma', this.segmentado('modoGoma', [['trozos', 'Borra a trozos'], ['enteras', 'Líneas enteras']]));
     this.fila(c, 'Tamaño de la goma (diámetro)', this.deslizador('tamGoma', 'Tamaño de la goma'));
 
+    titulo('Instrumentos');
+    this.fila(c, 'Color del plástico', this.muestras('colorInstrumentos',
+      [['verde', 'Verde'], ['azul', 'Azul'], ['rojo', 'Rojo'], ['naranja', 'Naranja'], ['morado', 'Morado'], ['humo', 'Ahumado'], ['cristal', 'Transparente']]
+        .map(([v, n]) => [v, Paleta.instrumentos[v].muestra, n])));
+    this.fila(c, 'Regla', this.segmentado('tamRegla', [[20, '20 cm'], [30, '30 cm'], [40, '40 cm']]));
+    this.fila(c, 'Escuadra (cateto)', this.segmentado('tamEscuadra', [[12, '12 cm'], [16, '16 cm'], [20, '20 cm']]));
+    this.fila(c, 'Cartabón (cateto mayor)', this.segmentado('tamCartabon', [[17, '17 cm'], [23, '23 cm'], [28, '28 cm']]));
+    this.fila(c, 'Transportador (diámetro)', this.segmentado('tamTransportador', [[10, '10 cm'], [13, '13 cm'], [16, '16 cm']]));
+    const ni = document.createElement('div');
+    ni.className = 'nota';
+    ni.textContent = 'La escuadra y el cartabón del mismo tamaño forman juego: el cateto mayor del cartabón mide lo que la hipotenusa de la escuadra.';
+    c.lastChild.appendChild(ni);
+
     titulo('Ayudas');
     this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
     this.interruptor(c, 'sonidos', 'Sonidos');
@@ -4201,6 +4337,8 @@ function aplicarConfig(clave) {
       : 'Goma de líneas enteras: borra la línea, el arco o el punto que toques.');
     Render.pedir('instrumentos');
   }
+  if (todo || clave.startsWith('tam') && clave !== 'tamGoma') Instrumentos.medir();
+  if (clave === 'colorInstrumentos') Render.pedir('instrumentos');
   if (clave === 'tamGoma') {
     UI.mensaje(`Tamaño de la goma: ${Config.get('tamGoma')} mm.`);
     Goma.mostrarTamano();

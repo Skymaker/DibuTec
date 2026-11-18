@@ -17,6 +17,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 6 | Transportador | ✅ Hecha |
 | 7 | Pulido: guardado, archivo, PNG, lupa, ayuda, deshacer instrumentos, imán en líneas y cruces | ✅ Hecha |
 | 8 | Ejercicios guiados en archivos JSON independientes | ✅ Hecha |
+| 9 | Instrumentos configurables: color del plástico y tamaño, con el nombre de la aplicación impreso | ✅ Hecha |
 
 ---
 
@@ -103,6 +104,11 @@ Panel lateral deslizante (pantalla completa en móviles/tablets pequeñas).
 - **Imán a la cuadrícula** (desactivado por defecto); en isométrico, vértices de los triángulos.
 
 **Dibujo**: grosor de mina 0,3 / 0,5 / 0,7 mm, color del grafito, etiquetado automático.
+
+**Instrumentos**: color del plástico (verde por defecto, azul, rojo, naranja, morado,
+ahumado o transparente) y tamaño de la regla (20/30/40 cm), la escuadra (cateto 12/16/20 cm),
+el cartabón (cateto mayor 17/23/28 cm, a juego con la escuadra) y el transportador
+(diámetro 10/13/16 cm). Cada instrumento lleva impreso «DibuTec» y su tamaño.
 
 **Ayudas**: fuerza del imán, sonidos, mensajes de ayuda, tamaño de interfaz.
 
