@@ -95,6 +95,12 @@
   #lienzo.mover { cursor: grab; }
   #lienzo.mover.arrastrando { cursor: grabbing; }
   #lienzo.precision { cursor: crosshair; }
+  #lienzo.sobre-instrumento { cursor: grab; }
+  #lienzo.sobre-asa {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='4'%3E%3Cpath d='M20 12a8 8 0 1 1-2.3-5.6'/%3E%3Cpath d='M20 3v4.5h-4.5'/%3E%3C/g%3E%3Cg stroke='%232d3047' stroke-width='2'%3E%3Cpath d='M20 12a8 8 0 1 1-2.3-5.6'/%3E%3Cpath d='M20 3v4.5h-4.5'/%3E%3C/g%3E%3C/svg%3E") 12 12, grab;
+  }
+  #lienzo.sobre-candado { cursor: pointer; }
+  #lienzo.arrastrando { cursor: grabbing; }
 
   /* ---------- Barra de estado ---------- */
   #estado {
@@ -133,6 +139,11 @@
   @media (orientation: portrait) and (pointer: coarse) {
     :root { --btn: 50px; --gap: 4px; }
   }
+  /* Interfaz grande (configuración) */
+  :root[data-interfaz="grande"] { --btn: 56px; }
+  @media (pointer: coarse) { :root[data-interfaz="grande"] { --btn: 62px; } }
+  :root[data-interfaz="grande"] #estado { font-size: 16px; }
+  :root[data-ayuda="no"] #mensaje { visibility: hidden; }
 
   /* ---------- Panel de configuración ---------- */
   #velo {
@@ -158,7 +169,64 @@
   .panel-cab h2 { margin: 0; font-size: 20px; }
   .panel-cuerpo { padding: 8px 18px 24px; overflow-y: auto; }
   .panel-cuerpo h3 { font-size: 15px; margin: 18px 0 6px; color: var(--activo); text-transform: uppercase; letter-spacing: .04em; }
-  .panel-cuerpo p { margin: 0; color: var(--texto-suave); font-size: 15px; line-height: 1.45; }
+  .panel-cuerpo h3:first-child { margin-top: 10px; }
+  .fila { margin: 14px 0; }
+  .fila[hidden] { display: none; }
+  .etq { display: block; font-size: 14px; color: var(--texto-suave); margin-bottom: 6px; }
+  .nota { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
+  .panel-cuerpo { --ctl: 40px; }
+  @media (pointer: coarse) { .panel-cuerpo { --ctl: 48px; } }
+
+  .opciones-papel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .tarjeta {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 8px; border: 2px solid var(--borde); border-radius: 12px;
+    background: #fff; color: var(--texto); font: inherit; font-size: 14px;
+    cursor: pointer; touch-action: manipulation;
+  }
+  .tarjeta svg { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: 0 0 0 1px var(--borde); }
+  .tarjeta[aria-checked="true"] { border-color: var(--activo); background: var(--activo-fondo); color: var(--activo); font-weight: 600; }
+
+  .segmentado { display: flex; gap: 4px; padding: 4px; background: #efebe3; border-radius: 12px; }
+  .segmentado button {
+    flex: 1; min-height: var(--ctl); border: none; border-radius: 9px;
+    background: transparent; color: var(--texto); font: inherit; font-size: 15px;
+    cursor: pointer; touch-action: manipulation; padding: 0 6px;
+  }
+  .segmentado button[aria-checked="true"] { background: #fff; color: var(--activo); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+
+  .muestras { display: flex; gap: 12px; flex-wrap: wrap; }
+  .muestra {
+    width: var(--ctl); height: var(--ctl); border-radius: 50%;
+    border: 3px solid #fff; box-shadow: 0 0 0 1px var(--borde);
+    cursor: pointer; touch-action: manipulation; padding: 0;
+  }
+  .muestra[aria-checked="true"] { box-shadow: 0 0 0 3px var(--activo); }
+
+  .fila-interruptor { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--ctl); }
+  .fila-interruptor .etq { margin: 0; font-size: 15px; color: var(--texto); }
+  .interruptor {
+    position: relative; flex: none; width: 52px; height: 30px; border-radius: 15px;
+    border: none; background: #cfc9be; cursor: pointer; touch-action: manipulation;
+    transition: background-color .15s;
+  }
+  .interruptor::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+    border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    transition: transform .15s;
+  }
+  .interruptor[aria-checked="true"] { background: var(--activo); }
+  .interruptor[aria-checked="true"]::after { transform: translateX(22px); }
+
+  .panel-cuerpo button:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+  .btn-texto {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; min-height: var(--ctl); margin-top: 26px;
+    border: 1px solid var(--borde); border-radius: 12px; background: #fff;
+    color: var(--texto); font: inherit; font-size: 15px; cursor: pointer; touch-action: manipulation;
+  }
+  .btn-texto svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .btn-texto svg .a { fill: var(--acento); }
 
   /* Aviso emergente */
   #aviso {
@@ -192,14 +260,7 @@
     <h2 id="titulo-config">Configuración</h2>
     <button class="btn" id="cerrar-config" type="button" aria-label="Cerrar" title="Cerrar (Esc)"></button>
   </div>
-  <div class="panel-cuerpo">
-    <h3>Papel</h3>
-    <p>Papel en blanco, cuadriculado, milimetrado o isométrico. Disponible en la fase 1b.</p>
-    <h3>Dibujo</h3>
-    <p>Grosor de mina, color del grafito y etiquetas automáticas. Próximamente.</p>
-    <h3>Ayudas</h3>
-    <p>Fuerza del imán, sonidos, mensajes de ayuda y tamaño de la interfaz. Próximamente.</p>
-  </div>
+  <div class="panel-cuerpo" id="config-cuerpo"></div>
 </aside>
 <div id="aviso" role="status"></div>
 
@@ -264,32 +325,93 @@ const Iconos = (() => {
    Configuración persistente
    ===================================================================== */
 const Config = {
-  defecto: {
-    papel: 'blanco',       // blanco | cuadriculado | milimetrado | isometrico  (fase 1b)
-    hoja: 'A4-h',          // A4-h | A4-v | A3-h | A3-v
-    margen: true,
-    colorPapel: '#ffffff',
+  // Cada opción: valor por defecto y valores permitidos
+  esquema: {
+    papel:          { def: 'blanco', ops: ['blanco', 'cuadriculado', 'milimetrado', 'isometrico'] },
+    cuadro:         { def: 5,        ops: [4, 5, 10] },          // mm (cuadriculado)
+    triangulo:      { def: 5,        ops: [5, 10] },             // mm (isométrico)
+    colorLineas:    { def: 'azul',   ops: ['azul', 'gris', 'verde'] },
+    colorPapel:     { def: 'blanco', ops: ['blanco', 'crema'] },
+    hoja:           { def: 'A4-h',   ops: ['A4-h', 'A4-v', 'A3-h', 'A3-v'] },
+    margen:         { def: true,     ops: [true, false] },
+    imanCuadricula: { def: false,    ops: [true, false] },
+    mina:           { def: 0.5,      ops: [0.3, 0.5, 0.7] },     // mm
+    grafito:        { def: 'gris',   ops: ['gris', 'negro', 'azul'] },
+    etiquetas:      { def: true,     ops: [true, false] },
+    iman:           { def: 'medio',  ops: ['debil', 'medio', 'fuerte'] },
+    sonidos:        { def: true,     ops: [true, false] },
+    ayuda:          { def: true,     ops: [true, false] },
+    interfaz:       { def: 'normal', ops: ['normal', 'grande'] },
   },
   valores: {},
+  oyentes: [],
   clave: 'dibutec.config',
   cargar() {
     let guardado = {};
     try { guardado = JSON.parse(localStorage.getItem(this.clave)) || {}; } catch (e) { guardado = {}; }
-    this.valores = Object.assign({}, this.defecto, guardado);
+    this.valores = {};
+    for (const k in this.esquema) {
+      const e = this.esquema[k];
+      this.valores[k] = e.ops.includes(guardado[k]) ? guardado[k] : e.def;
+    }
   },
   guardar() {
     try { localStorage.setItem(this.clave, JSON.stringify(this.valores)); } catch (e) { /* sin almacenamiento */ }
   },
   get(k) { return this.valores[k]; },
-  set(k, v) { this.valores[k] = v; this.guardar(); },
+  set(k, v) {
+    const e = this.esquema[k];
+    if (!e || !e.ops.includes(v) || this.valores[k] === v) return;
+    this.valores[k] = v;
+    this.guardar();
+    this.oyentes.forEach(f => f(k, v));
+  },
+  restaurar() {
+    for (const k in this.esquema) this.valores[k] = this.esquema[k].def;
+    this.guardar();
+    this.oyentes.forEach(f => f('*'));
+  },
+  alCambiar(f) { this.oyentes.push(f); },
+};
+
+const Paleta = {
+  papel:   { blanco: '#ffffff', crema: '#fbf5e3' },
+  lineas:  { azul: '70, 125, 200', gris: '110, 112, 122', verde: '45, 145, 95' }, // rgb
+  grafito: { gris: '#3b3b40', negro: '#141416', azul: '#2a4d8f' },
+  lineasRGBA(a) { return `rgba(${this.lineas[Config.get('colorLineas')]}, ${a})`; },
 };
 
 /* =====================================================================
    Geometría básica
    ===================================================================== */
 const Geom = {
+  DOS_PI: Math.PI * 2,
   dist: (ax, ay, bx, by) => Math.hypot(bx - ax, by - ay),
   clamp: (v, a, b) => Math.min(b, Math.max(a, v)),
+  // Ángulo en [0, 2π)
+  normAng(a) { a %= this.DOS_PI; return a < 0 ? a + this.DOS_PI : a; },
+  // Distancia de un punto a un segmento
+  distSegmento(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy;
+    const t = L ? this.clamp(((px - ax) * dx + (py - ay) * dy) / L, 0, 1) : 0;
+    return this.dist(px, py, ax + t * dx, ay + t * dy);
+  },
+  // Arco: centro, radio, ángulo inicial a0 y final a1 (a1 − a0 con signo = barrido)
+  esCircunferencia(arc) { return Math.abs(arc.a1 - arc.a0) >= this.DOS_PI - 1e-9; },
+  anguloEnArco(ang, arc) {
+    if (this.esCircunferencia(arc)) return true;
+    const s = arc.a1 - arc.a0;
+    return s >= 0 ? this.normAng(ang - arc.a0) <= s : this.normAng(arc.a0 - ang) <= -s;
+  },
+  distArco(px, py, arc) {
+    const ang = Math.atan2(py - arc.cy, px - arc.cx);
+    if (this.anguloEnArco(ang, arc)) return Math.abs(this.dist(px, py, arc.cx, arc.cy) - arc.r);
+    const e = this.extremosArco(arc);
+    return Math.min(this.dist(px, py, e[0].x, e[0].y), this.dist(px, py, e[1].x, e[1].y));
+  },
+  extremosArco(arc) {
+    return [arc.a0, arc.a1].map(a => ({ x: arc.cx + arc.r * Math.cos(a), y: arc.cy + arc.r * Math.sin(a) }));
+  },
 };
 
 /* =====================================================================
@@ -303,6 +425,155 @@ const Hoja = {
     const [l, c] = this.tamanos[fmt] || this.tamanos.A4;
     this.ancho = ori === 'v' ? c : l;
     this.alto  = ori === 'v' ? l : c;
+  },
+};
+
+/* =====================================================================
+   Fondo del papel: cuadriculado, milimetrado, isométrico
+   ===================================================================== */
+const Papel = {
+  RAIZ3: Math.sqrt(3),
+
+  // Zona con cuadrícula: dentro del margen si está activo; si no, la hoja entera
+  area() {
+    const m = Config.get('margen') ? Hoja.margen : 0;
+    return { x0: m, y0: m, x1: Hoja.ancho - m, y1: Hoja.alto - m };
+  },
+
+  // Opacidad según la separación en pantalla (oculta líneas demasiado juntas)
+  visibilidad(sepMm) {
+    const px = sepMm * Vista.escala;
+    return Geom.clamp((px - 3) / 5, 0, 1); // 0 por debajo de 3 px, 1 por encima de 8 px
+  },
+
+  // ctx en mm; vis = rectángulo visible en mm
+  dibujar(ctx, vis) {
+    const tipo = Config.get('papel');
+    if (tipo === 'blanco') return;
+    const a = this.area();
+    const r = {
+      x0: Math.max(a.x0, vis.x0), y0: Math.max(a.y0, vis.y0),
+      x1: Math.min(a.x1, vis.x1), y1: Math.min(a.y1, vis.y1),
+    };
+    if (r.x1 <= r.x0 || r.y1 <= r.y0) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(a.x0, a.y0, a.x1 - a.x0, a.y1 - a.y0);
+    ctx.clip();
+    ctx.lineCap = 'butt';
+    if (tipo === 'cuadriculado') {
+      this.rejilla(ctx, a, r, Config.get('cuadro'), 0.55, 0.8);
+    } else if (tipo === 'milimetrado') {
+      this.rejilla(ctx, a, r, 1, 0.28, 0.5, 5);
+      this.rejilla(ctx, a, r, 5, 0.5, 0.8, 10);
+      this.rejilla(ctx, a, r, 10, 0.75, 1.2);
+    } else if (tipo === 'isometrico') {
+      this.isometrica(ctx, a, r, Config.get('triangulo'));
+    }
+    ctx.restore();
+  },
+
+  // Líneas horizontales y verticales cada «sep» mm; «saltar» omite múltiplos de una rejilla mayor
+  rejilla(ctx, a, r, sep, alfa, anchoPx, saltar) {
+    const v = this.visibilidad(sep);
+    if (v <= 0) return;
+    ctx.strokeStyle = Paleta.lineasRGBA(alfa * v);
+    ctx.lineWidth = anchoPx / Vista.escala;
+    ctx.beginPath();
+    const omitir = i => saltar && (Math.round(i * sep) % saltar === 0);
+    for (let i = Math.ceil((r.x0 - a.x0) / sep); a.x0 + i * sep <= r.x1 + 1e-6; i++) {
+      if (omitir(i)) continue;
+      const x = a.x0 + i * sep;
+      ctx.moveTo(x, r.y0); ctx.lineTo(x, r.y1);
+    }
+    for (let j = Math.ceil((r.y0 - a.y0) / sep); a.y0 + j * sep <= r.y1 + 1e-6; j++) {
+      if (omitir(j)) continue;
+      const y = a.y0 + j * sep;
+      ctx.moveTo(r.x0, y); ctx.lineTo(r.x1, y);
+    }
+    ctx.stroke();
+  },
+
+  // Triángulos equiláteros de lado s: verticales y líneas a 30° y 150°
+  isometrica(ctx, a, r, s) {
+    const v = this.visibilidad(s * 0.5);
+    if (v <= 0) return;
+    const h = s * this.RAIZ3 / 2;     // separación entre verticales
+    const m = 1 / this.RAIZ3;          // pendiente tan 30°
+    ctx.strokeStyle = Paleta.lineasRGBA(0.55 * v);
+    ctx.lineWidth = 0.8 / Vista.escala;
+    ctx.beginPath();
+    for (let i = Math.ceil((r.x0 - a.x0) / h); a.x0 + i * h <= r.x1 + 1e-6; i++) {
+      const x = a.x0 + i * h;
+      ctx.moveTo(x, r.y0); ctx.lineTo(x, r.y1);
+    }
+    // y = a.y0 + k·s + m·(x − a.x0)   (sube hacia la derecha en pantalla: 150° visual)
+    const dx0 = r.x0 - a.x0, dx1 = r.x1 - a.x0;
+    let kMin = Math.ceil((r.y0 - m * dx1 - a.y0) / s), kMax = Math.floor((r.y1 - m * dx0 - a.y0) / s);
+    for (let k = kMin; k <= kMax; k++) {
+      const c = a.y0 + k * s;
+      ctx.moveTo(r.x0, c + m * dx0); ctx.lineTo(r.x1, c + m * dx1);
+    }
+    // y = a.y0 + k·s − m·(x − a.x0)
+    kMin = Math.ceil((r.y0 + m * dx0 - a.y0) / s); kMax = Math.floor((r.y1 + m * dx1 - a.y0) / s);
+    for (let k = kMin; k <= kMax; k++) {
+      const c = a.y0 + k * s;
+      ctx.moveTo(r.x0, c - m * dx0); ctx.lineTo(r.x1, c - m * dx1);
+    }
+    ctx.stroke();
+  },
+
+  // Nodo de la cuadrícula más cercano (para el imán, fase 2). null si no hay cuadrícula.
+  nodoCercano(x, y) {
+    const tipo = Config.get('papel');
+    if (tipo === 'blanco') return null;
+    const a = this.area();
+    let mejor = null;
+    const probar = (nx, ny) => {
+      if (nx < a.x0 - 1e-6 || nx > a.x1 + 1e-6 || ny < a.y0 - 1e-6 || ny > a.y1 + 1e-6) return;
+      const d = Geom.dist(x, y, nx, ny);
+      if (!mejor || d < mejor.d) mejor = { x: nx, y: ny, d };
+    };
+    if (tipo === 'isometrico') {
+      const s = Config.get('triangulo'), h = s * this.RAIZ3 / 2;
+      const i0 = Math.round((x - a.x0) / h);
+      for (let i = i0 - 1; i <= i0 + 1; i++) {
+        const desfase = (((i % 2) + 2) % 2) * s / 2;
+        const j = Math.round((y - a.y0 - desfase) / s);
+        for (let jj = j - 1; jj <= j + 1; jj++) probar(a.x0 + i * h, a.y0 + desfase + jj * s);
+      }
+    } else {
+      const sep = tipo === 'cuadriculado' ? Config.get('cuadro') : 1;
+      probar(a.x0 + Math.round((x - a.x0) / sep) * sep, a.y0 + Math.round((y - a.y0) / sep) * sep);
+    }
+    return mejor && { x: mejor.x, y: mejor.y };
+  },
+
+  // Miniatura SVG para el panel de configuración
+  miniatura(tipo) {
+    const W = 80, H = 56;
+    const col = `rgb(${Paleta.lineas[Config.get('colorLineas')]})`;
+    let lineas = '';
+    const linea = (d, op, w) => { lineas += `<path d="${d}" stroke="${col}" stroke-opacity="${op}" stroke-width="${w}" fill="none"/>`; };
+    const rejilla = (sep, op, w) => {
+      let d = '';
+      for (let x = sep; x < W; x += sep) d += `M${x} 0V${H}`;
+      for (let y = sep; y < H; y += sep) d += `M0 ${y}H${W}`;
+      linea(d, op, w);
+    };
+    if (tipo === 'cuadriculado') rejilla(8, 0.6, 0.6);
+    else if (tipo === 'milimetrado') { rejilla(2, 0.3, 0.25); rejilla(10, 0.8, 0.6); }
+    else if (tipo === 'isometrico') {
+      const s = 10, h = s * this.RAIZ3 / 2, m = 1 / this.RAIZ3;
+      let d = '';
+      for (let x = 0; x <= W; x += h) d += `M${x.toFixed(2)} 0V${H}`;
+      for (let c = -60; c <= H + 60; c += s) {
+        d += `M0 ${c}L${W} ${(c + m * W).toFixed(2)}`;
+        d += `M0 ${c}L${W} ${(c - m * W).toFixed(2)}`;
+      }
+      linea(d, 0.6, 0.6);
+    }
+    return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><rect width="${W}" height="${H}" fill="${Paleta.papel[Config.get('colorPapel')]}"/>${lineas}</svg>`;
   },
 };
 
@@ -430,45 +701,1151 @@ const Render = {
     ctx.save();
     ctx.shadowColor = 'rgba(60, 40, 10, .35)';
     ctx.shadowBlur = 18; ctx.shadowOffsetY = 4;
-    ctx.fillStyle = Config.get('colorPapel');
+    ctx.fillStyle = Paleta.papel[Config.get('colorPapel')];
     ctx.fillRect(a.x, a.y, w, h);
     ctx.restore();
 
     // Contenido en milímetros
     const m = Capas.ctxMundo(c);
-    const px = 1 / Vista.escala; // 1 píxel CSS en mm
-    // Fondo del papel (fase 1b: cuadriculado, milimetrado, isométrico)
+    const v0 = Vista.aMundo(0, 0), v1 = Vista.aMundo(Capas.w, Capas.h);
+    Papel.dibujar(m, { x0: v0.x, y0: v0.y, x1: v1.x, y1: v1.y });
     // Margen
     if (Config.get('margen')) {
       const mg = Hoja.margen;
-      m.strokeStyle = 'rgba(70, 90, 140, .45)';
-      m.lineWidth = Math.max(0.25, px);
+      m.strokeStyle = Config.get('papel') === 'blanco' ? 'rgba(70, 90, 140, .45)' : Paleta.lineasRGBA(0.85);
+      m.lineWidth = 1.2 / Vista.escala;
       m.strokeRect(mg, mg, Hoja.ancho - 2 * mg, Hoja.alto - 2 * mg);
     }
   },
 
   dibujo() {
-    Capas.limpiar(Capas.dibujo);
-    // Fase 2: puntos, rectas, arcos, circunferencias
+    const c = Capas.dibujo;
+    Capas.limpiar(c);
+    const ctx = Capas.ctxMundo(c);
+    const color = Paleta.grafito[Config.get('grafito')];
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Dibujo.grosor();
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = 0.92; // grafito, no tinta
+    for (const r of Escena.rectas) Dibujo.trazo(ctx, 'recta', r);
+    for (const a of Escena.arcos) Dibujo.trazo(ctx, 'arco', a);
+    for (const p of Escena.puntos) Dibujo.cruz(ctx, p.x, p.y, color);
+    if (Config.get('etiquetas')) for (const p of Escena.puntos) Dibujo.etiqueta(ctx, p, color);
+    ctx.globalAlpha = 1;
   },
 
   instrumentos() {
-    Capas.limpiar(Capas.instrumentos);
-    // Fases 3-6: regla, escuadra, cartabón, compás, transportador
+    const c = Capas.instrumentos;
+    Capas.limpiar(c);
+    const ctx = Capas.ctxMundo(c);
+    for (const inst of Instrumentos.visibles()) inst.dibujar(ctx);
+    Manip.overlay(ctx);
+    const acc = Acciones.actual();
+    if (acc && acc.overlay) acc.overlay(ctx);
   },
 };
 
 /* =====================================================================
-   Herramientas (en esta fase solo «mover» es funcional)
+   Escena: lo dibujado en la hoja (en mm)
+   ===================================================================== */
+const Escena = {
+  puntos: [],   // {id, x, y, etiqueta}
+  rectas: [],   // {id, x1, y1, x2, y2}
+  arcos: [],    // {id, cx, cy, r, a0, a1}
+  sigId: 1,
+
+  datos() {
+    return JSON.stringify({ puntos: this.puntos, rectas: this.rectas, arcos: this.arcos, sigId: this.sigId });
+  },
+  cargarDatos(json) {
+    const d = JSON.parse(json);
+    this.puntos = d.puntos || []; this.rectas = d.rectas || []; this.arcos = d.arcos || [];
+    this.sigId = d.sigId || 1;
+    Render.pedir('dibujo', 'instrumentos');
+  },
+  vaciar() { this.puntos = []; this.rectas = []; this.arcos = []; Render.pedir('dibujo', 'instrumentos'); },
+
+  // Etiquetas A…Z, luego A1…Z1, A2…; se usa la primera libre
+  etiqueta(n) {
+    const letra = String.fromCharCode(65 + (n % 26));
+    const vuelta = Math.floor(n / 26);
+    return vuelta ? letra + vuelta : letra;
+  },
+  siguienteEtiqueta() {
+    const usadas = new Set(this.puntos.map(p => p.etiqueta));
+    for (let n = 0; ; n++) { const e = this.etiqueta(n); if (!usadas.has(e)) return e; }
+  },
+
+  agregarPunto(x, y) {
+    const p = { id: this.sigId++, x, y, etiqueta: this.siguienteEtiqueta() };
+    this.puntos.push(p);
+    Render.pedir('dibujo');
+    return p;
+  },
+  agregarRecta(x1, y1, x2, y2) {
+    const r = { id: this.sigId++, x1, y1, x2, y2 };
+    this.rectas.push(r); Render.pedir('dibujo'); return r;
+  },
+  agregarArco(cx, cy, r, a0, a1) {
+    const a = { id: this.sigId++, cx, cy, r, a0, a1 };
+    this.arcos.push(a); Render.pedir('dibujo'); return a;
+  },
+
+  eliminar(el) {
+    const lista = { punto: this.puntos, recta: this.rectas, arco: this.arcos }[el.tipo];
+    const i = lista.findIndex(o => o.id === el.obj.id);
+    if (i >= 0) { lista.splice(i, 1); Render.pedir('dibujo'); return true; }
+    return false;
+  },
+
+  // Elemento más cercano dentro de «radio» mm; los puntos tienen preferencia
+  buscarElemento(x, y, radio) {
+    let mejor = null;
+    const probar = (tipo, obj, d) => {
+      if (d > radio) return;
+      const peso = tipo === 'punto' ? d * 0.5 : d;
+      if (!mejor || peso < mejor.peso) mejor = { tipo, obj, d, peso };
+    };
+    for (const p of this.puntos) probar('punto', p, Geom.dist(x, y, p.x, p.y));
+    for (const r of this.rectas) probar('recta', r, Geom.distSegmento(x, y, r.x1, r.y1, r.x2, r.y2));
+    for (const a of this.arcos) probar('arco', a, Geom.distArco(x, y, a));
+    return mejor;
+  },
+};
+
+/* =====================================================================
+   Historial: deshacer / rehacer por instantáneas
+   ===================================================================== */
+const Historial = {
+  pasado: [], futuro: [], limite: 200,
+  pendiente: null,
+
+  // Guarda el estado actual antes de un cambio
+  registrar() {
+    this.pasado.push(Escena.datos());
+    if (this.pasado.length > this.limite) this.pasado.shift();
+    this.futuro = [];
+    this.pendiente = null;
+    UI.actualizarHistorial();
+  },
+  // Para acciones largas (borrar arrastrando): se registra solo si hay cambios
+  iniciarGrupo() { this.pendiente = Escena.datos(); },
+  confirmarGrupo() {
+    if (this.pendiente === null) return;
+    this.pasado.push(this.pendiente);
+    if (this.pasado.length > this.limite) this.pasado.shift();
+    this.futuro = [];
+    this.pendiente = null;
+    UI.actualizarHistorial();
+  },
+  deshacer() {
+    if (!this.pasado.length) return;
+    Acciones.cancelarActual();
+    this.futuro.push(Escena.datos());
+    Escena.cargarDatos(this.pasado.pop());
+    UI.actualizarHistorial();
+    UI.mensaje('Deshecho.');
+  },
+  rehacer() {
+    if (!this.futuro.length) return;
+    Acciones.cancelarActual();
+    this.pasado.push(Escena.datos());
+    Escena.cargarDatos(this.futuro.pop());
+    UI.actualizarHistorial();
+    UI.mensaje('Rehecho.');
+  },
+};
+
+/* =====================================================================
+   Imán: atrae la punta hacia puntos, extremos, centros y cuadrícula
+   ===================================================================== */
+const Snap = {
+  // Radio de captura en píxeles de pantalla según fuerza y tipo de puntero
+  radios: { debil: [8, 14], medio: [12, 22], fuerte: [18, 30] },
+  radioPx(tipoPuntero) {
+    const r = this.radios[Config.get('iman')] || this.radios.medio;
+    return tipoPuntero === 'touch' ? r[1] : r[0];
+  },
+  // Devuelve {x, y, tipo, obj} o null. Prioridad: punto > extremo > centro > cuadrícula
+  buscar(x, y, tipoPuntero) {
+    const radio = this.radioPx(tipoPuntero) / Vista.escala;
+    let mejor = null;
+    const probar = (prio, tipo, px, py, obj) => {
+      const d = Geom.dist(x, y, px, py);
+      if (d > radio) return;
+      if (!mejor || prio < mejor.prio || (prio === mejor.prio && d < mejor.d))
+        mejor = { prio, tipo, x: px, y: py, obj, d };
+    };
+    for (const p of Escena.puntos) probar(1, 'punto', p.x, p.y, p);
+    for (const r of Escena.rectas) { probar(2, 'extremo', r.x1, r.y1, r); probar(2, 'extremo', r.x2, r.y2, r); }
+    for (const a of Escena.arcos) {
+      probar(3, 'centro', a.cx, a.cy, a);
+      if (!Geom.esCircunferencia(a)) for (const e of Geom.extremosArco(a)) probar(2, 'extremo', e.x, e.y, a);
+    }
+    if (!mejor && Config.get('imanCuadricula')) {
+      const n = Papel.nodoCercano(x, y);
+      if (n) probar(9, 'cuadricula', n.x, n.y, null);
+    }
+    return mejor;
+  },
+};
+
+/* =====================================================================
+   Sonidos sintetizados (sin archivos)
+   ===================================================================== */
+const Sonido = {
+  ctx: null,
+  tocar(tipo) {
+    if (!Config.get('sonidos')) return;
+    try {
+      if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const ac = this.ctx;
+      if (ac.state === 'suspended') ac.resume();
+      const t = ac.currentTime;
+      const g = ac.createGain();
+      g.connect(ac.destination);
+      if (tipo === 'borrar') {
+        // Ruido filtrado corto: «fsss»
+        const n = Math.floor(ac.sampleRate * 0.12);
+        const buf = ac.createBuffer(1, n, ac.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+        const src = ac.createBufferSource();
+        const f = ac.createBiquadFilter();
+        f.type = 'bandpass'; f.frequency.value = 2500; f.Q.value = 0.8;
+        src.buffer = buf; src.connect(f); f.connect(g);
+        g.gain.value = 0.25;
+        src.start(t);
+        return;
+      }
+      const o = ac.createOscillator();
+      o.connect(g);
+      const conf = { punto: [880, 0.18, 0.07, 'triangle'], iman: [1500, 0.06, 0.03, 'sine'] }[tipo] || [600, 0.1, 0.05, 'sine'];
+      o.type = conf[3];
+      o.frequency.setValueAtTime(conf[0], t);
+      g.gain.setValueAtTime(conf[1], t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + conf[2]);
+      o.start(t); o.stop(t + conf[2] + 0.02);
+    } catch (_) { /* audio no disponible */ }
+  },
+};
+
+/* =====================================================================
+   Acciones de las herramientas de dibujo
+   Cada una recibe info = {x, y (mm), sx, sy (px), tipo (puntero), id}
+   ===================================================================== */
+const Lapiz = {
+  activo: null,   // pulsado: {id, tipo, modo: 'punto'|'canto', x, y, snap, ini, canto}
+  hover: null,    // sin pulsar (ratón o lápiz digital)
+
+  posicion(info) {
+    const c = Instrumentos.cantoCercano(info);
+    if (c) {
+      const p = Instrumentos.puntoEnCanto(c, info);
+      return { modo: 'canto', canto: c, x: p.x, y: p.y, snap: p.snap, mm: p.mm, tipo: info.tipo };
+    }
+    const s = Snap.buscar(info.x, info.y, info.tipo);
+    return { modo: 'punto', x: s ? s.x : info.x, y: s ? s.y : info.y, snap: s, tipo: info.tipo };
+  },
+  abajo(info) {
+    this.hover = null;
+    const p = this.posicion(info);
+    this.activo = Object.assign({ id: info.id }, p);
+    if (p.modo === 'canto') this.activo.ini = { x: p.x, y: p.y, snap: p.snap, mm: p.mm };
+    if (p.snap) Sonido.tocar('iman');
+    Render.pedir('instrumentos');
+  },
+  mover(info) {
+    const a = this.activo;
+    const antes = a.snap && (a.snap.obj || a.snap.x + ',' + a.snap.y);
+    if (a.modo === 'canto') {
+      const p = Instrumentos.puntoEnCanto(a.canto, info);
+      Object.assign(a, { x: p.x, y: p.y, snap: p.snap, mm: p.mm });
+      const len = Geom.dist(a.ini.x, a.ini.y, a.x, a.y);
+      UI.mensaje(`Recta: ${this.mmTexto(len)}`);
+    } else {
+      const s = Snap.buscar(info.x, info.y, info.tipo);
+      Object.assign(a, { x: s ? s.x : info.x, y: s ? s.y : info.y, snap: s });
+    }
+    const ahora = a.snap && (a.snap.obj || a.snap.x + ',' + a.snap.y);
+    if (a.snap && a.snap.tipo !== 'marca' && ahora !== antes) Sonido.tocar('iman');
+    Render.pedir('instrumentos');
+  },
+  arriba() {
+    const a = this.activo;
+    this.activo = null;
+    Render.pedir('instrumentos');
+    if (!a) return;
+    if (a.modo === 'canto') {
+      const len = Geom.dist(a.ini.x, a.ini.y, a.x, a.y);
+      if (len * Vista.escala >= 4) {
+        Historial.registrar();
+        Escena.agregarRecta(a.ini.x, a.ini.y, a.x, a.y);
+        Sonido.tocar('punto');
+        UI.mensaje(`Recta trazada: ${this.mmTexto(len)}.`);
+        return;
+      }
+      // Toque corto junto al canto: marca un punto sobre el canto
+      Object.assign(a, a.ini);
+    }
+    this.marcarPunto(a);
+  },
+  marcarPunto(a) {
+    if (a.x < 0 || a.y < 0 || a.x > Hoja.ancho || a.y > Hoja.alto) {
+      UI.mensaje('Los puntos se marcan dentro de la hoja.');
+      return;
+    }
+    const existente = Escena.puntos.find(p => Geom.dist(p.x, p.y, a.x, a.y) < 0.05);
+    if (existente) {
+      UI.mensaje(`Ahí ya está el punto ${existente.etiqueta}.`);
+      return;
+    }
+    Historial.registrar();
+    const p = Escena.agregarPunto(a.x, a.y);
+    Sonido.tocar('punto');
+    const nombre = Config.get('etiquetas') ? `Punto ${p.etiqueta} marcado` : 'Punto marcado';
+    UI.mensaje(a.mm != null ? `${nombre} en la marca de ${this.mmTexto(a.mm)}.` : `${nombre}.`);
+  },
+  mmTexto(mm) {
+    const r = Math.round(mm * 10) / 10;
+    return (Number.isInteger(r) ? String(r) : r.toFixed(1).replace('.', ',')) + ' mm';
+  },
+  pasar(info) {
+    this.hover = this.posicion(info);
+    if (this.hover.modo === 'canto' && this.hover.mm != null)
+      UI.mensaje(`Marca de ${this.hover.canto.inst.conArticulo}: ${this.mmTexto(this.hover.mm)}`);
+    Render.pedir('instrumentos');
+  },
+  salir() { this.hover = null; Render.pedir('instrumentos'); },
+  cancelar() { this.activo = null; this.hover = null; Render.pedir('instrumentos'); },
+
+  overlay(ctx) {
+    const px = 1 / Vista.escala;
+    const e = this.activo || this.hover;
+    if (!e) return;
+    const color = Paleta.grafito[Config.get('grafito')];
+    if (e.modo === 'canto') {
+      // Canto resaltado
+      ctx.strokeStyle = 'rgba(47, 111, 208, .45)';
+      ctx.lineWidth = 4 * px;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(e.canto.a.x, e.canto.a.y); ctx.lineTo(e.canto.b.x, e.canto.b.y);
+      ctx.stroke();
+    }
+    if (this.activo && e.modo === 'canto') {
+      if (e.ini.snap) Dibujo.halo(ctx, e.ini.x, e.ini.y);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = Dibujo.grosor();
+      ctx.beginPath();
+      ctx.moveTo(e.ini.x, e.ini.y); ctx.lineTo(e.x, e.y);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      // Longitud junto al final, por fuera del instrumento
+      const len = Geom.dist(e.ini.x, e.ini.y, e.x, e.y);
+      if (len * Vista.escala > 20) this.rotulo(ctx, e.x, e.y, this.mmTexto(len), e.canto);
+    }
+    if (e.snap) Dibujo.halo(ctx, e.x, e.y);
+    ctx.globalAlpha = this.activo ? 0.85 : 0.4;
+    Dibujo.cruz(ctx, e.x, e.y, color);
+    ctx.globalAlpha = 1;
+  },
+  // Etiqueta con fondo en tamaño de pantalla
+  rotulo(ctx, x, y, texto, canto) {
+    const px = 1 / Vista.escala;
+    const centro = canto.inst.aMundo(...canto.inst.centroLocal());
+    const lado = ((centro.x - x) * canto.n.x + (centro.y - y) * canto.n.y) > 0 ? -1 : 1;
+    const tx = x + canto.n.x * lado * 16 * px, ty = y + canto.n.y * lado * 16 * px;
+    ctx.font = `600 ${13 * px}px ${getComputedStyle(document.body).fontFamily}`;
+    const w = ctx.measureText(texto).width + 10 * px, h = 20 * px;
+    ctx.fillStyle = 'rgba(45, 48, 71, .88)';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(tx - w / 2, ty - h / 2, w, h, 6 * px); else ctx.rect(tx - w / 2, ty - h / 2, w, h);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(texto, tx, ty);
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
+  },
+};
+
+const Goma = {
+  activo: null,   // {id, borrados}
+  hover: null,    // {x, y, el, tipo}
+
+  radioMm(tipo) { return (tipo === 'touch' ? 18 : 10) / Vista.escala; },
+  abajo(info) {
+    this.activo = { id: info.id, borrados: 0 };
+    Historial.iniciarGrupo();
+    this.borrarEn(info);
+  },
+  mover(info) { this.borrarEn(info); },
+  arriba() {
+    const n = this.activo ? this.activo.borrados : 0;
+    this.activo = null;
+    if (n) Historial.confirmarGrupo(); else Historial.pendiente = null;
+    Render.pedir('instrumentos');
+  },
+  borrarEn(info) {
+    const el = Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo));
+    this.hover = { x: info.x, y: info.y, tipo: info.tipo, el: null };
+    if (el && Escena.eliminar(el)) {
+      this.activo.borrados++;
+      Sonido.tocar('borrar');
+      const nombres = { punto: `el punto ${el.obj.etiqueta}`, recta: 'una recta', arco: el.tipo === 'arco' && Geom.esCircunferencia(el.obj) ? 'una circunferencia' : 'un arco' };
+      UI.mensaje(`Has borrado ${nombres[el.tipo]}.`);
+    }
+    Render.pedir('instrumentos');
+  },
+  pasar(info) {
+    this.hover = { x: info.x, y: info.y, tipo: info.tipo, el: Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo)) };
+    Render.pedir('instrumentos');
+  },
+  salir() { this.hover = null; Render.pedir('instrumentos'); },
+  cancelar() {
+    if (this.activo) this.arriba();
+    this.hover = null;
+    Render.pedir('instrumentos');
+  },
+
+  overlay(ctx) {
+    const h = this.hover;
+    if (!h) return;
+    const px = 1 / Vista.escala;
+    if (h.el) Dibujo.resaltar(ctx, h.el, 'rgba(230, 70, 60, .75)');
+    // Círculo de la goma
+    ctx.beginPath();
+    ctx.arc(h.x, h.y, this.radioMm(h.tipo), 0, Geom.DOS_PI);
+    ctx.fillStyle = this.activo ? 'rgba(255, 140, 150, .25)' : 'rgba(255, 140, 150, .12)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(200, 80, 90, .7)';
+    ctx.lineWidth = 1.5 * px;
+    ctx.stroke();
+  },
+};
+
+const Acciones = {
+  lapiz: Lapiz,
+  goma: Goma,
+  actual() { return this[App.herramienta] || null; },
+  cancelarActual() {
+    const a = this.actual();
+    if (a) a.cancelar();
+    Entrada.accion = null;
+  },
+};
+
+/* =====================================================================
+   Primitivas de dibujo (en mm)
+   ===================================================================== */
+const Dibujo = {
+  grosor() { return Math.max(Config.get('mina'), 0.9 / Vista.escala); },
+  cruz(ctx, x, y, color) {
+    const brazo = Math.max(1.2, 4 / Vista.escala);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = this.grosor();
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - brazo, y - brazo); ctx.lineTo(x + brazo, y + brazo);
+    ctx.moveTo(x - brazo, y + brazo); ctx.lineTo(x + brazo, y - brazo);
+    ctx.stroke();
+  },
+  etiqueta(ctx, p, color) {
+    const tam = Math.max(4, 12 / Vista.escala);
+    ctx.fillStyle = color;
+    ctx.font = `600 ${tam}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(p.etiqueta, p.x + tam * 0.4, p.y - tam * 0.35);
+  },
+  trazo(ctx, tipo, o) {
+    ctx.beginPath();
+    if (tipo === 'recta') { ctx.moveTo(o.x1, o.y1); ctx.lineTo(o.x2, o.y2); }
+    else if (tipo === 'arco') {
+      if (Geom.esCircunferencia(o)) ctx.arc(o.cx, o.cy, o.r, 0, Geom.DOS_PI);
+      else ctx.arc(o.cx, o.cy, o.r, o.a0, o.a1, o.a1 < o.a0);
+    }
+    ctx.stroke();
+  },
+  halo(ctx, x, y) {
+    const px = 1 / Vista.escala;
+    ctx.beginPath();
+    ctx.arc(x, y, 11 * px, 0, Geom.DOS_PI);
+    ctx.fillStyle = 'rgba(255, 159, 28, .22)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 140, 0, .95)';
+    ctx.lineWidth = 2 * px;
+    ctx.stroke();
+  },
+  resaltar(ctx, el, color) {
+    const px = 1 / Vista.escala;
+    if (el.tipo === 'punto') {
+      ctx.beginPath();
+      ctx.arc(el.obj.x, el.obj.y, 9 * px, 0, Geom.DOS_PI);
+      ctx.strokeStyle = color; ctx.lineWidth = 3 * px; ctx.stroke();
+      return;
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(this.grosor(), 4 * px);
+    ctx.lineCap = 'round';
+    this.trazo(ctx, el.tipo, el.obj);
+  },
+};
+
+/* =====================================================================
+   Instrumentos de dibujo (base común: polígono rígido en mm)
+   ===================================================================== */
+class Instrumento {
+  constructor(tipo, nombre, genero) {
+    this.tipo = tipo;
+    this.nombre = nombre;
+    this.g = genero;                         // 'a' (la regla) u 'o' (el cartabón)
+    this.x = 0; this.y = 0; this.rot = 0;   // posición del origen local y giro (rad)
+    this.visible = false;
+    this.colocado = false;
+    this.bloqueado = false;
+    this.poligono = [];   // vértices locales [[x, y], …]
+    this.agujero = null;  // polígono interior hueco (solo decorativo y para tocar a través)
+    this.cantos = [];     // [{i, j, graduado, origen: [x, y], max}] lados útiles para trazar
+    this.asas = [];       // [{x, y, pivote: [x, y]}] asas de giro
+    this.candado = null;  // [x, y] botón del candado
+    this.origenIman = null;
+  }
+  get conArticulo() { return (this.g === 'a' ? 'la ' : 'el ') + this.nombre.toLowerCase(); }
+
+  aMundo(lx, ly) {
+    const c = Math.cos(this.rot), s = Math.sin(this.rot);
+    return { x: this.x + lx * c - ly * s, y: this.y + lx * s + ly * c };
+  }
+  aLocal(wx, wy) {
+    const c = Math.cos(this.rot), s = Math.sin(this.rot), dx = wx - this.x, dy = wy - this.y;
+    return { x: dx * c + dy * s, y: -dx * s + dy * c };
+  }
+  // Fija el giro manteniendo un punto local en una posición del mundo
+  colocarPivote(local, mundo) {
+    const c = Math.cos(this.rot), s = Math.sin(this.rot);
+    this.x = mundo.x - (local[0] * c - local[1] * s);
+    this.y = mundo.y - (local[0] * s + local[1] * c);
+  }
+  // Gira el instrumento alrededor de un punto del mundo
+  girarEn(p, d) {
+    const c = Math.cos(d), s = Math.sin(d), rx = this.x - p.x, ry = this.y - p.y;
+    this.x = p.x + rx * c - ry * s;
+    this.y = p.y + rx * s + ry * c;
+    this.rot += d;
+  }
+  centroLocal() {
+    let x = 0, y = 0;
+    for (const v of this.poligono) { x += v[0]; y += v[1]; }
+    return [x / this.poligono.length, y / this.poligono.length];
+  }
+  centroMundo() { return this.aMundo(...this.centroLocal()); }
+  static dentro(p, v) {
+    let dentro = false;
+    for (let i = 0, j = v.length - 1; i < v.length; j = i++) {
+      if ((v[i][1] > p.y) !== (v[j][1] > p.y) &&
+          p.x < (v[j][0] - v[i][0]) * (p.y - v[i][1]) / (v[j][1] - v[i][1]) + v[i][0]) dentro = !dentro;
+    }
+    return dentro;
+  }
+  contiene(wx, wy) {
+    const p = this.aLocal(wx, wy);
+    return Instrumento.dentro(p, this.poligono) && !(this.agujero && Instrumento.dentro(p, this.agujero));
+  }
+  // Cantos en coordenadas del mundo, con vectores unitarios
+  cantosMundo() {
+    return this.cantos.map(k => {
+      const a = this.aMundo(...this.poligono[k.i]), b = this.aMundo(...this.poligono[k.j]);
+      const len = Geom.dist(a.x, a.y, b.x, b.y);
+      const u = { x: (b.x - a.x) / len, y: (b.y - a.y) / len };
+      return { inst: this, def: k, a, b, len, u, n: { x: -u.y, y: u.x },
+               graduado: !!k.graduado, origen: k.origen ? this.aMundo(...k.origen) : null };
+    });
+  }
+  radioAsa() { return Math.max(5, 14 / Vista.escala); }
+  radioCandado() { return Math.max(3.5, 11 / Vista.escala); }
+
+  // Agujero triangular: el triángulo escalado hacia su incentro
+  static agujeroTriangulo(v, k) {
+    const l = (p, q) => Math.hypot(q[0] - p[0], q[1] - p[1]);
+    const a = l(v[1], v[2]), b = l(v[0], v[2]), c = l(v[0], v[1]), s = a + b + c;
+    const I = [(a * v[0][0] + b * v[1][0] + c * v[2][0]) / s, (a * v[0][1] + b * v[1][1] + c * v[2][1]) / s];
+    return v.map(p => [I[0] + k * (p[0] - I[0]), I[1] + k * (p[1] - I[1])]);
+  }
+
+  // ---------- Dibujo (en coordenadas locales) ----------
+  trazarPoligono(ctx, v) {
+    ctx.moveTo(v[0][0], v[0][1]);
+    for (let i = 1; i < v.length; i++) ctx.lineTo(v[i][0], v[i][1]);
+    ctx.closePath();
+  }
+  dibujarCuerpo(ctx) {
+    ctx.beginPath();
+    this.trazarPoligono(ctx, this.poligono);
+    if (this.agujero) this.trazarPoligono(ctx, this.agujero);
+    ctx.save();
+    ctx.shadowColor = 'rgba(30, 40, 60, .22)';
+    ctx.shadowBlur = 10 * Capas.dpr;
+    ctx.shadowOffsetY = 3 * Capas.dpr;
+    ctx.fillStyle = this.bloqueado ? 'rgba(232, 226, 210, .6)' : 'rgba(214, 234, 250, .55)';
+    ctx.fill('evenodd');
+    ctx.restore();
+    ctx.strokeStyle = this.bloqueado ? 'rgba(150, 110, 40, .8)' : 'rgba(40, 90, 150, .7)';
+    ctx.lineWidth = 1.2 / Vista.escala;
+    ctx.stroke();
+  }
+  dibujarMarcas(ctx) {
+    for (const k of this.cantos) if (k.graduado) this.graduar(ctx, k);
+  }
+  // Graduación en mm a lo largo de un canto, con las marcas hacia dentro
+  graduar(ctx, k) {
+    const A = this.poligono[k.i], B = this.poligono[k.j];
+    const len = Math.hypot(B[0] - A[0], B[1] - A[1]);
+    const d = [(B[0] - A[0]) / len, (B[1] - A[1]) / len];
+    let m = [-d[1], d[0]];
+    const c = this.centroLocal();
+    if ((c[0] - A[0]) * m[0] + (c[1] - A[1]) * m[1] < 0) m = [-m[0], -m[1]];
+    const o = k.origen, px = 1 / Vista.escala;
+    const verMm = Vista.escala >= 2.5, verMedio = Vista.escala >= 1;
+    const P = (mm, h) => [o[0] + d[0] * mm + m[0] * h, o[1] + d[1] * mm + m[1] * h];
+    ctx.strokeStyle = '#1d2b44';
+    ctx.lineWidth = Math.max(0.12, 0.8 * px);
+    ctx.beginPath();
+    for (let i = 0; i <= k.max; i++) {
+      const cm = i % 10 === 0, medio = i % 5 === 0;
+      if (!cm && !medio && !verMm) continue;
+      if (!cm && !verMedio) continue;
+      const l = cm ? 6 : medio ? 4 : 2.5;
+      const p0 = P(i, 0), p1 = P(i, l);
+      ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]);
+    }
+    ctx.stroke();
+    const fuente = getComputedStyle(document.body).fontFamily, ang = Math.atan2(d[1], d[0]);
+    const texto = (t, pos, tam, alinear) => {
+      ctx.save();
+      ctx.translate(pos[0], pos[1]);
+      ctx.rotate(ang);
+      ctx.font = `600 ${tam}px ${fuente}`;
+      ctx.textAlign = alinear;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t, 0, 0);
+      ctx.restore();
+    };
+    ctx.fillStyle = '#1d2b44';
+    const paso = Vista.escala * 10 < 14 ? 5 : 1;
+    for (let c2 = 0; c2 * 10 <= k.max; c2 += paso) texto(String(c2), P(c2 * 10, 8.6), 3.2, 'center');
+    texto('cm', P(1.5, 12.3), 2.6, 'left');
+  }
+  dibujarAsas(ctx) {
+    if (this.bloqueado) return;
+    const R = this.radioAsa(), px = 1 / Vista.escala;
+    for (const a of this.asas) {
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, R, 0, Geom.DOS_PI);
+      ctx.fillStyle = 'rgba(47, 111, 208, .14)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(47, 111, 208, .7)';
+      ctx.lineWidth = 1.5 * px;
+      ctx.stroke();
+      const r = R * 0.55;
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, r, -Math.PI * 0.85, Math.PI * 0.55);
+      ctx.lineWidth = Math.max(0.5, 2 * px);
+      ctx.stroke();
+      const fx = a.x + r * Math.cos(Math.PI * 0.55), fy = a.y + r * Math.sin(Math.PI * 0.55);
+      const k = R * 0.32;
+      ctx.beginPath();
+      ctx.moveTo(fx + k, fy - k * 0.2);
+      ctx.lineTo(fx, fy);
+      ctx.lineTo(fx + k * 0.2, fy - k);
+      ctx.stroke();
+    }
+  }
+  dibujarCandado(ctx) {
+    if (!this.candado) return;
+    const [x, y] = this.candado, R = this.radioCandado(), px = 1 / Vista.escala;
+    const col = this.bloqueado ? 'rgba(200, 120, 20, .95)' : 'rgba(47, 111, 208, .6)';
+    ctx.beginPath();
+    ctx.arc(x, y, R, 0, Geom.DOS_PI);
+    ctx.fillStyle = this.bloqueado ? 'rgba(255, 209, 102, .55)' : 'rgba(255, 255, 255, .5)';
+    ctx.fill();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.3 * px;
+    ctx.stroke();
+    // Cuerpo y arco del candado
+    const w = R * 0.9, h = R * 0.62;
+    ctx.fillStyle = col;
+    ctx.fillRect(x - w / 2, y - h * 0.15, w, h);
+    ctx.beginPath();
+    const ra = w * 0.3, sube = this.bloqueado ? 0 : R * 0.22;
+    ctx.arc(x, y - h * 0.15 - sube, ra, Math.PI, 0);
+    if (this.bloqueado) ctx.lineTo(x + ra, y - h * 0.15);
+    ctx.moveTo(x - ra, y - h * 0.15 - sube);
+    ctx.lineTo(x - ra, y - h * 0.15);
+    ctx.lineWidth = Math.max(0.35, 1.8 * px);
+    ctx.stroke();
+  }
+  dibujar(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    this.dibujarCuerpo(ctx);
+    this.dibujarMarcas(ctx);
+    this.dibujarAsas(ctx);
+    this.dibujarCandado(ctx);
+    ctx.restore();
+  }
+}
+
+class Regla extends Instrumento {
+  constructor() {
+    super('regla', 'Regla', 'a');
+    const L = 310, W = 32, cero = 5;   // la marca 0 está a 5 mm del extremo
+    this.poligono = [[0, 0], [L, 0], [L, W], [0, W]];
+    this.cantos = [
+      { i: 0, j: 1, graduado: true, origen: [cero, 0], max: 300 },
+      { i: 3, j: 2 },
+    ];
+    // Asa derecha: gira alrededor del 0; asa izquierda: alrededor del 30 cm
+    this.asas = [
+      { x: 14, y: 22, pivote: [cero + 300, 0] },
+      { x: L - 14, y: 22, pivote: [cero, 0] },
+    ];
+    this.candado = [L - 34, 22];
+    this.origenIman = [cero, 0];
+  }
+}
+
+// Escuadra: triángulo rectángulo isósceles (45°-45°-90°)
+class Escuadra extends Instrumento {
+  constructor() {
+    super('escuadra', 'Escuadra', 'a');
+    const L = 160;
+    this.poligono = [[0, 0], [L, 0], [0, -L]];
+    this.agujero = Instrumento.agujeroTriangulo(this.poligono, 0.45);
+    this.cantos = [
+      { i: 0, j: 1, graduado: true, origen: [5, 0], max: 140 },
+      { i: 0, j: 2 },
+      { i: 1, j: 2 },
+    ];
+    this.asas = [
+      { x: L - 55, y: -18, pivote: [5, 0] },
+      { x: 18, y: -(L - 55), pivote: [5, 0] },
+    ];
+    this.candado = [16, -18];
+    this.origenIman = [5, 0];
+  }
+}
+
+// Cartabón: triángulo rectángulo de 30°-60°-90°; su cateto mayor mide lo que la hipotenusa de la escuadra
+class Cartabon extends Instrumento {
+  constructor() {
+    super('cartabon', 'Cartabón', 'o');
+    const Lg = 160 * Math.SQRT2, S = Lg / Math.sqrt(3);
+    this.poligono = [[0, 0], [S, 0], [0, -Lg]];
+    this.agujero = Instrumento.agujeroTriangulo(this.poligono, 0.45);
+    this.cantos = [
+      { i: 0, j: 2, graduado: true, origen: [0, -5], max: 200 },
+      { i: 0, j: 1 },
+      { i: 1, j: 2 },
+    ];
+    this.asas = [
+      { x: S - 50, y: -16, pivote: [0, -5] },
+      { x: 20, y: -151, pivote: [0, -5] },
+    ];
+    this.candado = [17, -18];
+    this.origenIman = [0, -5];
+  }
+}
+
+const Instrumentos = {
+  lista: [],          // de abajo arriba
+  porTipo: {},
+
+  registrar(inst) { this.lista.push(inst); this.porTipo[inst.tipo] = inst; },
+  visibles() { return this.lista.filter(i => i.visible); },
+  deArribaAbajo() { return this.visibles().reverse(); },
+  alFrente(inst) {
+    const i = this.lista.indexOf(inst);
+    if (i >= 0) { this.lista.splice(i, 1); this.lista.push(inst); }
+  },
+
+  alternar(tipo) {
+    const inst = this.porTipo[tipo];
+    if (!inst) return false;
+    inst.visible = !inst.visible;
+    if (inst.visible) {
+      if (!inst.colocado) this.colocarEnVista(inst);
+      this.alFrente(inst);
+      UI.mensaje(`${inst.nombre}: arrastra el cuerpo para mover${inst.g === 'a' ? 'la' : 'lo'}, usa las asas redondas para girar${inst.g === 'a' ? 'la' : 'lo'} y el candado para fijar${inst.g === 'a' ? 'la' : 'lo'}.`);
+    } else {
+      if (Manip.estado && Manip.estado.inst === inst) Manip.fin();
+      UI.mensaje(`${inst.nombre} guardad${inst.g}.`);
+    }
+    UI.marcarInstrumentos();
+    Render.pedir('instrumentos');
+    return true;
+  },
+  colocarEnVista(inst) {
+    const c = Vista.aMundo(Capas.w / 2, Capas.h / 2);
+    const cx = Geom.clamp(c.x, 0, Hoja.ancho), cy = Geom.clamp(c.y, 0, Hoja.alto);
+    const cl = inst.centroLocal();
+    inst.rot = 0;
+    inst.x = cx - cl[0]; inst.y = cy - cl[1];
+    inst.colocado = true;
+  },
+
+  bandaPx(tipo) { return tipo === 'touch' ? 22 : 12; },
+
+  // Canto más cercano al puntero (para trazar con el portaminas)
+  cantoCercano(info) {
+    const banda = this.bandaPx(info.tipo) / Vista.escala;
+    let mejor = null;
+    for (const inst of this.deArribaAbajo()) {
+      for (const k of inst.cantosMundo()) {
+        const d = Geom.distSegmento(info.x, info.y, k.a.x, k.a.y, k.b.x, k.b.y);
+        if (d <= banda && (!mejor || d < mejor.d)) mejor = Object.assign(k, { d });
+      }
+      if (mejor) return mejor;                         // el instrumento de arriba tapa a los de abajo
+      if (inst.contiene(info.x, info.y)) return null;
+    }
+    return mejor;
+  },
+
+  // Candado, asa o cuerpo bajo el puntero. conCantos = deja libre la franja de los cantos (portaminas)
+  tocar(info, conCantos) {
+    const extra = (info.tipo === 'touch' ? 8 : 2) / Vista.escala;
+    for (const inst of this.deArribaAbajo()) {
+      if (inst.candado) {
+        const w = inst.aMundo(...inst.candado);
+        if (Geom.dist(info.x, info.y, w.x, w.y) <= inst.radioCandado() + extra) return { inst, modo: 'candado' };
+      }
+      if (!inst.bloqueado) {
+        for (const a of inst.asas) {
+          const w = inst.aMundo(a.x, a.y);
+          if (Geom.dist(info.x, info.y, w.x, w.y) <= inst.radioAsa() + extra) return { inst, modo: 'girar', asa: a };
+        }
+      }
+      if (inst.contiene(info.x, info.y)) {
+        if (inst.bloqueado) return null;               // fijo: no se mueve y tapa a los de abajo
+        if (conCantos) {
+          const banda = this.bandaPx(info.tipo) / Vista.escala;
+          for (const k of inst.cantosMundo())
+            if (Geom.distSegmento(info.x, info.y, k.a.x, k.a.y, k.b.x, k.b.y) <= banda) return null;
+        }
+        return { inst, modo: 'mover' };
+      }
+    }
+    return null;
+  },
+
+  // Punto sobre un canto, con imán a puntos cercanos y a las marcas de milímetro
+  puntoEnCanto(k, info) {
+    const proy = (x, y) => {
+      const t = Geom.clamp((x - k.a.x) * k.u.x + (y - k.a.y) * k.u.y, 0, k.len);
+      return { x: k.a.x + k.u.x * t, y: k.a.y + k.u.y * t };
+    };
+    let p = proy(info.x, info.y);
+    let snap = null;
+    const radio = Snap.radioPx(info.tipo) / Vista.escala;
+    const s = Snap.buscar(p.x, p.y, info.tipo);
+    if (s) {
+      const q = proy(s.x, s.y);
+      if (Geom.dist(q.x, q.y, s.x, s.y) <= radio) { p = q; snap = s; }
+    }
+    let mm = null;
+    if (k.graduado && k.origen) {
+      mm = (p.x - k.origen.x) * k.u.x + (p.y - k.origen.y) * k.u.y;
+      const r = Math.round(mm);
+      if (!snap && Math.abs(mm - r) * Vista.escala <= (info.tipo === 'touch' ? 6 : 4) && r >= 0 && r <= k.def.max) {
+        p = { x: k.origen.x + k.u.x * r, y: k.origen.y + k.u.y * r };
+        mm = r;
+        snap = { tipo: 'marca', x: p.x, y: p.y };
+      }
+      if (mm < -0.05 || mm > k.def.max + 0.05) mm = null;
+    }
+    return { x: p.x, y: p.y, snap, mm };
+  },
+
+  // Imán al mover: el 0 a un punto, o un canto que pase por un punto
+  imanMover(inst, tipo) {
+    const radio = Snap.radioPx(tipo) / Vista.escala;
+    const objetivos = Escena.puntos;
+    if (inst.origenIman) {
+      const o = inst.aMundo(...inst.origenIman);
+      let mejor = null;
+      for (const p of objetivos) {
+        const d = Geom.dist(o.x, o.y, p.x, p.y);
+        if (d <= radio && (!mejor || d < mejor.d)) mejor = { p, d };
+      }
+      if (mejor) {
+        inst.x += mejor.p.x - o.x; inst.y += mejor.p.y - o.y;
+        return { x: mejor.p.x, y: mejor.p.y };
+      }
+    }
+    let mejor = null;
+    for (const k of inst.cantosMundo()) {
+      for (const p of objetivos) {
+        const t = (p.x - k.a.x) * k.u.x + (p.y - k.a.y) * k.u.y;
+        if (t < 0 || t > k.len) continue;
+        const d = (p.x - k.a.x) * k.n.x + (p.y - k.a.y) * k.n.y;
+        if (Math.abs(d) <= radio && (!mejor || Math.abs(d) < Math.abs(mejor.d))) mejor = { p, d, k };
+      }
+    }
+    if (mejor) {
+      inst.x += mejor.k.n.x * mejor.d; inst.y += mejor.k.n.y * mejor.d;
+      return { x: mejor.p.x, y: mejor.p.y };
+    }
+    return null;
+  },
+
+  // Imán al girar: el canto que pasa por el pivote se alinea con otro punto
+  imanGirar(inst, pivLocal, piv, tipo) {
+    const radio = Snap.radioPx(tipo) / Vista.escala;
+    let mejor = null;
+    for (const k of inst.cantosMundo()) {
+      const dp = (piv.x - k.a.x) * k.n.x + (piv.y - k.a.y) * k.n.y;
+      if (Math.abs(dp) > 1e-6) continue;           // el pivote no está sobre este canto
+      for (const p of Escena.puntos) {
+        const vx = p.x - piv.x, vy = p.y - piv.y, dist = Math.hypot(vx, vy);
+        if (dist < 3) continue;
+        const along = vx * k.u.x + vy * k.u.y;
+        const tPiv = (piv.x - k.a.x) * k.u.x + (piv.y - k.a.y) * k.u.y;
+        if (tPiv + along < 0 || tPiv + along > k.len) continue;
+        const perp = k.u.x * vy - k.u.y * vx;
+        if (Math.abs(perp) > radio) continue;
+        const w = along >= 0 ? k.u : { x: -k.u.x, y: -k.u.y };
+        const delta = Math.atan2(w.x * vy - w.y * vx, w.x * vx + w.y * vy);
+        if (!mejor || Math.abs(perp) < Math.abs(mejor.perp)) mejor = { delta, perp, p };
+      }
+    }
+    if (!mejor) return null;
+    inst.rot += mejor.delta;
+    inst.colocarPivote(pivLocal, piv);
+    return { x: mejor.p.x, y: mejor.p.y };
+  },
+
+  // ---------- Deslizamiento ----------
+  // Busca un canto de «inst» casi apoyado (paralelo y muy cerca) en un canto de otro instrumento
+  buscarContacto(inst) {
+    const umbralAng = 3 * Math.PI / 180;
+    const umbralD = Math.max(2, 8 / Vista.escala);
+    const cm = inst.centroMundo();
+    let mejor = null;
+    for (const otro of this.visibles()) {
+      if (otro === inst) continue;
+      const co = otro.centroMundo();
+      for (const g of otro.cantosMundo()) {
+        // Normal del canto guía hacia fuera de su instrumento
+        let n = g.n;
+        if ((co.x - g.a.x) * n.x + (co.y - g.a.y) * n.y > 0) n = { x: -n.x, y: -n.y };
+        // El instrumento que se mueve tiene que estar al otro lado (apoyado, no encima)
+        if ((cm.x - g.a.x) * n.x + (cm.y - g.a.y) * n.y <= 0) continue;
+        for (const k of inst.cantosMundo()) {
+          const cruz = g.u.x * k.u.y - g.u.y * k.u.x, punto = g.u.x * k.u.x + g.u.y * k.u.y;
+          const ang = Math.atan2(Math.abs(cruz), Math.abs(punto));
+          if (ang > umbralAng) continue;
+          const da = (k.a.x - g.a.x) * n.x + (k.a.y - g.a.y) * n.y;
+          const db = (k.b.x - g.a.x) * n.x + (k.b.y - g.a.y) * n.y;
+          // Se tocan por el extremo más cercano (o se cruzan)
+          const dm = da * db <= 0 ? 0 : Math.min(Math.abs(da), Math.abs(db));
+          if (Math.abs(dm) > umbralD) continue;
+          const ta = (k.a.x - g.a.x) * g.u.x + (k.a.y - g.a.y) * g.u.y;
+          const tb = (k.b.x - g.a.x) * g.u.x + (k.b.y - g.a.y) * g.u.y;
+          const solape = Math.min(g.len, Math.max(ta, tb)) - Math.max(0, Math.min(ta, tb));
+          if (solape < 2) continue;
+          const nota = Math.abs(dm) + ang * 30;
+          if (!mejor || nota < mejor.nota) mejor = { otro, g, n, kdef: k.def, nota };
+        }
+      }
+    }
+    return mejor;
+  },
+  // Apoya el canto kdef de inst sobre el canto guía (gira alrededor de «p» y lo pega a la línea)
+  apoyar(inst, c, p) {
+    const k = inst.cantosMundo().find(q => q.def === c.kdef);
+    let d = Math.atan2(k.u.x * c.g.u.y - k.u.y * c.g.u.x, k.u.x * c.g.u.x + k.u.y * c.g.u.y);
+    if (d > Math.PI / 2) d -= Math.PI; else if (d < -Math.PI / 2) d += Math.PI;
+    inst.girarEn(p, d);
+    const k2 = inst.cantosMundo().find(q => q.def === c.kdef);
+    const dist = (k2.a.x - c.g.a.x) * c.n.x + (k2.a.y - c.g.a.y) * c.n.y;
+    inst.x -= c.n.x * dist; inst.y -= c.n.y * dist;
+  },
+  // ¿Sigue habiendo solape entre los cantos en contacto?
+  haySolape(inst, c) {
+    const k = inst.cantosMundo().find(q => q.def === c.kdef);
+    const ta = (k.a.x - c.g.a.x) * c.g.u.x + (k.a.y - c.g.a.y) * c.g.u.y;
+    const tb = (k.b.x - c.g.a.x) * c.g.u.x + (k.b.y - c.g.a.y) * c.g.u.y;
+    return Math.min(c.g.len, Math.max(ta, tb)) - Math.max(0, Math.min(ta, tb)) > 1;
+  },
+  // Imán al deslizar: otro canto del instrumento pasa por un punto
+  imanDeslizar(inst, c, tipo) {
+    const radio = Snap.radioPx(tipo) / Vista.escala;
+    let mejor = null;
+    for (const k of inst.cantosMundo()) {
+      if (k.def === c.kdef) continue;
+      const dn = c.g.u.x * k.n.x + c.g.u.y * k.n.y;
+      if (Math.abs(dn) < 0.3) continue;
+      for (const p of Escena.puntos) {
+        const t = (p.x - k.a.x) * k.u.x + (p.y - k.a.y) * k.u.y;
+        if (t < -radio || t > k.len + radio) continue;
+        const d = (p.x - k.a.x) * k.n.x + (p.y - k.a.y) * k.n.y;
+        if (Math.abs(d) <= radio && (!mejor || Math.abs(d) < Math.abs(mejor.d))) mejor = { p, d, dn };
+      }
+    }
+    if (!mejor) return null;
+    const s = mejor.d / mejor.dn;
+    inst.x += c.g.u.x * s; inst.y += c.g.u.y * s;
+    return { x: mejor.p.x, y: mejor.p.y };
+  },
+};
+
+/* Manipulación de instrumentos: mover, deslizar, girar y dos dedos */
+const Manip = {
+  estado: null,
+  halo: null,
+
+  usa(id) {
+    const e = this.estado;
+    return !!e && (e.id === id || (e.modo === 'dos' && e.ids.includes(id)));
+  },
+  iniciar(hit, info) {
+    const inst = hit.inst;
+    Instrumentos.alFrente(inst);
+    if (hit.modo === 'girar') {
+      const pv = hit.asa.pivote, piv = inst.aMundo(pv[0], pv[1]);
+      this.estado = { inst, modo: 'girar', id: info.id, tipo: info.tipo, pivLocal: pv, piv,
+                      ang0: Math.atan2(info.y - piv.y, info.x - piv.x), rot0: inst.rot };
+    } else {
+      this.estado = { inst, modo: 'mover', id: info.id, tipo: info.tipo, dx: inst.x - info.x, dy: inst.y - info.y, guia: null };
+    }
+    Capas.contenedor.classList.add('arrastrando');
+    Render.pedir('instrumentos');
+  },
+  // Segundo dedo mientras se arrastra un instrumento: mover + girar
+  dosDedos(toques) {
+    const e = this.estado;
+    if (!e || e.modo !== 'mover') return false;
+    const [a, b] = toques;
+    this.estado = { inst: e.inst, modo: 'dos', tipo: 'touch', ids: [a.id, b.id], pos: { [a.id]: Vista.aMundo(a.x, a.y), [b.id]: Vista.aMundo(b.x, b.y) } };
+    return true;
+  },
+  mover(info, e) {
+    const s = this.estado;
+    if (!s) return;
+    const inst = s.inst;
+    this.halo = null;
+    if (s.modo === 'mover') this.moverCuerpo(s, info, e);
+    else if (s.modo === 'girar') {
+      const ang = Math.atan2(info.y - s.piv.y, info.x - s.piv.x);
+      inst.rot = s.rot0 + ang - s.ang0;
+      if (e && e.shiftKey) {
+        const paso = Math.PI / 12;
+        inst.rot = Math.round(inst.rot / paso) * paso;
+        inst.colocarPivote(s.pivLocal, s.piv);
+      } else {
+        inst.colocarPivote(s.pivLocal, s.piv);
+        this.halo = Instrumentos.imanGirar(inst, s.pivLocal, s.piv, s.tipo);
+      }
+      UI.mensaje(`Ángulo: ${this.anguloTexto(inst)}`);
+    } else if (s.modo === 'dos') {
+      const ids = s.ids, viejo = { a: s.pos[ids[0]], b: s.pos[ids[1]] };
+      const nuevo = Object.assign({}, s.pos, { [info.id]: { x: info.x, y: info.y } });
+      const a = nuevo[ids[0]], b = nuevo[ids[1]];
+      const m0 = { x: (viejo.a.x + viejo.b.x) / 2, y: (viejo.a.y + viejo.b.y) / 2 };
+      const m1 = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      const d = Math.atan2(b.y - a.y, b.x - a.x) - Math.atan2(viejo.b.y - viejo.a.y, viejo.b.x - viejo.a.x);
+      inst.girarEn(m0, d);
+      inst.x += m1.x - m0.x; inst.y += m1.y - m0.y;
+      s.pos = nuevo;
+      UI.mensaje(`Ángulo: ${this.anguloTexto(inst)}`);
+    }
+    Render.pedir('instrumentos');
+  },
+  moverCuerpo(s, info, e) {
+    const inst = s.inst;
+    const libreX = info.x + s.dx, libreY = info.y + s.dy;
+    const c = s.guia;
+    if (c) {
+      // Deslizando: solo se mueve a lo largo del canto guía
+      const vx = libreX - c.ancla.x, vy = libreY - c.ancla.y;
+      const desvio = vx * c.n.x + vy * c.n.y;
+      const soltar = Math.max(8, 30 / Vista.escala);
+      if (Math.abs(desvio) > soltar || (e && e.altKey)) {
+        s.guia = null;
+        UI.mensaje(`${inst.nombre} separad${inst.g}.`);
+      } else {
+        const t = vx * c.g.u.x + vy * c.g.u.y;
+        const antes = { x: inst.x, y: inst.y };
+        inst.x = c.ancla.x + c.g.u.x * t; inst.y = c.ancla.y + c.g.u.y * t;
+        if (!Instrumentos.haySolape(inst, c)) {
+          inst.x = antes.x; inst.y = antes.y;          // al final del canto guía se detiene
+        } else {
+          this.halo = Instrumentos.imanDeslizar(inst, c, s.tipo);
+        }
+        return;
+      }
+    }
+    inst.x = libreX; inst.y = libreY;
+    if (!(e && e.altKey)) {
+      const contacto = Instrumentos.buscarContacto(inst);
+      if (contacto) {
+        Instrumentos.apoyar(inst, contacto, { x: info.x, y: info.y });
+        s.dx = inst.x - info.x; s.dy = inst.y - info.y;
+        s.guia = Object.assign(contacto, { ancla: { x: inst.x, y: inst.y } });
+        Sonido.tocar('iman');
+        UI.mensaje(`${inst.nombre} apoyad${inst.g} en ${contacto.otro.conArticulo}: ahora se desliza a lo largo del canto. Aléjal${inst.g} para separar${inst.g === 'a' ? 'la' : 'lo'}.`);
+        return;
+      }
+    }
+    this.halo = Instrumentos.imanMover(inst, s.tipo);
+  },
+  // Ángulo del canto principal respecto a la horizontal (sentido antihorario)
+  anguloTexto(inst) {
+    let g = -inst.rot * 180 / Math.PI;
+    g = ((g % 360) + 360) % 360;
+    const r = Math.round(g * 10) / 10;
+    return (Number.isInteger(r) ? String(r) : r.toFixed(1).replace('.', ',')) + '°';
+  },
+  fin() {
+    this.estado = null;
+    this.halo = null;
+    Capas.contenedor.classList.remove('arrastrando');
+    Render.pedir('instrumentos');
+  },
+  overlay(ctx) {
+    const s = this.estado;
+    if (s && s.guia) {
+      // Canto de apoyo en verde
+      const c = s.guia, px = 1 / Vista.escala;
+      ctx.strokeStyle = 'rgba(40, 170, 90, .85)';
+      ctx.lineWidth = 4 * px;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(c.g.a.x, c.g.a.y); ctx.lineTo(c.g.b.x, c.g.b.y);
+      ctx.stroke();
+    }
+    if (this.halo) Dibujo.halo(ctx, this.halo.x, this.halo.y);
+  },
+};
+
+Instrumentos.registrar(new Regla());
+Instrumentos.registrar(new Escuadra());
+Instrumentos.registrar(new Cartabon());
+
+/* =====================================================================
+   Herramientas
    ===================================================================== */
 const Herramientas = [
   { id: 'lapiz',         nombre: 'Portaminas',     tecla: 'P', icono: 'lapiz',         cursor: 'precision', fase: 2 },
   { id: 'mover',         nombre: 'Mover la vista', tecla: 'M', icono: 'mover',         cursor: 'mover',     fase: 1 },
-  { id: 'regla',         nombre: 'Regla',          tecla: 'R', icono: 'regla',         cursor: '',          fase: 3 },
-  { id: 'escuadra',      nombre: 'Escuadra',       tecla: 'E', icono: 'escuadra',      cursor: '',          fase: 4 },
-  { id: 'cartabon',      nombre: 'Cartabón',       tecla: 'T', icono: 'cartabon',      cursor: '',          fase: 4 },
-  { id: 'compas',        nombre: 'Compás',         tecla: 'C', icono: 'compas',        cursor: 'precision', fase: 5 },
-  { id: 'transportador', nombre: 'Transportador',  tecla: 'A', icono: 'transportador', cursor: 'precision', fase: 6 },
+  { id: 'regla',         nombre: 'Regla',          tecla: 'R', icono: 'regla',         instrumento: true,   fase: 3 },
+  { id: 'escuadra',      nombre: 'Escuadra',       tecla: 'E', icono: 'escuadra',      instrumento: true,   fase: 4 },
+  { id: 'cartabon',      nombre: 'Cartabón',       tecla: 'T', icono: 'cartabon',      instrumento: true,   fase: 4 },
+  { id: 'compas',        nombre: 'Compás',         tecla: 'C', icono: 'compas',        instrumento: true,   fase: 5 },
+  { id: 'transportador', nombre: 'Transportador',  tecla: 'A', icono: 'transportador', instrumento: true,   fase: 6 },
   { id: 'goma',          nombre: 'Goma',           tecla: 'B', icono: 'goma',          cursor: 'precision', fase: 2 },
 ];
 
@@ -477,11 +1854,22 @@ const App = {
   seleccionar(id) {
     const h = Herramientas.find(t => t.id === id);
     if (!h) return;
+    // Los instrumentos se muestran u ocultan sin cambiar la herramienta activa
+    if (h.instrumento) {
+      if (!Instrumentos.alternar(id)) UI.mensaje(`${h.nombre}: llegará en la fase ${h.fase}.`);
+      return;
+    }
+    if (id !== this.herramienta) Acciones.cancelarActual();
     this.herramienta = id;
     UI.marcarHerramienta(id);
     Entrada.actualizarCursor();
-    if (h.fase > 1) UI.mensaje(`${h.nombre}: llegará en la fase ${h.fase}. Mientras tanto, puedes mover y acercar la hoja.`);
-    else UI.mensaje('Arrastra para mover la hoja. Usa la rueda o dos dedos para acercar y alejar.');
+    UI.mensaje(this.ayudas[id] || `${h.nombre}: llegará en la fase ${h.fase}. Mientras tanto, puedes marcar puntos y mover la hoja.`);
+    Render.pedir('instrumentos');
+  },
+  ayudas: {
+    mover: 'Arrastra para mover la hoja. Usa la rueda o dos dedos para acercar y alejar.',
+    lapiz: 'Toca o haz clic para marcar un punto. Mantén pulsado y arrastra para colocarlo con precisión.',
+    goma: 'Toca lo que quieras borrar, o pasa la goma por encima arrastrando.',
   },
 };
 
@@ -491,6 +1879,7 @@ const App = {
 const Entrada = {
   punteros: new Map(),    // id -> {x, y, tipo}
   arrastre: null,         // {id, x, y} desplazamiento con un puntero
+  accion: null,           // {id} puntero que usa la herramienta activa
   gesto: null,            // {dist, mx, my} pellizco con dos dedos
   espacio: false,
   lapizDigitalActivo: false,
@@ -501,7 +1890,13 @@ const Entrada = {
     el.addEventListener('pointermove', e => this.mover(e));
     el.addEventListener('pointerup', e => this.arriba(e));
     el.addEventListener('pointercancel', e => this.arriba(e));
-    el.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') UI.coords(null); });
+    el.addEventListener('pointerleave', e => {
+      if (e.pointerType === 'touch') return;
+      UI.coords(null);
+      if (!this.accion) this.cursorInstrumento(null);
+      const acc = Acciones.actual();
+      if (acc && !this.accion) acc.salir();
+    });
     el.addEventListener('wheel', e => this.rueda(e), { passive: false });
     el.addEventListener('contextmenu', e => e.preventDefault());
     // Safari: gestos propios del navegador
@@ -526,17 +1921,46 @@ const Entrada = {
     if (e.pointerType === 'pen') this.lapizDigitalActivo = true;
 
     const p = this.local(e);
-    this.punteros.set(e.pointerId, { x: p.x, y: p.y, tipo: e.pointerType });
+    this.punteros.set(e.pointerId, { id: e.pointerId, x: p.x, y: p.y, tipo: e.pointerType });
     try { Capas.contenedor.setPointerCapture(e.pointerId); } catch (_) {}
 
     const toques = [...this.punteros.values()].filter(q => q.tipo === 'touch');
     if (e.pointerType === 'touch' && toques.length === 2) {
-      // Empieza pellizco: cancela cualquier arrastre de un dedo
+      // Segundo dedo mientras se arrastra un instrumento: mover y girar con dos dedos
+      if (this.accion && this.accion.manip && Manip.dosDedos(toques)) return;
+      // Empieza pellizco: cancela cualquier arrastre o acción de un dedo
+      if (this.accion && this.accion.manip) { Manip.fin(); this.accion = null; }
       this.arrastre = null;
+      if (this.accion) Acciones.cancelarActual();
       this.gesto = this.medirGesto(toques);
       return;
     }
     if (this.gesto) return;
+
+    // Instrumentos: asas de giro y cuerpo (la goma trabaja por debajo de ellos)
+    const info = this.info(e, p);
+    if (e.button === 0 && !this.accion && !this.espacio && App.herramienta !== 'goma') {
+      const hit = Instrumentos.tocar(info, App.herramienta === 'lapiz');
+      if (hit && hit.modo === 'candado') {
+        e.preventDefault();
+        const inst = hit.inst;
+        inst.bloqueado = !inst.bloqueado;
+        Sonido.tocar('iman');
+        UI.mensaje(inst.bloqueado
+          ? `${inst.nombre} fijad${inst.g}: no se moverá, pero puedes trazar y deslizar otros instrumentos sobre ${inst.g === 'a' ? 'ella' : 'él'}.`
+          : `${inst.nombre} suelt${inst.g}: ya se puede mover.`);
+        Render.pedir('instrumentos');
+        return;
+      }
+      if (hit) {
+        e.preventDefault();
+        const acc = Acciones.actual();
+        if (acc) acc.salir();
+        this.accion = { id: e.pointerId, manip: true };
+        Manip.iniciar(hit, info);
+        return;
+      }
+    }
 
     const quiereMover =
       App.herramienta === 'mover' ||
@@ -547,16 +1971,46 @@ const Entrada = {
       this.arrastre = { id: e.pointerId, x: p.x, y: p.y };
       Capas.contenedor.classList.add('arrastrando');
       if (App.herramienta !== 'mover') Capas.contenedor.classList.add('mover');
+      return;
     }
-    // Fases 2+: aquí se delegará en la herramienta activa
+    // Herramienta activa (solo botón principal o toque)
+    const acc = Acciones.actual();
+    if (acc && e.button === 0 && !this.accion) {
+      e.preventDefault();
+      this.accion = { id: e.pointerId };
+      acc.abajo(info);
+    }
+  },
+
+  info(e, p) {
+    const m = Vista.aMundo(p.x, p.y);
+    return { x: m.x, y: m.y, sx: p.x, sy: p.y, tipo: e.pointerType, id: e.pointerId };
   },
 
   mover(e) {
     const p = this.local(e);
     if (e.pointerType !== 'touch') UI.coords(Vista.aMundo(p.x, p.y));
     const q = this.punteros.get(e.pointerId);
-    if (!q) return;
+    if (!q) {
+      // Ratón o lápiz sin pulsar: vista previa de la herramienta o del instrumento
+      if (e.pointerType === 'touch' || this.arrastre || this.espacio) return;
+      const info = this.info(e, p);
+      const hit = App.herramienta !== 'goma' && Instrumentos.tocar(info, App.herramienta === 'lapiz');
+      this.cursorInstrumento(hit);
+      const acc = Acciones.actual();
+      if (acc) { if (hit) acc.salir(); else acc.pasar(info); }
+      return;
+    }
     q.x = p.x; q.y = p.y;
+    if (this.accion && this.accion.manip) {
+      if (Manip.usa(e.pointerId)) Manip.mover(this.info(e, p), e);
+      return;
+    }
+    if (this.accion && this.accion.id === e.pointerId) {
+      const acc = Acciones.actual();
+      if (acc) acc.mover(this.info(e, p));
+      return;
+    }
 
     if (this.gesto) {
       const toques = [...this.punteros.values()].filter(t => t.tipo === 'touch');
@@ -577,6 +2031,19 @@ const Entrada = {
     if (!this.punteros.has(e.pointerId)) return;
     this.punteros.delete(e.pointerId);
     if (e.pointerType === 'pen') this.lapizDigitalActivo = false;
+    if (this.accion && this.accion.manip) {
+      if (Manip.usa(e.pointerId)) {
+        this.accion = null;
+        Manip.fin();
+      }
+    } else if (this.accion && this.accion.id === e.pointerId) {
+      this.accion = null;
+      const acc = Acciones.actual();
+      if (acc) {
+        if (e.type === 'pointercancel') acc.cancelar();
+        else acc.arriba(this.info(e, this.local(e)));
+      }
+    }
     if (this.arrastre && this.arrastre.id === e.pointerId) {
       this.arrastre = null;
       Capas.contenedor.classList.remove('arrastrando');
@@ -618,8 +2085,15 @@ const Entrada = {
       e.preventDefault();
       return;
     }
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key;
+    if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+      const kl = k.toLowerCase();
+      if (kl === 'z' && !e.shiftKey) { Historial.deshacer(); e.preventDefault(); }
+      else if (kl === 'y' || (kl === 'z' && e.shiftKey)) { Historial.rehacer(); e.preventDefault(); }
+      return;
+    }
+    if (e.altKey) return;
+    if (k === 'Escape') { Acciones.cancelarActual(); return; }
     if (k === '+' || k === '=') { this.zoomCentro(1.25); e.preventDefault(); return; }
     if (k === '-' || k === '_') { this.zoomCentro(1 / 1.25); e.preventDefault(); return; }
     if (k === '0') { Vista.ajustar(); return; }
@@ -630,6 +2104,13 @@ const Entrada = {
   },
 
   zoomCentro(f) { Vista.zoomEn(Capas.w / 2, Capas.h / 2, f); },
+
+  cursorInstrumento(hit) {
+    const el = Capas.contenedor;
+    el.classList.toggle('sobre-asa', !!hit && hit.modo === 'girar');
+    el.classList.toggle('sobre-instrumento', !!hit && hit.modo === 'mover');
+    el.classList.toggle('sobre-candado', !!hit && hit.modo === 'candado');
+  },
 
   actualizarCursor() {
     const el = Capas.contenedor;
@@ -665,17 +2146,21 @@ const UI = {
     const grupo = () => { const g = document.createElement('div'); g.className = 'grupo'; barra.appendChild(g); return g; };
     const sep = () => { const s = document.createElement('div'); s.className = 'sep'; barra.appendChild(s); };
 
-    const gH = grupo();
-    for (const h of Herramientas) {
-      gH.appendChild(this.crearBoton({
-        id: h.id, nombre: h.nombre, tecla: h.tecla, icono: h.icono, conmutable: true,
-        alPulsar: () => App.seleccionar(h.id),
-      }));
+    // Herramientas de mano y, aparte, los instrumentos (se muestran u ocultan)
+    for (const instr of [false, true]) {
+      const g = grupo();
+      for (const h of Herramientas.filter(t => !!t.instrumento === instr)) {
+        g.appendChild(this.crearBoton({
+          id: h.id, nombre: instr ? `${h.nombre} (mostrar u ocultar)` : h.nombre, tecla: h.tecla, icono: h.icono, conmutable: true,
+          alPulsar: () => App.seleccionar(h.id),
+        }));
+        if (instr) g.lastChild.dataset.instrumento = '1';
+      }
+      sep();
     }
-    sep();
     const gHist = grupo();
-    this.btnDeshacer = this.crearBoton({ nombre: 'Deshacer', tecla: 'Ctrl+Z', icono: 'deshacer', alPulsar: () => {} });
-    this.btnRehacer  = this.crearBoton({ nombre: 'Rehacer',  tecla: 'Ctrl+Y', icono: 'rehacer',  alPulsar: () => {} });
+    this.btnDeshacer = this.crearBoton({ nombre: 'Deshacer', tecla: 'Ctrl+Z', icono: 'deshacer', alPulsar: () => Historial.deshacer() });
+    this.btnRehacer  = this.crearBoton({ nombre: 'Rehacer',  tecla: 'Ctrl+Y', icono: 'rehacer',  alPulsar: () => Historial.rehacer() });
     this.btnDeshacer.disabled = this.btnRehacer.disabled = true;
     gHist.append(this.btnDeshacer, this.btnRehacer);
     sep();
@@ -691,8 +2176,19 @@ const UI = {
   },
 
   marcarHerramienta(id) {
-    document.querySelectorAll('#barra .btn[data-id]').forEach(b =>
+    document.querySelectorAll('#barra .btn[data-id]:not([data-instrumento])').forEach(b =>
       b.setAttribute('aria-pressed', String(b.dataset.id === id)));
+  },
+  marcarInstrumentos() {
+    document.querySelectorAll('#barra .btn[data-instrumento]').forEach(b => {
+      const inst = Instrumentos.porTipo[b.dataset.id];
+      b.setAttribute('aria-pressed', String(!!(inst && inst.visible)));
+    });
+  },
+
+  actualizarHistorial() {
+    this.btnDeshacer.disabled = !Historial.pasado.length;
+    this.btnRehacer.disabled = !Historial.futuro.length;
   },
 
   mensaje(txt) { document.getElementById('mensaje').textContent = txt; },
@@ -721,6 +2217,7 @@ const UI = {
     const p = document.getElementById('panel-config');
     p.classList.add('abierto');
     p.setAttribute('aria-hidden', 'false');
+    p.inert = false;
     document.getElementById('velo').classList.add('visible');
     document.getElementById('cerrar-config').focus();
   },
@@ -729,11 +2226,14 @@ const UI = {
     const p = document.getElementById('panel-config');
     p.classList.remove('abierto');
     p.setAttribute('aria-hidden', 'true');
+    p.inert = true;
     document.getElementById('velo').classList.remove('visible');
   },
 
   iniciar() {
     this.construirBarra();
+    Panel.construir();
+    document.getElementById('panel-config').inert = true;
     const cerrar = document.getElementById('cerrar-config');
     cerrar.innerHTML = Iconos.cerrar;
     cerrar.addEventListener('click', () => this.cerrarPanel());
@@ -741,6 +2241,189 @@ const UI = {
     document.getElementById('zoom').addEventListener('click', () => Vista.ajustar());
   },
 };
+
+/* =====================================================================
+   Panel de configuración
+   ===================================================================== */
+const Panel = {
+  cuerpo: null,
+
+  construir() {
+    const c = this.cuerpo = document.getElementById('config-cuerpo');
+    c.innerHTML = '';
+    const titulo = t => { const h = document.createElement('h3'); h.textContent = t; c.appendChild(h); };
+
+    titulo('Papel');
+    this.fila(c, 'Tipo de papel', this.tarjetasPapel());
+    this.fila(c, 'Tamaño del cuadro', this.segmentado('cuadro', [[4, '4 mm'], [5, '5 mm'], [10, '10 mm']]), 'papel=cuadriculado');
+    this.fila(c, 'Tamaño del triángulo', this.segmentado('triangulo', [[5, '5 mm'], [10, '10 mm']]), 'papel=isometrico');
+    this.fila(c, 'Color de las líneas', this.muestras('colorLineas', [
+      ['azul', `rgb(${Paleta.lineas.azul})`, 'Azul'],
+      ['gris', `rgb(${Paleta.lineas.gris})`, 'Gris'],
+      ['verde', `rgb(${Paleta.lineas.verde})`, 'Verde'],
+    ]), 'papel!=blanco');
+    this.fila(c, 'Color del papel', this.muestras('colorPapel', [
+      ['blanco', Paleta.papel.blanco, 'Blanco'],
+      ['crema', Paleta.papel.crema, 'Crema'],
+    ]));
+    this.fila(c, 'Hoja', this.segmentado('hoja', [['A4-h', 'A4 ▭'], ['A4-v', 'A4 ▯'], ['A3-h', 'A3 ▭'], ['A3-v', 'A3 ▯']],
+      { 'A4-h': 'A4 horizontal', 'A4-v': 'A4 vertical', 'A3-h': 'A3 horizontal', 'A3-v': 'A3 vertical' }));
+    this.interruptor(c, 'margen', 'Margen');
+    this.interruptor(c, 'imanCuadricula', 'Imán en la cuadrícula', 'Los cruces del papel atraen la punta del portaminas.', 'papel!=blanco');
+
+    titulo('Dibujo');
+    this.fila(c, 'Grosor de la mina', this.segmentado('mina', [[0.3, '0,3 mm'], [0.5, '0,5 mm'], [0.7, '0,7 mm']]));
+    this.fila(c, 'Color del grafito', this.muestras('grafito', [
+      ['gris', Paleta.grafito.gris, 'Gris'],
+      ['negro', Paleta.grafito.negro, 'Negro'],
+      ['azul', Paleta.grafito.azul, 'Azul'],
+    ]));
+    this.interruptor(c, 'etiquetas', 'Poner letras a los puntos (A, B, C…)');
+
+    titulo('Ayudas');
+    this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
+    this.interruptor(c, 'sonidos', 'Sonidos');
+    this.interruptor(c, 'ayuda', 'Mensajes de ayuda');
+    this.fila(c, 'Tamaño de los botones', this.segmentado('interfaz', [['normal', 'Normal'], ['grande', 'Grande']]));
+
+    const rest = document.createElement('button');
+    rest.type = 'button';
+    rest.className = 'btn-texto';
+    rest.innerHTML = Iconos.deshacer + '<span>Restaurar valores por defecto</span>';
+    rest.addEventListener('click', () => { Config.restaurar(); UI.aviso('Configuración restaurada'); });
+    c.appendChild(rest);
+
+    this.actualizar();
+  },
+
+  fila(c, etiqueta, control, condicion) {
+    const f = document.createElement('div');
+    f.className = 'fila';
+    if (condicion) f.dataset.si = condicion;
+    const id = 'etq-' + Math.random().toString(36).slice(2, 8);
+    const e = document.createElement('span');
+    e.className = 'etq'; e.id = id; e.textContent = etiqueta;
+    control.setAttribute('aria-labelledby', id);
+    f.append(e, control);
+    c.appendChild(f);
+    return f;
+  },
+
+  // Grupo de botones de opción: role=radiogroup / radio
+  grupo(clave, clase) {
+    const g = document.createElement('div');
+    g.className = clase;
+    g.setAttribute('role', 'radiogroup');
+    g.dataset.clave = clave;
+    g.addEventListener('keydown', e => this.flechas(e, g));
+    return g;
+  },
+  opcion(g, clave, valor, contenido, nombre, clase) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    if (clase) b.className = clase;
+    b.setAttribute('role', 'radio');
+    b.dataset.valor = JSON.stringify(valor);
+    b.innerHTML = contenido;
+    if (nombre) { b.setAttribute('aria-label', nombre); b.title = nombre; }
+    b.addEventListener('click', () => Config.set(clave, valor));
+    g.appendChild(b);
+    return b;
+  },
+  flechas(e, g) {
+    const dir = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!dir) return;
+    e.preventDefault();
+    const bs = [...g.querySelectorAll('[role=radio]')];
+    const i = bs.indexOf(document.activeElement);
+    const b = bs[(i + dir + bs.length) % bs.length];
+    b.focus(); b.click();
+  },
+
+  tarjetasPapel() {
+    const g = this.grupo('papel', 'opciones-papel');
+    const tipos = [['blanco', 'En blanco'], ['cuadriculado', 'Cuadriculado'], ['milimetrado', 'Milimetrado'], ['isometrico', 'Isométrico']];
+    for (const [v, n] of tipos) {
+      const b = this.opcion(g, 'papel', v, '', null, 'tarjeta');
+      b.dataset.miniatura = v;
+      b.dataset.nombre = n;
+    }
+    return g;
+  },
+  segmentado(clave, opciones, nombres) {
+    const g = this.grupo(clave, 'segmentado');
+    for (const [v, t] of opciones) this.opcion(g, clave, v, t, nombres && nombres[v]);
+    return g;
+  },
+  muestras(clave, opciones) {
+    const g = this.grupo(clave, 'muestras');
+    for (const [v, color, nombre] of opciones) {
+      const b = this.opcion(g, clave, v, '', nombre, 'muestra');
+      b.style.background = color;
+    }
+    return g;
+  },
+  interruptor(c, clave, etiqueta, nota, condicion) {
+    const f = document.createElement('div');
+    f.className = 'fila';
+    if (condicion) f.dataset.si = condicion;
+    const fi = document.createElement('div');
+    fi.className = 'fila-interruptor';
+    const id = 'etq-' + clave;
+    const e = document.createElement('label');
+    e.className = 'etq'; e.id = id; e.textContent = etiqueta;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'interruptor';
+    b.setAttribute('role', 'switch');
+    b.setAttribute('aria-labelledby', id);
+    b.dataset.interruptor = clave;
+    b.addEventListener('click', () => Config.set(clave, !Config.get(clave)));
+    e.addEventListener('click', () => b.click());
+    fi.append(e, b);
+    f.appendChild(fi);
+    if (nota) { const n = document.createElement('div'); n.className = 'nota'; n.textContent = nota; f.appendChild(n); }
+    c.appendChild(f);
+  },
+
+  // Refleja la configuración actual en los controles
+  actualizar() {
+    const c = this.cuerpo;
+    if (!c) return;
+    c.querySelectorAll('[role=radiogroup]').forEach(g => {
+      const actual = JSON.stringify(Config.get(g.dataset.clave));
+      g.querySelectorAll('[role=radio]').forEach(b => {
+        const sel = b.dataset.valor === actual;
+        b.setAttribute('aria-checked', String(sel));
+        b.tabIndex = sel ? 0 : -1;
+      });
+    });
+    c.querySelectorAll('[data-interruptor]').forEach(b =>
+      b.setAttribute('aria-checked', String(!!Config.get(b.dataset.interruptor))));
+    c.querySelectorAll('[data-miniatura]').forEach(b => {
+      b.innerHTML = Papel.miniatura(b.dataset.miniatura) + `<span>${b.dataset.nombre}</span>`;
+    });
+    c.querySelectorAll('[data-si]').forEach(f => {
+      const [, k, op, v] = f.dataset.si.match(/^(\w+)(!?=)(\w+)$/);
+      const igual = String(Config.get(k)) === v;
+      f.hidden = op === '=' ? !igual : igual;
+    });
+  },
+};
+
+/* Aplica un cambio de configuración al resto de la aplicación */
+function aplicarConfig(clave) {
+  const todo = clave === '*';
+  const raiz = document.documentElement;
+  if (todo || clave === 'interfaz') raiz.dataset.interfaz = Config.get('interfaz');
+  if (todo || clave === 'ayuda') raiz.dataset.ayuda = Config.get('ayuda') ? 'si' : 'no';
+  if (todo || clave === 'hoja') {
+    Hoja.actualizar();
+    if (Capas.w) Vista.ajustar();
+  }
+  Render.pedir('papel', 'dibujo');
+  Panel.actualizar();
+}
 
 /* =====================================================================
    Arranque
@@ -751,6 +2434,8 @@ function iniciar() {
   Capas.iniciar();
   UI.iniciar();
   Entrada.iniciar();
+  aplicarConfig('*');
+  Config.alCambiar(aplicarConfig);
 
   let primera = true;
   const alCambiarTamano = () => {
@@ -768,12 +2453,12 @@ function iniciar() {
     if ((window.devicePixelRatio || 1) !== Capas.dpr) alCambiarTamano();
   });
 
-  App.seleccionar('mover');
-  UI.mensaje('¡Bienvenido a DibuTec! Arrastra para mover la hoja; usa la rueda o dos dedos para acercar.');
+  App.seleccionar('lapiz');
+  UI.mensaje('¡Bienvenido a DibuTec! Toca la hoja con el portaminas para marcar puntos.');
 }
 
 // Acceso para pruebas automáticas
-window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos };
+window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip };
 
 iniciar();
 </script>

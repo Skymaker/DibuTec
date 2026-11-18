@@ -9,10 +9,10 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | Fase | Contenido | Estado |
 |---|---|---|
 | 1 | Base: estructura, CSS adaptable, iconos SVG, canvas en capas, mm↔px, zoom y desplazamiento | ✅ Hecha |
-| 1b | Papel configurable + panel de configuración | ⏳ Pendiente |
-| 2 | Portaminas y puntos magnéticos | ⏳ Pendiente |
-| 3 | Regla | ⏳ Pendiente |
-| 4 | Escuadra, cartabón y deslizamiento | ⏳ Pendiente |
+| 1b | Papel configurable + panel de configuración | ✅ Hecha |
+| 2 | Portaminas, puntos magnéticos, goma y deshacer/rehacer | ✅ Hecha |
+| 3 | Regla | ✅ Hecha |
+| 4 | Escuadra, cartabón, deslizamiento y candado | ✅ Hecha |
 | 5 | Compás | ⏳ Pendiente |
 | 6 | Transportador | ⏳ Pendiente |
 | 7 | Pulido | ⏳ Pendiente |
