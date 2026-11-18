@@ -238,17 +238,48 @@
   }
   @media (prefers-reduced-motion: reduce) { .btn.sugerido { animation: none; box-shadow: inset 0 0 0 3px #ff9f1c; } }
 
-  /* Opciones de la goma (abajo a la izquierda de la hoja) */
-  #lienzo #opciones-goma {
+  /* Opciones de la goma y del portaminas (abajo a la izquierda de la hoja) */
+  #lienzo .opciones {
     position: absolute; left: 10px; bottom: 10px; z-index: 4; --ctl: 36px;
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: calc(100% - 20px);
     padding: 6px 10px; background: #fff; border: 1px solid var(--borde); border-radius: 14px;
     box-shadow: 0 6px 20px rgba(30, 32, 50, .18); font-size: 14px;
   }
-  @media (pointer: coarse) { #lienzo #opciones-goma { --ctl: 44px; } }
-  #lienzo #opciones-goma[hidden] { display: none; }   /* tan específica como la regla que le da display: flex */
-  #opciones-goma .og-ico svg { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  #opciones-goma .og-ico svg .a { fill: var(--acento); }
+  @media (pointer: coarse) { #lienzo .opciones { --ctl: 44px; } }
+  #lienzo .opciones[hidden] { display: none; }   /* tan específica como la regla que le da display: flex */
+  .opciones .og-ico svg { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .opciones .og-ico svg .a { fill: var(--acento); }
+  /* Botones del portaminas: color y grosor actuales */
+  .ol-boton {
+    display: flex; align-items: center; gap: 8px; height: var(--ctl); padding: 0 12px 0 8px;
+    border: 1px solid var(--borde); border-radius: 10px; background: #fff; color: var(--texto);
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; touch-action: manipulation; white-space: nowrap;
+  }
+  .ol-boton[aria-expanded="true"] { border-color: var(--activo); background: var(--activo-fondo); color: var(--activo); }
+  @media (hover: hover) { .ol-boton:hover { border-color: var(--activo); } }
+  .ol-boton .pinta { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); flex: none; }
+  .ol-boton .linea, .sl-grosor .linea { width: 34px; border-radius: 99px; background: currentColor; flex: none; }
+  .ol-boton .flecha { width: 0; height: 0; border: 5px solid transparent; border-top-color: currentColor; margin-top: 5px; opacity: .6; }
+  /* Ventana flotante para elegir color o grosor */
+  #selector-lapiz {
+    position: absolute; left: 10px; z-index: 5; width: min(300px, calc(100% - 20px));
+    padding: 12px; background: #fff; border: 1px solid var(--borde); border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(30, 32, 50, .25); font-size: 14px;
+  }
+  #selector-lapiz[hidden] { display: none; }
+  #selector-lapiz h4 { margin: 0 0 10px; font-size: 13px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; }
+  .sl-rejilla { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .sl-color, .sl-grosor {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    min-height: 64px; padding: 6px 4px; border: 2px solid transparent; border-radius: 12px;
+    background: #faf8f4; color: var(--texto); font: inherit; font-size: 13px; cursor: pointer; touch-action: manipulation;
+  }
+  .sl-color .pinta { width: 30px; height: 30px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+  .sl-grosor { min-height: 52px; font-variant-numeric: tabular-nums; }
+  .sl-grosor .linea { width: 56px; }
+  .sl-color[aria-checked="true"], .sl-grosor[aria-checked="true"] { border-color: var(--activo); background: var(--activo-fondo); color: var(--activo); font-weight: 600; }
+  @media (hover: hover) { .sl-color:hover, .sl-grosor:hover { border-color: var(--borde); } }
+  .sl-color:focus-visible, .sl-grosor:focus-visible, .ol-boton:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
   #opciones-goma .segmentado button { font-size: 14px; padding: 0 12px; white-space: nowrap; }
   #opciones-goma .deslizador { width: 210px; }
   .deslizador { display: flex; align-items: center; gap: 10px; }
@@ -348,7 +379,9 @@
     <canvas id="capa-instrumentos"></canvas>
     <canvas id="lupa" aria-hidden="true"></canvas>
     <section id="tarjeta-ejercicio" aria-live="polite" hidden></section>
-    <div id="opciones-goma" role="toolbar" aria-label="Opciones de la goma" hidden></div>
+    <div id="opciones-goma" class="opciones" role="toolbar" aria-label="Opciones de la goma" hidden></div>
+    <div id="opciones-lapiz" class="opciones" role="toolbar" aria-label="Opciones del portaminas" hidden></div>
+    <div id="selector-lapiz" role="dialog" aria-modal="false" hidden></div>
   </main>
   <footer id="estado">
     <span id="mensaje" aria-live="polite"></span>
@@ -465,8 +498,17 @@ const Config = {
     hoja:           { def: 'A4-h',   ops: ['A4-h', 'A4-v', 'A3-h', 'A3-v'] },
     margen:         { def: true,     ops: [true, false] },
     imanCuadricula: { def: false,    ops: [true, false] },
-    mina:           { def: 0.5,      ops: [0.3, 0.5, 0.7] },     // mm
-    grafito:        { def: 'gris',   ops: ['gris', 'negro', 'azul'] },
+    // Imán: qué atrae a la punta del portaminas, del compás y a los instrumentos
+    imanPuntos:     { def: true,     ops: [true, false] },
+    imanExtremos:   { def: true,     ops: [true, false] },
+    imanCruces:     { def: true,     ops: [true, false] },
+    imanCentros:    { def: true,     ops: [true, false] },
+    imanLineas:     { def: true,     ops: [true, false] },
+    imanMarcas:     { def: true,     ops: [true, false] },
+    imanInstrumentos: { def: true,   ops: [true, false] },
+    // Portaminas: color y grosor de los trazos nuevos
+    colorLapiz:     { def: 'grafito', ops: ['grafito', 'negro', 'azul', 'rojo', 'verde', 'naranja', 'morado', 'marron', 'rosa'] },
+    grosorLapiz:    { def: 0.5, min: 0.5, max: 1.5, paso: 0.1 },   // mm
     etiquetas:      { def: true,     ops: [true, false] },
     iman:           { def: 'medio',  ops: ['debil', 'medio', 'fuerte'] },
     sonidos:        { def: true,     ops: [true, false] },
@@ -493,6 +535,12 @@ const Config = {
       const v = this.valido(k, guardado[k]);
       this.valores[k] = v === undefined ? this.esquema[k].def : v;
     }
+    // Configuraciones antiguas: color del grafito y grosor de la mina
+    if (guardado.colorLapiz === undefined && guardado.grafito) {
+      const c = guardado.grafito === 'gris' ? 'grafito' : guardado.grafito;
+      if (this.valido('colorLapiz', c)) this.valores.colorLapiz = c;
+    }
+    if (guardado.grosorLapiz === undefined && typeof guardado.mina === 'number') this.valores.grosorLapiz = this.valido('grosorLapiz', guardado.mina);
   },
   // Valor permitido (o undefined): de una lista de opciones o un número dentro de su rango
   valido(k, v) {
@@ -501,7 +549,7 @@ const Config = {
     if (e.ops) return e.ops.includes(v) ? v : undefined;
     if (typeof v !== 'number' || !Number.isFinite(v)) return undefined;
     const paso = e.paso || 1;
-    return Math.round(Math.min(e.max, Math.max(e.min, v)) / paso) * paso;
+    return Number((Math.round(Math.min(e.max, Math.max(e.min, v)) / paso) * paso).toFixed(6));
   },
   guardar() {
     try { localStorage.setItem(this.clave, JSON.stringify(this.valores)); } catch (e) { /* sin almacenamiento */ }
@@ -525,7 +573,14 @@ const Config = {
 const Paleta = {
   papel:   { blanco: '#ffffff', crema: '#fbf5e3' },
   lineas:  { azul: '70, 125, 200', gris: '110, 112, 122', verde: '45, 145, 95' }, // rgb
-  grafito: { gris: '#3b3b40', negro: '#141416', azul: '#2a4d8f' },
+  // Biblioteca de colores del portaminas: [color, nombre]
+  lapiz: {
+    grafito: ['#3b3b40', 'Grafito'], negro: ['#141416', 'Negro'],   azul:   ['#2a4d8f', 'Azul'],
+    rojo:    ['#c0392b', 'Rojo'],    verde: ['#24814f', 'Verde'],   naranja: ['#e07b12', 'Naranja'],
+    morado:  ['#7b3fa0', 'Morado'],  marron: ['#7a4a22', 'Marrón'], rosa:   ['#d13a7c', 'Rosa'],
+  },
+  colorLapiz(c) { return (this.lapiz[c] || this.lapiz.grafito)[0]; },
+  lapizActual() { return this.colorLapiz(Config.get('colorLapiz')); },
   // Plástico de los instrumentos: relleno translúcido, borde, tinta de las escalas y color de la muestra
   instrumentos: {
     verde:   { relleno: 'rgba(14, 150, 52, .58)',   borde: 'rgba(8, 92, 34, .9)',    tinta: '#0c2414', muestra: '#1fa646' },
@@ -982,15 +1037,15 @@ const Render = {
   },
   // Puntos, rectas y arcos sobre un contexto en mm (pantalla o exportación)
   pintarEscena(ctx) {
-    const grafito = Paleta.grafito[Config.get('grafito')];
-    // En un ejercicio, el enunciado se ve en azul, como impreso en la ficha
-    const color = o => (o.dado && Ejercicio.def ? '#2457a6' : grafito);
-    ctx.lineWidth = Dibujo.grosor();
+    // En un ejercicio, el enunciado se ve en azul y fino, como impreso en la ficha
+    const enunciado = o => o.dado && Ejercicio.def;
+    const color = o => (enunciado(o) ? '#2457a6' : Paleta.colorLapiz(o.c));
+    const grosor = o => Dibujo.grosor(enunciado(o) ? 0.5 : o.g);
     ctx.lineCap = 'round';
     ctx.globalAlpha = 0.92; // grafito, no tinta
-    for (const r of Escena.rectas) { ctx.strokeStyle = color(r); Dibujo.trazo(ctx, 'recta', r); }
-    for (const a of Escena.arcos) { ctx.strokeStyle = color(a); Dibujo.trazo(ctx, 'arco', a); }
-    for (const p of Escena.puntos) Dibujo.cruz(ctx, p.x, p.y, color(p));
+    for (const r of Escena.rectas) { ctx.strokeStyle = color(r); ctx.lineWidth = grosor(r); Dibujo.trazo(ctx, 'recta', r); }
+    for (const a of Escena.arcos) { ctx.strokeStyle = color(a); ctx.lineWidth = grosor(a); Dibujo.trazo(ctx, 'arco', a); }
+    for (const p of Escena.puntos) Dibujo.cruz(ctx, p.x, p.y, color(p), grosor(p));
     if (Config.get('etiquetas') || Ejercicio.def) for (const p of Escena.puntos) Dibujo.etiqueta(ctx, p, color(p));
     ctx.globalAlpha = 1;
   },
@@ -1049,12 +1104,14 @@ const Escena = {
   limpiar(d) {
     const fin = Number.isFinite, lista = v => Array.isArray(v) ? v : [];
     d = d && typeof d === 'object' ? d : {};
+    // Color y grosor de cada trazo (los dibujos antiguos no los tienen)
+    const trazo = o => ({ c: Config.valido('colorLapiz', o.c) || 'grafito', g: Config.valido('grosorLapiz', o.g) || 0.5 });
     const puntos = lista(d.puntos).filter(p => p && fin(p.x) && fin(p.y))
-      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 6), dado: !!p.dado }));
+      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 6), dado: !!p.dado, ...trazo(p) }));
     const rectas = lista(d.rectas).filter(r => r && [r.x1, r.y1, r.x2, r.y2].every(fin))
-      .map(r => ({ id: fin(r.id) ? r.id : 0, x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2, dado: !!r.dado }));
+      .map(r => ({ id: fin(r.id) ? r.id : 0, x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2, dado: !!r.dado, ...trazo(r) }));
     const arcos = lista(d.arcos).filter(a => a && [a.cx, a.cy, a.r, a.a0, a.a1].every(fin) && a.r > 0)
-      .map(a => ({ id: fin(a.id) ? a.id : 0, cx: a.cx, cy: a.cy, r: a.r, a0: a.a0, a1: a.a1, dado: !!a.dado }));
+      .map(a => ({ id: fin(a.id) ? a.id : 0, cx: a.cx, cy: a.cy, r: a.r, a0: a.a0, a1: a.a1, dado: !!a.dado, ...trazo(a) }));
     let sigId = fin(d.sigId) ? d.sigId : 1;
     for (const o of [...puntos, ...rectas, ...arcos]) { if (!o.id) o.id = sigId++; sigId = Math.max(sigId, o.id + 1); }
     return { puntos, rectas, arcos, sigId, instrumentos: lista(d.instrumentos) };
@@ -1073,18 +1130,20 @@ const Escena = {
     for (let n = 0; ; n++) { const e = this.etiqueta(n); if (!usadas.has(e)) return e; }
   },
 
+  // Color y grosor del portaminas con los que se guarda cada trazo nuevo
+  trazoActual() { return { c: Config.get('colorLapiz'), g: Config.get('grosorLapiz') }; },
   agregarPunto(x, y) {
-    const p = { id: this.sigId++, x, y, etiqueta: this.siguienteEtiqueta() };
+    const p = Object.assign({ id: this.sigId++, x, y, etiqueta: this.siguienteEtiqueta() }, this.trazoActual());
     this.puntos.push(p);
     Render.pedir('dibujo');
     return p;
   },
   agregarRecta(x1, y1, x2, y2) {
-    const r = { id: this.sigId++, x1, y1, x2, y2 };
+    const r = Object.assign({ id: this.sigId++, x1, y1, x2, y2 }, this.trazoActual());
     this.rectas.push(r); Render.pedir('dibujo'); return r;
   },
   agregarArco(cx, cy, r, a0, a1) {
-    const a = { id: this.sigId++, cx, cy, r, a0, a1 };
+    const a = Object.assign({ id: this.sigId++, cx, cy, r, a0, a1 }, this.trazoActual());
     this.arcos.push(a); Render.pedir('dibujo'); return a;
   },
 
@@ -1096,12 +1155,14 @@ const Escena = {
   },
 
   // Lugares que atraen a los instrumentos: puntos, extremos y centros
+  // Puntos que atraen a los instrumentos y al compás (según las opciones del imán)
   objetivos() {
-    const o = this.puntos.map(p => ({ x: p.x, y: p.y }));
-    for (const r of this.rectas) o.push({ x: r.x1, y: r.y1 }, { x: r.x2, y: r.y2 });
+    const si = k => Config.get(k);
+    const o = si('imanPuntos') ? this.puntos.map(p => ({ x: p.x, y: p.y })) : [];
+    if (si('imanExtremos')) for (const r of this.rectas) o.push({ x: r.x1, y: r.y1 }, { x: r.x2, y: r.y2 });
     for (const a of this.arcos) {
-      o.push({ x: a.cx, y: a.cy });
-      if (!Geom.esCircunferencia(a)) o.push(...Geom.extremosArco(a));
+      if (si('imanCentros')) o.push({ x: a.cx, y: a.cy });
+      if (si('imanExtremos') && !Geom.esCircunferencia(a)) o.push(...Geom.extremosArco(a));
     }
     return o;
   },
@@ -1212,11 +1273,12 @@ const Snap = {
       if (!mejor || prio < mejor.prio || (prio === mejor.prio && d < mejor.d))
         mejor = { prio, tipo, x: px, y: py, obj, d };
     };
-    for (const p of Escena.puntos) probar(1, 'punto', p.x, p.y, p);
-    for (const r of Escena.rectas) { probar(2, 'extremo', r.x1, r.y1, r); probar(2, 'extremo', r.x2, r.y2, r); }
+    const si = k => Config.get(k);
+    if (si('imanPuntos')) for (const p of Escena.puntos) probar(1, 'punto', p.x, p.y, p);
+    if (si('imanExtremos')) for (const r of Escena.rectas) { probar(2, 'extremo', r.x1, r.y1, r); probar(2, 'extremo', r.x2, r.y2, r); }
     for (const a of Escena.arcos) {
-      probar(3, 'centro', a.cx, a.cy, a);
-      if (!Geom.esCircunferencia(a)) for (const e of Geom.extremosArco(a)) probar(2, 'extremo', e.x, e.y, a);
+      if (si('imanCentros')) probar(3, 'centro', a.cx, a.cy, a);
+      if (si('imanExtremos') && !Geom.esCircunferencia(a)) for (const e of Geom.extremosArco(a)) probar(2, 'extremo', e.x, e.y, a);
     }
     // Sobre el trazo de las líneas cercanas y en los cruces entre ellas
     const cerca = [];
@@ -1224,17 +1286,18 @@ const Snap = {
       if (Geom.distSegmento(x, y, r.x1, r.y1, r.x2, r.y2) > radio) continue;
       cerca.push({ tipo: 'recta', o: r });
       const q = Geom.cercanoSegmento(x, y, r);
-      probar(5, 'sobre', q.x, q.y, r);
+      if (si('imanLineas')) probar(5, 'sobre', q.x, q.y, r);
     }
     for (const a of Escena.arcos) {
       if (Geom.distArco(x, y, a) > radio) continue;
       cerca.push({ tipo: 'arco', o: a });
       const q = Geom.cercanoArco(x, y, a);
-      probar(5, 'sobre', q.x, q.y, a);
+      if (si('imanLineas')) probar(5, 'sobre', q.x, q.y, a);
     }
-    for (let i = 0; i < cerca.length; i++)
-      for (let j = i + 1; j < cerca.length; j++)
-        for (const q of Geom.intersecciones(cerca[i], cerca[j])) probar(2, 'cruce', q.x, q.y, null);
+    if (si('imanCruces'))
+      for (let i = 0; i < cerca.length; i++)
+        for (let j = i + 1; j < cerca.length; j++)
+          for (const q of Geom.intersecciones(cerca[i], cerca[j])) probar(2, 'cruce', q.x, q.y, null);
     if (mejor && mejor.tipo === 'sobre') mejor.elTipo = 'r' in mejor.obj ? 'arco' : 'recta';
     if (!mejor && Config.get('imanCuadricula')) {
       const n = Papel.nodoCercano(x, y);
@@ -1404,7 +1467,7 @@ const Lapiz = {
     const px = 1 / Vista.escala;
     const e = this.activo || this.hover;
     if (!e) return;
-    const color = Paleta.grafito[Config.get('grafito')];
+    const color = Paleta.lapizActual();
     if (e.modo === 'canto') {
       // Canto resaltado
       ctx.strokeStyle = 'rgba(47, 111, 208, .45)';
@@ -1572,11 +1635,12 @@ const Acciones = {
    Primitivas de dibujo (en mm)
    ===================================================================== */
 const Dibujo = {
-  grosor() { return Math.max(Config.get('mina'), 0.9 / Vista.escala); },
-  cruz(ctx, x, y, color) {
+  // Grosor real de la mina (por defecto, el del portaminas), sin bajar de un píxel visible
+  grosor(mm = Config.get('grosorLapiz')) { return Math.max(mm || 0.5, 0.9 / Vista.escala); },
+  cruz(ctx, x, y, color, grosor) {
     const brazo = Math.max(1.2, 4 / Vista.escala);
     ctx.strokeStyle = color;
-    ctx.lineWidth = this.grosor();
+    ctx.lineWidth = grosor || this.grosor();
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(x - brazo, y - brazo); ctx.lineTo(x + brazo, y + brazo);
@@ -2069,7 +2133,7 @@ class Compas extends Instrumento {
     const finMina = this.pata(ctx, b, [this.r, 0], 5, 2.4, e.inversa ? 'rgba(232, 93, 80, .92)' : e.muestra, e.inversa ? '#9c3a30' : e.borde);
     ctx.restore();
     // Mina de grafito (más clara si está levantada)
-    ctx.fillStyle = Paleta.grafito[Config.get('grafito')];
+    ctx.fillStyle = Paleta.lapizActual();
     ctx.globalAlpha = this.levantada ? 0.35 : 1;
     ctx.beginPath();
     const v = [this.r - finMina[0], -finMina[1]], L = Math.hypot(v[0], v[1]) || 1, n = [-v[1] / L, v[0] / L];
@@ -2334,7 +2398,7 @@ const Instrumentos = {
     let snap = null;
     const radio = Snap.radioPx(info.tipo) / Vista.escala;
     const s = Snap.buscar(p.x, p.y, info.tipo);
-    if (s && s.tipo === 'sobre') {
+    if (s && s.tipo === 'sobre' && Config.get('imanCruces')) {
       // Una línea que cruza el canto: se para justo en el cruce
       const canto = { tipo: 'recta', o: { x1: k.a.x, y1: k.a.y, x2: k.b.x, y2: k.b.y } };
       let mejor = null;
@@ -2351,7 +2415,7 @@ const Instrumentos = {
     if (k.graduado && k.origen) {
       mm = (p.x - k.origen.x) * k.u.x + (p.y - k.origen.y) * k.u.y;
       const r = Math.round(mm);
-      if (!snap && Math.abs(mm - r) * Vista.escala <= (info.tipo === 'touch' ? 6 : 4) && r >= 0 && r <= k.def.max) {
+      if (!snap && Config.get('imanMarcas') && Math.abs(mm - r) * Vista.escala <= (info.tipo === 'touch' ? 6 : 4) && r >= 0 && r <= k.def.max) {
         p = { x: k.origen.x + k.u.x * r, y: k.origen.y + k.u.y * r };
         mm = r;
         snap = { tipo: 'marca', x: p.x, y: p.y };
@@ -2363,6 +2427,7 @@ const Instrumentos = {
 
   // Imán al mover: el 0 a un punto, o un canto que pase por un punto
   imanMover(inst, tipo) {
+    if (!Config.get('imanInstrumentos')) return null;
     const radio = Snap.radioPx(tipo) / Vista.escala;
     const objetivos = Escena.objetivos();
     if (inst.origenIman) {
@@ -2417,6 +2482,7 @@ const Instrumentos = {
 
   // Imán al girar: el canto que pasa por el pivote se alinea con otro punto
   imanGirar(inst, pivLocal, piv, tipo) {
+    if (!Config.get('imanInstrumentos')) return null;
     const radio = Snap.radioPx(tipo) / Vista.escala;
     let mejor = null;
     for (const k of inst.cantosMundo()) {
@@ -2496,6 +2562,7 @@ const Instrumentos = {
   },
   // Imán al deslizar: otro canto del instrumento pasa por un punto
   imanDeslizar(inst, c, tipo) {
+    if (!Config.get('imanInstrumentos')) return null;
     const radio = Snap.radioPx(tipo) / Vista.escala;
     let mejor = null;
     for (const k of inst.cantosMundo()) {
@@ -2658,7 +2725,7 @@ const Manip = {
       else if (sn) { obj = sn; halo = sn; }
     }
     let r = Geom.dist(obj.x, obj.y, c.x, c.y);
-    if (!halo) { const rr = Math.round(r); if (Math.abs(r - rr) * Vista.escala <= 3) r = rr; }
+    if (!halo && Config.get('imanMarcas')) { const rr = Math.round(r); if (Math.abs(r - rr) * Vista.escala <= 3) r = rr; }
     if (r < 1) return;
     inst.r = Math.min(r, inst.rMax);
     inst.rot = Math.atan2(obj.y - c.y, obj.x - c.x);
@@ -2751,7 +2818,7 @@ const Manip = {
         ctx.beginPath(); ctx.arc(inst.x, inst.y, inst.r, 0, Geom.DOS_PI); ctx.stroke();
         ctx.restore();
       }
-      ctx.strokeStyle = Paleta.grafito[Config.get('grafito')];
+      ctx.strokeStyle = Paleta.lapizActual();
       ctx.globalAlpha = 0.85;
       ctx.lineWidth = Dibujo.grosor();
       ctx.lineCap = 'round';
@@ -3070,7 +3137,7 @@ const Entrada = {
       return;
     }
     if (e.altKey) return;
-    if (k === 'Escape') { Acciones.cancelarActual(); return; }
+    if (k === 'Escape') { if (SelectorLapiz.abierto) { SelectorLapiz.cerrar(true); return; } Acciones.cancelarActual(); return; }
     if (k === '?' || k === 'F1') { UI.abrirPanel('ayuda'); e.preventDefault(); return; }
     if (k === 'l' || k === 'L') {
       const c = Instrumentos.porTipo.compas;
@@ -3181,8 +3248,45 @@ const UI = {
       o.addEventListener(t, e => e.stopPropagation(), { passive: true });
     Panel.actualizar();
   },
+  // Barra del portaminas: color y grosor actuales; cada uno abre su ventana flotante
+  construirOpcionesLapiz() {
+    const o = document.getElementById('opciones-lapiz');
+    const ico = document.createElement('span');
+    ico.className = 'og-ico';
+    ico.innerHTML = Iconos.lapiz;
+    const boton = (que, nombre) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ol-boton';
+      b.dataset.selector = que;
+      b.setAttribute('aria-haspopup', 'dialog');
+      b.setAttribute('aria-expanded', 'false');
+      b.title = nombre;
+      b.addEventListener('click', () => SelectorLapiz.alternar(que, b));
+      return b;
+    };
+    this.btnColorLapiz = boton('color', 'Elegir el color del portaminas');
+    this.btnGrosorLapiz = boton('grosor', 'Elegir el grosor de la mina');
+    o.append(ico, this.btnColorLapiz, this.btnGrosorLapiz);
+    for (const el of [o, document.getElementById('selector-lapiz')])
+      for (const t of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'dblclick'])
+        el.addEventListener(t, e => e.stopPropagation(), { passive: true });
+    this.actualizarOpcionesLapiz();
+  },
+  actualizarOpcionesLapiz() {
+    if (!this.btnColorLapiz) return;
+    const c = Config.get('colorLapiz'), g = Config.get('grosorLapiz');
+    const nombre = Paleta.lapiz[c][1];
+    this.btnColorLapiz.innerHTML = `<span class="pinta" style="background:${Paleta.colorLapiz(c)}"></span><span>${nombre}</span><span class="flecha"></span>`;
+    this.btnColorLapiz.setAttribute('aria-label', `Color del portaminas: ${nombre}. Pulsa para cambiarlo`);
+    this.btnGrosorLapiz.innerHTML = `<span style="color:${Paleta.colorLapiz(c)};display:contents">${SelectorLapiz.muestraGrosor(g)}</span><span>${SelectorLapiz.mm(g)}</span><span class="flecha"></span>`;
+    this.btnGrosorLapiz.setAttribute('aria-label', `Grosor de la mina: ${SelectorLapiz.mm(g)}. Pulsa para cambiarlo`);
+    SelectorLapiz.refrescar();
+  },
   marcarHerramienta(id) {
     document.getElementById('opciones-goma').hidden = id !== 'goma';
+    document.getElementById('opciones-lapiz').hidden = id !== 'lapiz';
+    if (id !== 'lapiz') SelectorLapiz.cerrar();
     document.querySelectorAll('#barra .btn[data-id]:not([data-instrumento])').forEach(b =>
       b.setAttribute('aria-pressed', String(b.dataset.id === id)));
   },
@@ -3248,6 +3352,7 @@ const UI = {
     Ayuda.construir();
     Catalogo.construir();
     this.construirOpcionesGoma();
+    this.construirOpcionesLapiz();
     // La tarjeta del ejercicio está sobre el lienzo: sus toques no deben dibujar ni mover la hoja
     const tarjeta = document.getElementById('tarjeta-ejercicio');
     for (const t of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'dblclick'])
@@ -3259,6 +3364,111 @@ const UI = {
     }
     document.getElementById('velo').addEventListener('click', () => this.cerrarPanel());
     document.getElementById('zoom').addEventListener('click', () => Vista.ajustar());
+  },
+};
+
+/* =====================================================================
+   Ventana flotante del portaminas: biblioteca de colores y grosores
+   ===================================================================== */
+const SelectorLapiz = {
+  abierto: null,     // 'color' | 'grosor' | null
+  boton: null,
+  grosores() {
+    const e = Config.esquema.grosorLapiz, l = [];
+    for (let g = e.min; g <= e.max + 1e-9; g += e.paso) l.push(Number(g.toFixed(1)));
+    return l;
+  },
+  mm(g) { return `${g.toFixed(1).replace('.', ',')} mm`; },
+  // Línea de muestra con un grosor proporcional al de la mina (0,5 mm → 2 px; 1,5 mm → 8 px)
+  muestraGrosor(g) { return `<span class="linea" style="height:${(2 + (g - 0.5) * 6).toFixed(1)}px"></span>`; },
+  alternar(que, boton) {
+    if (this.abierto === que) { this.cerrar(); return; }
+    this.abrir(que, boton);
+  },
+  abrir(que, boton) {
+    this.cerrar();
+    this.abierto = que;
+    this.boton = boton;
+    boton.setAttribute('aria-expanded', 'true');
+    const v = document.getElementById('selector-lapiz');
+    v.hidden = false;
+    v.setAttribute('aria-label', que === 'color' ? 'Color del portaminas' : 'Grosor de la mina');
+    this.pintar();
+    // Encima de la barra del portaminas
+    const barra = document.getElementById('opciones-lapiz');
+    v.style.bottom = (barra.offsetHeight + 18) + 'px';
+    const sel = v.querySelector('[aria-checked="true"]');
+    if (sel) sel.focus();
+    document.addEventListener('pointerdown', this.fuera, true);   // el pointerdown del clic que la abre ya pasó
+  },
+  cerrar(enfocar) {
+    if (!this.abierto) return;
+    document.getElementById('selector-lapiz').hidden = true;
+    document.removeEventListener('pointerdown', this.fuera, true);
+    if (this.boton) { this.boton.setAttribute('aria-expanded', 'false'); if (enfocar) this.boton.focus(); }
+    this.abierto = null;
+    this.boton = null;
+  },
+  // Pulsar fuera de la ventana (y de su botón) la cierra
+  fuera(e) {
+    const v = document.getElementById('selector-lapiz');
+    if (v.contains(e.target) || (SelectorLapiz.boton && SelectorLapiz.boton.contains(e.target))) return;
+    // Un toque en la hoja solo cierra la ventana: no marca un punto ni traza
+    if (Capas.contenedor.contains(e.target) && e.target.tagName === 'CANVAS') { e.stopPropagation(); e.preventDefault(); }
+    SelectorLapiz.cerrar();
+  },
+  pintar() {
+    const v = document.getElementById('selector-lapiz');
+    v.innerHTML = '';
+    const h = document.createElement('h4');
+    const g = document.createElement('div');
+    g.className = 'sl-rejilla';
+    g.setAttribute('role', 'radiogroup');
+    g.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.stopPropagation(); this.cerrar(true); return; }
+      const dir = { ArrowRight: 1, ArrowDown: 3, ArrowLeft: -1, ArrowUp: -3 }[e.key];
+      if (!dir) return;
+      e.preventDefault();
+      const bs = [...g.querySelectorAll('[role=radio]')];
+      const i = bs.indexOf(document.activeElement);
+      bs[Math.max(0, Math.min(bs.length - 1, i + dir))].focus();
+    });
+    const opcion = (clase, contenido, nombre, alElegir) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = clase;
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-label', nombre);
+      b.innerHTML = contenido;
+      b.addEventListener('click', () => { alElegir(); this.cerrar(true); });
+      g.appendChild(b);
+      return b;
+    };
+    if (this.abierto === 'color') {
+      h.textContent = 'Color';
+      g.setAttribute('aria-label', 'Color del portaminas');
+      for (const [k, [col, nombre]] of Object.entries(Paleta.lapiz))
+        opcion('sl-color', `<span class="pinta" style="background:${col}"></span><span>${nombre}</span>`, nombre,
+          () => Config.set('colorLapiz', k)).dataset.valor = k;
+    } else {
+      h.textContent = 'Grosor de la mina';
+      g.setAttribute('aria-label', 'Grosor de la mina');
+      const col = Paleta.lapizActual();
+      for (const gr of this.grosores())
+        opcion('sl-grosor', `<span style="color:${col};display:contents">${this.muestraGrosor(gr)}</span><span>${this.mm(gr)}</span>`, this.mm(gr),
+          () => Config.set('grosorLapiz', gr)).dataset.valor = gr;
+    }
+    v.append(h, g);
+    this.refrescar();
+  },
+  refrescar() {
+    if (!this.abierto) return;
+    const actual = this.abierto === 'color' ? Config.get('colorLapiz') : Config.get('grosorLapiz');
+    document.querySelectorAll('#selector-lapiz [role=radio]').forEach(b => {
+      const sel = this.abierto === 'color' ? b.dataset.valor === actual : Math.abs(Number(b.dataset.valor) - actual) < 1e-6;
+      b.setAttribute('aria-checked', String(sel));
+      b.tabIndex = sel ? 0 : -1;
+    });
   },
 };
 
@@ -3289,18 +3499,24 @@ const Panel = {
     this.fila(c, 'Hoja', this.segmentado('hoja', [['A4-h', 'A4 ▭'], ['A4-v', 'A4 ▯'], ['A3-h', 'A3 ▭'], ['A3-v', 'A3 ▯']],
       { 'A4-h': 'A4 horizontal', 'A4-v': 'A4 vertical', 'A3-h': 'A3 horizontal', 'A3-v': 'A3 vertical' }));
     this.interruptor(c, 'margen', 'Margen');
-    this.interruptor(c, 'imanCuadricula', 'Imán en la cuadrícula', 'Los cruces del papel atraen la punta del portaminas.', 'papel!=blanco');
 
     titulo('Dibujo');
-    this.fila(c, 'Grosor de la mina', this.segmentado('mina', [[0.3, '0,3 mm'], [0.5, '0,5 mm'], [0.7, '0,7 mm']]));
-    this.fila(c, 'Color del grafito', this.muestras('grafito', [
-      ['gris', Paleta.grafito.gris, 'Gris'],
-      ['negro', Paleta.grafito.negro, 'Negro'],
-      ['azul', Paleta.grafito.azul, 'Azul'],
-    ]));
     this.interruptor(c, 'etiquetas', 'Poner letras a los puntos (A, B, C…)');
-    this.fila(c, 'Goma', this.segmentado('modoGoma', [['trozos', 'Borra a trozos'], ['enteras', 'Líneas enteras']]));
-    this.fila(c, 'Tamaño de la goma (diámetro)', this.deslizador('tamGoma', 'Tamaño de la goma'));
+    const nd = document.createElement('div');
+    nd.className = 'nota';
+    nd.textContent = 'El color y el grosor del portaminas, y el modo y el tamaño de la goma, se eligen en la barrita que aparece abajo al seleccionarlos.';
+    c.lastChild.appendChild(nd);
+
+    titulo('Imán');
+    this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
+    this.interruptor(c, 'imanPuntos', 'Puntos marcados');
+    this.interruptor(c, 'imanExtremos', 'Extremos de las rectas y los arcos');
+    this.interruptor(c, 'imanCruces', 'Cruces entre líneas');
+    this.interruptor(c, 'imanCentros', 'Centros de las circunferencias y los arcos');
+    this.interruptor(c, 'imanLineas', 'Cualquier lugar de una línea', 'La punta se pega encima del trazo de rectas y arcos.');
+    this.interruptor(c, 'imanMarcas', 'Marcas de milímetro de la regla y la escuadra', 'También redondea la abertura del compás a milímetros enteros.');
+    this.interruptor(c, 'imanInstrumentos', 'Los instrumentos se pegan a los puntos', 'Al mover o girar la regla, la escuadra, el cartabón o el transportador, su cero o su canto busca los puntos cercanos.');
+    this.interruptor(c, 'imanCuadricula', 'Cruces de la cuadrícula', 'Los cruces del papel atraen la punta del portaminas.', 'papel!=blanco');
 
     titulo('Instrumentos');
     this.fila(c, 'Color del plástico', this.muestras('colorInstrumentos',
@@ -3316,7 +3532,6 @@ const Panel = {
     c.lastChild.appendChild(ni);
 
     titulo('Ayudas');
-    this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
     this.interruptor(c, 'sonidos', 'Sonidos');
     this.interruptor(c, 'ayuda', 'Mensajes de ayuda');
     this.interruptor(c, 'lupa', 'Lupa al dibujar con el dedo');
@@ -3444,7 +3659,7 @@ const Panel = {
   actualizar() {
     if (!this.cuerpo) return;
     const c = document;
-    c.querySelectorAll('[role=radiogroup]').forEach(g => {
+    c.querySelectorAll('[role=radiogroup][data-clave]').forEach(g => {
       const actual = JSON.stringify(Config.get(g.dataset.clave));
       g.querySelectorAll('[role=radio]').forEach(b => {
         const sel = b.dataset.valor === actual;
@@ -3666,7 +3881,7 @@ const Ayuda = {
   construir() {
     const b = (icono, titulo, texto) => `<div class="ayuda-bloque"><div class="ico">${Iconos[icono]}</div><div><h4>${titulo}</h4><p>${texto}</p></div></div>`;
     document.getElementById('ayuda-cuerpo').innerHTML = [
-      b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta.'),
+      b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta. En la barrita de abajo eliges el color y el grosor de la mina; el compás pinta con ellos. En Configuración › Imán decides qué atrae a la punta.'),
       b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos.'),
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
       b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
@@ -4338,6 +4553,10 @@ function aplicarConfig(clave) {
     Render.pedir('instrumentos');
   }
   if (todo || clave.startsWith('tam') && clave !== 'tamGoma') Instrumentos.medir();
+  if (todo || clave === 'colorLapiz' || clave === 'grosorLapiz') {
+    UI.actualizarOpcionesLapiz();
+    Render.pedir('instrumentos');   // punta del portaminas y mina del compás
+  }
   if (clave === 'colorInstrumentos') Render.pedir('instrumentos');
   if (clave === 'tamGoma') {
     UI.mensaje(`Tamaño de la goma: ${Config.get('tamGoma')} mm.`);
@@ -4408,7 +4627,7 @@ function iniciar() {
 }
 
 // Acceso para pruebas automáticas
-window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip, Guardado, Archivo, Lupa, Ejercicio, Catalogo, Goma };
+window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, SelectorLapiz, Instrumentos, Manip, Guardado, Archivo, Lupa, Ejercicio, Catalogo, Goma };
 
 iniciar();
 </script>

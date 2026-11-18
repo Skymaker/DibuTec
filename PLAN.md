@@ -18,6 +18,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 7 | Pulido: guardado, archivo, PNG, lupa, ayuda, deshacer instrumentos, imán en líneas y cruces | ✅ Hecha |
 | 8 | Ejercicios guiados en archivos JSON independientes | ✅ Hecha |
 | 9 | Instrumentos configurables: color del plástico y tamaño, con el nombre de la aplicación impreso | ✅ Hecha |
+| 10 | Barrita del portaminas (color y grosor por trazo) y opciones del imán en la configuración | ✅ Hecha |
 
 ---
 
@@ -43,9 +44,10 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 ## 2. Modelo de datos
 
 ```js
-punto:       { id, x, y, etiqueta }          // A, B, C… automáticas
-recta:       { id, p1:{x,y}, p2:{x,y} }
-arco:        { id, cx, cy, r, a0, a1 }       // circunferencia si |a1-a0| ≥ 2π
+punto:       { id, x, y, etiqueta, c, g }    // A, B, C… automáticas
+recta:       { id, x1, y1, x2, y2, c, g }
+arco:        { id, cx, cy, r, a0, a1, c, g } // circunferencia si |a1-a0| ≥ 2π
+// c = color del portaminas (biblioteca de 9), g = grosor de la mina en mm (0,5–1,5)
 instrumento: { tipo, x, y, rot, visible, bloqueado, ...propios }
 ```
 
@@ -56,7 +58,7 @@ historial de deshacer/rehacer por instantáneas.
 
 | Instrumento | Geometría | Interacción |
 |---|---|---|
-| **Portaminas 0,5 mm** | Cursor punta | Clic/toque → marca punto (cruz + etiqueta). Arrastrar junto al canto de regla/escuadra/cartabón → traza recta proyectada sobre el canto. Sin canto no traza. |
+| **Portaminas** (0,5–1,5 mm, 9 colores) | Cursor punta | Clic/toque → marca punto (cruz + etiqueta). Barrita con el color y el grosor actuales; cada uno abre una ventana flotante para elegirlo. Arrastrar junto al canto de regla/escuadra/cartabón → traza recta proyectada sobre el canto. Sin canto no traza. |
 | **Regla** | 300 × 30 mm, graduada en mm/cm | Arrastrar cuerpo = mover. Asa en extremo = girar (Shift: saltos de 15°). Dos cantos útiles. |
 | **Escuadra** | Triángulo 45°-45°-90°, cateto graduado | Igual que la regla; tres cantos útiles. |
 | **Cartabón** | Triángulo 30°-60°-90° | Igual. |
@@ -103,14 +105,20 @@ Panel lateral deslizante (pantalla completa en móviles/tablets pequeñas).
   tamaño de hoja (A4/A3, horizontal/vertical), margen sí/no.
 - **Imán a la cuadrícula** (desactivado por defecto); en isométrico, vértices de los triángulos.
 
-**Dibujo**: grosor de mina 0,3 / 0,5 / 0,7 mm, color del grafito, etiquetado automático.
+**Dibujo**: etiquetado automático. El color y el grosor del portaminas, y el modo y el
+tamaño de la goma, no están aquí: se eligen en la barrita de cada herramienta (abajo a la
+izquierda de la hoja).
+
+**Imán**: fuerza (débil/media/fuerte) e interruptores para cada objetivo: puntos, extremos,
+cruces, centros, cualquier lugar de una línea, marcas de milímetro de los instrumentos
+(y radio entero del compás), instrumentos que se pegan a los puntos y cruces de la cuadrícula.
 
 **Instrumentos**: color del plástico (verde por defecto, azul, rojo, naranja, morado,
 ahumado o transparente) y tamaño de la regla (20/30/40 cm), la escuadra (cateto 12/16/20 cm),
 el cartabón (cateto mayor 17/23/28 cm, a juego con la escuadra) y el transportador
 (diámetro 10/13/16 cm). Cada instrumento lleva impreso «DibuTec» y su tamaño.
 
-**Ayudas**: fuerza del imán, sonidos, mensajes de ayuda, tamaño de interfaz.
+**Ayudas**: sonidos, mensajes de ayuda, tamaño de interfaz.
 
 Se guarda y aplica al instante; botón «Restaurar valores por defecto».
 
