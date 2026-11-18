@@ -12,7 +12,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 1b | Papel configurable + panel de configuración | ✅ Hecha |
 | 2 | Portaminas, puntos magnéticos, goma y deshacer/rehacer | ✅ Hecha |
 | 3 | Regla | ✅ Hecha |
-| 4 | Escuadra, cartabón y deslizamiento | ⏳ Pendiente |
+| 4 | Escuadra, cartabón, deslizamiento y candado | ✅ Hecha |
 | 5 | Compás | ⏳ Pendiente |
 | 6 | Transportador | ⏳ Pendiente |
 | 7 | Pulido | ⏳ Pendiente |
