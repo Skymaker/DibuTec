@@ -202,7 +202,7 @@
     background: #fff; border: 1px solid var(--borde); border-radius: 14px;
     box-shadow: 0 8px 28px rgba(30, 32, 50, .22); font-size: 15px;
   }
-  #tarjeta-ejercicio[hidden] { display: none; }
+  #lienzo #tarjeta-ejercicio[hidden] { display: none; }
   #tarjeta-ejercicio.completado { border-color: #3bb273; box-shadow: 0 8px 28px rgba(59, 178, 115, .35); }
   #tarjeta-ejercicio.minimizado .te-cuerpo { display: none; }
   .te-cab { display: flex; align-items: center; gap: 8px; }
@@ -242,7 +242,7 @@
     box-shadow: 0 6px 20px rgba(30, 32, 50, .18); font-size: 14px;
   }
   @media (pointer: coarse) { #lienzo #opciones-goma { --ctl: 44px; } }
-  #opciones-goma[hidden] { display: none; }
+  #lienzo #opciones-goma[hidden] { display: none; }   /* tan específica como la regla que le da display: flex */
   #opciones-goma .og-ico svg { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   #opciones-goma .og-ico svg .a { fill: var(--acento); }
   #opciones-goma .segmentado button { font-size: 14px; padding: 0 12px; white-space: nowrap; }
