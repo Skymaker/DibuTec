@@ -1340,8 +1340,11 @@ class Instrumento {
   }
   dibujarAsas(ctx) {
     if (this.bloqueado) return;
+    for (const a of this.asas) this.dibujarAsa(ctx, a);
+  }
+  dibujarAsa(ctx, a) {
     const R = this.radioAsa(), px = 1 / Vista.escala;
-    for (const a of this.asas) {
+    {
       ctx.beginPath();
       ctx.arc(a.x, a.y, R, 0, Geom.DOS_PI);
       ctx.fillStyle = 'rgba(47, 111, 208, .14)';
@@ -1460,6 +1463,103 @@ class Cartabon extends Instrumento {
   }
 }
 
+// Compás: el origen local es la punta seca; la mina está en (r, 0); rot = dirección de la mina
+class Compas extends Instrumento {
+  constructor() {
+    super('compas', 'Compás', 'o');
+    this.r = 40;                 // radio en mm
+    this.pierna = 75;            // longitud aparente de las patas (vista desde arriba)
+    this.rMax = 2 * this.pierna * 0.98;
+    this.origenIman = [0, 0];    // la punta seca se pega a los puntos
+    this.ayuda = 'Compás: arrastra la punta seca hasta un punto, abre el compás moviendo la mina y gira el asa de arriba para trazar (con Alt gira sin pintar).';
+  }
+  altura() {
+    const m = this.r / 2;
+    return Math.sqrt(Math.max(this.pierna ** 2 - m * m, (this.pierna * 0.18) ** 2));
+  }
+  bisagra() { return [this.r / 2, -this.altura()]; }
+  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(12, 32 / Vista.escala)]; }
+  centroLocal() { return [this.r / 2, -this.altura() / 2]; }
+  cantosMundo() { return []; }
+  radioPunta() { return Math.max(3, 12 / Vista.escala); }
+  contiene(wx, wy) { return !!this.tocarPropio({ x: wx, y: wy }, 0); }
+  tocarPropio(info, extra) {
+    const p = this.aLocal(info.x, info.y), b = this.bisagra(), k = this.pomo();
+    const d = q => Math.hypot(p.x - q[0], p.y - q[1]);
+    if (d(k) <= this.radioAsa() + extra) return { inst: this, modo: 'trazar' };
+    if (d([this.r, 0]) <= this.radioPunta() + extra) return { inst: this, modo: 'abrir' };
+    if (d([0, 0]) <= this.radioPunta() + extra) return { inst: this, modo: 'mover' };
+    const ancho = Math.max(2.5, 9 / Vista.escala) + extra;
+    const seg = (q) => Geom.distSegmento(p.x, p.y, b[0], b[1], q[0], q[1]) <= ancho;
+    if (seg([0, 0]) || seg([this.r, 0]) || seg(k) || d(b) <= 5 + extra) return { inst: this, modo: 'mover' };
+    return null;
+  }
+  // Pata con forma de cuña desde la bisagra hasta la punta
+  pata(ctx, b, t, w0, w1, relleno, borde) {
+    const L = Math.hypot(t[0] - b[0], t[1] - b[1]) || 1;
+    const v = [(t[0] - b[0]) / L, (t[1] - b[1]) / L], n = [-v[1], v[0]];
+    const fin = [t[0] - v[0] * Math.min(6, L * 0.15), t[1] - v[1] * Math.min(6, L * 0.15)];
+    ctx.beginPath();
+    ctx.moveTo(b[0] + n[0] * w0 / 2, b[1] + n[1] * w0 / 2);
+    ctx.lineTo(fin[0] + n[0] * w1 / 2, fin[1] + n[1] * w1 / 2);
+    ctx.lineTo(t[0], t[1]);
+    ctx.lineTo(fin[0] - n[0] * w1 / 2, fin[1] - n[1] * w1 / 2);
+    ctx.lineTo(b[0] - n[0] * w0 / 2, b[1] - n[1] * w0 / 2);
+    ctx.closePath();
+    ctx.fillStyle = relleno;
+    ctx.fill();
+    ctx.strokeStyle = borde;
+    ctx.lineWidth = 1 / Vista.escala;
+    ctx.stroke();
+    return fin;
+  }
+  dibujar(ctx) {
+    const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    ctx.save();
+    ctx.shadowColor = 'rgba(30, 40, 60, .25)';
+    ctx.shadowBlur = 8 * Capas.dpr;
+    ctx.shadowOffsetY = 3 * Capas.dpr;
+    // Vástago hasta el asa
+    ctx.strokeStyle = '#6b7383';
+    ctx.lineWidth = Math.max(1.6, 4 * px);
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(k[0], k[1]); ctx.stroke();
+    // Patas: metálica (punta seca) y de color (mina)
+    this.pata(ctx, b, [0, 0], 5, 1.6, 'rgba(150, 160, 175, .92)', '#4b5363');
+    const finMina = this.pata(ctx, b, [this.r, 0], 5, 2.4, 'rgba(232, 93, 80, .92)', '#9c3a30');
+    ctx.restore();
+    // Mina de grafito
+    ctx.fillStyle = Paleta.grafito[Config.get('grafito')];
+    ctx.beginPath();
+    const v = [this.r - finMina[0], -finMina[1]], L = Math.hypot(v[0], v[1]) || 1, n = [-v[1] / L, v[0] / L];
+    ctx.moveTo(finMina[0] + n[0] * 0.9, finMina[1] + n[1] * 0.9);
+    ctx.lineTo(this.r, 0);
+    ctx.lineTo(finMina[0] - n[0] * 0.9, finMina[1] - n[1] * 0.9);
+    ctx.closePath();
+    ctx.fill();
+    // Punta seca
+    ctx.beginPath();
+    ctx.arc(0, 0, Math.max(0.5, 2 * px), 0, Geom.DOS_PI);
+    ctx.fillStyle = '#2b2f3a';
+    ctx.fill();
+    // Bisagra
+    ctx.beginPath();
+    ctx.arc(b[0], b[1], 4.5, 0, Geom.DOS_PI);
+    ctx.fillStyle = '#5b6270';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(b[0], b[1], 1.6, 0, Geom.DOS_PI);
+    ctx.fillStyle = '#c9ced8';
+    ctx.fill();
+    // Asa para girar y trazar
+    this.dibujarAsa(ctx, { x: k[0], y: k[1] });
+    ctx.restore();
+  }
+}
+
 const Instrumentos = {
   lista: [],          // de abajo arriba
   porTipo: {},
@@ -1479,9 +1579,9 @@ const Instrumentos = {
     if (inst.visible) {
       if (!inst.colocado) this.colocarEnVista(inst);
       this.alFrente(inst);
-      UI.mensaje(`${inst.nombre}: arrastra el cuerpo para mover${inst.g === 'a' ? 'la' : 'lo'}, usa las asas redondas para girar${inst.g === 'a' ? 'la' : 'lo'} y el candado para fijar${inst.g === 'a' ? 'la' : 'lo'}.`);
+      if (inst.ayuda) UI.mensaje(inst.ayuda); else UI.mensaje(`${inst.nombre}: arrastra el cuerpo para mover${inst.g === 'a' ? 'la' : 'lo'}, usa las asas redondas para girar${inst.g === 'a' ? 'la' : 'lo'} y el candado para fijar${inst.g === 'a' ? 'la' : 'lo'}.`);
     } else {
-      if (Manip.estado && Manip.estado.inst === inst) Manip.fin();
+      if (Manip.estado && Manip.estado.inst === inst) Manip.fin(false);
       UI.mensaje(`${inst.nombre} guardad${inst.g}.`);
     }
     UI.marcarInstrumentos();
@@ -1500,10 +1600,11 @@ const Instrumentos = {
   bandaPx(tipo) { return tipo === 'touch' ? 22 : 12; },
 
   // Canto más cercano al puntero (para trazar con el portaminas)
-  cantoCercano(info) {
+  cantoCercano(info, excluir) {
     const banda = this.bandaPx(info.tipo) / Vista.escala;
     let mejor = null;
     for (const inst of this.deArribaAbajo()) {
+      if (inst === excluir) continue;
       for (const k of inst.cantosMundo()) {
         const d = Geom.distSegmento(info.x, info.y, k.a.x, k.a.y, k.b.x, k.b.y);
         if (d <= banda && (!mejor || d < mejor.d)) mejor = Object.assign(k, { d });
@@ -1518,6 +1619,11 @@ const Instrumentos = {
   tocar(info, conCantos) {
     const extra = (info.tipo === 'touch' ? 8 : 2) / Vista.escala;
     for (const inst of this.deArribaAbajo()) {
+      if (inst.tocarPropio) {
+        const h = inst.tocarPropio(info, extra);
+        if (h) return h;
+        continue;
+      }
       if (inst.candado) {
         const w = inst.aMundo(...inst.candado);
         if (Geom.dist(info.x, info.y, w.x, w.y) <= inst.radioCandado() + extra) return { inst, modo: 'candado' };
@@ -1718,6 +1824,11 @@ const Manip = {
       const pv = hit.asa.pivote, piv = inst.aMundo(pv[0], pv[1]);
       this.estado = { inst, modo: 'girar', id: info.id, tipo: info.tipo, pivLocal: pv, piv,
                       ang0: Math.atan2(info.y - piv.y, info.x - piv.x), rot0: inst.rot };
+    } else if (hit.modo === 'abrir') {
+      this.estado = { inst, modo: 'abrir', id: info.id, tipo: info.tipo };
+    } else if (hit.modo === 'trazar') {
+      this.estado = { inst, modo: 'trazar', id: info.id, tipo: info.tipo, a0: inst.rot, barrido: 0,
+                      angPrev: Math.atan2(info.y - inst.y, info.x - inst.x), sinTrazo: false };
     } else {
       this.estado = { inst, modo: 'mover', id: info.id, tipo: info.tipo, dx: inst.x - info.x, dy: inst.y - info.y, guia: null };
     }
@@ -1738,6 +1849,8 @@ const Manip = {
     const inst = s.inst;
     this.halo = null;
     if (s.modo === 'mover') this.moverCuerpo(s, info, e);
+    else if (s.modo === 'abrir') this.abrirCompas(s, info);
+    else if (s.modo === 'trazar') this.girarCompas(s, info, e);
     else if (s.modo === 'girar') {
       const ang = Math.atan2(info.y - s.piv.y, info.x - s.piv.x);
       inst.rot = s.rot0 + ang - s.ang0;
@@ -1801,6 +1914,14 @@ const Manip = {
       }
     }
     this.halo = Instrumentos.imanMover(inst, s.tipo);
+    // La punta seca del compás también se pega a las marcas de una regla o escuadra
+    if (!this.halo && inst.tocarPropio) {
+      const k = Instrumentos.cantoCercano({ x: inst.x, y: inst.y, tipo: s.tipo }, inst);
+      if (k) {
+        const q = Instrumentos.puntoEnCanto(k, { x: inst.x, y: inst.y, tipo: s.tipo });
+        if (q.snap) { inst.x = q.x; inst.y = q.y; this.halo = { x: q.x, y: q.y }; }
+      }
+    }
   },
   // Ángulo del canto principal respecto a la horizontal (sentido antihorario)
   anguloTexto(inst) {
@@ -1809,7 +1930,66 @@ const Manip = {
     const r = Math.round(g * 10) / 10;
     return (Number.isInteger(r) ? String(r) : r.toFixed(1).replace('.', ',')) + '°';
   },
-  fin() {
+  // Compás: la mina sigue al puntero (la punta seca no se mueve)
+  abrirCompas(s, info) {
+    const inst = s.inst, c = { x: inst.x, y: inst.y };
+    let obj = { x: info.x, y: info.y }, halo = null;
+    const sn = Snap.buscar(info.x, info.y, s.tipo);
+    if (sn && Geom.dist(sn.x, sn.y, c.x, c.y) > 0.5) { obj = sn; halo = sn; }
+    else {
+      // Tomar la medida en una regla, escuadra o cartabón
+      const k = Instrumentos.cantoCercano(info, inst);
+      if (k) { const q = Instrumentos.puntoEnCanto(k, info); if (q.snap) { obj = q; halo = q; } }
+    }
+    let r = Geom.dist(obj.x, obj.y, c.x, c.y);
+    if (!halo) { const rr = Math.round(r); if (Math.abs(r - rr) * Vista.escala <= 3) r = rr; }
+    if (r < 1) return;
+    inst.r = Math.min(r, inst.rMax);
+    inst.rot = Math.atan2(obj.y - c.y, obj.x - c.x);
+    this.halo = halo && inst.r === r ? { x: halo.x, y: halo.y } : null;
+    UI.mensaje(`Radio: ${Lapiz.mmTexto(inst.r)}${inst.r < r ? ' (el compás no se abre más)' : ''}`);
+  },
+  // Compás: gira alrededor de la punta seca; la mina va dejando el arco
+  girarCompas(s, info, e) {
+    const inst = s.inst, c = { x: inst.x, y: inst.y };
+    if (e && e.altKey && Math.abs(s.barrido) < 1e-9) s.sinTrazo = true;
+    const ang = Math.atan2(info.y - c.y, info.x - c.x);
+    let d = ang - s.angPrev;
+    if (d > Math.PI) d -= Geom.DOS_PI; else if (d < -Math.PI) d += Geom.DOS_PI;
+    s.angPrev = ang;
+    s.barridoLibre = (s.barridoLibre || 0) + d;
+    let b = Geom.clamp(s.barridoLibre, -Geom.DOS_PI, Geom.DOS_PI);
+    this.halo = null;
+    if (Math.abs(b) >= Geom.DOS_PI - 4 * Math.PI / 180) b = Math.sign(b) * Geom.DOS_PI;
+    else if (!s.sinTrazo) {
+      // Imán: terminar el arco justo en un punto de la circunferencia
+      const radio = Snap.radioPx(s.tipo) / Vista.escala, fin = s.a0 + b;
+      let mejor = null;
+      for (const p of Escena.puntos) {
+        if (Math.abs(Geom.dist(p.x, p.y, c.x, c.y) - inst.r) > radio) continue;
+        let df = Math.atan2(p.y - c.y, p.x - c.x) - fin;
+        df = Math.atan2(Math.sin(df), Math.cos(df));
+        if (Math.abs(df) * inst.r <= radio && (!mejor || Math.abs(df) < Math.abs(mejor.df))) mejor = { p, df };
+      }
+      if (mejor && Math.abs(b + mejor.df) < Geom.DOS_PI) { b += mejor.df; this.halo = { x: mejor.p.x, y: mejor.p.y }; }
+    }
+    s.barrido = b;
+    inst.rot = s.a0 + b;
+    const grados = Math.round(Math.abs(b) * 180 / Math.PI);
+    if (s.sinTrazo) UI.mensaje('Girando el compás sin trazar.');
+    else UI.mensaje(Math.abs(b) >= Geom.DOS_PI ? 'Circunferencia completa.' : `Arco: ${grados}°`);
+  },
+  fin(confirmar = true) {
+    const s = this.estado;
+    if (s && s.modo === 'trazar' && confirmar && !s.sinTrazo && Math.abs(s.barrido) > Math.PI / 180) {
+      const inst = s.inst;
+      Historial.registrar();
+      const a = Escena.agregarArco(inst.x, inst.y, inst.r, s.a0, s.a0 + s.barrido);
+      Sonido.tocar('punto');
+      UI.mensaje(Geom.esCircunferencia(a)
+        ? `Circunferencia trazada (radio ${Lapiz.mmTexto(a.r)}).`
+        : `Arco trazado: ${Math.round(Math.abs(s.barrido) * 180 / Math.PI)}°, radio ${Lapiz.mmTexto(a.r)}.`);
+    }
     this.estado = null;
     this.halo = null;
     Capas.contenedor.classList.remove('arrastrando');
@@ -1817,6 +1997,26 @@ const Manip = {
   },
   overlay(ctx) {
     const s = this.estado;
+    const px = 1 / Vista.escala;
+    if (s && s.modo === 'abrir') {
+      // Circunferencia que se trazaría
+      const inst = s.inst;
+      ctx.save();
+      ctx.setLineDash([6 * px, 5 * px]);
+      ctx.strokeStyle = 'rgba(47, 111, 208, .55)';
+      ctx.lineWidth = 1.2 * px;
+      ctx.beginPath(); ctx.arc(inst.x, inst.y, inst.r, 0, Geom.DOS_PI); ctx.stroke();
+      ctx.restore();
+    }
+    if (s && s.modo === 'trazar' && !s.sinTrazo && s.barrido) {
+      const inst = s.inst;
+      ctx.strokeStyle = Paleta.grafito[Config.get('grafito')];
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = Dibujo.grosor();
+      ctx.lineCap = 'round';
+      Dibujo.trazo(ctx, 'arco', { cx: inst.x, cy: inst.y, r: inst.r, a0: s.a0, a1: s.a0 + s.barrido });
+      ctx.globalAlpha = 1;
+    }
     if (s && s.guia) {
       // Canto de apoyo en verde
       const c = s.guia, px = 1 / Vista.escala;
@@ -1834,6 +2034,7 @@ const Manip = {
 Instrumentos.registrar(new Regla());
 Instrumentos.registrar(new Escuadra());
 Instrumentos.registrar(new Cartabon());
+Instrumentos.registrar(new Compas());
 
 /* =====================================================================
    Herramientas
@@ -1929,7 +2130,7 @@ const Entrada = {
       // Segundo dedo mientras se arrastra un instrumento: mover y girar con dos dedos
       if (this.accion && this.accion.manip && Manip.dosDedos(toques)) return;
       // Empieza pellizco: cancela cualquier arrastre o acción de un dedo
-      if (this.accion && this.accion.manip) { Manip.fin(); this.accion = null; }
+      if (this.accion && this.accion.manip) { Manip.fin(false); this.accion = null; }
       this.arrastre = null;
       if (this.accion) Acciones.cancelarActual();
       this.gesto = this.medirGesto(toques);

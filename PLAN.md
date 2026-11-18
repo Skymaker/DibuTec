@@ -13,7 +13,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 2 | Portaminas, puntos magnéticos, goma y deshacer/rehacer | ✅ Hecha |
 | 3 | Regla | ✅ Hecha |
 | 4 | Escuadra, cartabón, deslizamiento y candado | ✅ Hecha |
-| 5 | Compás | ⏳ Pendiente |
+| 5 | Compás | ✅ Hecha |
 | 6 | Transportador | ⏳ Pendiente |
 | 7 | Pulido | ⏳ Pendiente |
 | 8 | Ejercicios guiados (opcional) | ⏳ Pendiente |
