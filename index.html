@@ -133,6 +133,11 @@
   @media (orientation: portrait) and (pointer: coarse) {
     :root { --btn: 50px; --gap: 4px; }
   }
+  /* Interfaz grande (configuración) */
+  :root[data-interfaz="grande"] { --btn: 56px; }
+  @media (pointer: coarse) { :root[data-interfaz="grande"] { --btn: 62px; } }
+  :root[data-interfaz="grande"] #estado { font-size: 16px; }
+  :root[data-ayuda="no"] #mensaje { visibility: hidden; }
 
   /* ---------- Panel de configuración ---------- */
   #velo {
@@ -158,7 +163,64 @@
   .panel-cab h2 { margin: 0; font-size: 20px; }
   .panel-cuerpo { padding: 8px 18px 24px; overflow-y: auto; }
   .panel-cuerpo h3 { font-size: 15px; margin: 18px 0 6px; color: var(--activo); text-transform: uppercase; letter-spacing: .04em; }
-  .panel-cuerpo p { margin: 0; color: var(--texto-suave); font-size: 15px; line-height: 1.45; }
+  .panel-cuerpo h3:first-child { margin-top: 10px; }
+  .fila { margin: 14px 0; }
+  .fila[hidden] { display: none; }
+  .etq { display: block; font-size: 14px; color: var(--texto-suave); margin-bottom: 6px; }
+  .nota { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
+  .panel-cuerpo { --ctl: 40px; }
+  @media (pointer: coarse) { .panel-cuerpo { --ctl: 48px; } }
+
+  .opciones-papel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .tarjeta {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 8px; border: 2px solid var(--borde); border-radius: 12px;
+    background: #fff; color: var(--texto); font: inherit; font-size: 14px;
+    cursor: pointer; touch-action: manipulation;
+  }
+  .tarjeta svg { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: 0 0 0 1px var(--borde); }
+  .tarjeta[aria-checked="true"] { border-color: var(--activo); background: var(--activo-fondo); color: var(--activo); font-weight: 600; }
+
+  .segmentado { display: flex; gap: 4px; padding: 4px; background: #efebe3; border-radius: 12px; }
+  .segmentado button {
+    flex: 1; min-height: var(--ctl); border: none; border-radius: 9px;
+    background: transparent; color: var(--texto); font: inherit; font-size: 15px;
+    cursor: pointer; touch-action: manipulation; padding: 0 6px;
+  }
+  .segmentado button[aria-checked="true"] { background: #fff; color: var(--activo); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+
+  .muestras { display: flex; gap: 12px; flex-wrap: wrap; }
+  .muestra {
+    width: var(--ctl); height: var(--ctl); border-radius: 50%;
+    border: 3px solid #fff; box-shadow: 0 0 0 1px var(--borde);
+    cursor: pointer; touch-action: manipulation; padding: 0;
+  }
+  .muestra[aria-checked="true"] { box-shadow: 0 0 0 3px var(--activo); }
+
+  .fila-interruptor { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--ctl); }
+  .fila-interruptor .etq { margin: 0; font-size: 15px; color: var(--texto); }
+  .interruptor {
+    position: relative; flex: none; width: 52px; height: 30px; border-radius: 15px;
+    border: none; background: #cfc9be; cursor: pointer; touch-action: manipulation;
+    transition: background-color .15s;
+  }
+  .interruptor::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+    border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    transition: transform .15s;
+  }
+  .interruptor[aria-checked="true"] { background: var(--activo); }
+  .interruptor[aria-checked="true"]::after { transform: translateX(22px); }
+
+  .panel-cuerpo button:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+  .btn-texto {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; min-height: var(--ctl); margin-top: 26px;
+    border: 1px solid var(--borde); border-radius: 12px; background: #fff;
+    color: var(--texto); font: inherit; font-size: 15px; cursor: pointer; touch-action: manipulation;
+  }
+  .btn-texto svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .btn-texto svg .a { fill: var(--acento); }
 
   /* Aviso emergente */
   #aviso {
@@ -192,14 +254,7 @@
     <h2 id="titulo-config">Configuración</h2>
     <button class="btn" id="cerrar-config" type="button" aria-label="Cerrar" title="Cerrar (Esc)"></button>
   </div>
-  <div class="panel-cuerpo">
-    <h3>Papel</h3>
-    <p>Papel en blanco, cuadriculado, milimetrado o isométrico. Disponible en la fase 1b.</p>
-    <h3>Dibujo</h3>
-    <p>Grosor de mina, color del grafito y etiquetas automáticas. Próximamente.</p>
-    <h3>Ayudas</h3>
-    <p>Fuerza del imán, sonidos, mensajes de ayuda y tamaño de la interfaz. Próximamente.</p>
-  </div>
+  <div class="panel-cuerpo" id="config-cuerpo"></div>
 </aside>
 <div id="aviso" role="status"></div>
 
@@ -264,24 +319,60 @@ const Iconos = (() => {
    Configuración persistente
    ===================================================================== */
 const Config = {
-  defecto: {
-    papel: 'blanco',       // blanco | cuadriculado | milimetrado | isometrico  (fase 1b)
-    hoja: 'A4-h',          // A4-h | A4-v | A3-h | A3-v
-    margen: true,
-    colorPapel: '#ffffff',
+  // Cada opción: valor por defecto y valores permitidos
+  esquema: {
+    papel:          { def: 'blanco', ops: ['blanco', 'cuadriculado', 'milimetrado', 'isometrico'] },
+    cuadro:         { def: 5,        ops: [4, 5, 10] },          // mm (cuadriculado)
+    triangulo:      { def: 5,        ops: [5, 10] },             // mm (isométrico)
+    colorLineas:    { def: 'azul',   ops: ['azul', 'gris', 'verde'] },
+    colorPapel:     { def: 'blanco', ops: ['blanco', 'crema'] },
+    hoja:           { def: 'A4-h',   ops: ['A4-h', 'A4-v', 'A3-h', 'A3-v'] },
+    margen:         { def: true,     ops: [true, false] },
+    imanCuadricula: { def: false,    ops: [true, false] },
+    mina:           { def: 0.5,      ops: [0.3, 0.5, 0.7] },     // mm
+    grafito:        { def: 'gris',   ops: ['gris', 'negro', 'azul'] },
+    etiquetas:      { def: true,     ops: [true, false] },
+    iman:           { def: 'medio',  ops: ['debil', 'medio', 'fuerte'] },
+    sonidos:        { def: true,     ops: [true, false] },
+    ayuda:          { def: true,     ops: [true, false] },
+    interfaz:       { def: 'normal', ops: ['normal', 'grande'] },
   },
   valores: {},
+  oyentes: [],
   clave: 'dibutec.config',
   cargar() {
     let guardado = {};
     try { guardado = JSON.parse(localStorage.getItem(this.clave)) || {}; } catch (e) { guardado = {}; }
-    this.valores = Object.assign({}, this.defecto, guardado);
+    this.valores = {};
+    for (const k in this.esquema) {
+      const e = this.esquema[k];
+      this.valores[k] = e.ops.includes(guardado[k]) ? guardado[k] : e.def;
+    }
   },
   guardar() {
     try { localStorage.setItem(this.clave, JSON.stringify(this.valores)); } catch (e) { /* sin almacenamiento */ }
   },
   get(k) { return this.valores[k]; },
-  set(k, v) { this.valores[k] = v; this.guardar(); },
+  set(k, v) {
+    const e = this.esquema[k];
+    if (!e || !e.ops.includes(v) || this.valores[k] === v) return;
+    this.valores[k] = v;
+    this.guardar();
+    this.oyentes.forEach(f => f(k, v));
+  },
+  restaurar() {
+    for (const k in this.esquema) this.valores[k] = this.esquema[k].def;
+    this.guardar();
+    this.oyentes.forEach(f => f('*'));
+  },
+  alCambiar(f) { this.oyentes.push(f); },
+};
+
+const Paleta = {
+  papel:   { blanco: '#ffffff', crema: '#fbf5e3' },
+  lineas:  { azul: '70, 125, 200', gris: '110, 112, 122', verde: '45, 145, 95' }, // rgb
+  grafito: { gris: '#3b3b40', negro: '#141416', azul: '#2a4d8f' },
+  lineasRGBA(a) { return `rgba(${this.lineas[Config.get('colorLineas')]}, ${a})`; },
 };
 
 /* =====================================================================
@@ -303,6 +394,155 @@ const Hoja = {
     const [l, c] = this.tamanos[fmt] || this.tamanos.A4;
     this.ancho = ori === 'v' ? c : l;
     this.alto  = ori === 'v' ? l : c;
+  },
+};
+
+/* =====================================================================
+   Fondo del papel: cuadriculado, milimetrado, isométrico
+   ===================================================================== */
+const Papel = {
+  RAIZ3: Math.sqrt(3),
+
+  // Zona con cuadrícula: dentro del margen si está activo; si no, la hoja entera
+  area() {
+    const m = Config.get('margen') ? Hoja.margen : 0;
+    return { x0: m, y0: m, x1: Hoja.ancho - m, y1: Hoja.alto - m };
+  },
+
+  // Opacidad según la separación en pantalla (oculta líneas demasiado juntas)
+  visibilidad(sepMm) {
+    const px = sepMm * Vista.escala;
+    return Geom.clamp((px - 3) / 5, 0, 1); // 0 por debajo de 3 px, 1 por encima de 8 px
+  },
+
+  // ctx en mm; vis = rectángulo visible en mm
+  dibujar(ctx, vis) {
+    const tipo = Config.get('papel');
+    if (tipo === 'blanco') return;
+    const a = this.area();
+    const r = {
+      x0: Math.max(a.x0, vis.x0), y0: Math.max(a.y0, vis.y0),
+      x1: Math.min(a.x1, vis.x1), y1: Math.min(a.y1, vis.y1),
+    };
+    if (r.x1 <= r.x0 || r.y1 <= r.y0) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(a.x0, a.y0, a.x1 - a.x0, a.y1 - a.y0);
+    ctx.clip();
+    ctx.lineCap = 'butt';
+    if (tipo === 'cuadriculado') {
+      this.rejilla(ctx, a, r, Config.get('cuadro'), 0.55, 0.8);
+    } else if (tipo === 'milimetrado') {
+      this.rejilla(ctx, a, r, 1, 0.28, 0.5, 5);
+      this.rejilla(ctx, a, r, 5, 0.5, 0.8, 10);
+      this.rejilla(ctx, a, r, 10, 0.75, 1.2);
+    } else if (tipo === 'isometrico') {
+      this.isometrica(ctx, a, r, Config.get('triangulo'));
+    }
+    ctx.restore();
+  },
+
+  // Líneas horizontales y verticales cada «sep» mm; «saltar» omite múltiplos de una rejilla mayor
+  rejilla(ctx, a, r, sep, alfa, anchoPx, saltar) {
+    const v = this.visibilidad(sep);
+    if (v <= 0) return;
+    ctx.strokeStyle = Paleta.lineasRGBA(alfa * v);
+    ctx.lineWidth = anchoPx / Vista.escala;
+    ctx.beginPath();
+    const omitir = i => saltar && (Math.round(i * sep) % saltar === 0);
+    for (let i = Math.ceil((r.x0 - a.x0) / sep); a.x0 + i * sep <= r.x1 + 1e-6; i++) {
+      if (omitir(i)) continue;
+      const x = a.x0 + i * sep;
+      ctx.moveTo(x, r.y0); ctx.lineTo(x, r.y1);
+    }
+    for (let j = Math.ceil((r.y0 - a.y0) / sep); a.y0 + j * sep <= r.y1 + 1e-6; j++) {
+      if (omitir(j)) continue;
+      const y = a.y0 + j * sep;
+      ctx.moveTo(r.x0, y); ctx.lineTo(r.x1, y);
+    }
+    ctx.stroke();
+  },
+
+  // Triángulos equiláteros de lado s: verticales y líneas a 30° y 150°
+  isometrica(ctx, a, r, s) {
+    const v = this.visibilidad(s * 0.5);
+    if (v <= 0) return;
+    const h = s * this.RAIZ3 / 2;     // separación entre verticales
+    const m = 1 / this.RAIZ3;          // pendiente tan 30°
+    ctx.strokeStyle = Paleta.lineasRGBA(0.55 * v);
+    ctx.lineWidth = 0.8 / Vista.escala;
+    ctx.beginPath();
+    for (let i = Math.ceil((r.x0 - a.x0) / h); a.x0 + i * h <= r.x1 + 1e-6; i++) {
+      const x = a.x0 + i * h;
+      ctx.moveTo(x, r.y0); ctx.lineTo(x, r.y1);
+    }
+    // y = a.y0 + k·s + m·(x − a.x0)   (sube hacia la derecha en pantalla: 150° visual)
+    const dx0 = r.x0 - a.x0, dx1 = r.x1 - a.x0;
+    let kMin = Math.ceil((r.y0 - m * dx1 - a.y0) / s), kMax = Math.floor((r.y1 - m * dx0 - a.y0) / s);
+    for (let k = kMin; k <= kMax; k++) {
+      const c = a.y0 + k * s;
+      ctx.moveTo(r.x0, c + m * dx0); ctx.lineTo(r.x1, c + m * dx1);
+    }
+    // y = a.y0 + k·s − m·(x − a.x0)
+    kMin = Math.ceil((r.y0 + m * dx0 - a.y0) / s); kMax = Math.floor((r.y1 + m * dx1 - a.y0) / s);
+    for (let k = kMin; k <= kMax; k++) {
+      const c = a.y0 + k * s;
+      ctx.moveTo(r.x0, c - m * dx0); ctx.lineTo(r.x1, c - m * dx1);
+    }
+    ctx.stroke();
+  },
+
+  // Nodo de la cuadrícula más cercano (para el imán, fase 2). null si no hay cuadrícula.
+  nodoCercano(x, y) {
+    const tipo = Config.get('papel');
+    if (tipo === 'blanco') return null;
+    const a = this.area();
+    let mejor = null;
+    const probar = (nx, ny) => {
+      if (nx < a.x0 - 1e-6 || nx > a.x1 + 1e-6 || ny < a.y0 - 1e-6 || ny > a.y1 + 1e-6) return;
+      const d = Geom.dist(x, y, nx, ny);
+      if (!mejor || d < mejor.d) mejor = { x: nx, y: ny, d };
+    };
+    if (tipo === 'isometrico') {
+      const s = Config.get('triangulo'), h = s * this.RAIZ3 / 2;
+      const i0 = Math.round((x - a.x0) / h);
+      for (let i = i0 - 1; i <= i0 + 1; i++) {
+        const desfase = (((i % 2) + 2) % 2) * s / 2;
+        const j = Math.round((y - a.y0 - desfase) / s);
+        for (let jj = j - 1; jj <= j + 1; jj++) probar(a.x0 + i * h, a.y0 + desfase + jj * s);
+      }
+    } else {
+      const sep = tipo === 'cuadriculado' ? Config.get('cuadro') : 1;
+      probar(a.x0 + Math.round((x - a.x0) / sep) * sep, a.y0 + Math.round((y - a.y0) / sep) * sep);
+    }
+    return mejor && { x: mejor.x, y: mejor.y };
+  },
+
+  // Miniatura SVG para el panel de configuración
+  miniatura(tipo) {
+    const W = 80, H = 56;
+    const col = `rgb(${Paleta.lineas[Config.get('colorLineas')]})`;
+    let lineas = '';
+    const linea = (d, op, w) => { lineas += `<path d="${d}" stroke="${col}" stroke-opacity="${op}" stroke-width="${w}" fill="none"/>`; };
+    const rejilla = (sep, op, w) => {
+      let d = '';
+      for (let x = sep; x < W; x += sep) d += `M${x} 0V${H}`;
+      for (let y = sep; y < H; y += sep) d += `M0 ${y}H${W}`;
+      linea(d, op, w);
+    };
+    if (tipo === 'cuadriculado') rejilla(8, 0.6, 0.6);
+    else if (tipo === 'milimetrado') { rejilla(2, 0.3, 0.25); rejilla(10, 0.8, 0.6); }
+    else if (tipo === 'isometrico') {
+      const s = 10, h = s * this.RAIZ3 / 2, m = 1 / this.RAIZ3;
+      let d = '';
+      for (let x = 0; x <= W; x += h) d += `M${x.toFixed(2)} 0V${H}`;
+      for (let c = -60; c <= H + 60; c += s) {
+        d += `M0 ${c}L${W} ${(c + m * W).toFixed(2)}`;
+        d += `M0 ${c}L${W} ${(c - m * W).toFixed(2)}`;
+      }
+      linea(d, 0.6, 0.6);
+    }
+    return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><rect width="${W}" height="${H}" fill="${Paleta.papel[Config.get('colorPapel')]}"/>${lineas}</svg>`;
   },
 };
 
@@ -430,19 +670,19 @@ const Render = {
     ctx.save();
     ctx.shadowColor = 'rgba(60, 40, 10, .35)';
     ctx.shadowBlur = 18; ctx.shadowOffsetY = 4;
-    ctx.fillStyle = Config.get('colorPapel');
+    ctx.fillStyle = Paleta.papel[Config.get('colorPapel')];
     ctx.fillRect(a.x, a.y, w, h);
     ctx.restore();
 
     // Contenido en milímetros
     const m = Capas.ctxMundo(c);
-    const px = 1 / Vista.escala; // 1 píxel CSS en mm
-    // Fondo del papel (fase 1b: cuadriculado, milimetrado, isométrico)
+    const v0 = Vista.aMundo(0, 0), v1 = Vista.aMundo(Capas.w, Capas.h);
+    Papel.dibujar(m, { x0: v0.x, y0: v0.y, x1: v1.x, y1: v1.y });
     // Margen
     if (Config.get('margen')) {
       const mg = Hoja.margen;
-      m.strokeStyle = 'rgba(70, 90, 140, .45)';
-      m.lineWidth = Math.max(0.25, px);
+      m.strokeStyle = Config.get('papel') === 'blanco' ? 'rgba(70, 90, 140, .45)' : Paleta.lineasRGBA(0.85);
+      m.lineWidth = 1.2 / Vista.escala;
       m.strokeRect(mg, mg, Hoja.ancho - 2 * mg, Hoja.alto - 2 * mg);
     }
   },
@@ -721,6 +961,7 @@ const UI = {
     const p = document.getElementById('panel-config');
     p.classList.add('abierto');
     p.setAttribute('aria-hidden', 'false');
+    p.inert = false;
     document.getElementById('velo').classList.add('visible');
     document.getElementById('cerrar-config').focus();
   },
@@ -729,11 +970,14 @@ const UI = {
     const p = document.getElementById('panel-config');
     p.classList.remove('abierto');
     p.setAttribute('aria-hidden', 'true');
+    p.inert = true;
     document.getElementById('velo').classList.remove('visible');
   },
 
   iniciar() {
     this.construirBarra();
+    Panel.construir();
+    document.getElementById('panel-config').inert = true;
     const cerrar = document.getElementById('cerrar-config');
     cerrar.innerHTML = Iconos.cerrar;
     cerrar.addEventListener('click', () => this.cerrarPanel());
@@ -741,6 +985,189 @@ const UI = {
     document.getElementById('zoom').addEventListener('click', () => Vista.ajustar());
   },
 };
+
+/* =====================================================================
+   Panel de configuración
+   ===================================================================== */
+const Panel = {
+  cuerpo: null,
+
+  construir() {
+    const c = this.cuerpo = document.getElementById('config-cuerpo');
+    c.innerHTML = '';
+    const titulo = t => { const h = document.createElement('h3'); h.textContent = t; c.appendChild(h); };
+
+    titulo('Papel');
+    this.fila(c, 'Tipo de papel', this.tarjetasPapel());
+    this.fila(c, 'Tamaño del cuadro', this.segmentado('cuadro', [[4, '4 mm'], [5, '5 mm'], [10, '10 mm']]), 'papel=cuadriculado');
+    this.fila(c, 'Tamaño del triángulo', this.segmentado('triangulo', [[5, '5 mm'], [10, '10 mm']]), 'papel=isometrico');
+    this.fila(c, 'Color de las líneas', this.muestras('colorLineas', [
+      ['azul', `rgb(${Paleta.lineas.azul})`, 'Azul'],
+      ['gris', `rgb(${Paleta.lineas.gris})`, 'Gris'],
+      ['verde', `rgb(${Paleta.lineas.verde})`, 'Verde'],
+    ]), 'papel!=blanco');
+    this.fila(c, 'Color del papel', this.muestras('colorPapel', [
+      ['blanco', Paleta.papel.blanco, 'Blanco'],
+      ['crema', Paleta.papel.crema, 'Crema'],
+    ]));
+    this.fila(c, 'Hoja', this.segmentado('hoja', [['A4-h', 'A4 ▭'], ['A4-v', 'A4 ▯'], ['A3-h', 'A3 ▭'], ['A3-v', 'A3 ▯']],
+      { 'A4-h': 'A4 horizontal', 'A4-v': 'A4 vertical', 'A3-h': 'A3 horizontal', 'A3-v': 'A3 vertical' }));
+    this.interruptor(c, 'margen', 'Margen');
+    this.interruptor(c, 'imanCuadricula', 'Imán en la cuadrícula', 'Los cruces del papel atraen la punta (desde la fase 2).', 'papel!=blanco');
+
+    titulo('Dibujo');
+    this.fila(c, 'Grosor de la mina', this.segmentado('mina', [[0.3, '0,3 mm'], [0.5, '0,5 mm'], [0.7, '0,7 mm']]));
+    this.fila(c, 'Color del grafito', this.muestras('grafito', [
+      ['gris', Paleta.grafito.gris, 'Gris'],
+      ['negro', Paleta.grafito.negro, 'Negro'],
+      ['azul', Paleta.grafito.azul, 'Azul'],
+    ]));
+    this.interruptor(c, 'etiquetas', 'Poner letras a los puntos (A, B, C…)');
+
+    titulo('Ayudas');
+    this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
+    this.interruptor(c, 'sonidos', 'Sonidos');
+    this.interruptor(c, 'ayuda', 'Mensajes de ayuda');
+    this.fila(c, 'Tamaño de los botones', this.segmentado('interfaz', [['normal', 'Normal'], ['grande', 'Grande']]));
+
+    const rest = document.createElement('button');
+    rest.type = 'button';
+    rest.className = 'btn-texto';
+    rest.innerHTML = Iconos.deshacer + '<span>Restaurar valores por defecto</span>';
+    rest.addEventListener('click', () => { Config.restaurar(); UI.aviso('Configuración restaurada'); });
+    c.appendChild(rest);
+
+    this.actualizar();
+  },
+
+  fila(c, etiqueta, control, condicion) {
+    const f = document.createElement('div');
+    f.className = 'fila';
+    if (condicion) f.dataset.si = condicion;
+    const id = 'etq-' + Math.random().toString(36).slice(2, 8);
+    const e = document.createElement('span');
+    e.className = 'etq'; e.id = id; e.textContent = etiqueta;
+    control.setAttribute('aria-labelledby', id);
+    f.append(e, control);
+    c.appendChild(f);
+    return f;
+  },
+
+  // Grupo de botones de opción: role=radiogroup / radio
+  grupo(clave, clase) {
+    const g = document.createElement('div');
+    g.className = clase;
+    g.setAttribute('role', 'radiogroup');
+    g.dataset.clave = clave;
+    g.addEventListener('keydown', e => this.flechas(e, g));
+    return g;
+  },
+  opcion(g, clave, valor, contenido, nombre, clase) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    if (clase) b.className = clase;
+    b.setAttribute('role', 'radio');
+    b.dataset.valor = JSON.stringify(valor);
+    b.innerHTML = contenido;
+    if (nombre) { b.setAttribute('aria-label', nombre); b.title = nombre; }
+    b.addEventListener('click', () => Config.set(clave, valor));
+    g.appendChild(b);
+    return b;
+  },
+  flechas(e, g) {
+    const dir = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!dir) return;
+    e.preventDefault();
+    const bs = [...g.querySelectorAll('[role=radio]')];
+    const i = bs.indexOf(document.activeElement);
+    const b = bs[(i + dir + bs.length) % bs.length];
+    b.focus(); b.click();
+  },
+
+  tarjetasPapel() {
+    const g = this.grupo('papel', 'opciones-papel');
+    const tipos = [['blanco', 'En blanco'], ['cuadriculado', 'Cuadriculado'], ['milimetrado', 'Milimetrado'], ['isometrico', 'Isométrico']];
+    for (const [v, n] of tipos) {
+      const b = this.opcion(g, 'papel', v, '', null, 'tarjeta');
+      b.dataset.miniatura = v;
+      b.dataset.nombre = n;
+    }
+    return g;
+  },
+  segmentado(clave, opciones, nombres) {
+    const g = this.grupo(clave, 'segmentado');
+    for (const [v, t] of opciones) this.opcion(g, clave, v, t, nombres && nombres[v]);
+    return g;
+  },
+  muestras(clave, opciones) {
+    const g = this.grupo(clave, 'muestras');
+    for (const [v, color, nombre] of opciones) {
+      const b = this.opcion(g, clave, v, '', nombre, 'muestra');
+      b.style.background = color;
+    }
+    return g;
+  },
+  interruptor(c, clave, etiqueta, nota, condicion) {
+    const f = document.createElement('div');
+    f.className = 'fila';
+    if (condicion) f.dataset.si = condicion;
+    const fi = document.createElement('div');
+    fi.className = 'fila-interruptor';
+    const id = 'etq-' + clave;
+    const e = document.createElement('label');
+    e.className = 'etq'; e.id = id; e.textContent = etiqueta;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'interruptor';
+    b.setAttribute('role', 'switch');
+    b.setAttribute('aria-labelledby', id);
+    b.dataset.interruptor = clave;
+    b.addEventListener('click', () => Config.set(clave, !Config.get(clave)));
+    e.addEventListener('click', () => b.click());
+    fi.append(e, b);
+    f.appendChild(fi);
+    if (nota) { const n = document.createElement('div'); n.className = 'nota'; n.textContent = nota; f.appendChild(n); }
+    c.appendChild(f);
+  },
+
+  // Refleja la configuración actual en los controles
+  actualizar() {
+    const c = this.cuerpo;
+    if (!c) return;
+    c.querySelectorAll('[role=radiogroup]').forEach(g => {
+      const actual = JSON.stringify(Config.get(g.dataset.clave));
+      g.querySelectorAll('[role=radio]').forEach(b => {
+        const sel = b.dataset.valor === actual;
+        b.setAttribute('aria-checked', String(sel));
+        b.tabIndex = sel ? 0 : -1;
+      });
+    });
+    c.querySelectorAll('[data-interruptor]').forEach(b =>
+      b.setAttribute('aria-checked', String(!!Config.get(b.dataset.interruptor))));
+    c.querySelectorAll('[data-miniatura]').forEach(b => {
+      b.innerHTML = Papel.miniatura(b.dataset.miniatura) + `<span>${b.dataset.nombre}</span>`;
+    });
+    c.querySelectorAll('[data-si]').forEach(f => {
+      const [, k, op, v] = f.dataset.si.match(/^(\w+)(!?=)(\w+)$/);
+      const igual = String(Config.get(k)) === v;
+      f.hidden = op === '=' ? !igual : igual;
+    });
+  },
+};
+
+/* Aplica un cambio de configuración al resto de la aplicación */
+function aplicarConfig(clave) {
+  const todo = clave === '*';
+  const raiz = document.documentElement;
+  if (todo || clave === 'interfaz') raiz.dataset.interfaz = Config.get('interfaz');
+  if (todo || clave === 'ayuda') raiz.dataset.ayuda = Config.get('ayuda') ? 'si' : 'no';
+  if (todo || clave === 'hoja') {
+    Hoja.actualizar();
+    if (Capas.w) Vista.ajustar();
+  }
+  Render.pedir('papel', 'dibujo');
+  Panel.actualizar();
+}
 
 /* =====================================================================
    Arranque
@@ -751,6 +1178,8 @@ function iniciar() {
   Capas.iniciar();
   UI.iniciar();
   Entrada.iniciar();
+  aplicarConfig('*');
+  Config.alCambiar(aplicarConfig);
 
   let primera = true;
   const alCambiarTamano = () => {
@@ -773,7 +1202,7 @@ function iniciar() {
 }
 
 // Acceso para pruebas automáticas
-window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos };
+window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel };
 
 iniciar();
 </script>
