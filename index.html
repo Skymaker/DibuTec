@@ -234,6 +234,23 @@
   }
   @media (prefers-reduced-motion: reduce) { .btn.sugerido { animation: none; box-shadow: inset 0 0 0 3px #ff9f1c; } }
 
+  /* Opciones de la goma (abajo a la izquierda de la hoja) */
+  #lienzo #opciones-goma {
+    position: absolute; left: 10px; bottom: 10px; z-index: 4; --ctl: 36px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: calc(100% - 20px);
+    padding: 6px 10px; background: #fff; border: 1px solid var(--borde); border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(30, 32, 50, .18); font-size: 14px;
+  }
+  @media (pointer: coarse) { #lienzo #opciones-goma { --ctl: 44px; } }
+  #opciones-goma[hidden] { display: none; }
+  #opciones-goma .og-ico svg { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #opciones-goma .og-ico svg .a { fill: var(--acento); }
+  #opciones-goma .segmentado button { font-size: 14px; padding: 0 12px; white-space: nowrap; }
+  #opciones-goma .deslizador { width: 210px; }
+  .deslizador { display: flex; align-items: center; gap: 10px; }
+  .deslizador input[type="range"] { flex: 1; min-width: 0; height: var(--ctl); accent-color: var(--activo); cursor: pointer; touch-action: manipulation; }
+  .deslizador output { min-width: 48px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
   /* Lupa de precisión para el dedo */
   #lienzo #lupa {
     position: absolute; display: none; z-index: 3; pointer-events: none; inset: auto;
@@ -327,6 +344,7 @@
     <canvas id="capa-instrumentos"></canvas>
     <canvas id="lupa" aria-hidden="true"></canvas>
     <section id="tarjeta-ejercicio" aria-live="polite" hidden></section>
+    <div id="opciones-goma" role="toolbar" aria-label="Opciones de la goma" hidden></div>
   </main>
   <footer id="estado">
     <span id="mensaje" aria-live="polite"></span>
@@ -452,7 +470,7 @@ const Config = {
     interfaz:       { def: 'normal', ops: ['normal', 'grande'] },
     lupa:           { def: true,     ops: [true, false] },
     modoGoma:       { def: 'trozos', ops: ['trozos', 'enteras'] },
-    tamGoma:        { def: 'mediana', ops: ['pequena', 'mediana', 'grande'] },
+    tamGoma:        { def: 6, min: 1, max: 40, paso: 1 },          // diámetro de la goma en mm
     exportarFondo:  { def: true,     ops: [true, false] },
   },
   valores: {},
@@ -463,17 +481,26 @@ const Config = {
     try { guardado = JSON.parse(localStorage.getItem(this.clave)) || {}; } catch (e) { guardado = {}; }
     this.valores = {};
     for (const k in this.esquema) {
-      const e = this.esquema[k];
-      this.valores[k] = e.ops.includes(guardado[k]) ? guardado[k] : e.def;
+      const v = this.valido(k, guardado[k]);
+      this.valores[k] = v === undefined ? this.esquema[k].def : v;
     }
+  },
+  // Valor permitido (o undefined): de una lista de opciones o un número dentro de su rango
+  valido(k, v) {
+    const e = this.esquema[k];
+    if (!e) return undefined;
+    if (e.ops) return e.ops.includes(v) ? v : undefined;
+    if (typeof v !== 'number' || !Number.isFinite(v)) return undefined;
+    const paso = e.paso || 1;
+    return Math.round(Math.min(e.max, Math.max(e.min, v)) / paso) * paso;
   },
   guardar() {
     try { localStorage.setItem(this.clave, JSON.stringify(this.valores)); } catch (e) { /* sin almacenamiento */ }
   },
   get(k) { return this.valores[k]; },
   set(k, v) {
-    const e = this.esquema[k];
-    if (!e || !e.ops.includes(v) || this.valores[k] === v) return;
+    v = this.valido(k, v);
+    if (v === undefined || this.valores[k] === v) return;
     this.valores[k] = v;
     this.guardar();
     this.oyentes.forEach(f => f(k, v));
@@ -1422,13 +1449,19 @@ const Lapiz = {
 const Goma = {
   activo: null,   // {id, cambios, ultimo: {x, y}, sonido}
   hover: null,    // {x, y, el, tipo}
-  tamanos: { pequena: [6, 12], mediana: [10, 18], grande: [16, 28] },   // px: ratón, dedo
+  muestraHasta: 0,   // al cambiar el tamaño se enseña la goma un momento en el centro
 
-  radioMm(tipo) {
-    const t = this.tamanos[Config.get('tamGoma')] || this.tamanos.mediana;
-    return (tipo === 'touch' ? t[1] : t[0]) / Vista.escala;
-  },
+  // Radio en mm sobre el papel (el tamaño se configura como diámetro)
+  radioMm() { return Config.get('tamGoma') / 2; },
   aTrozos() { return Config.get('modoGoma') !== 'enteras'; },
+  alternarModo() {
+    Config.set('modoGoma', this.aTrozos() ? 'enteras' : 'trozos');
+  },
+  mostrarTamano() {
+    this.muestraHasta = performance.now() + 900;
+    Render.pedir('instrumentos');
+    setTimeout(() => Render.pedir('instrumentos'), 950);
+  },
   abajo(info) {
     this.activo = { id: info.id, cambios: 0, ultimo: { x: info.x, y: info.y }, sonido: 0 };
     Historial.iniciarGrupo();
@@ -1484,7 +1517,11 @@ const Goma = {
   },
 
   overlay(ctx) {
-    const h = this.hover;
+    let h = this.hover;
+    if (!h && performance.now() < this.muestraHasta) {
+      const c = Vista.aMundo(Capas.w / 2, Capas.h / 2);
+      h = { x: c.x, y: c.y, tipo: 'mouse', el: null };
+    }
     if (!h) return;
     const px = 1 / Vista.escala;
     if (h.el) Dibujo.resaltar(ctx, h.el, 'rgba(230, 70, 60, .75)');
@@ -2650,6 +2687,8 @@ const App = {
       if (!Instrumentos.alternar(id)) UI.mensaje(`${h.nombre}: llegará en la fase ${h.fase}.`);
       return;
     }
+    // Pulsar otra vez la goma (o la tecla B) cambia entre borrar a trozos y borrar enteras
+    if (id === 'goma' && this.herramienta === 'goma') { Goma.alternarModo(); return; }
     if (id !== this.herramienta) Acciones.cancelarActual();
     this.herramienta = id;
     UI.marcarHerramienta(id);
@@ -2660,7 +2699,7 @@ const App = {
   ayudas: {
     mover: 'Arrastra para mover la hoja. Usa la rueda o dos dedos para acercar y alejar.',
     lapiz: 'Toca o haz clic para marcar un punto. Mantén pulsado y arrastra para colocarlo con precisión.',
-    goma: 'Frota con la goma: borra solo lo que pisa, así que puedes ir recortando los extremos de las líneas y los arcos.',
+    goma: 'Goma: elige abajo si borra a trozos o líneas enteras y su tamaño. Pulsa otra vez la goma (o B) para cambiar de modo.',
   },
 };
 
@@ -2916,6 +2955,10 @@ const Entrada = {
     if (k === '0') { Vista.ajustar(); return; }
     const mayus = k.toUpperCase();
     if (mayus === 'H') { App.seleccionar('mover'); return; }
+    if (k === '[' || k === ']') {
+      Config.set('tamGoma', Config.get('tamGoma') + (k === ']' ? 1 : -1));
+      return;
+    }
     const h = Herramientas.find(t => t.tecla === mayus);
     if (h) App.seleccionar(h.id);
   },
@@ -2998,7 +3041,21 @@ const UI = {
     );
   },
 
+  construirOpcionesGoma() {
+    const o = document.getElementById('opciones-goma');
+    const ico = document.createElement('span');
+    ico.className = 'og-ico';
+    ico.innerHTML = Iconos.goma;
+    const modos = Panel.segmentado('modoGoma', [['trozos', 'A trozos'], ['enteras', 'Enteras']],
+      { trozos: 'Borrar solo lo que pisa la goma', enteras: 'Borrar líneas y arcos enteros' });
+    modos.setAttribute('aria-label', 'Modo de la goma');
+    o.append(ico, modos, Panel.deslizador('tamGoma', 'Tamaño de la goma'));
+    for (const t of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'dblclick'])
+      o.addEventListener(t, e => e.stopPropagation(), { passive: true });
+    Panel.actualizar();
+  },
   marcarHerramienta(id) {
+    document.getElementById('opciones-goma').hidden = id !== 'goma';
     document.querySelectorAll('#barra .btn[data-id]:not([data-instrumento])').forEach(b =>
       b.setAttribute('aria-pressed', String(b.dataset.id === id)));
   },
@@ -3063,6 +3120,7 @@ const UI = {
     Archivo.construir();
     Ayuda.construir();
     Catalogo.construir();
+    this.construirOpcionesGoma();
     // La tarjeta del ejercicio está sobre el lienzo: sus toques no deben dibujar ni mover la hoja
     const tarjeta = document.getElementById('tarjeta-ejercicio');
     for (const t of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'dblclick'])
@@ -3115,7 +3173,7 @@ const Panel = {
     ]));
     this.interruptor(c, 'etiquetas', 'Poner letras a los puntos (A, B, C…)');
     this.fila(c, 'Goma', this.segmentado('modoGoma', [['trozos', 'Borra a trozos'], ['enteras', 'Líneas enteras']]));
-    this.fila(c, 'Tamaño de la goma', this.segmentado('tamGoma', [['pequena', 'Pequeña'], ['mediana', 'Mediana'], ['grande', 'Grande']]));
+    this.fila(c, 'Tamaño de la goma (diámetro)', this.deslizador('tamGoma', 'Tamaño de la goma'));
 
     titulo('Ayudas');
     this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
@@ -3145,6 +3203,24 @@ const Panel = {
     f.append(e, control);
     c.appendChild(f);
     return f;
+  },
+
+  // Control deslizante para un valor numérico de la configuración
+  formatos: { tamGoma: v => `${v} mm` },
+  deslizador(clave, etiqueta) {
+    const e = Config.esquema[clave];
+    const caja = document.createElement('div');
+    caja.className = 'deslizador';
+    const r = document.createElement('input');
+    r.type = 'range';
+    r.min = e.min; r.max = e.max; r.step = e.paso || 1;
+    r.dataset.clave = clave;
+    r.setAttribute('aria-label', etiqueta);
+    r.addEventListener('input', () => Config.set(clave, Number(r.value)));
+    const o = document.createElement('output');
+    o.dataset.valorDe = clave;
+    caja.append(r, o);
+    return caja;
   },
 
   // Grupo de botones de opción: role=radiogroup / radio
@@ -3235,6 +3311,13 @@ const Panel = {
         b.setAttribute('aria-checked', String(sel));
         b.tabIndex = sel ? 0 : -1;
       });
+    });
+    c.querySelectorAll('input[type=range][data-clave]').forEach(r => {
+      if (Number(r.value) !== Config.get(r.dataset.clave)) r.value = Config.get(r.dataset.clave);
+    });
+    c.querySelectorAll('output[data-valor-de]').forEach(o => {
+      const k = o.dataset.valorDe, f = this.formatos[k];
+      o.textContent = f ? f(Config.get(k)) : String(Config.get(k));
     });
     c.querySelectorAll('[data-interruptor]').forEach(b =>
       b.setAttribute('aria-checked', String(!!Config.get(b.dataset.interruptor))));
@@ -3448,7 +3531,7 @@ const Ayuda = {
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
       b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
       b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
-      b('goma', 'Goma', 'Frota sobre lo que quieras borrar: solo se borra lo que queda debajo de la goma, así que puedes recortar poco a poco los extremos de las líneas y los arcos. En Configuración puedes cambiar su tamaño o hacer que borre líneas enteras.'),
+      b('goma', 'Goma', 'Tiene dos modos, en la barrita que aparece abajo a la izquierda: «A trozos» borra solo lo que pisa (para recortar poco a poco los extremos de las líneas y los arcos) y «Enteras» borra la línea, el arco o el punto que toques. Pulsa otra vez la goma para cambiar de modo. El deslizador elige su tamaño.'),
       b('deshacer', 'Deshacer', 'Deshace puntos, líneas y también los movimientos de los instrumentos.'),
       b('mover', 'Mover y acercar la hoja', '<span class="solo-raton">Rueda del ratón para acercar; botón central, la barra espaciadora o la herramienta mover para desplazar la hoja.</span><span class="solo-tactil">Dos dedos sobre la hoja para acercar y moverla. Dos dedos sobre un instrumento lo mueven y lo giran.</span>'),
       b('guardar', 'Tu dibujo', 'Se guarda solo en este navegador. Desde el botón del disquete puedes empezar una hoja nueva, guardarlo en un archivo, abrirlo o exportarlo como imagen.'),
@@ -3461,7 +3544,8 @@ const Ayuda = {
         <tr><td><kbd>+</kbd> <kbd>−</kbd> Zoom</td><td><kbd>0</kbd> Ver la hoja entera</td></tr>
         <tr><td><kbd>Mayús</kbd> Girar de 15° en 15°</td><td><kbd>Alt</kbd> Separar / girar sin trazar</td></tr>
         <tr><td><kbd>Espacio</kbd> Mover la hoja</td><td><kbd>?</kbd> Esta ayuda</td></tr>
-        <tr><td><kbd>L</kbd> Levantar o apoyar la mina del compás</td><td></td></tr>
+        <tr><td><kbd>L</kbd> Levantar o apoyar la mina del compás</td><td><kbd>B</kbd> otra vez: modo de la goma</td></tr>
+        <tr><td><kbd>[</kbd> <kbd>]</kbd> Tamaño de la goma</td><td></td></tr>
       </table></div>`,
     ].join('');
   },
@@ -4106,6 +4190,16 @@ function aplicarConfig(clave) {
   if (todo || clave === 'hoja') {
     Hoja.actualizar();
     if (Capas.w) Vista.ajustar();
+  }
+  if (clave === 'modoGoma') {
+    UI.mensaje(Goma.aTrozos()
+      ? 'Goma a trozos: borra solo lo que pisa, para recortar los extremos de las líneas.'
+      : 'Goma de líneas enteras: borra la línea, el arco o el punto que toques.');
+    Render.pedir('instrumentos');
+  }
+  if (clave === 'tamGoma') {
+    UI.mensaje(`Tamaño de la goma: ${Config.get('tamGoma')} mm.`);
+    Goma.mostrarTamano();
   }
   Render.pedir('papel', 'dibujo');
   Panel.actualizar();
