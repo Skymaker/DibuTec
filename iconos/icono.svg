@@ -6,12 +6,12 @@
   </defs>
   <rect width="512" height="512" rx="112" fill="#2f6fd0"/>
   <rect width="512" height="512" rx="112" fill="url(#cuadricula)"/>
-  <g transform="translate(0 -18)" stroke="#2d3047" stroke-linejoin="round" stroke-linecap="round">
+  <g stroke="#2d3047" stroke-linejoin="round" stroke-linecap="round">
     <!-- Escuadra (45°) -->
-    <path d="M88 424V176L336 424Z M128 384H239L128 273Z" fill="#ffd166" fill-rule="evenodd" stroke-width="12"/>
-    <path d="M120 424v-16M152 424v-16M184 424v-24M216 424v-16M248 424v-16" stroke-width="6"/>
+    <path d="M64 448V88L424 448Z M112 400H308L112 204Z" fill="#ffd166" fill-rule="evenodd" stroke-width="14"/>
+    <path d="M96 448v-18M128 448v-18M160 448v-28M192 448v-18" stroke-width="7"/>
     <!-- Cartabón (30°/60°) -->
-    <path d="M424 424V124L251 424Z M384 384H320L384 273Z" fill="#f4f1ea" fill-rule="evenodd" stroke-width="12"/>
-    <path d="M424 156h-16M424 188h-16M424 220h-24M424 252h-16M424 284h-16M424 316h-24M424 348h-16" stroke-width="6"/>
+    <path d="M448 448V48L217 448Z M400 400H300L400 227Z" fill="#f4f1ea" fill-rule="evenodd" stroke-width="14"/>
+    <path d="M448 96h-18M448 128h-18M448 160h-28M448 192h-18M448 224h-18M448 256h-28M448 288h-18M448 320h-18M448 352h-28M448 384h-18M448 416h-18" stroke-width="7"/>
   </g>
 </svg>
