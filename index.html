@@ -409,6 +409,54 @@ const Geom = {
     const e = this.extremosArco(arc);
     return Math.min(this.dist(px, py, e[0].x, e[0].y), this.dist(px, py, e[1].x, e[1].y));
   },
+  // Punto de un segmento o de un arco más cercano a (px, py)
+  cercanoSegmento(px, py, r) {
+    const dx = r.x2 - r.x1, dy = r.y2 - r.y1, L = dx * dx + dy * dy;
+    const t = L ? this.clamp(((px - r.x1) * dx + (py - r.y1) * dy) / L, 0, 1) : 0;
+    return { x: r.x1 + t * dx, y: r.y1 + t * dy };
+  },
+  cercanoArco(px, py, a) {
+    const ang = Math.atan2(py - a.cy, px - a.cx);
+    if (this.anguloEnArco(ang, a)) return { x: a.cx + a.r * Math.cos(ang), y: a.cy + a.r * Math.sin(ang) };
+    const e = this.extremosArco(a);
+    return this.dist(px, py, e[0].x, e[0].y) <= this.dist(px, py, e[1].x, e[1].y) ? e[0] : e[1];
+  },
+  // Cortes entre dos líneas: {tipo: 'recta'|'arco', o}
+  intersecciones(A, B) {
+    if (A.tipo === 'arco' && B.tipo === 'recta') [A, B] = [B, A];
+    const eps = 1e-9, sal = [];
+    if (A.tipo === 'recta' && B.tipo === 'recta') {
+      const r = A.o, q = B.o;
+      const dx1 = r.x2 - r.x1, dy1 = r.y2 - r.y1, dx2 = q.x2 - q.x1, dy2 = q.y2 - q.y1;
+      const den = dx1 * dy2 - dy1 * dx2;
+      if (Math.abs(den) < eps) return sal;
+      const t = ((q.x1 - r.x1) * dy2 - (q.y1 - r.y1) * dx2) / den;
+      const u = ((q.x1 - r.x1) * dy1 - (q.y1 - r.y1) * dx1) / den;
+      if (t >= -eps && t <= 1 + eps && u >= -eps && u <= 1 + eps) sal.push({ x: r.x1 + t * dx1, y: r.y1 + t * dy1 });
+    } else if (A.tipo === 'recta') {
+      const r = A.o, a = B.o;
+      const dx = r.x2 - r.x1, dy = r.y2 - r.y1, fx = r.x1 - a.cx, fy = r.y1 - a.cy;
+      const qa = dx * dx + dy * dy, qb = 2 * (fx * dx + fy * dy), qc = fx * fx + fy * fy - a.r * a.r;
+      const disc = qb * qb - 4 * qa * qc;
+      if (qa < eps || disc < 0) return sal;
+      for (const sg of [-1, 1]) {
+        const t = (-qb + sg * Math.sqrt(disc)) / (2 * qa);
+        if (t < -eps || t > 1 + eps) continue;
+        const p = { x: r.x1 + t * dx, y: r.y1 + t * dy };
+        if (this.anguloEnArco(Math.atan2(p.y - a.cy, p.x - a.cx), a)) sal.push(p);
+      }
+    } else {
+      const a = A.o, b = B.o, d = this.dist(a.cx, a.cy, b.cx, b.cy);
+      if (d < eps || d > a.r + b.r || d < Math.abs(a.r - b.r)) return sal;
+      const l = (a.r * a.r - b.r * b.r + d * d) / (2 * d), h = Math.sqrt(Math.max(0, a.r * a.r - l * l));
+      const mx = a.cx + l * (b.cx - a.cx) / d, my = a.cy + l * (b.cy - a.cy) / d;
+      for (const sg of [-1, 1]) {
+        const p = { x: mx + sg * h * (b.cy - a.cy) / d, y: my - sg * h * (b.cx - a.cx) / d };
+        if (this.anguloEnArco(Math.atan2(p.y - a.cy, p.x - a.cx), a) && this.anguloEnArco(Math.atan2(p.y - b.cy, p.x - b.cx), b)) sal.push(p);
+      }
+    }
+    return sal;
+  },
   extremosArco(arc) {
     return [arc.a0, arc.a1].map(a => ({ x: arc.cx + arc.r * Math.cos(a), y: arc.cy + arc.r * Math.sin(a) }));
   },
@@ -877,7 +925,8 @@ const Snap = {
     const r = this.radios[Config.get('iman')] || this.radios.medio;
     return tipoPuntero === 'touch' ? r[1] : r[0];
   },
-  // Devuelve {x, y, tipo, obj} o null. Prioridad: punto > extremo > centro > cuadrícula
+  // Devuelve {x, y, tipo, obj} o null.
+  // Prioridad: punto > extremo / cruce de líneas > centro > sobre una línea > cuadrícula
   buscar(x, y, tipoPuntero) {
     const radio = this.radioPx(tipoPuntero) / Vista.escala;
     let mejor = null;
@@ -893,6 +942,24 @@ const Snap = {
       probar(3, 'centro', a.cx, a.cy, a);
       if (!Geom.esCircunferencia(a)) for (const e of Geom.extremosArco(a)) probar(2, 'extremo', e.x, e.y, a);
     }
+    // Sobre el trazo de las líneas cercanas y en los cruces entre ellas
+    const cerca = [];
+    for (const r of Escena.rectas) {
+      if (Geom.distSegmento(x, y, r.x1, r.y1, r.x2, r.y2) > radio) continue;
+      cerca.push({ tipo: 'recta', o: r });
+      const q = Geom.cercanoSegmento(x, y, r);
+      probar(5, 'sobre', q.x, q.y, r);
+    }
+    for (const a of Escena.arcos) {
+      if (Geom.distArco(x, y, a) > radio) continue;
+      cerca.push({ tipo: 'arco', o: a });
+      const q = Geom.cercanoArco(x, y, a);
+      probar(5, 'sobre', q.x, q.y, a);
+    }
+    for (let i = 0; i < cerca.length; i++)
+      for (let j = i + 1; j < cerca.length; j++)
+        for (const q of Geom.intersecciones(cerca[i], cerca[j])) probar(2, 'cruce', q.x, q.y, null);
+    if (mejor && mejor.tipo === 'sobre') mejor.elTipo = 'r' in mejor.obj ? 'arco' : 'recta';
     if (!mejor && Config.get('imanCuadricula')) {
       const n = Papel.nodoCercano(x, y);
       if (n) probar(9, 'cuadricula', n.x, n.y, null);
@@ -1019,8 +1086,14 @@ const Lapiz = {
     const p = Escena.agregarPunto(a.x, a.y);
     Sonido.tocar('punto');
     const nombre = Config.get('etiquetas') ? `Punto ${p.etiqueta} marcado` : 'Punto marcado';
+    const sn = a.snap && a.snap.tipo;
+    const donde = sn === 'sobre' ? (a.snap.elTipo === 'recta' ? ' sobre la recta'
+                    : Geom.esCircunferencia(a.snap.obj) ? ' sobre la circunferencia' : ' sobre el arco')
+                : sn === 'extremo' ? ' en el extremo de la línea'
+                : sn === 'cruce' ? ' en el cruce de dos líneas'
+                : sn === 'centro' ? ' en el centro' : '';
     UI.mensaje(a.modo === 'marca' ? `${nombre} a ${a.grados}° (escala interior: ${180 - a.grados}°).`
-      : a.mm != null ? `${nombre} en la marca de ${this.mmTexto(a.mm)}.` : `${nombre}.`);
+      : a.mm != null ? `${nombre} en la marca de ${this.mmTexto(a.mm)}${donde}.` : `${nombre}${donde}.`);
   },
   mmTexto(mm) {
     const r = Math.round(mm * 10) / 10;
@@ -1436,6 +1509,7 @@ class Instrumento {
 class Regla extends Instrumento {
   constructor() {
     super('regla', 'Regla', 'a');
+    this.giraEnPuntos = true;   // con un punto marcado en un canto, gira alrededor de él
     const L = 310, W = 32, cero = 5;   // la marca 0 está a 5 mm del extremo
     this.poligono = [[0, 0], [L, 0], [L, W], [0, W]];
     this.cantos = [
@@ -1456,6 +1530,7 @@ class Regla extends Instrumento {
 class Escuadra extends Instrumento {
   constructor() {
     super('escuadra', 'Escuadra', 'a');
+    this.giraEnPuntos = true;   // con un punto marcado en un canto, gira alrededor de él
     const L = 160;
     this.poligono = [[0, 0], [L, 0], [0, -L]];
     this.agujero = Instrumento.agujeroTriangulo(this.poligono, 0.45);
@@ -1477,6 +1552,7 @@ class Escuadra extends Instrumento {
 class Cartabon extends Instrumento {
   constructor() {
     super('cartabon', 'Cartabón', 'o');
+    this.giraEnPuntos = true;   // con un punto marcado en un canto, gira alrededor de él
     const Lg = 160 * Math.SQRT2, S = Lg / Math.sqrt(3);
     this.poligono = [[0, 0], [S, 0], [0, -Lg]];
     this.agujero = Instrumento.agujeroTriangulo(this.poligono, 0.45);
@@ -1775,7 +1851,16 @@ const Instrumentos = {
     let snap = null;
     const radio = Snap.radioPx(info.tipo) / Vista.escala;
     const s = Snap.buscar(p.x, p.y, info.tipo);
-    if (s) {
+    if (s && s.tipo === 'sobre') {
+      // Una línea que cruza el canto: se para justo en el cruce
+      const canto = { tipo: 'recta', o: { x1: k.a.x, y1: k.a.y, x2: k.b.x, y2: k.b.y } };
+      let mejor = null;
+      for (const q of Geom.intersecciones(canto, { tipo: s.elTipo, o: s.obj })) {
+        const d = Geom.dist(q.x, q.y, p.x, p.y);
+        if (d <= radio && (!mejor || d < mejor.d)) mejor = { x: q.x, y: q.y, d };
+      }
+      if (mejor) { p = { x: mejor.x, y: mejor.y }; snap = { tipo: 'cruce', x: p.x, y: p.y }; }
+    } else if (s) {
       const q = proy(s.x, s.y);
       if (Geom.dist(q.x, q.y, s.x, s.y) <= radio) { p = q; snap = s; }
     }
@@ -1823,6 +1908,28 @@ const Instrumentos = {
       return { x: mejor.p.x, y: mejor.p.y };
     }
     return null;
+  },
+
+  // Punto marcado apoyado en un canto (el más alejado del asa): será el centro del giro
+  pivoteEnPunto(inst, asa) {
+    const tol = Math.max(0.3, 4 / Vista.escala);
+    const am = inst.aMundo(asa.x, asa.y);
+    let mejor = null;
+    for (const k of inst.cantosMundo()) {
+      for (const p of Escena.puntos) {
+        const t = (p.x - k.a.x) * k.u.x + (p.y - k.a.y) * k.u.y;
+        if (t < -tol || t > k.len + tol) continue;
+        const d = (p.x - k.a.x) * k.n.x + (p.y - k.a.y) * k.n.y;
+        if (Math.abs(d) > tol) continue;
+        const lejos = Geom.dist(p.x, p.y, am.x, am.y);
+        if (!mejor || lejos > mejor.lejos) mejor = { p, d, k, lejos };
+      }
+    }
+    if (!mejor) return null;
+    // Ajuste fino: el canto pasa exactamente por el punto
+    inst.x += mejor.k.n.x * mejor.d; inst.y += mejor.k.n.y * mejor.d;
+    const l = inst.aLocal(mejor.p.x, mejor.p.y);
+    return { punto: mejor.p, mundo: { x: mejor.p.x, y: mejor.p.y }, local: [l.x, l.y] };
   },
 
   // Imán al girar: el canto que pasa por el pivote se alinea con otro punto
@@ -1939,9 +2046,12 @@ const Manip = {
     const inst = hit.inst;
     Instrumentos.alFrente(inst);
     if (hit.modo === 'girar') {
-      const pv = hit.asa.pivote, piv = inst.aMundo(pv[0], pv[1]);
-      this.estado = { inst, modo: 'girar', id: info.id, tipo: info.tipo, pivLocal: pv, piv,
+      // Si hay un punto marcado sobre un canto, se gira alrededor de él
+      const enPunto = inst.giraEnPuntos ? Instrumentos.pivoteEnPunto(inst, hit.asa) : null;
+      const pv = enPunto ? enPunto.local : hit.asa.pivote, piv = enPunto ? enPunto.mundo : inst.aMundo(pv[0], pv[1]);
+      this.estado = { inst, modo: 'girar', id: info.id, tipo: info.tipo, pivLocal: pv, piv, punto: enPunto && enPunto.punto,
                       ang0: Math.atan2(info.y - piv.y, info.x - piv.x), rot0: inst.rot };
+      if (enPunto) UI.mensaje(`Girando alrededor del punto ${enPunto.punto.etiqueta}: busca la línea con otro punto.`);
     } else if (hit.modo === 'abrir') {
       this.estado = { inst, modo: 'abrir', id: info.id, tipo: info.tipo };
     } else if (hit.modo === 'trazar') {
@@ -1980,7 +2090,7 @@ const Manip = {
         inst.colocarPivote(s.pivLocal, s.piv);
         this.halo = Instrumentos.imanGirar(inst, s.pivLocal, s.piv, s.tipo);
       }
-      UI.mensaje(`Ángulo: ${this.anguloTexto(inst)}`);
+      UI.mensaje(`${s.punto ? `Girando alrededor de ${s.punto.etiqueta} · ` : ''}Ángulo: ${this.anguloTexto(inst)}`);
     } else if (s.modo === 'dos') {
       const ids = s.ids, viejo = { a: s.pos[ids[0]], b: s.pos[ids[1]] };
       const nuevo = Object.assign({}, s.pos, { [info.id]: { x: info.x, y: info.y } });
@@ -2144,6 +2254,17 @@ const Manip = {
       ctx.beginPath();
       ctx.moveTo(c.g.a.x, c.g.a.y); ctx.lineTo(c.g.b.x, c.g.b.y);
       ctx.stroke();
+    }
+    if (s && s.modo === 'girar' && s.punto) {
+      // Punto alrededor del que se gira
+      ctx.beginPath();
+      ctx.arc(s.piv.x, s.piv.y, 7 * px, 0, Geom.DOS_PI);
+      ctx.fillStyle = 'rgba(47, 111, 208, .9)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s.piv.x, s.piv.y, 2.5 * px, 0, Geom.DOS_PI);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
     }
     if (this.halo) Dibujo.halo(ctx, this.halo.x, this.halo.y);
   },
