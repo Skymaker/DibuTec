@@ -451,6 +451,8 @@ const Config = {
     ayuda:          { def: true,     ops: [true, false] },
     interfaz:       { def: 'normal', ops: ['normal', 'grande'] },
     lupa:           { def: true,     ops: [true, false] },
+    modoGoma:       { def: 'trozos', ops: ['trozos', 'enteras'] },
+    tamGoma:        { def: 'mediana', ops: ['pequena', 'mediana', 'grande'] },
     exportarFondo:  { def: true,     ops: [true, false] },
   },
   valores: {},
@@ -530,6 +532,52 @@ const Geom = {
     if (this.anguloEnArco(ang, a)) return { x: a.cx + a.r * Math.cos(ang), y: a.cy + a.r * Math.sin(ang) };
     const e = this.extremosArco(a);
     return this.dist(px, py, e[0].x, e[0].y) <= this.dist(px, py, e[1].x, e[1].y) ? e[0] : e[1];
+  },
+  // Goma: lo que queda de un segmento tras quitarle lo que cae dentro del círculo (x, y, R).
+  // null = no lo toca; [] = desaparece; si no, los trozos que quedan (más largos que «minimo»)
+  restarDiscoSegmento(r, x, y, R, minimo) {
+    const vx = r.x2 - r.x1, vy = r.y2 - r.y1, a = vx * vx + vy * vy;
+    if (a < 1e-12) return this.dist(r.x1, r.y1, x, y) <= R ? [] : null;
+    const fx = r.x1 - x, fy = r.y1 - y, b = 2 * (fx * vx + fy * vy), c = fx * fx + fy * fy - R * R;
+    const disc = b * b - 4 * a * c;
+    if (disc <= 0) return null;
+    const sq = Math.sqrt(disc), t0 = (-b - sq) / (2 * a), t1 = (-b + sq) / (2 * a);
+    if (t1 <= 0 || t0 >= 1) return null;
+    const L = Math.sqrt(a), P = t => ({ x: r.x1 + vx * t, y: r.y1 + vy * t }), trozos = [];
+    if (t0 > 0 && t0 * L >= minimo) { const q = P(t0); trozos.push({ x1: r.x1, y1: r.y1, x2: q.x, y2: q.y }); }
+    if (t1 < 1 && (1 - t1) * L >= minimo) { const q = P(t1); trozos.push({ x1: q.x, y1: q.y, x2: r.x2, y2: r.y2 }); }
+    return trozos;
+  },
+  // Igual para un arco o una circunferencia: devuelve los trozos como {a0, a1}
+  restarDiscoArco(a, x, y, R, minimo) {
+    const d = this.dist(x, y, a.cx, a.cy);
+    if (d >= a.r + R || d + R <= a.r) return null;            // no toca el trazo
+    const completo = this.esCircunferencia(a);
+    const sg = a.a1 >= a.a0 ? 1 : -1, L = completo ? this.DOS_PI : Math.abs(a.a1 - a.a0);
+    // Medio ángulo del trozo de circunferencia que cae dentro de la goma
+    const alfa = d + a.r <= R ? Math.PI
+      : Math.acos(this.clamp((a.r * a.r + d * d - R * R) / (2 * a.r * d), -1, 1));
+    if (alfa >= Math.PI - 1e-9) return [];
+    const wc = this.normAng((Math.atan2(y - a.cy, x - a.cx) - a.a0) * sg);  // centro del borrado, medido desde a0
+    const arco = (w0, w1) => ({ a0: a.a0 + sg * w0, a1: a.a0 + sg * w1 });
+    if (completo) {
+      // La circunferencia se abre: queda un arco que da la vuelta hasta el otro lado del borrado
+      const w0 = wc + alfa, w1 = wc - alfa + this.DOS_PI;
+      return (w1 - w0) * a.r >= minimo ? [arco(w0, w1)] : [];
+    }
+    let tramos = [[0, L]];
+    const quitar = (e0, e1) => {
+      const sal = [];
+      for (const [s0, s1] of tramos) {
+        if (e1 <= s0 || e0 >= s1) { sal.push([s0, s1]); continue; }
+        if (e0 > s0) sal.push([s0, e0]);
+        if (e1 < s1) sal.push([e1, s1]);
+      }
+      tramos = sal;
+    };
+    for (const k of [-1, 0, 1]) quitar(wc - alfa + k * this.DOS_PI, wc + alfa + k * this.DOS_PI);
+    if (tramos.length === 1 && tramos[0][0] === 0 && tramos[0][1] === L) return null;
+    return tramos.filter(([s0, s1]) => (s1 - s0) * a.r >= minimo).map(([s0, s1]) => arco(s0, s1));
   },
   // Cortes entre dos líneas: {tipo: 'recta'|'arco', o}
   intersecciones(A, B) {
@@ -1010,6 +1058,30 @@ const Escena = {
   },
 
   // Elemento más cercano dentro de «radio» mm; los puntos tienen preferencia
+  // Goma a trozos: quita lo que cae dentro del círculo (x, y, R). Devuelve si ha cambiado algo
+  borrarDisco(x, y, R, protegerDados) {
+    const libre = o => !(protegerDados && o.dado && Ejercicio.def);
+    const minimo = Math.max(0.15, 1.5 / Vista.escala);     // los restos más cortos desaparecen
+    let cambio = false;
+    const puntos = this.puntos.filter(p => !(libre(p) && Geom.dist(p.x, p.y, x, y) <= R));
+    if (puntos.length !== this.puntos.length) { this.puntos = puntos; cambio = true; }
+    // El primer trozo conserva el id (los ejercicios siguen reconociendo la línea)
+    const repartir = (lista, restar) => {
+      const sal = [];
+      for (const o of lista) {
+        const trozos = libre(o) ? restar(o) : null;
+        if (trozos === null) { sal.push(o); continue; }
+        cambio = true;
+        trozos.forEach((t, i) => sal.push(Object.assign({}, o, t, { id: i === 0 ? o.id : this.sigId++ })));
+      }
+      return sal;
+    };
+    this.rectas = repartir(this.rectas, r => Geom.restarDiscoSegmento(r, x, y, R, minimo));
+    this.arcos = repartir(this.arcos, a => Geom.restarDiscoArco(a, x, y, R, minimo));
+    if (cambio) Render.pedir('dibujo');
+    return cambio;
+  },
+
   // protegerDados: lo que da el enunciado de un ejercicio no se puede borrar
   buscarElemento(x, y, radio, protegerDados) {
     let mejor = null;
@@ -1347,35 +1419,60 @@ const Lapiz = {
 };
 
 const Goma = {
-  activo: null,   // {id, borrados}
+  activo: null,   // {id, cambios, ultimo: {x, y}, sonido}
   hover: null,    // {x, y, el, tipo}
+  tamanos: { pequena: [6, 12], mediana: [10, 18], grande: [16, 28] },   // px: ratón, dedo
 
-  radioMm(tipo) { return (tipo === 'touch' ? 18 : 10) / Vista.escala; },
-  abajo(info) {
-    this.activo = { id: info.id, borrados: 0 };
-    Historial.iniciarGrupo();
-    this.borrarEn(info);
+  radioMm(tipo) {
+    const t = this.tamanos[Config.get('tamGoma')] || this.tamanos.mediana;
+    return (tipo === 'touch' ? t[1] : t[0]) / Vista.escala;
   },
-  mover(info) { this.borrarEn(info); },
+  aTrozos() { return Config.get('modoGoma') !== 'enteras'; },
+  abajo(info) {
+    this.activo = { id: info.id, cambios: 0, ultimo: { x: info.x, y: info.y }, sonido: 0 };
+    Historial.iniciarGrupo();
+    this.borrarEn(info, true);
+  },
+  mover(info) { this.borrarEn(info, false); },
   arriba() {
-    const n = this.activo ? this.activo.borrados : 0;
+    const n = this.activo ? this.activo.cambios : 0;
     this.activo = null;
     if (n) Historial.confirmarGrupo(); else Historial.pendiente = null;
     Render.pedir('instrumentos');
   },
-  borrarEn(info) {
-    const el = Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo), true);
+  borrarEn(info, primero) {
+    const R = this.radioMm(info.tipo);
     this.hover = { x: info.x, y: info.y, tipo: info.tipo, el: null };
-    if (el && Escena.eliminar(el)) {
-      this.activo.borrados++;
-      Sonido.tocar('borrar');
-      const nombres = { punto: `el punto ${el.obj.etiqueta}`, recta: 'una recta', arco: el.tipo === 'arco' && Geom.esCircunferencia(el.obj) ? 'una circunferencia' : 'un arco' };
-      UI.mensaje(`Has borrado ${nombres[el.tipo]}.`);
+    if (this.aTrozos()) {
+      // Se borra a lo largo del recorrido, con pasos más cortos que la goma para no dejar huecos
+      const de = this.activo.ultimo, L = Geom.dist(de.x, de.y, info.x, info.y);
+      const n = Math.max(1, Math.ceil(L / (R * 0.5)));
+      let cambio = false;
+      for (let i = primero ? 0 : 1; i <= n; i++) {
+        const t = i / n;
+        if (Escena.borrarDisco(de.x + (info.x - de.x) * t, de.y + (info.y - de.y) * t, R, true)) cambio = true;
+      }
+      this.activo.ultimo = { x: info.x, y: info.y };
+      if (cambio) {
+        this.activo.cambios++;
+        const ahora = performance.now();
+        if (ahora - this.activo.sonido > 140) { Sonido.tocar('borrar'); this.activo.sonido = ahora; }
+      }
+    } else {
+      const el = Escena.buscarElemento(info.x, info.y, R, true);
+      if (el && Escena.eliminar(el)) {
+        this.activo.cambios++;
+        Sonido.tocar('borrar');
+        const nombres = { punto: `el punto ${el.obj.etiqueta}`, recta: 'una recta', arco: el.tipo === 'arco' && Geom.esCircunferencia(el.obj) ? 'una circunferencia' : 'un arco' };
+        UI.mensaje(`Has borrado ${nombres[el.tipo]}.`);
+      }
     }
     Render.pedir('instrumentos');
   },
   pasar(info) {
-    this.hover = { x: info.x, y: info.y, tipo: info.tipo, el: Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo), true) };
+    // Con la goma a trozos no se resalta nada: borra justo lo que queda bajo el círculo
+    const el = this.aTrozos() ? null : Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo), true);
+    this.hover = { x: info.x, y: info.y, tipo: info.tipo, el };
     Render.pedir('instrumentos');
   },
   salir() { this.hover = null; Render.pedir('instrumentos'); },
@@ -2484,7 +2581,7 @@ const App = {
   ayudas: {
     mover: 'Arrastra para mover la hoja. Usa la rueda o dos dedos para acercar y alejar.',
     lapiz: 'Toca o haz clic para marcar un punto. Mantén pulsado y arrastra para colocarlo con precisión.',
-    goma: 'Toca lo que quieras borrar, o pasa la goma por encima arrastrando.',
+    goma: 'Frota con la goma: borra solo lo que pisa, así que puedes ir recortando los extremos de las líneas y los arcos.',
   },
 };
 
@@ -2919,6 +3016,8 @@ const Panel = {
       ['azul', Paleta.grafito.azul, 'Azul'],
     ]));
     this.interruptor(c, 'etiquetas', 'Poner letras a los puntos (A, B, C…)');
+    this.fila(c, 'Goma', this.segmentado('modoGoma', [['trozos', 'Borra a trozos'], ['enteras', 'Líneas enteras']]));
+    this.fila(c, 'Tamaño de la goma', this.segmentado('tamGoma', [['pequena', 'Pequeña'], ['mediana', 'Mediana'], ['grande', 'Grande']]));
 
     titulo('Ayudas');
     this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
@@ -3251,7 +3350,7 @@ const Ayuda = {
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
       b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar arcos o una circunferencia entera.'),
       b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
-      b('goma', 'Goma', 'Toca lo que quieras borrar o pasa la goma por encima arrastrando.'),
+      b('goma', 'Goma', 'Frota sobre lo que quieras borrar: solo se borra lo que queda debajo de la goma, así que puedes recortar poco a poco los extremos de las líneas y los arcos. En Configuración puedes cambiar su tamaño o hacer que borre líneas enteras.'),
       b('deshacer', 'Deshacer', 'Deshace puntos, líneas y también los movimientos de los instrumentos.'),
       b('mover', 'Mover y acercar la hoja', '<span class="solo-raton">Rueda del ratón para acercar; botón central, la barra espaciadora o la herramienta mover para desplazar la hoja.</span><span class="solo-tactil">Dos dedos sobre la hoja para acercar y moverla. Dos dedos sobre un instrumento lo mueven y lo giran.</span>'),
       b('guardar', 'Tu dibujo', 'Se guarda solo en este navegador. Desde el botón del disquete puedes empezar una hoja nueva, guardarlo en un archivo, abrirlo o exportarlo como imagen.'),
@@ -3974,7 +4073,7 @@ function iniciar() {
 }
 
 // Acceso para pruebas automáticas
-window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip, Guardado, Archivo, Lupa, Ejercicio, Catalogo };
+window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip, Guardado, Archivo, Lupa, Ejercicio, Catalogo, Goma };
 
 iniciar();
 </script>
