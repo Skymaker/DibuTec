@@ -1751,16 +1751,20 @@ class Instrumento {
     const p = this.aLocal(wx, wy);
     return Instrumento.dentro(p, this.poligono) && !(this.agujero && Instrumento.dentro(p, this.agujero));
   }
-  // Cantos en coordenadas del mundo, con vectores unitarios
-  cantosMundo() {
-    return this.cantos.map(k => {
-      const a = this.aMundo(...this.poligono[k.i]), b = this.aMundo(...this.poligono[k.j]);
+  // Cantos en coordenadas del mundo, con vectores unitarios. Un canto une dos vértices del
+  // polígono (i, j) o dos puntos locales (a, b). Los «virtuales» son líneas impresas (la base
+  // de 0°-180° del transportador): sirven para alinear el instrumento, pero no para trazar.
+  cantosMundo(conVirtuales = false) {
+    return this.cantos.filter(k => conVirtuales || !k.virtual).map(k => {
+      const a = this.aMundo(...(k.a || this.poligono[k.i])), b = this.aMundo(...(k.b || this.poligono[k.j]));
       const len = Geom.dist(a.x, a.y, b.x, b.y);
       const u = { x: (b.x - a.x) / len, y: (b.y - a.y) / len };
       return { inst: this, def: k, a, b, len, u, n: { x: -u.y, y: u.x },
-               graduado: !!k.graduado, origen: k.origen ? this.aMundo(...k.origen) : null };
+               graduado: !!k.graduado, origen: k.origen ? this.aMundo(...k.origen) : null, virtual: !!k.virtual };
     });
   }
+  // Cantos y líneas de apoyo (para los imanes y para comprobar los ejercicios)
+  cantosApoyo() { return this.cantosMundo(true); }
   radioAsa() { return Math.max(5, 14 / Vista.escala); }
   radioCandado() { return Math.max(3.5, 11 / Vista.escala); }
 
@@ -1829,7 +1833,7 @@ class Instrumento {
   }
   // Graduación en mm a lo largo de un canto, con las marcas hacia dentro
   graduar(ctx, k) {
-    const A = this.poligono[k.i], B = this.poligono[k.j];
+    const A = k.a || this.poligono[k.i], B = k.b || this.poligono[k.j];
     const len = Math.hypot(B[0] - A[0], B[1] - A[1]);
     const d = [(B[0] - A[0]) / len, (B[1] - A[1]) / len];
     let m = [-d[1], d[0]];
@@ -2177,54 +2181,44 @@ class Transportador extends Instrumento {
   constructor() {
     super('transportador', 'Transportador', 'o');
     this.medir();
-    this.ayuda = 'Transportador: pon el centro sobre el vértice, gira con las asas hasta que la base pase por la recta y, con el portaminas, toca el borde para marcar el ángulo.';
+    this.ayuda = 'Transportador: pon el centro sobre el vértice, gira con las asas hasta que la línea de 0°-180° pase por la recta y, con el portaminas, toca el borde para marcar el ángulo. Su base es una regla: también sirve para trazar.';
   }
+  // Semicírculo sobre una base recta con regla en mm; el centro está sobre la línea de 0°-180°
   medir() {
-    const cm = Config.get('tamTransportador') || 13;
-    const Ro = this.Ro = cm * 5;
-    const ri = this.ri = Ro - 39;     // radio del hueco
+    const cm = this.cm = Config.get('tamTransportador') || 13;
+    const Ro = this.Ro = cm * 5, k = this.k = Ro / 65;
+    const B = this.B = 16;                       // alto de la base, por debajo de la línea de 0°-180°
+    const ri = this.ri = Ro - 23;                // radio del hueco: justo dentro de la escala interior
+    const pt = (r, g) => [r * Math.cos(g * Math.PI / 180), -r * Math.sin(g * Math.PI / 180)];
     const arco = (r, a0, a1, paso) => {
       const v = [];
-      for (let g = a0; g <= a1 + 1e-9; g += paso) v.push([r * Math.cos(g * Math.PI / 180), -r * Math.sin(g * Math.PI / 180)]);
+      for (let g = a0; g <= a1 + 1e-9; g += paso) v.push(pt(r, g));
       return v;
     };
-    this.poligono = arco(Ro, 0, 180, 2);                 // de (Ro, 0) a (−Ro, 0); se cierra por la base
-    this.agujero = arco(ri, 14, 166, 4);
-    this.cantos = [{ i: this.poligono.length - 1, j: 0 }];
-    const ra = Ro - 29;
-    const asa = g => ({ x: ra * Math.cos(g * Math.PI / 180), y: -ra * Math.sin(g * Math.PI / 180), pivote: [0, 0] });
-    this.asas = [asa(35), asa(145)];
-    this.candado = [0, -ra];
+    // Contorno: arco de 0° a 180°, bajada por la izquierda, base y subida por la derecha
+    this.poligono = arco(Ro, 0, 180, 2).concat([[-Ro, B], [Ro, B]]);
+    // Hueco en forma de «D»: arco cerrado por una cuerda horizontal por encima del centro
+    const hc = this.hc = 17 * k, g0 = Math.asin(hc / ri) * 180 / Math.PI;
+    this.agujero = arco(ri, g0, 180 - g0, 3);
+    this.agujero.push(pt(ri, 180 - g0));          // último punto exacto; el polígono se cierra por la cuerda
+    const n = this.poligono.length;
+    this.cantos = [
+      // Base: regla graduada con el 0 a la derecha (los números se leen girando el transportador)
+      { i: n - 1, j: n - 2, graduado: true, origen: [Ro - 5, B], max: Math.floor((2 * Ro - 10) / 10) * 10 },
+      // Línea impresa de 0°-180° que pasa por el centro
+      { a: [-Ro, 0], b: [Ro, 0], virtual: true },
+    ];
+    // Asas junto al borde del hueco, por debajo de la cuerda, sin tapar la escala interior
+    const ra = ri + 1, ga = Math.min(13, g0 * 0.45);
+    this.asas = [{ x: pt(ra, ga)[0], y: pt(ra, ga)[1], pivote: [0, 0] }, { x: pt(ra, 180 - ga)[0], y: pt(ra, 180 - ga)[1], pivote: [0, 0] }];
+    this.candado = [0, -hc * 0.68];
     this.origenIman = [0, 0];
-    this.cm = cm;
+    this.rotulos = [
+      { x: -Ro * 0.27, y: -hc * 0.42, texto: 'DibuTec', tam: 4 * k, marca: true },
+      { x: Ro * 0.29, y: -hc * 0.42, texto: `– ${cm} cm –`, tam: 2.8 * k },
+    ];
   }
-  // Rótulos curvados entre el hueco y la escala: el nombre a la izquierda y el tamaño a la derecha
-  dibujarRotulos(ctx) {
-    if (Vista.escala < 1) return;
-    const fuente = getComputedStyle(document.body).fontFamily, r = this.Ro - 29;
-    ctx.fillStyle = Paleta.instrumento().tinta;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const curvo = (texto, gCentro, tam, peso) => {
-      ctx.font = `${peso} ${tam}px ${fuente}`;
-      const anchos = [...texto].map(c => ctx.measureText(c).width);
-      const total = anchos.reduce((a, b) => a + b, 0);
-      let a = gCentro * Math.PI / 180 + total / 2 / r;   // de izquierda a derecha = sentido horario
-      [...texto].forEach((c, i) => {
-        const m = a - anchos[i] / 2 / r;
-        ctx.save();
-        ctx.translate(r * Math.cos(m), -r * Math.sin(m));
-        ctx.rotate(Math.PI / 2 - m);
-        ctx.fillText(c, 0, 0);
-        ctx.restore();
-        a -= anchos[i] / r;
-      });
-    };
-    const k = Math.min(1, this.Ro / 65);
-    curvo('DibuTec', 117, 4 * k, 'italic 800');
-    if (this.Ro >= 60) curvo(`180° · ${this.cm} cm`, 63, 2.6, '600');
-  }
-  centroLocal() { return [0, -this.Ro * 0.42]; }
+  centroLocal() { return [0, -this.Ro * 0.3]; }
   zonaLapiz(info) {
     const p = this.aLocal(info.x, info.y), r = Math.hypot(p.x, p.y);
     const banda = Instrumentos.bandaPx(info.tipo) / Vista.escala;
@@ -2250,13 +2244,36 @@ class Transportador extends Instrumento {
       ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
       if (diez) { const c = pt(Ro - 18.5, g), d = pt(Ro - 20.5, g); ctx.moveTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); }
     }
-    // Línea de 90° y cruz del centro
-    ctx.moveTo(0, -this.ri); ctx.lineTo(0, 0);
-    ctx.moveTo(-4, 0); ctx.lineTo(4, 0);
+    // Línea de 0°-180° de lado a lado (por el centro) y trazo de 90° bajo el hueco
+    const L = Ro - 1.5;
+    ctx.moveTo(-L, 0); ctx.lineTo(L, 0);
+    ctx.moveTo(0, -this.hc); ctx.lineTo(0, -this.hc + 2.5);
     ctx.stroke();
+    ctx.fillStyle = e.tinta;
+    // Flechas en los extremos de la línea base
+    for (const sg of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(sg * L, 0); ctx.lineTo(sg * (L - 3.2), -1.1); ctx.lineTo(sg * (L - 3.2), 1.1);
+      ctx.closePath(); ctx.fill();
+    }
+    // Centro: cuatro flechas que apuntan al punto, como en la referencia
+    for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {
+      ctx.beginPath();
+      ctx.moveTo(dx * 0.7, dy * 0.7);
+      ctx.lineTo(dx * 3.2 + dy * 0.0, dy * 2.2); ctx.lineTo(dx * 2.2, dy * 3.2);
+      ctx.closePath(); ctx.fill();
+    }
     ctx.beginPath();
-    ctx.arc(0, 0, 1.2, 0, Geom.DOS_PI);
+    ctx.moveTo(0, -4.5); ctx.lineTo(0, 4.5);
     ctx.stroke();
+    // Flechas en el borde del hueco a 45°, 90° y 135°
+    for (const g of [45, 90, 135]) {
+      const a = pt(this.ri + 0.4, g), b = pt(this.ri + 3.4, g), m = g * Math.PI / 180;
+      const nx = Math.sin(m) * 1.1, ny = Math.cos(m) * 1.1;
+      ctx.beginPath();
+      ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0] + nx, b[1] + ny); ctx.lineTo(b[0] - nx, b[1] - ny);
+      ctx.closePath(); ctx.fill();
+    }
     // Números: escala exterior (oscura) e interior (roja, al revés)
     const fuente = getComputedStyle(document.body).fontFamily;
     const numero = (texto, r, g, tam, color) => {
@@ -2272,11 +2289,24 @@ class Transportador extends Instrumento {
       ctx.restore();
     };
     const paso = Ro * Math.PI / 18 * Vista.escala < 18 ? 30 : 10;
+    const kn = Math.min(1, Ro / 65);   // números algo más pequeños en el transportador pequeño
     for (let g = 0; g <= 180; g += paso) {
-      const m = 3.5 * 65 / Ro, pos = g === 0 ? m : g === 180 ? 180 - m : g;   // el 0 y el 180 no caben sobre la base
-      numero(String(g), Ro - 9.5, pos, 3.2, e.tinta);
-      numero(String(180 - g), Ro - 15, pos, 2.6, e.inversa || e.tinta);
+      if (g === 90) {
+        numero('90', Ro - 10.5, 90, 4.6, e.tinta);   // el 90, más grande, como en la referencia
+        continue;
+      }
+      // El 0 y el 180 se suben lo justo (según el ancho del número) para no pisar la línea base
+      const pos = (texto, r, tam) => {
+        if (g !== 0 && g !== 180) return g;
+        ctx.font = `600 ${tam}px ${fuente}`;
+        const m = Math.asin((ctx.measureText(texto).width / 2 + 0.4) / r) * 180 / Math.PI;
+        return g === 0 ? m : 180 - m;
+      };
+      const t1 = 3.2 * kn, t2 = 2.6 * kn;
+      numero(String(g), Ro - 9.5, pos(String(g), Ro - 9.5, t1), t1, e.tinta);
+      numero(String(180 - g), Ro - 15, pos(String(180 - g), Ro - 15, t2), t2, e.inversa || e.tinta);
     }
+    for (const k of this.cantos) if (k.graduado) this.graduar(ctx, k);
     this.dibujarRotulos(ctx);
   }
 }
@@ -2443,7 +2473,7 @@ const Instrumentos = {
       }
     }
     let mejor = null;
-    for (const k of inst.cantosMundo()) {
+    for (const k of inst.cantosApoyo()) {
       for (const p of objetivos) {
         const t = (p.x - k.a.x) * k.u.x + (p.y - k.a.y) * k.u.y;
         if (t < 0 || t > k.len) continue;
@@ -2485,7 +2515,7 @@ const Instrumentos = {
     if (!Config.get('imanInstrumentos')) return null;
     const radio = Snap.radioPx(tipo) / Vista.escala;
     let mejor = null;
-    for (const k of inst.cantosMundo()) {
+    for (const k of inst.cantosApoyo()) {
       const dp = (piv.x - k.a.x) * k.n.x + (piv.y - k.a.y) * k.n.y;
       if (Math.abs(dp) > 1e-6) continue;           // el pivote no está sobre este canto
       for (const p of Escena.objetivos()) {
@@ -4183,7 +4213,7 @@ const Ejercicio = {
       const p = this.punto(o.origenEn), q = inst.aMundo(...inst.origenIman);
       if (!p || Geom.dist(p.x, p.y, q.x, q.y) > tol) return `Coloca el centro de ${inst.conArticulo} en ${this.nombreDe(o.origenEn)}.`;
     }
-    const cantos = inst.cantosMundo();
+    const cantos = inst.cantosApoyo();
     const dLinea = (k, x, y) => Math.abs((x - k.a.x) * k.n.x + (y - k.a.y) * k.n.y);
     if (o.cantoSobre !== undefined) {
       const L = this.linea(o.cantoSobre);
