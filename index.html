@@ -151,7 +151,7 @@
     opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10;
   }
   #velo.visible { opacity: 1; pointer-events: auto; }
-  #panel-config {
+  .panel {
     position: fixed; top: 0; right: 0; bottom: 0; z-index: 11;
     width: min(380px, 100%);
     background: var(--barra); box-shadow: -8px 0 30px rgba(0,0,0,.15);
@@ -160,8 +160,36 @@
     padding-top: env(safe-area-inset-top);
     padding-right: env(safe-area-inset-right);
   }
-  #panel-config.abierto { transform: none; }
-  @media (max-width: 600px) { #panel-config { width: 100%; } }
+  .panel.abierto { transform: none; }
+  @media (max-width: 600px) { .panel { width: 100%; } }
+  .panel-cuerpo p { margin: 6px 0; line-height: 1.45; font-size: 15px; }
+  .panel-cuerpo .nota-final { font-size: 13px; color: var(--texto-suave); margin-top: 18px; }
+  .btn-texto.primero { margin-top: 10px; }
+  .btn-texto + .btn-texto { margin-top: 10px; }
+  .ayuda-bloque { display: flex; gap: 12px; margin: 14px 0; align-items: flex-start; }
+  .ayuda-bloque .ico {
+    flex: none; width: 40px; height: 40px; border-radius: 10px; background: var(--activo-fondo);
+    display: grid; place-items: center; color: var(--activo);
+  }
+  .ayuda-bloque .ico svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ayuda-bloque .ico svg .a { fill: var(--acento-activo); }
+  .ayuda-bloque h4 { margin: 0 0 2px; font-size: 16px; }
+  .ayuda-bloque p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--texto); }
+  .atajos { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .atajos td { padding: 4px 0; border-bottom: 1px solid var(--borde); }
+  kbd {
+    display: inline-block; min-width: 22px; padding: 1px 6px; border: 1px solid var(--borde);
+    border-bottom-width: 2px; border-radius: 6px; background: #faf8f4; font: 600 13px var(--fuente); text-align: center;
+  }
+  @media (pointer: coarse) { .solo-raton { display: none !important; } }
+  @media (pointer: fine) { .solo-tactil { display: none !important; } }
+
+  /* Lupa de precisión para el dedo */
+  #lienzo #lupa {
+    position: absolute; display: none; z-index: 3; pointer-events: none; inset: auto;
+    width: 150px; height: 150px; border-radius: 50%;
+    border: 3px solid #fff; box-shadow: 0 6px 22px rgba(0, 0, 0, .35), 0 0 0 1px rgba(0, 0, 0, .15);
+  }
   .panel-cab {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 10px 10px 18px; border-bottom: 1px solid var(--borde);
@@ -246,6 +274,7 @@
     <canvas id="capa-papel"></canvas>
     <canvas id="capa-dibujo"></canvas>
     <canvas id="capa-instrumentos"></canvas>
+    <canvas id="lupa" aria-hidden="true"></canvas>
   </main>
   <footer id="estado">
     <span id="mensaje" aria-live="polite"></span>
@@ -255,13 +284,28 @@
 </div>
 
 <div id="velo"></div>
-<aside id="panel-config" role="dialog" aria-modal="true" aria-labelledby="titulo-config" aria-hidden="true">
+<aside id="panel-config" class="panel" role="dialog" aria-modal="true" aria-labelledby="titulo-config" aria-hidden="true">
   <div class="panel-cab">
     <h2 id="titulo-config">Configuración</h2>
-    <button class="btn" id="cerrar-config" type="button" aria-label="Cerrar" title="Cerrar (Esc)"></button>
+    <button class="btn cerrar-panel" type="button" aria-label="Cerrar" title="Cerrar (Esc)"></button>
   </div>
   <div class="panel-cuerpo" id="config-cuerpo"></div>
 </aside>
+<aside id="panel-archivo" class="panel" role="dialog" aria-modal="true" aria-labelledby="titulo-archivo" aria-hidden="true">
+  <div class="panel-cab">
+    <h2 id="titulo-archivo">Dibujo</h2>
+    <button class="btn cerrar-panel" type="button" aria-label="Cerrar" title="Cerrar (Esc)"></button>
+  </div>
+  <div class="panel-cuerpo" id="archivo-cuerpo"></div>
+</aside>
+<aside id="panel-ayuda" class="panel" role="dialog" aria-modal="true" aria-labelledby="titulo-ayuda" aria-hidden="true">
+  <div class="panel-cab">
+    <h2 id="titulo-ayuda">Cómo se usa</h2>
+    <button class="btn cerrar-panel" type="button" aria-label="Cerrar" title="Cerrar (Esc)"></button>
+  </div>
+  <div class="panel-cuerpo" id="ayuda-cuerpo"></div>
+</aside>
+<input type="file" id="abrir-archivo" accept=".json,application/json" hidden>
 <div id="aviso" role="status"></div>
 
 <script>
@@ -315,6 +359,7 @@ const Iconos = (() => {
     exportar: `<rect x="3" y="3" width="18" height="18" rx="2"/><circle class="a" cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>`,
     papelera: `<path d="M3 6h18M8 6V4h8v2"/><path class="a" d="M6 6l1 15h10l1-15Z"/><path d="M10 11v6M14 11v6"/>`,
     cerrar:   `<path d="M6 6l12 12M18 6 6 18"/>`,
+    ayuda:    `<circle class="a" cx="12" cy="12" r="10"/><path d="M9.2 9a2.9 2.9 0 0 1 5.6 1c0 2-2.8 2.6-2.8 4"/><path d="M12 17.5h.01"/>`,
   };
   const out = {};
   for (const k in d) out[k] = svg(d[k]);
@@ -342,6 +387,8 @@ const Config = {
     sonidos:        { def: true,     ops: [true, false] },
     ayuda:          { def: true,     ops: [true, false] },
     interfaz:       { def: 'normal', ops: ['normal', 'grande'] },
+    lupa:           { def: true,     ops: [true, false] },
+    exportarFondo:  { def: true,     ops: [true, false] },
   },
   valores: {},
   oyentes: [],
@@ -736,7 +783,9 @@ const Render = {
     if (p.papel) this.papel();
     if (p.dibujo) this.dibujo();
     if (p.instrumentos) this.instrumentos();
+    if (p.dibujo || p.instrumentos) Guardado.programar();
     p.papel = p.dibujo = p.instrumentos = false;
+    Lupa.pintar();
   },
 
   papel() {
@@ -757,19 +806,23 @@ const Render = {
     const m = Capas.ctxMundo(c);
     const v0 = Vista.aMundo(0, 0), v1 = Vista.aMundo(Capas.w, Capas.h);
     Papel.dibujar(m, { x0: v0.x, y0: v0.y, x1: v1.x, y1: v1.y });
-    // Margen
-    if (Config.get('margen')) {
-      const mg = Hoja.margen;
-      m.strokeStyle = Config.get('papel') === 'blanco' ? 'rgba(70, 90, 140, .45)' : Paleta.lineasRGBA(0.85);
-      m.lineWidth = 1.2 / Vista.escala;
-      m.strokeRect(mg, mg, Hoja.ancho - 2 * mg, Hoja.alto - 2 * mg);
-    }
+    this.margen(m);
+  },
+  margen(m) {
+    if (!Config.get('margen')) return;
+    const mg = Hoja.margen;
+    m.strokeStyle = Config.get('papel') === 'blanco' ? 'rgba(70, 90, 140, .45)' : Paleta.lineasRGBA(0.85);
+    m.lineWidth = 1.2 / Vista.escala;
+    m.strokeRect(mg, mg, Hoja.ancho - 2 * mg, Hoja.alto - 2 * mg);
   },
 
   dibujo() {
     const c = Capas.dibujo;
     Capas.limpiar(c);
-    const ctx = Capas.ctxMundo(c);
+    this.pintarEscena(Capas.ctxMundo(c));
+  },
+  // Puntos, rectas y arcos sobre un contexto en mm (pantalla o exportación)
+  pintarEscena(ctx) {
     const color = Paleta.grafito[Config.get('grafito')];
     ctx.strokeStyle = color;
     ctx.lineWidth = Dibujo.grosor();
@@ -802,15 +855,50 @@ const Escena = {
   arcos: [],    // {id, cx, cy, r, a0, a1}
   sigId: 1,
 
+  // Instantánea: dibujo y posición de los instrumentos
   datos() {
-    return JSON.stringify({ puntos: this.puntos, rectas: this.rectas, arcos: this.arcos, sigId: this.sigId });
+    const inst = Instrumentos.lista.map(i => ({ tipo: i.tipo, x: i.x, y: i.y, rot: i.rot, r: i.r,
+      bloqueado: i.bloqueado, colocado: i.colocado, visible: i.visible }));
+    return JSON.stringify({ puntos: this.puntos, rectas: this.rectas, arcos: this.arcos, sigId: this.sigId, instrumentos: inst });
   },
-  cargarDatos(json) {
-    const d = JSON.parse(json);
-    this.puntos = d.puntos || []; this.rectas = d.rectas || []; this.arcos = d.arcos || [];
-    this.sigId = d.sigId || 1;
+  // completo = también la visibilidad y el orden de los instrumentos (al abrir un dibujo)
+  cargarDatos(json, completo = false) {
+    const d = this.limpiar(typeof json === 'string' ? JSON.parse(json) : json);
+    this.puntos = d.puntos; this.rectas = d.rectas; this.arcos = d.arcos;
+    this.sigId = d.sigId;
+    const fin = Number.isFinite;
+    const orden = [];
+    for (const e of d.instrumentos) {
+      const inst = Instrumentos.porTipo[e && e.tipo];
+      if (!inst || !fin(e.x) || !fin(e.y) || !fin(e.rot)) continue;
+      inst.x = e.x; inst.y = e.y; inst.rot = e.rot;
+      if ('r' in inst && fin(e.r) && e.r > 0) inst.r = Math.min(e.r, inst.rMax);
+      inst.bloqueado = !!e.bloqueado;
+      inst.colocado = !!e.colocado;
+      if (completo) { inst.visible = !!e.visible; orden.push(inst); }
+    }
+    if (completo && orden.length) {
+      for (const i of Instrumentos.lista) if (!orden.includes(i)) orden.unshift(i);
+      Instrumentos.lista = orden;
+    }
+    UI.marcarInstrumentos();
     Render.pedir('dibujo', 'instrumentos');
   },
+  // Valida datos que vienen de fuera (archivo o almacenamiento del navegador)
+  limpiar(d) {
+    const fin = Number.isFinite, lista = v => Array.isArray(v) ? v : [];
+    d = d && typeof d === 'object' ? d : {};
+    const puntos = lista(d.puntos).filter(p => p && fin(p.x) && fin(p.y))
+      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 6) }));
+    const rectas = lista(d.rectas).filter(r => r && [r.x1, r.y1, r.x2, r.y2].every(fin))
+      .map(r => ({ id: fin(r.id) ? r.id : 0, x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2 }));
+    const arcos = lista(d.arcos).filter(a => a && [a.cx, a.cy, a.r, a.a0, a.a1].every(fin) && a.r > 0)
+      .map(a => ({ id: fin(a.id) ? a.id : 0, cx: a.cx, cy: a.cy, r: a.r, a0: a.a0, a1: a.a1 }));
+    let sigId = fin(d.sigId) ? d.sigId : 1;
+    for (const o of [...puntos, ...rectas, ...arcos]) { if (!o.id) o.id = sigId++; sigId = Math.max(sigId, o.id + 1); }
+    return { puntos, rectas, arcos, sigId, instrumentos: lista(d.instrumentos) };
+  },
+  estaVacia() { return !this.puntos.length && !this.rectas.length && !this.arcos.length; },
   vaciar() { this.puntos = []; this.rectas = []; this.arcos = []; Render.pedir('dibujo', 'instrumentos'); },
 
   // Etiquetas A…Z, luego A1…Z1, A2…; se usa la primera libre
@@ -880,8 +968,9 @@ const Historial = {
   pendiente: null,
 
   // Guarda el estado actual antes de un cambio
-  registrar() {
-    this.pasado.push(Escena.datos());
+  registrar() { this.empujar(Escena.datos()); },
+  empujar(instantanea) {
+    this.pasado.push(instantanea);
     if (this.pasado.length > this.limite) this.pasado.shift();
     this.futuro = [];
     this.pendiente = null;
@@ -2060,6 +2149,7 @@ const Manip = {
     } else {
       this.estado = { inst, modo: 'mover', id: info.id, tipo: info.tipo, dx: inst.x - info.x, dy: inst.y - info.y, guia: null };
     }
+    this.estado.antes = Escena.datos();   // para poder deshacer el movimiento
     Capas.contenedor.classList.add('arrastrando');
     Render.pedir('instrumentos');
   },
@@ -2068,7 +2158,7 @@ const Manip = {
     const e = this.estado;
     if (!e || e.modo !== 'mover') return false;
     const [a, b] = toques;
-    this.estado = { inst: e.inst, modo: 'dos', tipo: 'touch', ids: [a.id, b.id], pos: { [a.id]: Vista.aMundo(a.x, a.y), [b.id]: Vista.aMundo(b.x, b.y) } };
+    this.estado = { inst: e.inst, modo: 'dos', tipo: 'touch', antes: e.antes, ids: [a.id, b.id], pos: { [a.id]: Vista.aMundo(a.x, a.y), [b.id]: Vista.aMundo(b.x, b.y) } };
     return true;
   },
   mover(info, e) {
@@ -2214,13 +2304,13 @@ const Manip = {
     const s = this.estado;
     if (s && s.modo === 'trazar' && confirmar && !s.sinTrazo && Math.abs(s.barrido) > Math.PI / 180) {
       const inst = s.inst;
-      Historial.registrar();
       const a = Escena.agregarArco(inst.x, inst.y, inst.r, s.a0, s.a0 + s.barrido);
       Sonido.tocar('punto');
       UI.mensaje(Geom.esCircunferencia(a)
         ? `Circunferencia trazada (radio ${Lapiz.mmTexto(a.r)}).`
         : `Arco trazado: ${Math.round(Math.abs(s.barrido) * 180 / Math.PI)}°, radio ${Lapiz.mmTexto(a.r)}.`);
     }
+    if (s && s.antes && Escena.datos() !== s.antes) Historial.empujar(s.antes);
     this.estado = null;
     this.halo = null;
     Capas.contenedor.classList.remove('arrastrando');
@@ -2370,6 +2460,7 @@ const Entrada = {
 
     const toques = [...this.punteros.values()].filter(q => q.tipo === 'touch');
     if (e.pointerType === 'touch' && toques.length === 2) {
+      Lupa.ocultar();
       // Segundo dedo mientras se arrastra un instrumento: mover y girar con dos dedos
       if (this.accion && this.accion.manip && Manip.dosDedos(toques)) return;
       // Empieza pellizco: cancela cualquier arrastre o acción de un dedo
@@ -2388,6 +2479,7 @@ const Entrada = {
       if (hit && hit.modo === 'candado') {
         e.preventDefault();
         const inst = hit.inst;
+        Historial.registrar();
         inst.bloqueado = !inst.bloqueado;
         Sonido.tocar('iman');
         UI.mensaje(inst.bloqueado
@@ -2402,6 +2494,7 @@ const Entrada = {
         if (acc) acc.salir();
         this.accion = { id: e.pointerId, manip: true };
         Manip.iniciar(hit, info);
+        if (e.pointerType === 'touch') Lupa.seguir(p);
         return;
       }
     }
@@ -2423,6 +2516,7 @@ const Entrada = {
       e.preventDefault();
       this.accion = { id: e.pointerId };
       acc.abajo(info);
+      if (e.pointerType === 'touch') Lupa.seguir(p);
     }
   },
 
@@ -2446,6 +2540,7 @@ const Entrada = {
       return;
     }
     q.x = p.x; q.y = p.y;
+    if (e.pointerType === 'touch' && this.accion && !this.gesto) Lupa.seguir(p);
     if (this.accion && this.accion.manip) {
       if (Manip.usa(e.pointerId)) Manip.mover(this.info(e, p), e);
       return;
@@ -2474,6 +2569,7 @@ const Entrada = {
   arriba(e) {
     if (!this.punteros.has(e.pointerId)) return;
     this.punteros.delete(e.pointerId);
+    if (e.pointerType === 'touch') Lupa.ocultar();
     if (e.pointerType === 'pen') this.lapizDigitalActivo = false;
     if (this.accion && this.accion.manip) {
       if (Manip.usa(e.pointerId)) {
@@ -2538,6 +2634,7 @@ const Entrada = {
     }
     if (e.altKey) return;
     if (k === 'Escape') { Acciones.cancelarActual(); return; }
+    if (k === '?' || k === 'F1') { UI.abrirPanel('ayuda'); e.preventDefault(); return; }
     if (k === '+' || k === '=') { this.zoomCentro(1.25); e.preventDefault(); return; }
     if (k === '-' || k === '_') { this.zoomCentro(1 / 1.25); e.preventDefault(); return; }
     if (k === '0') { Vista.ajustar(); return; }
@@ -2609,14 +2706,19 @@ const UI = {
     gHist.append(this.btnDeshacer, this.btnRehacer);
     sep();
     const gZoom = grupo();
-    gZoom.append(
-      this.crearBoton({ nombre: 'Acercar', tecla: '+', icono: 'zoomMas', alPulsar: () => Entrada.zoomCentro(1.25) }),
-      this.crearBoton({ nombre: 'Alejar',  tecla: '−', icono: 'zoomMenos', alPulsar: () => Entrada.zoomCentro(1 / 1.25) }),
+    const mas = this.crearBoton({ nombre: 'Acercar', tecla: '+', icono: 'zoomMas', alPulsar: () => Entrada.zoomCentro(1.25) });
+    const menos = this.crearBoton({ nombre: 'Alejar', tecla: '−', icono: 'zoomMenos', alPulsar: () => Entrada.zoomCentro(1 / 1.25) });
+    mas.classList.add('solo-raton'); menos.classList.add('solo-raton');   // en tablet se usan dos dedos
+    gZoom.append(mas, menos,
       this.crearBoton({ nombre: 'Ver la hoja entera', tecla: '0', icono: 'ajustar', alPulsar: () => Vista.ajustar() }),
     );
     const esp = document.createElement('div'); esp.className = 'espaciador'; barra.appendChild(esp);
     const gConf = grupo();
-    gConf.appendChild(this.crearBoton({ nombre: 'Configuración', icono: 'engranaje', alPulsar: () => this.abrirPanel() }));
+    gConf.append(
+      this.crearBoton({ nombre: 'Ayuda', tecla: '?', icono: 'ayuda', alPulsar: () => this.abrirPanel('ayuda') }),
+      this.crearBoton({ nombre: 'Dibujo: nuevo, guardar, abrir, exportar', icono: 'guardar', alPulsar: () => this.abrirPanel('archivo') }),
+      this.crearBoton({ nombre: 'Configuración', icono: 'engranaje', alPulsar: () => this.abrirPanel('config') }),
+    );
   },
 
   marcarHerramienta(id) {
@@ -2656,31 +2758,37 @@ const UI = {
     document.getElementById('zoom').textContent = `${Vista.porcentaje()} %`;
   },
 
-  abrirPanel() {
-    this.panelAbierto = true;
-    const p = document.getElementById('panel-config');
+  abrirPanel(id = 'config') {
+    if (this.panelAbierto) this.cerrarPanel();
+    Acciones.cancelarActual();
+    this.panelAbierto = id;
+    const p = document.getElementById('panel-' + id);
     p.classList.add('abierto');
     p.setAttribute('aria-hidden', 'false');
     p.inert = false;
     document.getElementById('velo').classList.add('visible');
-    document.getElementById('cerrar-config').focus();
+    p.querySelector('.cerrar-panel').focus();
   },
   cerrarPanel() {
     this.panelAbierto = false;
-    const p = document.getElementById('panel-config');
-    p.classList.remove('abierto');
-    p.setAttribute('aria-hidden', 'true');
-    p.inert = true;
+    for (const p of document.querySelectorAll('.panel')) {
+      p.classList.remove('abierto');
+      p.setAttribute('aria-hidden', 'true');
+      p.inert = true;
+    }
     document.getElementById('velo').classList.remove('visible');
   },
 
   iniciar() {
     this.construirBarra();
     Panel.construir();
-    document.getElementById('panel-config').inert = true;
-    const cerrar = document.getElementById('cerrar-config');
-    cerrar.innerHTML = Iconos.cerrar;
-    cerrar.addEventListener('click', () => this.cerrarPanel());
+    Archivo.construir();
+    Ayuda.construir();
+    for (const p of document.querySelectorAll('.panel')) p.inert = true;
+    for (const b of document.querySelectorAll('.cerrar-panel')) {
+      b.innerHTML = Iconos.cerrar;
+      b.addEventListener('click', () => this.cerrarPanel());
+    }
     document.getElementById('velo').addEventListener('click', () => this.cerrarPanel());
     document.getElementById('zoom').addEventListener('click', () => Vista.ajustar());
   },
@@ -2728,6 +2836,7 @@ const Panel = {
     this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
     this.interruptor(c, 'sonidos', 'Sonidos');
     this.interruptor(c, 'ayuda', 'Mensajes de ayuda');
+    this.interruptor(c, 'lupa', 'Lupa al dibujar con el dedo');
     this.fila(c, 'Tamaño de los botones', this.segmentado('interfaz', [['normal', 'Normal'], ['grande', 'Grande']]));
 
     const rest = document.createElement('button');
@@ -2832,8 +2941,8 @@ const Panel = {
 
   // Refleja la configuración actual en los controles
   actualizar() {
-    const c = this.cuerpo;
-    if (!c) return;
+    if (!this.cuerpo) return;
+    const c = document;
     c.querySelectorAll('[role=radiogroup]').forEach(g => {
       const actual = JSON.stringify(Config.get(g.dataset.clave));
       g.querySelectorAll('[role=radio]').forEach(b => {
@@ -2852,6 +2961,223 @@ const Panel = {
       const igual = String(Config.get(k)) === v;
       f.hidden = op === '=' ? !igual : igual;
     });
+  },
+};
+
+/* =====================================================================
+   Guardado automático en el navegador
+   ===================================================================== */
+const Guardado = {
+  clave: 'dibutec.dibujo',
+  temporizador: 0,
+  listo: false,      // no guardar hasta haber recuperado lo anterior
+  programar() {
+    if (!this.listo) return;
+    clearTimeout(this.temporizador);
+    this.temporizador = setTimeout(() => this.guardar(), 400);
+  },
+  guardar() {
+    try { localStorage.setItem(this.clave, Escena.datos()); } catch (_) { /* sin almacenamiento */ }
+  },
+  recuperar() {
+    let datos = null;
+    try { datos = localStorage.getItem(this.clave); } catch (_) {}
+    if (datos) {
+      try { Escena.cargarDatos(datos, true); } catch (_) { /* datos dañados: se empieza en blanco */ }
+    }
+    this.listo = true;
+    return !!datos && !Escena.estaVacia();
+  },
+};
+
+/* =====================================================================
+   Archivo: nueva hoja, guardar, abrir y exportar imagen
+   ===================================================================== */
+const Archivo = {
+  clavesPapel: ['papel', 'cuadro', 'triangulo', 'colorLineas', 'colorPapel', 'hoja', 'margen'],
+
+  construir() {
+    const c = document.getElementById('archivo-cuerpo');
+    const boton = (icono, texto, accion, clase) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn-texto' + (clase ? ' ' + clase : '');
+      b.innerHTML = Iconos[icono] + `<span>${texto}</span>`;
+      b.addEventListener('click', accion);
+      c.appendChild(b);
+      return b;
+    };
+    const titulo = t => { const h = document.createElement('h3'); h.textContent = t; c.appendChild(h); };
+    titulo('Hoja');
+    boton('papelera', 'Empezar una hoja nueva', () => this.nueva(), 'primero');
+    titulo('Archivo');
+    boton('guardar', 'Guardar el dibujo en un archivo', () => this.guardar(), 'primero');
+    boton('abrir', 'Abrir un dibujo guardado', () => document.getElementById('abrir-archivo').click());
+    titulo('Imagen');
+    Panel.interruptor(c, 'exportarFondo', 'Con el fondo del papel', 'Sin fondo, la imagen solo tiene el dibujo, sobre transparente.');
+    boton('exportar', 'Exportar como imagen (PNG)', () => this.exportarPNG(), 'primero');
+    const n = document.createElement('p');
+    n.className = 'nota-final';
+    n.textContent = 'El dibujo se guarda solo en este navegador. Para llevarlo a otro ordenador o tablet, guárdalo en un archivo.';
+    c.appendChild(n);
+    document.getElementById('abrir-archivo').addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (f) this.leer(f);
+    });
+  },
+  nombreBase() {
+    const d = new Date(), z = n => String(n).padStart(2, '0');
+    return `dibutec-${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`;
+  },
+  descargar(blob, nombre) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  },
+  nueva() {
+    UI.cerrarPanel();
+    if (Escena.estaVacia()) { UI.aviso('La hoja ya está limpia.'); return; }
+    Historial.registrar();
+    Escena.vaciar();
+    Sonido.tocar('borrar');
+    UI.mensaje('Hoja nueva. Si te has equivocado, pulsa deshacer.');
+  },
+  guardar() {
+    const papel = {};
+    for (const k of this.clavesPapel) papel[k] = Config.get(k);
+    const datos = { app: 'DibuTec', version: 1, guardado: new Date().toISOString(), papel, dibujo: JSON.parse(Escena.datos()) };
+    this.descargar(new Blob([JSON.stringify(datos)], { type: 'application/json' }), this.nombreBase() + '.json');
+    UI.aviso('Dibujo guardado en un archivo.');
+  },
+  leer(archivo) {
+    const fallo = () => UI.aviso('Ese archivo no es un dibujo de DibuTec.');
+    if (archivo.size > 5e6) { fallo(); return; }
+    archivo.text().then(texto => {
+      let d;
+      try { d = JSON.parse(texto); } catch (_) { fallo(); return; }
+      if (!d || d.app !== 'DibuTec' || !d.dibujo || typeof d.dibujo !== 'object') { fallo(); return; }
+      Historial.registrar();
+      if (d.papel && typeof d.papel === 'object')
+        for (const k of this.clavesPapel) if (k in d.papel) Config.set(k, d.papel[k]);
+      Escena.cargarDatos(d.dibujo, true);
+      UI.cerrarPanel();
+      UI.aviso('Dibujo abierto.');
+      UI.mensaje(`Dibujo «${archivo.name}» abierto. Si quieres volver al anterior, pulsa deshacer.`);
+    }, fallo);
+  },
+  // Imagen de la hoja entera a unos 200 ppp, sin instrumentos
+  exportarPNG() {
+    const k = 8;
+    const W = Math.round(Hoja.ancho * k), H = Math.round(Hoja.alto * k);
+    const lienzo = document.createElement('canvas');
+    lienzo.width = W; lienzo.height = H;
+    const ctx = lienzo.getContext('2d');
+    const vista = { escala: Vista.escala, ox: Vista.ox, oy: Vista.oy };
+    Vista.escala = k; Vista.ox = 0; Vista.oy = 0;   // los grosores se calculan con la escala de la imagen
+    try {
+      ctx.setTransform(k, 0, 0, k, 0, 0);
+      if (Config.get('exportarFondo')) {
+        ctx.fillStyle = Paleta.papel[Config.get('colorPapel')];
+        ctx.fillRect(0, 0, Hoja.ancho, Hoja.alto);
+        Papel.dibujar(ctx, { x0: 0, y0: 0, x1: Hoja.ancho, y1: Hoja.alto });
+        Render.margen(ctx);
+      }
+      Render.pintarEscena(ctx);
+    } finally {
+      Object.assign(Vista, vista);
+    }
+    lienzo.toBlob(b => {
+      if (!b) { UI.aviso('No se ha podido crear la imagen.'); return; }
+      this.descargar(b, this.nombreBase() + '.png');
+      UI.aviso('Imagen exportada.');
+    }, 'image/png');
+  },
+};
+
+/* =====================================================================
+   Lupa de precisión: al usar el dedo muestra ampliado lo que hay debajo
+   ===================================================================== */
+const Lupa = {
+  el: null,
+  D: 150,           // diámetro en px CSS
+  aumento: 2.5,
+  dedo: null,       // posición del dedo en el lienzo (px CSS)
+  seguir(p) { this.dedo = { x: p.x, y: p.y }; Render.pedir('instrumentos'); },
+  ocultar() { this.dedo = null; if (this.el) this.el.style.display = 'none'; },
+  // Lo que interesa ver: la punta del portaminas, la mina o la punta seca del compás, el centro del transportador
+  objetivo() {
+    const s = Manip.estado;
+    if (s) {
+      const i = s.inst;
+      if (s.modo === 'abrir' || s.modo === 'trazar') return i.aMundo(i.r, 0);
+      if (s.modo === 'mover' && (i.tipo === 'compas' || i.tipo === 'transportador')) return i.aMundo(...i.origenIman);
+      return null;
+    }
+    if (App.herramienta === 'lapiz' && Lapiz.activo) return { x: Lapiz.activo.x, y: Lapiz.activo.y };
+    return null;
+  },
+  pintar() {
+    if (!this.el) this.el = document.getElementById('lupa');
+    const o = this.dedo && Config.get('lupa') ? this.objetivo() : null;
+    if (!o) { this.el.style.display = 'none'; return; }
+    const dpr = Capas.dpr, D = this.D, lado = Math.round(D * dpr);
+    if (this.el.width !== lado || this.el.height !== lado) { this.el.width = lado; this.el.height = lado; }
+    const t = Vista.aPantalla(o.x, o.y);
+    const fuente = D / this.aumento * dpr;
+    const ctx = this.el.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#cdbb9f';
+    ctx.fillRect(0, 0, lado, lado);
+    for (const c of [Capas.papel, Capas.dibujo, Capas.instrumentos])
+      ctx.drawImage(c, t.x * dpr - fuente / 2, t.y * dpr - fuente / 2, fuente, fuente, 0, 0, lado, lado);
+    // Mira en el centro
+    const m = lado / 2, g = 6 * dpr, l = 16 * dpr;
+    ctx.strokeStyle = 'rgba(47, 111, 208, .9)';
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.beginPath();
+    ctx.moveTo(m - l, m); ctx.lineTo(m - g, m); ctx.moveTo(m + g, m); ctx.lineTo(m + l, m);
+    ctx.moveTo(m, m - l); ctx.lineTo(m, m - g); ctx.moveTo(m, m + g); ctx.lineTo(m, m + l);
+    ctx.stroke();
+    // Por encima del dedo; si no cabe, por debajo
+    let top = this.dedo.y - D - 70;
+    if (top < 6) top = this.dedo.y + 70;
+    const left = Geom.clamp(this.dedo.x - D / 2, 6, Math.max(6, Capas.w - D - 6));
+    Object.assign(this.el.style, { display: 'block', left: left + 'px', top: top + 'px' });
+  },
+};
+
+/* =====================================================================
+   Ayuda
+   ===================================================================== */
+const Ayuda = {
+  construir() {
+    const b = (icono, titulo, texto) => `<div class="ayuda-bloque"><div class="ico">${Iconos[icono]}</div><div><h4>${titulo}</h4><p>${texto}</p></div></div>`;
+    document.getElementById('ayuda-cuerpo').innerHTML = [
+      b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta.'),
+      b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos.'),
+      b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
+      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar arcos o una circunferencia entera.'),
+      b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
+      b('goma', 'Goma', 'Toca lo que quieras borrar o pasa la goma por encima arrastrando.'),
+      b('deshacer', 'Deshacer', 'Deshace puntos, líneas y también los movimientos de los instrumentos.'),
+      b('mover', 'Mover y acercar la hoja', '<span class="solo-raton">Rueda del ratón para acercar; botón central, la barra espaciadora o la herramienta mover para desplazar la hoja.</span><span class="solo-tactil">Dos dedos sobre la hoja para acercar y moverla. Dos dedos sobre un instrumento lo mueven y lo giran.</span>'),
+      b('guardar', 'Tu dibujo', 'Se guarda solo en este navegador. Desde el botón del disquete puedes empezar una hoja nueva, guardarlo en un archivo, abrirlo o exportarlo como imagen.'),
+      `<div class="solo-raton"><h3>Teclas</h3><table class="atajos">
+        <tr><td><kbd>P</kbd> Portaminas</td><td><kbd>B</kbd> Goma</td></tr>
+        <tr><td><kbd>R</kbd> Regla</td><td><kbd>E</kbd> Escuadra</td></tr>
+        <tr><td><kbd>T</kbd> Cartabón</td><td><kbd>C</kbd> Compás</td></tr>
+        <tr><td><kbd>A</kbd> Transportador</td><td><kbd>M</kbd> Mover la hoja</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> Deshacer</td><td><kbd>Ctrl</kbd>+<kbd>Y</kbd> Rehacer</td></tr>
+        <tr><td><kbd>+</kbd> <kbd>−</kbd> Zoom</td><td><kbd>0</kbd> Ver la hoja entera</td></tr>
+        <tr><td><kbd>Mayús</kbd> Girar de 15° en 15°</td><td><kbd>Alt</kbd> Separar / girar sin trazar</td></tr>
+        <tr><td><kbd>Espacio</kbd> Mover la hoja</td><td><kbd>?</kbd> Esta ayuda</td></tr>
+      </table></div>`,
+    ].join('');
   },
 };
 
@@ -2897,12 +3223,15 @@ function iniciar() {
     if ((window.devicePixelRatio || 1) !== Capas.dpr) alCambiarTamano();
   });
 
+  const habia = Guardado.recuperar();
   App.seleccionar('lapiz');
-  UI.mensaje('¡Bienvenido a DibuTec! Toca la hoja con el portaminas para marcar puntos.');
+  UI.mensaje(habia
+    ? 'Aquí está tu dibujo de la última vez. Pulsa ? si necesitas ayuda.'
+    : '¡Bienvenido a DibuTec! Toca la hoja con el portaminas para marcar puntos. Pulsa ? para ver la ayuda.');
 }
 
 // Acceso para pruebas automáticas
-window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip };
+window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip, Guardado, Archivo, Lupa };
 
 iniciar();
 </script>

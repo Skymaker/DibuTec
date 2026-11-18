@@ -15,7 +15,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 4 | Escuadra, cartabón, deslizamiento y candado | ✅ Hecha |
 | 5 | Compás | ✅ Hecha |
 | 6 | Transportador | ✅ Hecha |
-| 7 | Pulido | ⏳ Pendiente |
+| 7 | Pulido: guardado, archivo, PNG, lupa, ayuda, deshacer instrumentos, imán en líneas y cruces | ✅ Hecha |
 | 8 | Ejercicios guiados (opcional) | ⏳ Pendiente |
 
 ---
