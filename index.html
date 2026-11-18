@@ -42,8 +42,8 @@
 
   #app {
     display: grid; height: 100%; height: 100dvh;
-    grid-template-columns: auto 1fr;
-    grid-template-rows: 1fr auto;
+    grid-template-columns: auto minmax(0, 1fr);   /* un mensaje largo no puede ensanchar la columna */
+    grid-template-rows: minmax(0, 1fr) auto;
     grid-template-areas: "barra lienzo" "barra estado";
   }
 
@@ -104,7 +104,7 @@
 
   /* ---------- Barra de estado ---------- */
   #estado {
-    grid-area: estado;
+    grid-area: estado; min-width: 0;
     display: flex; align-items: center; gap: 14px;
     min-height: 34px; padding: 4px 12px;
     padding-bottom: max(4px, env(safe-area-inset-bottom));
@@ -122,8 +122,8 @@
   /* ---------- Orientación vertical: barra inferior ---------- */
   @media (orientation: portrait) {
     #app {
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr auto auto;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) auto auto;
       grid-template-areas: "lienzo" "estado" "barra";
     }
     #barra {
@@ -970,7 +970,7 @@ const Escena = {
   // Instantánea: dibujo y posición de los instrumentos
   datos() {
     const inst = Instrumentos.lista.map(i => ({ tipo: i.tipo, x: i.x, y: i.y, rot: i.rot, r: i.r,
-      bloqueado: i.bloqueado, colocado: i.colocado, visible: i.visible }));
+      bloqueado: i.bloqueado, colocado: i.colocado, visible: i.visible, levantada: i.levantada }));
     return JSON.stringify({ puntos: this.puntos, rectas: this.rectas, arcos: this.arcos, sigId: this.sigId, instrumentos: inst });
   },
   // completo = también la visibilidad y el orden de los instrumentos (al abrir un dibujo)
@@ -986,6 +986,7 @@ const Escena = {
       inst.x = e.x; inst.y = e.y; inst.rot = e.rot;
       if ('r' in inst && fin(e.r) && e.r > 0) inst.r = Math.min(e.r, inst.rMax);
       inst.bloqueado = !!e.bloqueado;
+      if ('levantada' in inst) inst.levantada = !!e.levantada;
       inst.colocado = !!e.colocado;
       if (completo) { inst.visible = !!e.visible; orden.push(inst); }
     }
@@ -1845,7 +1846,8 @@ class Compas extends Instrumento {
     this.pierna = 75;            // longitud aparente de las patas (vista desde arriba)
     this.rMax = 2 * this.pierna * 0.98;
     this.origenIman = [0, 0];    // la punta seca se pega a los puntos
-    this.ayuda = 'Compás: arrastra la punta seca hasta un punto, abre el compás moviendo la mina y gira el asa de arriba para trazar (con Alt gira sin pintar).';
+    this.levantada = false;      // mina levantada: el compás gira sin pintar
+    this.ayuda = 'Compás: arrastra la punta seca hasta un punto, abre el compás moviendo la mina y gira el asa de arriba. El botón de la mina decide si pinta (apoyada) o solo gira (levantada).';
   }
   altura() {
     const m = this.r / 2;
@@ -1857,9 +1859,21 @@ class Compas extends Instrumento {
   cantosMundo() { return []; }
   radioPunta() { return Math.max(3, 12 / Vista.escala); }
   contiene(wx, wy) { return !!this.tocarPropio({ x: wx, y: wy }, 0); }
+  // Botón para apoyar o levantar la mina, junto al asa
+  botonMina() { const k = this.pomo(); return [k[0] - this.radioAsa() * 2.3, k[1]]; }
+  radioBotonMina() { return Math.max(4, 12 / Vista.escala); }
+  alternarMina() {
+    this.levantada = !this.levantada;
+    Sonido.tocar('iman');
+    UI.mensaje(this.levantada
+      ? 'Mina levantada: el compás gira sin pintar.'
+      : 'Mina apoyada: al girar el asa, el compás pinta.');
+    Render.pedir('instrumentos');
+  }
   tocarPropio(info, extra) {
     const p = this.aLocal(info.x, info.y), b = this.bisagra(), k = this.pomo();
     const d = q => Math.hypot(p.x - q[0], p.y - q[1]);
+    if (d(this.botonMina()) <= this.radioBotonMina() + extra) return { inst: this, modo: 'mina' };
     if (d(k) <= this.radioAsa() + extra) return { inst: this, modo: 'trazar' };
     if (d([this.r, 0]) <= this.radioPunta() + extra) return { inst: this, modo: 'abrir' };
     if (d([0, 0]) <= this.radioPunta() + extra) return { inst: this, modo: 'mover' };
@@ -1867,6 +1881,33 @@ class Compas extends Instrumento {
     const seg = (q) => Geom.distSegmento(p.x, p.y, b[0], b[1], q[0], q[1]) <= ancho;
     if (seg([0, 0]) || seg([this.r, 0]) || seg(k) || d(b) <= 5 + extra) return { inst: this, modo: 'mover' };
     return null;
+  }
+  dibujarBotonMina(ctx) {
+    const [x, y] = this.botonMina(), R = this.radioBotonMina(), px = 1 / Vista.escala, lev = this.levantada;
+    ctx.beginPath();
+    ctx.arc(x, y, R, 0, Geom.DOS_PI);
+    ctx.fillStyle = lev ? 'rgba(255, 255, 255, .92)' : 'rgba(232, 93, 80, .95)';
+    ctx.fill();
+    ctx.strokeStyle = lev ? 'rgba(90, 95, 110, .8)' : '#9c3a30';
+    ctx.lineWidth = 1.5 * px;
+    ctx.stroke();
+    // Punta de la mina sobre la línea del papel: tocándola (apoyada) o separada (levantada)
+    const w = R * 0.32, sube = lev ? R * 0.3 : 0, col = lev ? '#5a5f6e' : '#fff';
+    ctx.beginPath();
+    ctx.moveTo(x - w, y - R * 0.45 - sube);
+    ctx.lineTo(x + w, y - R * 0.45 - sube);
+    ctx.lineTo(x, y + R * 0.18 - sube);
+    ctx.closePath();
+    ctx.fillStyle = col;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x - R * 0.55, y + R * 0.4);
+    ctx.lineTo(x + R * 0.55, y + R * 0.4);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = Math.max(0.3, 1.6 * px);
+    if (lev) ctx.setLineDash([R * 0.15, R * 0.12]);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
   // Pata con forma de cuña desde la bisagra hasta la punta
   pata(ctx, b, t, w0, w1, relleno, borde) {
@@ -1905,8 +1946,9 @@ class Compas extends Instrumento {
     this.pata(ctx, b, [0, 0], 5, 1.6, 'rgba(150, 160, 175, .92)', '#4b5363');
     const finMina = this.pata(ctx, b, [this.r, 0], 5, 2.4, 'rgba(232, 93, 80, .92)', '#9c3a30');
     ctx.restore();
-    // Mina de grafito
+    // Mina de grafito (más clara si está levantada)
     ctx.fillStyle = Paleta.grafito[Config.get('grafito')];
+    ctx.globalAlpha = this.levantada ? 0.35 : 1;
     ctx.beginPath();
     const v = [this.r - finMina[0], -finMina[1]], L = Math.hypot(v[0], v[1]) || 1, n = [-v[1] / L, v[0] / L];
     ctx.moveTo(finMina[0] + n[0] * 0.9, finMina[1] + n[1] * 0.9);
@@ -1914,6 +1956,15 @@ class Compas extends Instrumento {
     ctx.lineTo(finMina[0] - n[0] * 0.9, finMina[1] - n[1] * 0.9);
     ctx.closePath();
     ctx.fill();
+    ctx.globalAlpha = 1;
+    if (this.levantada) {
+      // Sombra de la punta: la mina no toca el papel
+      ctx.beginPath();
+      ctx.arc(this.r, 0, Math.max(0.8, 3 * px), 0, Geom.DOS_PI);
+      ctx.strokeStyle = 'rgba(90, 90, 100, .6)';
+      ctx.lineWidth = px;
+      ctx.stroke();
+    }
     // Punta seca
     ctx.beginPath();
     ctx.arc(0, 0, Math.max(0.5, 2 * px), 0, Geom.DOS_PI);
@@ -1930,6 +1981,7 @@ class Compas extends Instrumento {
     ctx.fill();
     // Asa para girar y trazar
     this.dibujarAsa(ctx, { x: k[0], y: k[1] });
+    this.dibujarBotonMina(ctx);
     ctx.restore();
   }
 }
@@ -2322,8 +2374,9 @@ const Manip = {
     } else if (hit.modo === 'abrir') {
       this.estado = { inst, modo: 'abrir', id: info.id, tipo: info.tipo };
     } else if (hit.modo === 'trazar') {
-      this.estado = { inst, modo: 'trazar', id: info.id, tipo: info.tipo, a0: inst.rot, barrido: 0,
-                      angPrev: Math.atan2(info.y - inst.y, info.x - inst.x), sinTrazo: false };
+      // tramos: arcos ya pintados en este giro; tramo: el que se está pintando ahora
+      this.estado = { inst, modo: 'trazar', id: info.id, tipo: info.tipo, tramos: [], tramo: null,
+                      angPrev: Math.atan2(info.y - inst.y, info.x - inst.x) };
     } else {
       this.estado = { inst, modo: 'mover', id: info.id, tipo: info.tipo, dx: inst.x - info.x, dy: inst.y - info.y, guia: null };
     }
@@ -2448,21 +2501,30 @@ const Manip = {
     this.halo = halo && inst.r === r ? { x: halo.x, y: halo.y } : null;
     UI.mensaje(`Radio: ${Lapiz.mmTexto(inst.r)}${inst.r < r ? ' (el compás no se abre más)' : ''}`);
   },
-  // Compás: gira alrededor de la punta seca; la mina va dejando el arco
+  // Compás: gira alrededor de la punta seca. Con la mina apoyada va dejando el arco;
+  // levantada (botón de la mina, tecla L o Alt mantenido) solo gira. Se puede cambiar a mitad del giro.
   girarCompas(s, info, e) {
     const inst = s.inst, c = { x: inst.x, y: inst.y };
-    if (e && e.altKey && Math.abs(s.barrido) < 1e-9) s.sinTrazo = true;
     const ang = Math.atan2(info.y - c.y, info.x - c.x);
     let d = ang - s.angPrev;
     if (d > Math.PI) d -= Geom.DOS_PI; else if (d < -Math.PI) d += Geom.DOS_PI;
     s.angPrev = ang;
-    s.barridoLibre = (s.barridoLibre || 0) + d;
-    let b = Geom.clamp(s.barridoLibre, -Geom.DOS_PI, Geom.DOS_PI);
     this.halo = null;
+    const levantada = inst.levantada || !!(e && e.altKey);
+    if (levantada) {
+      this.cerrarTramo(s);
+      inst.rot += d;
+      UI.mensaje('Mina levantada: el compás gira sin pintar.');
+      return;
+    }
+    if (!s.tramo) s.tramo = { a0: inst.rot, libre: 0, barrido: 0 };
+    const t = s.tramo;
+    t.libre += d;
+    let b = Geom.clamp(t.libre, -Geom.DOS_PI, Geom.DOS_PI);
     if (Math.abs(b) >= Geom.DOS_PI - 4 * Math.PI / 180) b = Math.sign(b) * Geom.DOS_PI;
-    else if (!s.sinTrazo) {
+    else {
       // Imán: terminar el arco justo en un punto de la circunferencia
-      const radio = Snap.radioPx(s.tipo) / Vista.escala, fin = s.a0 + b;
+      const radio = Snap.radioPx(s.tipo) / Vista.escala, fin = t.a0 + b;
       let mejor = null;
       for (const p of Escena.objetivos()) {
         if (Math.abs(Geom.dist(p.x, p.y, c.x, c.y) - inst.r) > radio) continue;
@@ -2472,21 +2534,28 @@ const Manip = {
       }
       if (mejor && Math.abs(b + mejor.df) < Geom.DOS_PI) { b += mejor.df; this.halo = { x: mejor.p.x, y: mejor.p.y }; }
     }
-    s.barrido = b;
-    inst.rot = s.a0 + b;
-    const grados = Math.round(Math.abs(b) * 180 / Math.PI);
-    if (s.sinTrazo) UI.mensaje('Girando el compás sin trazar.');
-    else UI.mensaje(Math.abs(b) >= Geom.DOS_PI ? 'Circunferencia completa.' : `Arco: ${grados}°`);
+    t.barrido = b;
+    inst.rot = t.a0 + b;
+    UI.mensaje(Math.abs(b) >= Geom.DOS_PI ? 'Circunferencia completa.' : `Arco: ${Math.round(Math.abs(b) * 180 / Math.PI)}°`);
+  },
+  // Guarda el tramo que se estaba pintando (al levantar la mina o al soltar)
+  cerrarTramo(s) {
+    if (s.tramo && Math.abs(s.tramo.barrido) > Math.PI / 180) s.tramos.push(s.tramo);
+    s.tramo = null;
   },
   fin(confirmar = true) {
     const s = this.estado;
-    if (s && s.modo === 'trazar' && confirmar && !s.sinTrazo && Math.abs(s.barrido) > Math.PI / 180) {
+    if (s && s.modo === 'trazar' && confirmar) {
+      this.cerrarTramo(s);
       const inst = s.inst;
-      const a = Escena.agregarArco(inst.x, inst.y, inst.r, s.a0, s.a0 + s.barrido);
-      Sonido.tocar('punto');
-      UI.mensaje(Geom.esCircunferencia(a)
-        ? `Circunferencia trazada (radio ${Lapiz.mmTexto(a.r)}).`
-        : `Arco trazado: ${Math.round(Math.abs(s.barrido) * 180 / Math.PI)}°, radio ${Lapiz.mmTexto(a.r)}.`);
+      const arcos = s.tramos.map(t => Escena.agregarArco(inst.x, inst.y, inst.r, t.a0, t.a0 + t.barrido));
+      if (arcos.length) {
+        Sonido.tocar('punto');
+        const a = arcos[arcos.length - 1];
+        UI.mensaje(arcos.length > 1 ? `${arcos.length} arcos trazados (radio ${Lapiz.mmTexto(a.r)}).`
+          : Geom.esCircunferencia(a) ? `Circunferencia trazada (radio ${Lapiz.mmTexto(a.r)}).`
+          : `Arco trazado: ${Math.round(Math.abs(a.a1 - a.a0) * 180 / Math.PI)}°, radio ${Lapiz.mmTexto(a.r)}.`);
+      }
     }
     if (s && s.antes && Escena.datos() !== s.antes) Historial.empujar(s.antes);
     this.estado = null;
@@ -2507,13 +2576,23 @@ const Manip = {
       ctx.beginPath(); ctx.arc(inst.x, inst.y, inst.r, 0, Geom.DOS_PI); ctx.stroke();
       ctx.restore();
     }
-    if (s && s.modo === 'trazar' && !s.sinTrazo && s.barrido) {
+    if (s && s.modo === 'trazar') {
       const inst = s.inst;
+      if (inst.levantada) {
+        // Camino de la mina mientras está levantada
+        ctx.save();
+        ctx.setLineDash([4 * px, 6 * px]);
+        ctx.strokeStyle = 'rgba(90, 95, 110, .45)';
+        ctx.lineWidth = 1.2 * px;
+        ctx.beginPath(); ctx.arc(inst.x, inst.y, inst.r, 0, Geom.DOS_PI); ctx.stroke();
+        ctx.restore();
+      }
       ctx.strokeStyle = Paleta.grafito[Config.get('grafito')];
       ctx.globalAlpha = 0.85;
       ctx.lineWidth = Dibujo.grosor();
       ctx.lineCap = 'round';
-      Dibujo.trazo(ctx, 'arco', { cx: inst.x, cy: inst.y, r: inst.r, a0: s.a0, a1: s.a0 + s.barrido });
+      for (const t of s.tramos.concat(s.tramo ? [s.tramo] : []))
+        if (t.barrido) Dibujo.trazo(ctx, 'arco', { cx: inst.x, cy: inst.y, r: inst.r, a0: t.a0, a1: t.a0 + t.barrido });
       ctx.globalAlpha = 1;
     }
     if (s && s.guia) {
@@ -2637,6 +2716,15 @@ const Entrada = {
     try { Capas.contenedor.setPointerCapture(e.pointerId); } catch (_) {}
 
     const toques = [...this.punteros.values()].filter(q => q.tipo === 'touch');
+    // Con un dedo girando el compás, otro dedo puede apoyar o levantar la mina sin soltarlo
+    if (e.pointerType === 'touch' && toques.length === 2 && Manip.estado && Manip.estado.modo === 'trazar') {
+      const h = Instrumentos.tocar(this.info(e, p), false);
+      if (h && h.modo === 'mina') {
+        h.inst.alternarMina();
+        this.punteros.delete(e.pointerId);     // este toque no cuenta como gesto
+        return;
+      }
+    }
     if (e.pointerType === 'touch' && toques.length === 2) {
       Lupa.ocultar();
       // Segundo dedo mientras se arrastra un instrumento: mover y girar con dos dedos
@@ -2654,6 +2742,11 @@ const Entrada = {
     const info = this.info(e, p);
     if (e.button === 0 && !this.accion && !this.espacio && App.herramienta !== 'goma') {
       const hit = Instrumentos.tocar(info, App.herramienta === 'lapiz');
+      if (hit && hit.modo === 'mina') {
+        e.preventDefault();
+        hit.inst.alternarMina();
+        return;
+      }
       if (hit && hit.modo === 'candado') {
         e.preventDefault();
         const inst = hit.inst;
@@ -2813,6 +2906,11 @@ const Entrada = {
     if (e.altKey) return;
     if (k === 'Escape') { Acciones.cancelarActual(); return; }
     if (k === '?' || k === 'F1') { UI.abrirPanel('ayuda'); e.preventDefault(); return; }
+    if (k === 'l' || k === 'L') {
+      const c = Instrumentos.porTipo.compas;
+      if (c.visible) c.alternarMina(); else UI.mensaje('Saca el compás para apoyar o levantar su mina.');
+      return;
+    }
     if (k === '+' || k === '=') { this.zoomCentro(1.25); e.preventDefault(); return; }
     if (k === '-' || k === '_') { this.zoomCentro(1 / 1.25); e.preventDefault(); return; }
     if (k === '0') { Vista.ajustar(); return; }
@@ -2828,7 +2926,7 @@ const Entrada = {
     const el = Capas.contenedor;
     el.classList.toggle('sobre-asa', !!hit && hit.modo === 'girar');
     el.classList.toggle('sobre-instrumento', !!hit && hit.modo === 'mover');
-    el.classList.toggle('sobre-candado', !!hit && hit.modo === 'candado');
+    el.classList.toggle('sobre-candado', !!hit && (hit.modo === 'candado' || hit.modo === 'mina'));
   },
 
   actualizarCursor() {
@@ -3348,7 +3446,7 @@ const Ayuda = {
       b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta.'),
       b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos.'),
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
-      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar arcos o una circunferencia entera.'),
+      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
       b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
       b('goma', 'Goma', 'Frota sobre lo que quieras borrar: solo se borra lo que queda debajo de la goma, así que puedes recortar poco a poco los extremos de las líneas y los arcos. En Configuración puedes cambiar su tamaño o hacer que borre líneas enteras.'),
       b('deshacer', 'Deshacer', 'Deshace puntos, líneas y también los movimientos de los instrumentos.'),
@@ -3363,6 +3461,7 @@ const Ayuda = {
         <tr><td><kbd>+</kbd> <kbd>−</kbd> Zoom</td><td><kbd>0</kbd> Ver la hoja entera</td></tr>
         <tr><td><kbd>Mayús</kbd> Girar de 15° en 15°</td><td><kbd>Alt</kbd> Separar / girar sin trazar</td></tr>
         <tr><td><kbd>Espacio</kbd> Mover la hoja</td><td><kbd>?</kbd> Esta ayuda</td></tr>
+        <tr><td><kbd>L</kbd> Levantar o apoyar la mina del compás</td><td></td></tr>
       </table></div>`,
     ].join('');
   },
