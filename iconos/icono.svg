@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="cuadricula" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity=".13" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#2f6fd0"/>
+  <rect width="512" height="512" rx="112" fill="url(#cuadricula)"/>
+  <!-- Escuadra -->
+  <path d="M84 428V156L356 428Z M128 384H250L128 262Z" fill="#ffd166" fill-rule="evenodd"
+        stroke="#2d3047" stroke-width="12" stroke-linejoin="round"/>
+  <!-- Arco trazado por el compás (centro en la aguja) -->
+  <path d="M428 404A168 168 0 0 1 425 473" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
+  <!-- Compás -->
+  <g stroke="#2d3047" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M330 104L268 400" stroke-width="30"/>
+    <path d="M330 104L268 400" stroke="#e8ecf3" stroke-width="16"/>
+    <path d="M330 104L414 372" stroke-width="30"/>
+    <path d="M330 104L414 372" stroke="#e8ecf3" stroke-width="16"/>
+    <path d="M268 400L262 432" stroke-width="8"/>
+    <path d="M414 372L428 404" stroke="#ff9f1c" stroke-width="16"/>
+    <rect x="316" y="50" width="28" height="46" rx="10" fill="#2d3047" stroke="none"/>
+    <circle cx="330" cy="108" r="22" fill="#ffd166" stroke-width="10"/>
+  </g>
+</svg>

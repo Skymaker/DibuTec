@@ -20,6 +20,8 @@ en tablet, con portaminas, regla, escuadra, cartabón, compás y transportador.
 | `ejercicios/` | Ejercicios guiados, uno por archivo JSON. |
 | `ejercicios/indice.json` | Lista de ejercicios que aparecen en la aplicación. |
 | `ejercicios/LEEME.md` | Formato de los ejercicios y cómo añadir otros nuevos. |
+| `iconos/` | Icono de la aplicación (`icono.svg` es el original; los PNG se generan a partir de él). |
+| `manifest.webmanifest` | Datos para instalar la aplicación en la pantalla de inicio. |
 | `PLAN.md` | Plan de desarrollo. |
 
 ## Añadir ejercicios
