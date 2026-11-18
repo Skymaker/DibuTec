@@ -118,9 +118,9 @@ ahumado o transparente) y tamaño de la regla (20/30/40 cm), la escuadra (cateto
 el cartabón (cateto mayor 17/23/28 cm, a juego con la escuadra) y el transportador
 (diámetro 10/13/16 cm). Cada instrumento lleva impreso «DibuTec» y su tamaño.
 
-El transportador imita a uno escolar real: semicírculo sobre una base recta que es una
-regla en mm (canto para trazar), línea de 0°-180° impresa con flechas y marca del centro
-(sirve para alinear, no para trazar), hueco en «D», doble escala y el 90 destacado.
+El transportador imita a uno escolar real: semicírculo cuyo canto recto es la línea de
+0°-180° (pasa por el centro; sirve para alinear y para trazar), flechas que señalan el
+centro, hueco en «D», doble escala y el 90 destacado.
 
 **Ayudas**: sonidos, mensajes de ayuda, tamaño de interfaz.
 

@@ -2181,13 +2181,12 @@ class Transportador extends Instrumento {
   constructor() {
     super('transportador', 'Transportador', 'o');
     this.medir();
-    this.ayuda = 'Transportador: pon el centro sobre el vértice, gira con las asas hasta que la línea de 0°-180° pase por la recta y, con el portaminas, toca el borde para marcar el ángulo. Su base es una regla: también sirve para trazar.';
+    this.ayuda = 'Transportador: pon el centro sobre el vértice, gira con las asas hasta que la línea de 0°-180° pase por la recta y, con el portaminas, toca el borde para marcar el ángulo.';
   }
-  // Semicírculo sobre una base recta con regla en mm; el centro está sobre la línea de 0°-180°
+  // Semicírculo; el centro está en el canto recto (la línea de 0°-180°)
   medir() {
     const cm = this.cm = Config.get('tamTransportador') || 13;
     const Ro = this.Ro = cm * 5, k = this.k = Ro / 65;
-    const B = this.B = 16;                       // alto de la base, por debajo de la línea de 0°-180°
     const ri = this.ri = Ro - 23;                // radio del hueco: justo dentro de la escala interior
     const pt = (r, g) => [r * Math.cos(g * Math.PI / 180), -r * Math.sin(g * Math.PI / 180)];
     const arco = (r, a0, a1, paso) => {
@@ -2195,19 +2194,13 @@ class Transportador extends Instrumento {
       for (let g = a0; g <= a1 + 1e-9; g += paso) v.push(pt(r, g));
       return v;
     };
-    // Contorno: arco de 0° a 180°, bajada por la izquierda, base y subida por la derecha
-    this.poligono = arco(Ro, 0, 180, 2).concat([[-Ro, B], [Ro, B]]);
+    this.poligono = arco(Ro, 0, 180, 2);                 // de (Ro, 0) a (−Ro, 0); se cierra por la base
     // Hueco en forma de «D»: arco cerrado por una cuerda horizontal por encima del centro
     const hc = this.hc = 17 * k, g0 = Math.asin(hc / ri) * 180 / Math.PI;
     this.agujero = arco(ri, g0, 180 - g0, 3);
     this.agujero.push(pt(ri, 180 - g0));          // último punto exacto; el polígono se cierra por la cuerda
-    const n = this.poligono.length;
-    this.cantos = [
-      // Base: regla graduada con el 0 a la derecha (los números se leen girando el transportador)
-      { i: n - 1, j: n - 2, graduado: true, origen: [Ro - 5, B], max: Math.floor((2 * Ro - 10) / 10) * 10 },
-      // Línea impresa de 0°-180° que pasa por el centro
-      { a: [-Ro, 0], b: [Ro, 0], virtual: true },
-    ];
+    // Canto recto de 0°-180°: pasa por el centro, sirve para alinear y para trazar
+    this.cantos = [{ i: this.poligono.length - 1, j: 0 }];
     // Asas junto al borde del hueco, por debajo de la cuerda, sin tapar la escala interior
     const ra = ri + 1, ga = Math.min(13, g0 * 0.45);
     this.asas = [{ x: pt(ra, ga)[0], y: pt(ra, ga)[1], pivote: [0, 0] }, { x: pt(ra, 180 - ga)[0], y: pt(ra, 180 - ga)[1], pivote: [0, 0] }];
@@ -2218,7 +2211,7 @@ class Transportador extends Instrumento {
       { x: Ro * 0.29, y: -hc * 0.42, texto: `– ${cm} cm –`, tam: 2.8 * k },
     ];
   }
-  centroLocal() { return [0, -this.Ro * 0.3]; }
+  centroLocal() { return [0, -this.Ro * 0.42]; }
   zonaLapiz(info) {
     const p = this.aLocal(info.x, info.y), r = Math.hypot(p.x, p.y);
     const banda = Instrumentos.bandaPx(info.tipo) / Vista.escala;
@@ -2244,28 +2237,21 @@ class Transportador extends Instrumento {
       ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
       if (diez) { const c = pt(Ro - 18.5, g), d = pt(Ro - 20.5, g); ctx.moveTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); }
     }
-    // Línea de 0°-180° de lado a lado (por el centro) y trazo de 90° bajo el hueco
-    const L = Ro - 1.5;
-    ctx.moveTo(-L, 0); ctx.lineTo(L, 0);
+    // Trazo de 90° bajo el hueco y línea vertical que baja al centro
     ctx.moveTo(0, -this.hc); ctx.lineTo(0, -this.hc + 2.5);
+    ctx.moveTo(0, -4.5); ctx.lineTo(0, 0);
     ctx.stroke();
     ctx.fillStyle = e.tinta;
-    // Flechas en los extremos de la línea base
+    // Flechas junto al canto, en los extremos, y dos flechas que apuntan al centro
+    const L = Ro - 1.5;
     for (const sg of [-1, 1]) {
       ctx.beginPath();
-      ctx.moveTo(sg * L, 0); ctx.lineTo(sg * (L - 3.2), -1.1); ctx.lineTo(sg * (L - 3.2), 1.1);
+      ctx.moveTo(sg * L, -0.3); ctx.lineTo(sg * (L - 3.2), -0.3); ctx.lineTo(sg * (L - 3.2), -1.6);
       ctx.closePath(); ctx.fill();
-    }
-    // Centro: cuatro flechas que apuntan al punto, como en la referencia
-    for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {
       ctx.beginPath();
-      ctx.moveTo(dx * 0.7, dy * 0.7);
-      ctx.lineTo(dx * 3.2 + dy * 0.0, dy * 2.2); ctx.lineTo(dx * 2.2, dy * 3.2);
+      ctx.moveTo(sg * 0.6, -0.6); ctx.lineTo(sg * 3.2, -2.2); ctx.lineTo(sg * 2.2, -3.2);
       ctx.closePath(); ctx.fill();
     }
-    ctx.beginPath();
-    ctx.moveTo(0, -4.5); ctx.lineTo(0, 4.5);
-    ctx.stroke();
     // Flechas en el borde del hueco a 45°, 90° y 135°
     for (const g of [45, 90, 135]) {
       const a = pt(this.ri + 0.4, g), b = pt(this.ri + 3.4, g), m = g * Math.PI / 180;
@@ -2306,7 +2292,6 @@ class Transportador extends Instrumento {
       numero(String(g), Ro - 9.5, pos(String(g), Ro - 9.5, t1), t1, e.tinta);
       numero(String(180 - g), Ro - 15, pos(String(180 - g), Ro - 15, t2), t2, e.inversa || e.tinta);
     }
-    for (const k of this.cantos) if (k.graduado) this.graduar(ctx, k);
     this.dibujarRotulos(ctx);
   }
 }
