@@ -1,0 +1,43 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "perpendicular",
+  "titulo": "Perpendicular por un punto",
+  "nivel": "1.º ESO",
+  "descripcion": "Usa la regla y la escuadra para trazar la perpendicular a una recta que pasa por un punto.",
+  "papel": { "papel": "blanco", "hoja": "A4-h" },
+  "inicial": {
+    "puntos": [
+      { "nombre": "P", "x": 150, "y": 60 }
+    ],
+    "rectas": [
+      { "nombre": "r", "x1": 35, "y1": 150, "x2": 265, "y2": 150 }
+    ]
+  },
+  "textos": { "r": "la recta r" },
+  "pasos": [
+    {
+      "texto": "Saca la regla y coloca su canto justo encima de la recta r.",
+      "pista": "Gira la regla con un asa: el canto se pega a los extremos de la recta.",
+      "herramientas": ["regla"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "regla", "cantoSobre": "r", "tolerancia": 1.5 }
+    },
+    {
+      "texto": "Fija la regla con su candado para que no se mueva.",
+      "herramientas": ["regla"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "regla", "bloqueado": true }
+    },
+    {
+      "texto": "Saca la escuadra, apoya uno de sus catetos en el canto de la regla y deslízala hasta que el otro cateto pase por el punto P.",
+      "pista": "Cuando la escuadra toca la regla, el canto se pone verde y solo se desliza a lo largo.",
+      "herramientas": ["escuadra"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "escuadra", "apoyadoEn": "regla", "cantoPasaPor": "P", "perpendicularA": "r" }
+    },
+    {
+      "texto": "Traza con el portaminas la recta que pasa por P a lo largo de ese cateto.",
+      "herramientas": ["lapiz"],
+      "objetivo": { "tipo": "recta", "pasaPor": ["P"], "perpendicularA": "r", "longitudMin": 30 }
+    }
+  ],
+  "final": "¡Muy bien! La recta que has trazado forma un ángulo recto con r."
+}

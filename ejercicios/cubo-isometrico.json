@@ -1,0 +1,49 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "cubo-isometrico",
+  "titulo": "Cubo en perspectiva isométrica",
+  "nivel": "2.º ESO",
+  "descripcion": "Dibuja un cubo sobre papel isométrico siguiendo las líneas de la cuadrícula.",
+  "papel": { "papel": "isometrico", "triangulo": 10, "margen": true, "hoja": "A4-h", "imanCuadricula": true },
+  "inicial": {
+    "puntos": [
+      { "nombre": "A", "x": 148.564, "y": 140 }
+    ]
+  },
+  "pasos": [
+    {
+      "texto": "Marca el punto que está cuatro triángulos justo encima de A y únelo con A usando la regla. Es la arista de delante.",
+      "pista": "Los cruces de la cuadrícula atraen la punta del portaminas. Luego apoya la regla en los dos puntos.",
+      "herramientas": ["lapiz", "regla"],
+      "objetivo": { "tipo": "rectas", "segmentos": [["A", { "x": 148.564, "y": 100 }]] }
+    },
+    {
+      "texto": "Traza las dos aristas de abajo: desde A, cuatro triángulos subiendo hacia la derecha y cuatro subiendo hacia la izquierda, por las líneas inclinadas.",
+      "herramientas": ["lapiz", "regla"],
+      "objetivo": { "tipo": "rectas", "segmentos": [
+        ["A", { "x": 183.205, "y": 120 }],
+        ["A", { "x": 113.923, "y": 120 }]
+      ] }
+    },
+    {
+      "texto": "Sube las aristas verticales de los dos lados, también de cuatro triángulos.",
+      "herramientas": ["lapiz", "regla"],
+      "objetivo": { "tipo": "rectas", "segmentos": [
+        [{ "x": 183.205, "y": 120 }, { "x": 183.205, "y": 80 }],
+        [{ "x": 113.923, "y": 120 }, { "x": 113.923, "y": 80 }]
+      ] }
+    },
+    {
+      "texto": "Cierra la cara de arriba con cuatro líneas inclinadas, como un rombo.",
+      "herramientas": ["lapiz", "regla"],
+      "objetivo": { "tipo": "rectas", "segmentos": [
+        [{ "x": 148.564, "y": 100 }, { "x": 183.205, "y": 80 }],
+        [{ "x": 148.564, "y": 100 }, { "x": 113.923, "y": 80 }],
+        [{ "x": 183.205, "y": 80 }, { "x": 148.564, "y": 60 }],
+        [{ "x": 113.923, "y": 80 }, { "x": 148.564, "y": 60 }]
+      ] }
+    }
+  ],
+  "final": "¡Ya tienes tu cubo en perspectiva isométrica!"
+}

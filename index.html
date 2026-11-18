@@ -137,7 +137,7 @@
     #estado { padding-bottom: 4px; }
   }
   @media (orientation: portrait) and (pointer: coarse) {
-    :root { --btn: 50px; --gap: 4px; }
+    :root { --btn: 46px; --gap: 3px; }
   }
   /* Interfaz grande (configuración) */
   :root[data-interfaz="grande"] { --btn: 56px; }
@@ -183,6 +183,56 @@
   }
   @media (pointer: coarse) { .solo-raton { display: none !important; } }
   @media (pointer: fine) { .solo-tactil { display: none !important; } }
+
+  /* Ejercicios */
+  .ejercicio-item {
+    display: flex; flex-direction: column; gap: 3px; width: 100%; text-align: left;
+    margin-top: 8px; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 12px;
+    background: #fff; color: var(--texto); font: inherit; cursor: pointer; touch-action: manipulation;
+  }
+  @media (hover: hover) { .ejercicio-item:hover { border-color: var(--activo); background: var(--activo-fondo); } }
+  .ejercicio-item strong { font-size: 16px; }
+  .ejercicio-item .meta { font-size: 13px; color: var(--activo); font-weight: 600; }
+  .ejercicio-item .desc { font-size: 14px; color: var(--texto-suave); line-height: 1.4; }
+  .panel-cuerpo .nota { font-size: 14px; color: var(--texto-suave); }
+  .panel-cuerpo .nota.error { color: #b23a2e; }
+  #lienzo #tarjeta-ejercicio {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 4;
+    width: min(560px, calc(100% - 20px)); padding: 10px 12px 12px;
+    background: #fff; border: 1px solid var(--borde); border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(30, 32, 50, .22); font-size: 15px;
+  }
+  #tarjeta-ejercicio[hidden] { display: none; }
+  #tarjeta-ejercicio.completado { border-color: #3bb273; box-shadow: 0 8px 28px rgba(59, 178, 115, .35); }
+  #tarjeta-ejercicio.minimizado .te-cuerpo { display: none; }
+  .te-cab { display: flex; align-items: center; gap: 8px; }
+  .te-ico svg { width: 24px; height: 24px; display: block; fill: none; stroke: var(--activo); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .te-ico svg .a { fill: var(--acento); }
+  .te-titulo { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .te-paso { font-size: 13px; font-weight: 600; color: var(--activo); white-space: nowrap; }
+  .completado .te-paso { color: #2a8f5a; }
+  #tarjeta-ejercicio .btn { width: 36px; height: 36px; border-radius: 10px; }
+  @media (pointer: coarse) { #tarjeta-ejercicio .btn { width: 44px; height: 44px; } }
+  .te-texto { margin: 6px 2px; line-height: 1.45; }
+  .te-pista { margin: 6px 0; padding: 8px 10px; border-radius: 10px; background: #fff4d6; font-size: 14px; line-height: 1.4; }
+  .te-pie { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .te-progreso { display: flex; gap: 4px; flex: 1 1 120px; }
+  .te-progreso i { flex: 1; height: 6px; border-radius: 3px; background: #e6e1d6; }
+  .te-progreso i.hecho { background: #3bb273; }
+  .te-progreso i.actual { background: var(--activo); }
+  .te-boton {
+    min-height: 36px; padding: 0 14px; border: 1px solid var(--borde); border-radius: 10px;
+    background: #fff; color: var(--texto); font: inherit; font-size: 14px; cursor: pointer; touch-action: manipulation;
+  }
+  @media (pointer: coarse) { .te-boton { min-height: 44px; } }
+  .te-boton.principal { background: var(--activo); border-color: var(--activo); color: #fff; font-weight: 600; }
+  .te-boton:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+  .btn.sugerido { animation: sugerido 1.4s ease-in-out infinite; }
+  @keyframes sugerido {
+    0%, 100% { box-shadow: inset 0 0 0 2px rgba(255, 159, 28, .95); }
+    50% { box-shadow: inset 0 0 0 2px rgba(255, 159, 28, .3), 0 0 0 4px rgba(255, 159, 28, .35); }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn.sugerido { animation: none; box-shadow: inset 0 0 0 3px #ff9f1c; } }
 
   /* Lupa de precisión para el dedo */
   #lienzo #lupa {
@@ -258,13 +308,14 @@
 
   /* Aviso emergente */
   #aviso {
-    position: fixed; left: 50%; top: 16px; z-index: 20;
-    transform: translate(-50%, -20px); opacity: 0;
+    position: fixed; left: 50%; bottom: 56px; z-index: 20;   /* abajo: arriba está la tarjeta de los ejercicios */
+    transform: translate(-50%, 20px); opacity: 0;
     background: var(--texto); color: #fff; padding: 10px 16px; border-radius: 12px;
     font-size: 15px; max-width: calc(100% - 32px); text-align: center;
     pointer-events: none; transition: opacity .2s, transform .2s;
   }
   #aviso.visible { opacity: 1; transform: translate(-50%, 0); }
+  @media (orientation: portrait) { #aviso { bottom: calc(130px + env(safe-area-inset-bottom)); } }
 </style>
 </head>
 <body>
@@ -275,6 +326,7 @@
     <canvas id="capa-dibujo"></canvas>
     <canvas id="capa-instrumentos"></canvas>
     <canvas id="lupa" aria-hidden="true"></canvas>
+    <section id="tarjeta-ejercicio" aria-live="polite" hidden></section>
   </main>
   <footer id="estado">
     <span id="mensaje" aria-live="polite"></span>
@@ -305,7 +357,15 @@
   </div>
   <div class="panel-cuerpo" id="ayuda-cuerpo"></div>
 </aside>
+<aside id="panel-ejercicios" class="panel" role="dialog" aria-modal="true" aria-labelledby="titulo-ejercicios" aria-hidden="true">
+  <div class="panel-cab">
+    <h2 id="titulo-ejercicios">Ejercicios guiados</h2>
+    <button class="btn cerrar-panel" type="button" aria-label="Cerrar" title="Cerrar (Esc)"></button>
+  </div>
+  <div class="panel-cuerpo" id="ejercicios-cuerpo"></div>
+</aside>
 <input type="file" id="abrir-archivo" accept=".json,application/json" hidden>
+<input type="file" id="abrir-ejercicio" accept=".json,application/json" hidden>
 <div id="aviso" role="status"></div>
 
 <script>
@@ -359,6 +419,9 @@ const Iconos = (() => {
     exportar: `<rect x="3" y="3" width="18" height="18" rx="2"/><circle class="a" cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>`,
     papelera: `<path d="M3 6h18M8 6V4h8v2"/><path class="a" d="M6 6l1 15h10l1-15Z"/><path d="M10 11v6M14 11v6"/>`,
     cerrar:   `<path d="M6 6l12 12M18 6 6 18"/>`,
+    ejercicios: `<rect class="a" x="4.5" y="4" width="15" height="17.5" rx="2"/><path d="M9 4V2.5h6V4"/><path d="m8.5 13 2.5 2.5 4.5-5"/>`,
+    contraer: `<path d="m6 15 6-6 6 6"/>`,
+    expandir: `<path d="m6 9 6 6 6-6"/>`,
     ayuda:    `<circle class="a" cx="12" cy="12" r="10"/><path d="M9.2 9a2.9 2.9 0 0 1 5.6 1c0 2-2.8 2.6-2.8 4"/><path d="M12 17.5h.01"/>`,
   };
   const out = {};
@@ -783,7 +846,7 @@ const Render = {
     if (p.papel) this.papel();
     if (p.dibujo) this.dibujo();
     if (p.instrumentos) this.instrumentos();
-    if (p.dibujo || p.instrumentos) Guardado.programar();
+    if (p.dibujo || p.instrumentos) { Guardado.programar(); Ejercicio.comprobar(); }
     p.papel = p.dibujo = p.instrumentos = false;
     Lupa.pintar();
   },
@@ -823,15 +886,16 @@ const Render = {
   },
   // Puntos, rectas y arcos sobre un contexto en mm (pantalla o exportación)
   pintarEscena(ctx) {
-    const color = Paleta.grafito[Config.get('grafito')];
-    ctx.strokeStyle = color;
+    const grafito = Paleta.grafito[Config.get('grafito')];
+    // En un ejercicio, el enunciado se ve en azul, como impreso en la ficha
+    const color = o => (o.dado && Ejercicio.def ? '#2457a6' : grafito);
     ctx.lineWidth = Dibujo.grosor();
     ctx.lineCap = 'round';
     ctx.globalAlpha = 0.92; // grafito, no tinta
-    for (const r of Escena.rectas) Dibujo.trazo(ctx, 'recta', r);
-    for (const a of Escena.arcos) Dibujo.trazo(ctx, 'arco', a);
-    for (const p of Escena.puntos) Dibujo.cruz(ctx, p.x, p.y, color);
-    if (Config.get('etiquetas')) for (const p of Escena.puntos) Dibujo.etiqueta(ctx, p, color);
+    for (const r of Escena.rectas) { ctx.strokeStyle = color(r); Dibujo.trazo(ctx, 'recta', r); }
+    for (const a of Escena.arcos) { ctx.strokeStyle = color(a); Dibujo.trazo(ctx, 'arco', a); }
+    for (const p of Escena.puntos) Dibujo.cruz(ctx, p.x, p.y, color(p));
+    if (Config.get('etiquetas') || Ejercicio.def) for (const p of Escena.puntos) Dibujo.etiqueta(ctx, p, color(p));
     ctx.globalAlpha = 1;
   },
 
@@ -889,11 +953,11 @@ const Escena = {
     const fin = Number.isFinite, lista = v => Array.isArray(v) ? v : [];
     d = d && typeof d === 'object' ? d : {};
     const puntos = lista(d.puntos).filter(p => p && fin(p.x) && fin(p.y))
-      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 6) }));
+      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 6), dado: !!p.dado }));
     const rectas = lista(d.rectas).filter(r => r && [r.x1, r.y1, r.x2, r.y2].every(fin))
-      .map(r => ({ id: fin(r.id) ? r.id : 0, x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2 }));
+      .map(r => ({ id: fin(r.id) ? r.id : 0, x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2, dado: !!r.dado }));
     const arcos = lista(d.arcos).filter(a => a && [a.cx, a.cy, a.r, a.a0, a.a1].every(fin) && a.r > 0)
-      .map(a => ({ id: fin(a.id) ? a.id : 0, cx: a.cx, cy: a.cy, r: a.r, a0: a.a0, a1: a.a1 }));
+      .map(a => ({ id: fin(a.id) ? a.id : 0, cx: a.cx, cy: a.cy, r: a.r, a0: a.a0, a1: a.a1, dado: !!a.dado }));
     let sigId = fin(d.sigId) ? d.sigId : 1;
     for (const o of [...puntos, ...rectas, ...arcos]) { if (!o.id) o.id = sigId++; sigId = Math.max(sigId, o.id + 1); }
     return { puntos, rectas, arcos, sigId, instrumentos: lista(d.instrumentos) };
@@ -946,10 +1010,12 @@ const Escena = {
   },
 
   // Elemento más cercano dentro de «radio» mm; los puntos tienen preferencia
-  buscarElemento(x, y, radio) {
+  // protegerDados: lo que da el enunciado de un ejercicio no se puede borrar
+  buscarElemento(x, y, radio, protegerDados) {
     let mejor = null;
     const probar = (tipo, obj, d) => {
       if (d > radio) return;
+      if (protegerDados && obj.dado && Ejercicio.def) return;
       const peso = tipo === 'punto' ? d * 0.5 : d;
       if (!mejor || peso < mejor.peso) mejor = { tipo, obj, d, peso };
     };
@@ -1083,6 +1149,21 @@ const Sonido = {
         src.buffer = buf; src.connect(f); f.connect(g);
         g.gain.value = 0.25;
         src.start(t);
+        return;
+      }
+      if (tipo === 'bien' || tipo === 'fin') {
+        // Acierto: dos notas; ejercicio terminado: arpegio
+        const notas = tipo === 'bien' ? [660, 880] : [523, 659, 784, 1047];
+        notas.forEach((f, i) => {
+          const o = ac.createOscillator(), v = ac.createGain(), t0 = t + i * 0.1;
+          o.type = 'triangle';
+          o.frequency.value = f;
+          v.gain.setValueAtTime(0.0001, t0);
+          v.gain.exponentialRampToValueAtTime(0.16, t0 + 0.015);
+          v.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
+          o.connect(v); v.connect(ac.destination);
+          o.start(t0); o.stop(t0 + 0.25);
+        });
         return;
       }
       const o = ac.createOscillator();
@@ -1283,7 +1364,7 @@ const Goma = {
     Render.pedir('instrumentos');
   },
   borrarEn(info) {
-    const el = Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo));
+    const el = Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo), true);
     this.hover = { x: info.x, y: info.y, tipo: info.tipo, el: null };
     if (el && Escena.eliminar(el)) {
       this.activo.borrados++;
@@ -1294,7 +1375,7 @@ const Goma = {
     Render.pedir('instrumentos');
   },
   pasar(info) {
-    this.hover = { x: info.x, y: info.y, tipo: info.tipo, el: Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo)) };
+    this.hover = { x: info.x, y: info.y, tipo: info.tipo, el: Escena.buscarElemento(info.x, info.y, this.radioMm(info.tipo), true) };
     Render.pedir('instrumentos');
   },
   salir() { this.hover = null; Render.pedir('instrumentos'); },
@@ -2715,6 +2796,7 @@ const UI = {
     const esp = document.createElement('div'); esp.className = 'espaciador'; barra.appendChild(esp);
     const gConf = grupo();
     gConf.append(
+      this.crearBoton({ nombre: 'Ejercicios guiados', icono: 'ejercicios', alPulsar: () => this.abrirPanel('ejercicios') }),
       this.crearBoton({ nombre: 'Ayuda', tecla: '?', icono: 'ayuda', alPulsar: () => this.abrirPanel('ayuda') }),
       this.crearBoton({ nombre: 'Dibujo: nuevo, guardar, abrir, exportar', icono: 'guardar', alPulsar: () => this.abrirPanel('archivo') }),
       this.crearBoton({ nombre: 'Configuración', icono: 'engranaje', alPulsar: () => this.abrirPanel('config') }),
@@ -2768,6 +2850,7 @@ const UI = {
     p.inert = false;
     document.getElementById('velo').classList.add('visible');
     p.querySelector('.cerrar-panel').focus();
+    if (id === 'ejercicios') Catalogo.cargar();
   },
   cerrarPanel() {
     this.panelAbierto = false;
@@ -2784,6 +2867,11 @@ const UI = {
     Panel.construir();
     Archivo.construir();
     Ayuda.construir();
+    Catalogo.construir();
+    // La tarjeta del ejercicio está sobre el lienzo: sus toques no deben dibujar ni mover la hoja
+    const tarjeta = document.getElementById('tarjeta-ejercicio');
+    for (const t of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'dblclick'])
+      tarjeta.addEventListener(t, e => e.stopPropagation(), { passive: true });
     for (const p of document.querySelectorAll('.panel')) p.inert = true;
     for (const b of document.querySelectorAll('.cerrar-panel')) {
       b.innerHTML = Iconos.cerrar;
@@ -3181,6 +3269,636 @@ const Ayuda = {
   },
 };
 
+/* =====================================================================
+   Ejercicios guiados: cada ejercicio es un archivo JSON independiente
+   (formato descrito en ejercicios/LEEME.md)
+   ===================================================================== */
+const Ejercicio = {
+  def: null,             // ejercicio activo
+  paso: 0,               // índice del paso actual
+  nombres: {},           // nombre -> {tipo, id} de los elementos del dibujo
+  asignados: [],         // por paso: nombres que fijó al completarse
+  iniciales: [],         // nombres de los elementos del enunciado
+  completado: false,
+  configPrevia: null,    // papel que había antes del ejercicio
+  ultimoId: 0,           // para saber qué se ha dibujado desde la última comprobación
+  minimizado: false,
+  verPista: false,
+  siguiente: false,      // botón «Siguiente» de los pasos de lectura
+  clave: 'dibutec.ejercicio',
+  TIPOS: ['punto', 'recta', 'arco', 'rectas', 'vertices', 'instrumento', 'continuar'],
+  CLAVES_PAPEL: ['papel', 'cuadro', 'triangulo', 'colorLineas', 'colorPapel', 'hoja', 'margen', 'imanCuadricula'],
+
+  // ---------- Validación del archivo ----------
+  objetivosDe(p) { return Array.isArray(p.objetivos) ? p.objetivos : p.objetivo ? [p.objetivo] : []; },
+  validar(d) {
+    const err = m => { throw new Error(m); };
+    if (!d || typeof d !== 'object' || d.formato !== 'dibutec-ejercicio') err('falta "formato": "dibutec-ejercicio"');
+    if (typeof d.titulo !== 'string' || !d.titulo.trim()) err('falta el título');
+    if (!Array.isArray(d.pasos) || !d.pasos.length) err('no tiene pasos');
+    d.pasos.forEach((p, i) => {
+      if (!p || typeof p.texto !== 'string') err(`el paso ${i + 1} no tiene texto`);
+      const objs = this.objetivosDe(p);
+      if (!objs.length) err(`el paso ${i + 1} no tiene objetivo`);
+      for (const o of objs) if (!o || !this.TIPOS.includes(o.tipo)) err(`paso ${i + 1}: tipo de objetivo desconocido «${o && o.tipo}»`);
+    });
+    const ini = d.inicial || {};
+    for (const k of ['puntos', 'rectas', 'arcos'])
+      if (ini[k] !== undefined && !Array.isArray(ini[k])) err(`"inicial.${k}" tiene que ser una lista`);
+    return d;
+  },
+
+  // ---------- Empezar y salir ----------
+  iniciar(def) {
+    try { this.validar(def); } catch (e) { UI.aviso('El ejercicio no es válido: ' + e.message); return false; }
+    if (this.def) this.salir(false);
+    UI.cerrarPanel();
+    Acciones.cancelarActual();
+    Historial.registrar();                         // se puede volver al dibujo anterior con deshacer
+    this.configPrevia = {};
+    for (const k of this.CLAVES_PAPEL) this.configPrevia[k] = Config.get(k);
+    const papel = def.papel && typeof def.papel === 'object' ? def.papel : {};
+    for (const k of this.CLAVES_PAPEL) if (k in papel) Config.set(k, papel[k]);
+    Object.assign(this, { def, paso: 0, nombres: {}, asignados: [], completado: false, minimizado: false, verPista: false });
+    Escena.vaciar();
+    this.crearInicial(def.inicial || {});
+    this.colocarInstrumentos(def.instrumentos);
+    this.ultimoId = Escena.sigId;
+    App.seleccionar('lapiz');
+    this.guardar();
+    this.pintarTarjeta();
+    this.marcarSugeridos();
+    UI.mensaje(`Ejercicio: ${def.titulo}. Sigue los pasos de la tarjeta.`);
+    Render.pedir('papel', 'dibujo', 'instrumentos');
+    return true;
+  },
+  salir(aviso = true) {
+    if (!this.def) return;
+    if (this.configPrevia) for (const k in this.configPrevia) Config.set(k, this.configPrevia[k]);
+    Object.assign(this, { def: null, paso: 0, nombres: {}, asignados: [], iniciales: [], completado: false, configPrevia: null });
+    this.guardar();
+    this.pintarTarjeta();
+    this.marcarSugeridos();
+    Render.pedir('dibujo');
+    if (aviso) UI.mensaje('Has salido del ejercicio. Lo dibujado se queda en la hoja.');
+  },
+  crearInicial(ini) {
+    const fin = Number.isFinite;
+    const nombrar = (n, tipo, id) => { if (typeof n === 'string' && n) this.nombres[n] = { tipo, id }; };
+    for (const p of ini.puntos || []) {
+      if (!p || !fin(p.x) || !fin(p.y)) continue;
+      const q = Escena.agregarPunto(p.x, p.y);
+      q.dado = true;
+      const et = p.etiqueta || p.nombre;
+      if (et) q.etiqueta = String(et).slice(0, 6);
+      nombrar(p.nombre || q.etiqueta, 'punto', q.id);
+    }
+    const coord = (ref, x, y) => this.punto(ref) || (fin(x) && fin(y) ? { x, y } : null);
+    for (const r of ini.rectas || []) {
+      if (!r) continue;
+      const a = coord(r.desde, r.x1, r.y1), b = coord(r.hasta, r.x2, r.y2);
+      if (!a || !b) continue;
+      const q = Escena.agregarRecta(a.x, a.y, b.x, b.y);
+      q.dado = true;
+      nombrar(r.nombre, 'recta', q.id);
+    }
+    for (const c of ini.arcos || []) {
+      if (!c) continue;
+      const o = coord(c.centro, c.cx, c.cy);
+      if (!o || !fin(c.radio) || c.radio <= 0) continue;
+      // Grados en sentido antihorario, como en el transportador
+      const g0 = fin(c.desde) ? c.desde : 0, g1 = fin(c.hasta) ? c.hasta : g0 + 360;
+      const q = Escena.agregarArco(o.x, o.y, c.radio, -g0 * Math.PI / 180, -g1 * Math.PI / 180);
+      q.dado = true;
+      nombrar(c.nombre, 'arco', q.id);
+    }
+    this.iniciales = Object.keys(this.nombres);
+  },
+  colocarInstrumentos(cfg) {
+    for (const inst of Instrumentos.lista) { inst.visible = false; inst.bloqueado = false; }
+    if (cfg && typeof cfg === 'object') {
+      for (const tipo of Object.keys(cfg)) {
+        const inst = Instrumentos.porTipo[tipo], c = cfg[tipo];
+        if (!inst || !c) continue;
+        inst.visible = true;
+        if (Number.isFinite(c.x) && Number.isFinite(c.y)) { inst.x = c.x; inst.y = c.y; inst.colocado = true; }
+        if (Number.isFinite(c.giro)) inst.rot = -c.giro * Math.PI / 180;
+        if (Number.isFinite(c.radio) && 'r' in inst) inst.r = Geom.clamp(c.radio, 1, inst.rMax);
+        if (!inst.colocado) Instrumentos.colocarEnVista(inst);
+        Instrumentos.alFrente(inst);
+      }
+    }
+    UI.marcarInstrumentos();
+  },
+
+  // ---------- Referencias a elementos ----------
+  buscarId(tipo, id) {
+    const l = { punto: Escena.puntos, recta: Escena.rectas, arco: Escena.arcos }[tipo];
+    return (l && l.find(o => o.id === id)) || null;
+  },
+  elemento(ref) {
+    if (typeof ref !== 'string') return null;
+    const n = this.nombres[ref];
+    if (n) { const o = this.buscarId(n.tipo, n.id); return o ? { tipo: n.tipo, o } : null; }
+    const p = Escena.puntos.find(q => q.etiqueta === ref);
+    return p ? { tipo: 'punto', o: p } : null;
+  },
+  // Un punto: nombre de un punto o coordenadas {x, y} en mm
+  punto(ref) {
+    if (ref && typeof ref === 'object' && Number.isFinite(ref.x) && Number.isFinite(ref.y)) return { x: ref.x, y: ref.y };
+    const e = this.elemento(ref);
+    return e && e.tipo === 'punto' ? e.o : null;
+  },
+  linea(ref) { const e = this.elemento(ref); return e && e.tipo !== 'punto' ? e : null; },
+  nombreDe(ref) {
+    const t = this.def && this.def.textos;
+    if (typeof ref === 'string' && t && typeof t[ref] === 'string') return t[ref];
+    if (typeof ref === 'string') {
+      const e = this.elemento(ref);
+      if (e && e.tipo === 'punto') return `el punto ${e.o.etiqueta}`;
+      return `«${ref}»`;
+    }
+    return 'el punto indicado';
+  },
+
+  // ---------- Geometría de apoyo ----------
+  distLinea(p, L) {
+    return L.tipo === 'recta' ? Geom.distSegmento(p.x, p.y, L.o.x1, L.o.y1, L.o.x2, L.o.y2) : Geom.distArco(p.x, p.y, L.o);
+  },
+  dirRecta(r) { return Math.atan2(r.y2 - r.y1, r.x2 - r.x1); },
+  // Ángulo entre dos direcciones, de 0° a 90°
+  difAng(a, b) {
+    let d = Math.abs(a - b) % Math.PI;
+    if (d > Math.PI / 2) d = Math.PI - d;
+    return d * 180 / Math.PI;
+  },
+  cruces(o) {
+    const par = Array.isArray(o.cruce) ? o.cruce : [];
+    const A = this.linea(par[0]), B = this.linea(par[1]);
+    return A && B ? Geom.intersecciones(A, B) : [];
+  },
+  indiceCruce(p, o, tol) {
+    let mejor = -1, dm = Infinity;
+    this.cruces(o).forEach((c, i) => {
+      const d = Geom.dist(p.x, p.y, c.x, c.y);
+      if (d <= tol && d < dm) { dm = d; mejor = i; }
+    });
+    return mejor;
+  },
+
+  // ---------- Condiciones: devuelven null si se cumplen o el motivo si no ----------
+  condPunto(p, o, tol, tolA) {
+    if (o.cerca !== undefined) {
+      const c = this.punto(o.cerca);
+      if (!c || Geom.dist(p.x, p.y, c.x, c.y) > tol) return 'El punto no está en su sitio.';
+    }
+    if (o.sobre !== undefined) {
+      const L = this.linea(o.sobre);
+      if (!L || this.distLinea(p, L) > tol) return `El punto tiene que estar sobre ${this.nombreDe(o.sobre)}.`;
+    }
+    if (o.cruce !== undefined && this.indiceCruce(p, o, tol) < 0) return 'Marca el punto justo donde se cortan las líneas.';
+    if (o.angulo) {
+      const a = o.angulo, V = this.punto(a.vertice), H = this.punto(a.desde);
+      if (!V || !H) return 'Falta el ángulo de referencia.';
+      let g = (Math.atan2(-(p.y - V.y), p.x - V.x) - Math.atan2(-(H.y - V.y), H.x - V.x)) * 180 / Math.PI;
+      g = ((g % 360) + 540) % 360 - 180;
+      const ok = a.sentido === 'antihorario' ? Math.abs(g - a.grados) <= tolA
+        : a.sentido === 'horario' ? Math.abs(g + a.grados) <= tolA
+        : Math.abs(Math.abs(g) - a.grados) <= tolA;
+      if (!ok) return `El punto tiene que estar a ${a.grados}° (está a ${Math.round(Math.abs(g))}°).`;
+    }
+    if (o.distancia) {
+      const c = this.punto(o.distancia.de);
+      if (!c || Math.abs(Geom.dist(p.x, p.y, c.x, c.y) - o.distancia.mm) > tol)
+        return `El punto tiene que estar a ${o.distancia.mm} mm de ${this.nombreDe(o.distancia.de)}.`;
+    }
+    return null;
+  },
+  condRecta(r, o, tol, tolA) {
+    if (o.desde !== undefined || o.hasta !== undefined) {
+      const a = this.punto(o.desde), b = this.punto(o.hasta);
+      const cerca = (q, x, y) => !q || Geom.dist(q.x, q.y, x, y) <= tol;
+      const ok = (o.desde === undefined || a) && (o.hasta === undefined || b) &&
+        ((cerca(a, r.x1, r.y1) && cerca(b, r.x2, r.y2)) || (cerca(a, r.x2, r.y2) && cerca(b, r.x1, r.y1)));
+      if (!ok) return o.hasta !== undefined
+        ? `La recta tiene que ir de ${this.nombreDe(o.desde)} a ${this.nombreDe(o.hasta)}.`
+        : `La recta tiene que empezar en ${this.nombreDe(o.desde)}.`;
+    }
+    for (const ref of [].concat(o.pasaPor || [])) {
+      const q = this.punto(ref);
+      if (!q || Geom.distSegmento(q.x, q.y, r.x1, r.y1, r.x2, r.y2) > tol) return `La recta tiene que pasar por ${this.nombreDe(ref)}.`;
+    }
+    const dir = this.dirRecta(r);
+    if (o.paralelaA !== undefined) {
+      const L = this.linea(o.paralelaA);
+      if (!L || L.tipo !== 'recta' || this.difAng(dir, this.dirRecta(L.o)) > tolA) return `La recta tiene que ser paralela a ${this.nombreDe(o.paralelaA)}.`;
+    }
+    if (o.perpendicularA !== undefined) {
+      const L = this.linea(o.perpendicularA);
+      if (!L || L.tipo !== 'recta' || 90 - this.difAng(dir, this.dirRecta(L.o)) > tolA) return `La recta tiene que ser perpendicular a ${this.nombreDe(o.perpendicularA)}.`;
+    }
+    if (o.angulo) {
+      const L = this.linea(o.angulo.con), g = o.angulo.grados > 90 ? 180 - o.angulo.grados : o.angulo.grados;
+      if (!L || L.tipo !== 'recta' || Math.abs(this.difAng(dir, this.dirRecta(L.o)) - g) > tolA)
+        return `La recta tiene que formar ${o.angulo.grados}° con ${this.nombreDe(o.angulo.con)}.`;
+    }
+    if (Number.isFinite(o.longitudMin) && Geom.dist(r.x1, r.y1, r.x2, r.y2) < o.longitudMin)
+      return `Haz la recta más larga (al menos ${o.longitudMin} mm).`;
+    return null;
+  },
+  condArco(a, o, tol) {
+    if (o.centro !== undefined) {
+      const c = this.punto(o.centro);
+      if (!c || Geom.dist(a.cx, a.cy, c.x, c.y) > tol) return `Pincha la punta seca del compás en ${this.nombreDe(o.centro)}.`;
+    }
+    if (Number.isFinite(o.radio) && Math.abs(a.r - o.radio) > tol)
+      return `El radio tiene que medir ${o.radio} mm (mide ${Lapiz.mmTexto(a.r)}).`;
+    if (o.radio && typeof o.radio === 'object') {
+      const mn = o.radio.min, mx = o.radio.max;
+      if ((Number.isFinite(mn) && a.r < mn - tol) || (Number.isFinite(mx) && a.r > mx + tol))
+        return Number.isFinite(mx) ? `El radio tiene que medir entre ${mn || 0} y ${mx} mm.` : `Abre más el compás (al menos ${mn} mm).`;
+    }
+    if (o.radioComo !== undefined) {
+      const L = this.linea(o.radioComo);
+      if (!L || L.tipo !== 'arco' || Math.abs(a.r - L.o.r) > tol)
+        return `No cambies la abertura del compás: usa el mismo radio que en ${this.nombreDe(o.radioComo)}.`;
+    }
+    if (o.completo && !Geom.esCircunferencia(a)) return 'Tiene que ser una circunferencia completa: da la vuelta entera con el compás.';
+    if (Number.isFinite(o.barridoMin) && Math.abs(a.a1 - a.a0) * 180 / Math.PI < o.barridoMin) return 'Haz el arco más largo.';
+    for (const ref of [].concat(o.pasaPor || [])) {
+      const q = this.punto(ref);
+      if (!q || Geom.distArco(q.x, q.y, a) > tol) return `El arco tiene que pasar por ${this.nombreDe(ref)}.`;
+    }
+    for (const c of [].concat(o.cortaA || [])) {
+      const ref = typeof c === 'string' ? c : c && c.elemento, n = (c && c.cortes) || 1;
+      const L = this.linea(ref), k = L ? Geom.intersecciones({ tipo: 'arco', o: a }, L).length : 0;
+      if (k < n) return n > 1 ? `El arco tiene que cortar a ${this.nombreDe(ref)} en ${n} puntos.` : `El arco tiene que cortar a ${this.nombreDe(ref)}.`;
+    }
+    return null;
+  },
+  condInstrumento(o, tol, tolA) {
+    const inst = Instrumentos.porTipo[o.instrumento];
+    if (!inst) return `Instrumento desconocido: ${o.instrumento}.`;
+    if (!inst.visible) return `Saca ${inst.conArticulo} con su botón de la barra.`;
+    if (typeof o.bloqueado === 'boolean' && inst.bloqueado !== o.bloqueado)
+      return o.bloqueado ? `Fija ${inst.conArticulo} con su candado.` : `Quita el candado de ${inst.conArticulo}.`;
+    if (o.origenEn !== undefined) {
+      const p = this.punto(o.origenEn), q = inst.aMundo(...inst.origenIman);
+      if (!p || Geom.dist(p.x, p.y, q.x, q.y) > tol) return `Coloca el centro de ${inst.conArticulo} en ${this.nombreDe(o.origenEn)}.`;
+    }
+    const cantos = inst.cantosMundo();
+    const dLinea = (k, x, y) => Math.abs((x - k.a.x) * k.n.x + (y - k.a.y) * k.n.y);
+    if (o.cantoSobre !== undefined) {
+      const L = this.linea(o.cantoSobre);
+      const ok = L && L.tipo === 'recta' && cantos.some(k => dLinea(k, L.o.x1, L.o.y1) <= tol && dLinea(k, L.o.x2, L.o.y2) <= tol);
+      if (!ok) return `Apoya un canto de ${inst.conArticulo} justo encima de ${this.nombreDe(o.cantoSobre)}.`;
+    }
+    if (o.cantoPasaPor !== undefined) {
+      const pts = [].concat(o.cantoPasaPor).map(r => this.punto(r));
+      const par = o.paraleloA !== undefined ? this.linea(o.paraleloA) : null;
+      const per = o.perpendicularA !== undefined ? this.linea(o.perpendicularA) : null;
+      const ok = pts.every(Boolean) && cantos.some(k => {
+        if (!pts.every(p => dLinea(k, p.x, p.y) <= tol)) return false;
+        const ang = Math.atan2(k.u.y, k.u.x);
+        if (par && (par.tipo !== 'recta' || this.difAng(ang, this.dirRecta(par.o)) > tolA)) return false;
+        if (per && (per.tipo !== 'recta' || 90 - this.difAng(ang, this.dirRecta(per.o)) > tolA)) return false;
+        return true;
+      });
+      if (!ok) {
+        const quien = [].concat(o.cantoPasaPor).map(r => this.nombreDe(r)).join(' y ');
+        return `Coloca ${inst.conArticulo} para que un canto pase por ${quien}` +
+          (par ? `, paralelo a ${this.nombreDe(o.paraleloA)}` : '') + (per ? `, perpendicular a ${this.nombreDe(o.perpendicularA)}` : '') + '.';
+      }
+    }
+    if (o.apoyadoEn !== undefined) {
+      const otro = Instrumentos.porTipo[o.apoyadoEn];
+      if (!otro || !otro.visible || !this.apoyados(inst, otro))
+        return `Apoya ${inst.conArticulo} contra un canto de ${otro ? otro.conArticulo : o.apoyadoEn}.`;
+    }
+    return null;
+  },
+  // Dos instrumentos con un canto apoyado en otro (paralelos, juntos y solapados)
+  apoyados(a, b) {
+    for (const k of a.cantosMundo()) for (const g of b.cantosMundo()) {
+      if (this.difAng(Math.atan2(k.u.y, k.u.x), Math.atan2(g.u.y, g.u.x)) > 0.5) continue;
+      const d = q => Math.abs((q.x - g.a.x) * g.n.x + (q.y - g.a.y) * g.n.y);
+      if (d(k.a) > 0.3 || d(k.b) > 0.3) continue;
+      const t = q => (q.x - g.a.x) * g.u.x + (q.y - g.a.y) * g.u.y;
+      if (Math.min(g.len, Math.max(t(k.a), t(k.b))) - Math.max(0, Math.min(t(k.a), t(k.b))) > 1) return true;
+    }
+    return false;
+  },
+
+  // ---------- Evaluación de objetivos ----------
+  evaluar(o) {
+    const tol = Number.isFinite(o.tolerancia) ? o.tolerancia : 1;
+    const tolA = Number.isFinite(o.toleranciaGrados) ? o.toleranciaGrados : 1;
+    const nombrar = o.nombrar === undefined ? [] : [].concat(o.nombrar);
+    const propios = l => l.filter(e => o.permitirDados || !e.dado);
+    const nuevos = l => l.filter(e => e.id >= this.ultimoId);   // para explicar qué falla
+    const fallo = motivo => ({ ok: false, motivo });
+    const elegirUno = (lista, cond, tipo) => {
+      const orden = propios(lista).sort((a, b) => b.id - a.id);    // lo más reciente primero
+      const bueno = orden.find(e => !cond(e));
+      if (bueno) return { ok: true, asignar: nombrar.slice(0, 1).map(n => ({ nombre: n, tipo, id: bueno.id })) };
+      const nuevo = nuevos(orden)[0];
+      return fallo(nuevo ? cond(nuevo) : null);
+    };
+    switch (o.tipo) {
+      case 'continuar':
+        return this.siguiente ? { ok: true, asignar: [] } : fallo(null);
+      case 'punto': {
+        const n = Number.isInteger(o.cantidad) && o.cantidad > 0 ? o.cantidad : 1;
+        const elegidos = [], usados = new Set();
+        for (const p of propios(Escena.puntos)) {
+          if (this.condPunto(p, o, tol, tolA)) continue;
+          if (o.cruce !== undefined) {
+            const i = this.indiceCruce(p, o, tol);
+            if (usados.has(i)) continue;
+            usados.add(i);
+          }
+          elegidos.push(p);
+          if (elegidos.length === n) break;
+        }
+        if (elegidos.length < n) {
+          const nuevo = nuevos(propios(Escena.puntos)).sort((a, b) => b.id - a.id)[0];
+          const m = nuevo && this.condPunto(nuevo, o, tol, tolA);
+          return fallo(m || (elegidos.length && n > 1 ? `Llevas ${elegidos.length} de ${n} puntos.` : null));
+        }
+        return { ok: true, asignar: nombrar.map((nm, i) => elegidos[i] && { nombre: nm, tipo: 'punto', id: elegidos[i].id }).filter(Boolean) };
+      }
+      case 'recta': return elegirUno(Escena.rectas, r => this.condRecta(r, o, tol, tolA), 'recta');
+      case 'arco': return elegirUno(Escena.arcos, a => this.condArco(a, o, tol), 'arco');
+      case 'rectas': {
+        const refs = Array.isArray(o.poligono) ? o.poligono : null;
+        const segs = refs ? refs.map((r, i) => [r, refs[(i + 1) % refs.length]]).slice(0, o.cerrado === false ? refs.length - 1 : refs.length)
+                          : Array.isArray(o.segmentos) ? o.segmentos : [];
+        let hechas = 0;
+        for (const s of segs) {
+          const a = this.punto(s && s[0]), b = this.punto(s && s[1]);
+          if (a && b && propios(Escena.rectas).some(r =>
+            Geom.distSegmento(a.x, a.y, r.x1, r.y1, r.x2, r.y2) <= tol && Geom.distSegmento(b.x, b.y, r.x1, r.y1, r.x2, r.y2) <= tol)) hechas++;
+        }
+        if (hechas < segs.length) return fallo(nuevos(Escena.rectas).length ? `Llevas ${hechas} de ${segs.length} líneas.` : null);
+        return { ok: true, asignar: [] };
+      }
+      case 'vertices': {
+        const L = this.linea(o.circunferencia), P0 = this.punto(o.desde), n = o.lados;
+        if (!L || L.tipo !== 'arco' || !P0 || !Number.isInteger(n) || n < 3) return fallo(null);
+        const c = L.o, a0 = Math.atan2(P0.y - c.cy, P0.x - c.cx), hallados = [];
+        for (let k = 0; k < n; k++) {
+          const t = a0 + k * Geom.DOS_PI / n, x = c.cx + c.r * Math.cos(t), y = c.cy + c.r * Math.sin(t);
+          // Los vértices de un polígono regular son los mismos en los dos sentidos de giro
+          hallados.push(Escena.puntos.find(q => Geom.dist(q.x, q.y, x, y) <= tol) || null);
+        }
+        const bien = hallados.filter(Boolean).length;
+        if (bien < n) return fallo(nuevos(Escena.puntos).length ? `Llevas ${bien} de ${n} vértices.` : null);
+        return { ok: true, asignar: nombrar.map((nm, i) => hallados[i] && { nombre: nm, tipo: 'punto', id: hallados[i].id }).filter(Boolean) };
+      }
+      case 'instrumento': {
+        const m = this.condInstrumento(o, tol, tolA);
+        return m ? fallo(m) : { ok: true, asignar: [] };
+      }
+    }
+    return fallo(null);
+  },
+  evaluarPaso(p) {
+    const asignar = [];
+    for (const o of this.objetivosDe(p)) {
+      const r = this.evaluar(o);
+      if (!r.ok) return r;
+      asignar.push(...r.asignar);
+    }
+    return { ok: true, asignar };
+  },
+
+  // ---------- Comprobación tras cada cambio ----------
+  comprobar() {
+    if (!this.def || this.completado) return;
+    // Si se ha deshecho el comienzo, el ejercicio termina
+    if (this.iniciales.some(n => !this.elemento(n))) {
+      this.salir(false);
+      UI.mensaje('Se ha deshecho el comienzo del ejercicio, así que el ejercicio se ha cerrado.');
+      return;
+    }
+    // Si falta algo conseguido en un paso anterior (deshacer, goma), se vuelve a ese paso
+    let retrocede = false;
+    for (let i = 0; i < this.paso; i++) {
+      if ((this.asignados[i] || []).some(n => !this.elemento(n))) {
+        for (let j = i; j < this.paso; j++) for (const n of this.asignados[j] || []) delete this.nombres[n];
+        this.asignados.length = i;
+        this.paso = i;
+        retrocede = true;
+        break;
+      }
+    }
+    let avanza = 0, motivo = null;
+    const hayNuevo = Escena.sigId > this.ultimoId;
+    while (this.paso < this.def.pasos.length) {
+      const r = this.evaluarPaso(this.def.pasos[this.paso]);
+      if (!r.ok) { motivo = r.motivo; break; }
+      for (const a of r.asignar) this.nombres[a.nombre] = { tipo: a.tipo, id: a.id };
+      this.asignados[this.paso] = r.asignar.map(a => a.nombre);
+      this.paso++;
+      avanza++;
+      this.verPista = false;
+    }
+    this.siguiente = false;
+    this.ultimoId = Escena.sigId;
+    if (this.paso >= this.def.pasos.length) {
+      this.completado = true;
+      Sonido.tocar('fin');
+      UI.aviso('¡Ejercicio completado!');
+      UI.mensaje(this.def.final || '¡Has terminado el ejercicio! Muy bien.');
+    } else if (avanza) {
+      Sonido.tocar('bien');
+      UI.aviso('¡Bien hecho!');
+      UI.mensaje(`Paso ${this.paso + 1}: ${this.def.pasos[this.paso].texto}`);
+    } else if (retrocede) {
+      UI.mensaje('Has quitado algo que hacía falta: vuelve a hacer este paso.');
+    } else if (hayNuevo && motivo) {
+      UI.mensaje(motivo);
+    }
+    if (avanza || retrocede) {
+      this.guardar();
+      this.pintarTarjeta();
+      this.marcarSugeridos();
+    }
+  },
+  pulsarSiguiente() { this.siguiente = true; this.comprobar(); this.siguiente = false; },
+
+  // ---------- Guardado del progreso ----------
+  guardar() {
+    try {
+      if (this.def) localStorage.setItem(this.clave, JSON.stringify({
+        def: this.def, paso: this.paso, nombres: this.nombres, asignados: this.asignados,
+        iniciales: this.iniciales, completado: this.completado, configPrevia: this.configPrevia }));
+      else localStorage.removeItem(this.clave);
+    } catch (_) { /* sin almacenamiento */ }
+  },
+  recuperar() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(this.clave)); } catch (_) { d = null; }
+    if (!d || !d.def) return;
+    try { this.validar(d.def); } catch (_) { return; }
+    Object.assign(this, {
+      def: d.def,
+      paso: Number.isInteger(d.paso) ? Geom.clamp(d.paso, 0, d.def.pasos.length) : 0,
+      nombres: d.nombres && typeof d.nombres === 'object' ? d.nombres : {},
+      asignados: Array.isArray(d.asignados) ? d.asignados : [],
+      iniciales: Array.isArray(d.iniciales) ? d.iniciales : [],
+      completado: !!d.completado,
+      configPrevia: d.configPrevia || null,
+    });
+    this.ultimoId = Escena.sigId;
+    this.pintarTarjeta();
+    this.marcarSugeridos();
+  },
+
+  // ---------- Tarjeta del ejercicio ----------
+  marcarSugeridos() {
+    const p = this.def && !this.completado ? this.def.pasos[this.paso] : null;
+    const ids = p && Array.isArray(p.herramientas) ? p.herramientas : [];
+    document.querySelectorAll('#barra .btn[data-id]').forEach(b => b.classList.toggle('sugerido', ids.includes(b.dataset.id)));
+  },
+  pintarTarjeta() {
+    const el = document.getElementById('tarjeta-ejercicio');
+    el.textContent = '';
+    if (!this.def) { el.hidden = true; return; }
+    el.hidden = false;
+    el.classList.toggle('minimizado', this.minimizado);
+    el.classList.toggle('completado', this.completado);
+    const crear = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const N = this.def.pasos.length;
+    const cab = crear('div', 'te-cab');
+    const ico = crear('span', 'te-ico');
+    ico.innerHTML = Iconos.ejercicios;
+    cab.append(ico, crear('span', 'te-titulo', this.def.titulo),
+      crear('span', 'te-paso', this.completado ? '¡Terminado!' : `Paso ${this.paso + 1} de ${N}`));
+    cab.append(
+      UI.crearBoton({ nombre: this.minimizado ? 'Mostrar el paso' : 'Ocultar el paso', icono: this.minimizado ? 'expandir' : 'contraer',
+                      alPulsar: () => { this.minimizado = !this.minimizado; this.pintarTarjeta(); } }),
+      UI.crearBoton({ nombre: 'Salir del ejercicio', icono: 'cerrar', alPulsar: () => this.salir() }));
+    el.append(cab);
+    const cuerpo = crear('div', 'te-cuerpo');
+    const pie = crear('div', 'te-pie');
+    const progreso = crear('div', 'te-progreso');
+    for (let i = 0; i < N; i++) progreso.append(crear('i', i < this.paso || this.completado ? 'hecho' : i === this.paso ? 'actual' : ''));
+    pie.append(progreso);
+    const boton = (texto, accion, principal) => {
+      const b = crear('button', 'te-boton' + (principal ? ' principal' : ''), texto);
+      b.type = 'button';
+      b.addEventListener('click', accion);
+      pie.append(b);
+    };
+    if (this.completado) {
+      cuerpo.append(crear('p', 'te-texto', this.def.final || '¡Has terminado el ejercicio! Muy bien.'));
+      boton('Repetir', () => this.iniciar(this.def));
+      boton('Otro ejercicio', () => UI.abrirPanel('ejercicios'), true);
+    } else {
+      const p = this.def.pasos[this.paso];
+      cuerpo.append(crear('p', 'te-texto', p.texto));
+      if (this.verPista && typeof p.pista === 'string') cuerpo.append(crear('p', 'te-pista', p.pista));
+      if (typeof p.pista === 'string') boton(this.verPista ? 'Ocultar pista' : 'Pista', () => { this.verPista = !this.verPista; this.pintarTarjeta(); });
+      if (this.objetivosDe(p).some(o => o.tipo === 'continuar')) boton('Siguiente', () => this.pulsarSiguiente(), true);
+    }
+    cuerpo.append(pie);
+    el.append(cuerpo);
+  },
+};
+
+/* Lista de ejercicios: ejercicios/indice.json y un archivo por ejercicio */
+const Catalogo = {
+  estado: 'sin-cargar',   // sin-cargar | cargando | listo | error
+  lista: [],              // {archivo, def} o {archivo, error}
+  CARPETA: 'ejercicios/',
+
+  async cargar() {
+    if (this.estado === 'cargando' || this.estado === 'listo') return;
+    this.estado = 'cargando';
+    this.pintar();
+    try {
+      const r = await fetch(this.CARPETA + 'indice.json', { cache: 'no-cache' });
+      if (!r.ok) throw new Error('sin índice');
+      const indice = await r.json();
+      const archivos = (Array.isArray(indice.ejercicios) ? indice.ejercicios : [])
+        .filter(a => typeof a === 'string' && /^[\w.-]+\.json$/.test(a) && !a.startsWith('.'));
+      // Cada ejercicio se carga de su propio archivo; uno roto no impide los demás
+      this.lista = await Promise.all(archivos.map(async archivo => {
+        try {
+          const rr = await fetch(this.CARPETA + archivo, { cache: 'no-cache' });
+          if (!rr.ok) throw new Error('no se encuentra el archivo');
+          return { archivo, def: Ejercicio.validar(await rr.json()) };
+        } catch (e) {
+          return { archivo, error: e instanceof SyntaxError ? 'el JSON tiene un error de escritura' : e.message };
+        }
+      }));
+      this.estado = 'listo';
+    } catch (_) {
+      this.estado = 'error';
+    }
+    this.pintar();
+  },
+  leerArchivo(archivo) {
+    if (archivo.size > 2e6) { UI.aviso('Ese archivo es demasiado grande para ser un ejercicio.'); return; }
+    archivo.text().then(t => {
+      let d;
+      try { d = JSON.parse(t); } catch (_) { UI.aviso('El archivo no es un JSON válido.'); return; }
+      Ejercicio.iniciar(d);
+    });
+  },
+  pintar() {
+    const c = document.getElementById('ejercicios-lista');
+    if (!c) return;
+    c.textContent = '';
+    const crear = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    if (this.estado === 'cargando') { c.append(crear('p', 'nota', 'Cargando ejercicios…')); return; }
+    if (this.estado === 'error') {
+      c.append(crear('p', 'nota', 'No se ha podido leer la carpeta de ejercicios. Si has abierto DibuTec con doble clic, ' +
+        'el navegador no deja leerla: ábrelo desde una página web o carga un ejercicio desde un archivo.'));
+      return;
+    }
+    if (!this.lista.length) { c.append(crear('p', 'nota', 'La carpeta de ejercicios está vacía.')); return; }
+    for (const item of this.lista) {
+      if (item.error) { c.append(crear('p', 'nota error', `${item.archivo}: ${item.error}.`)); continue; }
+      const d = item.def;
+      const b = crear('button', 'ejercicio-item');
+      b.type = 'button';
+      b.append(crear('strong', null, d.titulo));
+      b.append(crear('span', 'meta', [d.nivel, `${d.pasos.length} pasos`].filter(x => typeof x === 'string' && x).join(' · ')));
+      if (typeof d.descripcion === 'string') b.append(crear('span', 'desc', d.descripcion));
+      b.addEventListener('click', () => Ejercicio.iniciar(d));
+      c.append(b);
+    }
+  },
+  construir() {
+    const c = document.getElementById('ejercicios-cuerpo');
+    const titulo = t => { const h = document.createElement('h3'); h.textContent = t; c.appendChild(h); };
+    titulo('Ejercicios');
+    const lista = document.createElement('div');
+    lista.id = 'ejercicios-lista';
+    c.appendChild(lista);
+    titulo('Desde un archivo');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn-texto primero';
+    b.innerHTML = Iconos.abrir + '<span>Cargar un ejercicio (.json)</span>';
+    b.addEventListener('click', () => document.getElementById('abrir-ejercicio').click());
+    c.appendChild(b);
+    const n = document.createElement('p');
+    n.className = 'nota-final';
+    n.textContent = 'También puedes arrastrar un archivo de ejercicio sobre la hoja. Para añadir ejercicios a la lista, ' +
+      'copia su archivo .json en la carpeta «ejercicios» y escribe su nombre en ejercicios/indice.json.';
+    c.appendChild(n);
+    document.getElementById('abrir-ejercicio').addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (f) this.leerArchivo(f);
+    });
+    this.pintar();
+  },
+};
+
 /* Aplica un cambio de configuración al resto de la aplicación */
 function aplicarConfig(clave) {
   const todo = clave === '*';
@@ -3224,14 +3942,39 @@ function iniciar() {
   });
 
   const habia = Guardado.recuperar();
+  Ejercicio.recuperar();
   App.seleccionar('lapiz');
   UI.mensaje(habia
     ? 'Aquí está tu dibujo de la última vez. Pulsa ? si necesitas ayuda.'
     : '¡Bienvenido a DibuTec! Toca la hoja con el portaminas para marcar puntos. Pulsa ? para ver la ayuda.');
+  if (Ejercicio.def) UI.mensaje(`Sigues con el ejercicio «${Ejercicio.def.titulo}».`);
+
+  // Abrir un ejercicio desde la dirección: index.html?ejercicio=ejercicios/mediatriz.json
+  const ruta = new URLSearchParams(location.search).get('ejercicio');
+  if (ruta && /^[\w./-]+\.json$/.test(ruta) && !ruta.includes('..') && !ruta.startsWith('/')) {
+    fetch(ruta, { cache: 'no-cache' }).then(r => r.json()).then(d => Ejercicio.iniciar(d))
+      .catch(() => UI.aviso('No se ha podido abrir el ejercicio indicado en la dirección.'));
+  }
+
+  // Arrastrar un archivo sobre la hoja: ejercicio o dibujo guardado
+  window.addEventListener('dragover', e => { e.preventDefault(); });
+  window.addEventListener('drop', e => {
+    e.preventDefault();
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    if (f.size > 5e6) { UI.aviso('Ese archivo es demasiado grande.'); return; }
+    f.text().then(t => {
+      let d;
+      try { d = JSON.parse(t); } catch (_) { UI.aviso('Solo se pueden abrir archivos de DibuTec (.json).'); return; }
+      if (d && d.formato === 'dibutec-ejercicio') Ejercicio.iniciar(d);
+      else if (d && d.app === 'DibuTec') Archivo.leer(f);
+      else UI.aviso('Ese archivo no es un dibujo ni un ejercicio de DibuTec.');
+    });
+  });
 }
 
 // Acceso para pruebas automáticas
-window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip, Guardado, Archivo, Lupa };
+window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip, Guardado, Archivo, Lupa, Ejercicio, Catalogo };
 
 iniciar();
 </script>

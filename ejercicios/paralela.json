@@ -1,0 +1,43 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "paralela",
+  "titulo": "Paralela por un punto",
+  "nivel": "1.º ESO",
+  "descripcion": "Con la escuadra y el cartabón, traza la paralela a una recta que pasa por un punto.",
+  "papel": { "papel": "blanco", "hoja": "A4-h" },
+  "inicial": {
+    "puntos": [
+      { "nombre": "P", "x": 120, "y": 65 }
+    ],
+    "rectas": [
+      { "nombre": "r", "x1": 40, "y1": 165, "x2": 250, "y2": 130 }
+    ]
+  },
+  "textos": { "r": "la recta r" },
+  "pasos": [
+    {
+      "texto": "Saca la escuadra y apoya uno de sus cantos justo encima de la recta r.",
+      "pista": "Gírala con un asa: el canto se pega a los extremos de la recta.",
+      "herramientas": ["escuadra"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "escuadra", "cantoSobre": "r", "tolerancia": 1.5 }
+    },
+    {
+      "texto": "Saca el cartabón, apóyalo contra otro canto de la escuadra y fíjalo con su candado.",
+      "herramientas": ["cartabon"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "cartabon", "apoyadoEn": "escuadra", "bloqueado": true }
+    },
+    {
+      "texto": "Desliza la escuadra a lo largo del cartabón hasta que el canto que estaba sobre r pase por el punto P.",
+      "pista": "Arrastra la escuadra por el cuerpo: mientras toca el cartabón, solo se mueve a lo largo de él.",
+      "herramientas": ["escuadra"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "escuadra", "apoyadoEn": "cartabon", "cantoPasaPor": "P", "paraleloA": "r" }
+    },
+    {
+      "texto": "Traza con el portaminas la recta que pasa por P a lo largo de ese canto.",
+      "herramientas": ["lapiz"],
+      "objetivo": { "tipo": "recta", "pasaPor": ["P"], "paralelaA": "r", "longitudMin": 40 }
+    }
+  ],
+  "final": "¡Perfecto! Las dos rectas son paralelas: nunca se cortan."
+}

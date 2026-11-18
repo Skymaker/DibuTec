@@ -1,0 +1,61 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "bisectriz",
+  "titulo": "Bisectriz de un ángulo",
+  "nivel": "1.º ESO",
+  "descripcion": "Divide un ángulo en dos ángulos iguales usando el compás y la regla.",
+  "papel": { "papel": "blanco", "hoja": "A4-h" },
+  "inicial": {
+    "puntos": [
+      { "nombre": "V", "x": 70, "y": 165 }
+    ],
+    "rectas": [
+      { "nombre": "lado1", "desde": "V", "x2": 240, "y2": 165 },
+      { "nombre": "lado2", "desde": "V", "x2": 179.27, "y2": 34.77 }
+    ]
+  },
+  "textos": {
+    "lado1": "el lado de abajo",
+    "lado2": "el lado inclinado",
+    "arco1": "el primer arco",
+    "arcoP": "el arco desde P"
+  },
+  "pasos": [
+    {
+      "texto": "Pincha el compás en el vértice V y traza un arco que corte a los dos lados del ángulo.",
+      "herramientas": ["compas"],
+      "objetivo": { "tipo": "arco", "centro": "V", "cortaA": ["lado1", "lado2"], "nombrar": "arco1" }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde el arco corta a los lados.",
+      "herramientas": ["lapiz"],
+      "objetivos": [
+        { "tipo": "punto", "cruce": ["arco1", "lado1"], "nombrar": "P" },
+        { "tipo": "punto", "cruce": ["arco1", "lado2"], "nombrar": "Q" }
+      ]
+    },
+    {
+      "texto": "Pincha el compás en el punto del lado de abajo y traza un arco hacia dentro del ángulo.",
+      "pista": "Abre el compás más de la mitad de la distancia entre los dos puntos marcados.",
+      "herramientas": ["compas"],
+      "objetivo": { "tipo": "arco", "centro": "P", "nombrar": "arcoP" }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en el punto del lado inclinado y traza otro arco que corte al anterior.",
+      "herramientas": ["compas"],
+      "objetivo": { "tipo": "arco", "centro": "Q", "radioComo": "arcoP", "cortaA": ["arcoP"], "nombrar": "arcoQ" }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos últimos arcos.",
+      "herramientas": ["lapiz"],
+      "objetivo": { "tipo": "punto", "cruce": ["arcoP", "arcoQ"], "nombrar": "R" }
+    },
+    {
+      "texto": "Une el vértice V con ese punto usando la regla. ¡Es la bisectriz!",
+      "herramientas": ["regla", "lapiz"],
+      "objetivo": { "tipo": "recta", "pasaPor": ["V", "R"], "longitudMin": 40 }
+    }
+  ],
+  "final": "¡Genial! La bisectriz divide el ángulo en dos ángulos iguales."
+}

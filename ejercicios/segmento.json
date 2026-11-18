@@ -1,0 +1,35 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "segmento",
+  "titulo": "Une dos puntos con la regla",
+  "nivel": "Primeros pasos",
+  "descripcion": "Aprende a mover y girar la regla para trazar el segmento que une dos puntos.",
+  "papel": { "papel": "blanco", "hoja": "A4-h" },
+  "inicial": {
+    "puntos": [
+      { "nombre": "A", "x": 70, "y": 140 },
+      { "nombre": "B", "x": 210, "y": 75 }
+    ]
+  },
+  "pasos": [
+    {
+      "texto": "Pulsa el botón de la regla para sacarla.",
+      "herramientas": ["regla"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "regla" }
+    },
+    {
+      "texto": "Arrastra la regla por el cuerpo hasta que su canto toque el punto A. Después gírala con un asa redonda hasta que el canto pase también por B.",
+      "pista": "Cuando el canto pasa por A, la regla gira alrededor de A. Al acercarte a B, el canto se pega solo.",
+      "herramientas": ["regla"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "regla", "cantoPasaPor": ["A", "B"] }
+    },
+    {
+      "texto": "Con el portaminas, arrastra junto al canto desde A hasta B para trazar el segmento.",
+      "pista": "Empieza cerca de A y suelta cerca de B: la punta se pega a los puntos.",
+      "herramientas": ["lapiz"],
+      "objetivo": { "tipo": "recta", "desde": "A", "hasta": "B" }
+    }
+  ],
+  "final": "¡Muy bien! Has trazado el segmento AB."
+}

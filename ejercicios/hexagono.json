@@ -1,0 +1,40 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "hexagono",
+  "titulo": "Hexágono regular",
+  "nivel": "2.º ESO",
+  "descripcion": "Dibuja un hexágono regular dentro de una circunferencia usando solo el compás y la regla.",
+  "papel": { "papel": "blanco", "hoja": "A4-h" },
+  "inicial": {
+    "puntos": [
+      { "nombre": "O", "x": 148.5, "y": 105 }
+    ]
+  },
+  "textos": { "c": "la circunferencia" },
+  "pasos": [
+    {
+      "texto": "Con el compás, traza una circunferencia de centro O y radio 50 mm.",
+      "pista": "Mide la abertura en la regla: pon la punta seca en el 0 y la mina en el 5.",
+      "herramientas": ["compas", "regla"],
+      "objetivo": { "tipo": "arco", "centro": "O", "radio": 50, "completo": true, "nombrar": "c" }
+    },
+    {
+      "texto": "Marca con el portaminas un punto cualquiera sobre la circunferencia.",
+      "herramientas": ["lapiz"],
+      "objetivo": { "tipo": "punto", "sobre": "c", "nombrar": "P1" }
+    },
+    {
+      "texto": "Sin cambiar la abertura del compás, pincha en ese punto y marca dónde el arco corta a la circunferencia. Repite desde cada punto nuevo hasta tener los seis vértices.",
+      "pista": "El lado del hexágono regular mide lo mismo que el radio de la circunferencia.",
+      "herramientas": ["compas", "lapiz"],
+      "objetivo": { "tipo": "vertices", "circunferencia": "c", "desde": "P1", "lados": 6, "nombrar": ["V1", "V2", "V3", "V4", "V5", "V6"] }
+    },
+    {
+      "texto": "Une los seis vértices con la regla, cada uno con el siguiente.",
+      "herramientas": ["regla", "lapiz"],
+      "objetivo": { "tipo": "rectas", "poligono": ["V1", "V2", "V3", "V4", "V5", "V6"] }
+    }
+  ],
+  "final": "¡Precioso! Has dibujado un hexágono regular: sus seis lados miden lo mismo que el radio."
+}
