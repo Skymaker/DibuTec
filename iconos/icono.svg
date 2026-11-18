@@ -6,20 +6,12 @@
   </defs>
   <rect width="512" height="512" rx="112" fill="#2f6fd0"/>
   <rect width="512" height="512" rx="112" fill="url(#cuadricula)"/>
-  <!-- Escuadra -->
-  <path d="M84 428V156L356 428Z M128 384H250L128 262Z" fill="#ffd166" fill-rule="evenodd"
+  <!-- Línea trazada a lo largo de la hipotenusa -->
+  <path d="M132 104L420 392" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
+  <!-- Escuadra (45°) -->
+  <path d="M96 424V128L392 424Z M144 376H284L144 236Z" fill="#ffd166" fill-rule="evenodd"
         stroke="#2d3047" stroke-width="12" stroke-linejoin="round"/>
-  <!-- Arco trazado por el compás (centro en la aguja) -->
-  <path d="M428 404A168 168 0 0 1 425 473" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
-  <!-- Compás -->
-  <g stroke="#2d3047" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M330 104L268 400" stroke-width="30"/>
-    <path d="M330 104L268 400" stroke="#e8ecf3" stroke-width="16"/>
-    <path d="M330 104L414 372" stroke-width="30"/>
-    <path d="M330 104L414 372" stroke="#e8ecf3" stroke-width="16"/>
-    <path d="M268 400L262 432" stroke-width="8"/>
-    <path d="M414 372L428 404" stroke="#ff9f1c" stroke-width="16"/>
-    <rect x="316" y="50" width="28" height="46" rx="10" fill="#2d3047" stroke="none"/>
-    <circle cx="330" cy="108" r="22" fill="#ffd166" stroke-width="10"/>
-  </g>
+  <!-- Marcas de medida en el cateto inferior -->
+  <path d="M128 424v-18M160 424v-18M192 424v-26M224 424v-18M256 424v-18M288 424v-26M320 424v-18"
+        stroke="#2d3047" stroke-width="6" stroke-linecap="round"/>
 </svg>
