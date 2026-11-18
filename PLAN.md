@@ -11,7 +11,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 1 | Base: estructura, CSS adaptable, iconos SVG, canvas en capas, mm↔px, zoom y desplazamiento | ✅ Hecha |
 | 1b | Papel configurable + panel de configuración | ✅ Hecha |
 | 2 | Portaminas, puntos magnéticos, goma y deshacer/rehacer | ✅ Hecha |
-| 3 | Regla | ⏳ Pendiente |
+| 3 | Regla | ✅ Hecha |
 | 4 | Escuadra, cartabón y deslizamiento | ⏳ Pendiente |
 | 5 | Compás | ⏳ Pendiente |
 | 6 | Transportador | ⏳ Pendiente |

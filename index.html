@@ -95,6 +95,11 @@
   #lienzo.mover { cursor: grab; }
   #lienzo.mover.arrastrando { cursor: grabbing; }
   #lienzo.precision { cursor: crosshair; }
+  #lienzo.sobre-instrumento { cursor: grab; }
+  #lienzo.sobre-asa {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='4'%3E%3Cpath d='M20 12a8 8 0 1 1-2.3-5.6'/%3E%3Cpath d='M20 3v4.5h-4.5'/%3E%3C/g%3E%3Cg stroke='%232d3047' stroke-width='2'%3E%3Cpath d='M20 12a8 8 0 1 1-2.3-5.6'/%3E%3Cpath d='M20 3v4.5h-4.5'/%3E%3C/g%3E%3C/svg%3E") 12 12, grab;
+  }
+  #lienzo.arrastrando { cursor: grabbing; }
 
   /* ---------- Barra de estado ---------- */
   #estado {
@@ -732,7 +737,8 @@ const Render = {
     const c = Capas.instrumentos;
     Capas.limpiar(c);
     const ctx = Capas.ctxMundo(c);
-    // Fases 3-6: regla, escuadra, cartabón, compás, transportador
+    for (const inst of Instrumentos.visibles()) inst.dibujar(ctx);
+    Manip.overlay(ctx);
     const acc = Acciones.actual();
     if (acc && acc.overlay) acc.overlay(ctx);
   },
@@ -928,24 +934,40 @@ const Sonido = {
    Cada una recibe info = {x, y (mm), sx, sy (px), tipo (puntero), id}
    ===================================================================== */
 const Lapiz = {
-  activo: null,   // {id, x, y, snap} mientras se pulsa
-  hover: null,    // {x, y, snap} con ratón o lápiz sin pulsar
+  activo: null,   // pulsado: {id, tipo, modo: 'punto'|'canto', x, y, snap, ini, canto}
+  hover: null,    // sin pulsar (ratón o lápiz digital)
 
   posicion(info) {
+    const c = Instrumentos.cantoCercano(info);
+    if (c) {
+      const p = Instrumentos.puntoEnCanto(c, info);
+      return { modo: 'canto', canto: c, x: p.x, y: p.y, snap: p.snap, mm: p.mm, tipo: info.tipo };
+    }
     const s = Snap.buscar(info.x, info.y, info.tipo);
-    return { x: s ? s.x : info.x, y: s ? s.y : info.y, snap: s, tipo: info.tipo };
+    return { modo: 'punto', x: s ? s.x : info.x, y: s ? s.y : info.y, snap: s, tipo: info.tipo };
   },
   abajo(info) {
     this.hover = null;
-    this.activo = Object.assign({ id: info.id }, this.posicion(info));
-    if (this.activo.snap) Sonido.tocar('iman');
+    const p = this.posicion(info);
+    this.activo = Object.assign({ id: info.id }, p);
+    if (p.modo === 'canto') this.activo.ini = { x: p.x, y: p.y, snap: p.snap, mm: p.mm };
+    if (p.snap) Sonido.tocar('iman');
     Render.pedir('instrumentos');
   },
   mover(info) {
-    const antes = this.activo.snap && this.activo.snap.obj;
-    Object.assign(this.activo, this.posicion(info));
-    const ahora = this.activo.snap && this.activo.snap.obj;
-    if (this.activo.snap && ahora !== antes) Sonido.tocar('iman');
+    const a = this.activo;
+    const antes = a.snap && (a.snap.obj || a.snap.x + ',' + a.snap.y);
+    if (a.modo === 'canto') {
+      const p = Instrumentos.puntoEnCanto(a.canto, info);
+      Object.assign(a, { x: p.x, y: p.y, snap: p.snap, mm: p.mm });
+      const len = Geom.dist(a.ini.x, a.ini.y, a.x, a.y);
+      UI.mensaje(`Recta: ${this.mmTexto(len)}`);
+    } else {
+      const s = Snap.buscar(info.x, info.y, info.tipo);
+      Object.assign(a, { x: s ? s.x : info.x, y: s ? s.y : info.y, snap: s });
+    }
+    const ahora = a.snap && (a.snap.obj || a.snap.x + ',' + a.snap.y);
+    if (a.snap && a.snap.tipo !== 'marca' && ahora !== antes) Sonido.tocar('iman');
     Render.pedir('instrumentos');
   },
   arriba() {
@@ -953,41 +975,99 @@ const Lapiz = {
     this.activo = null;
     Render.pedir('instrumentos');
     if (!a) return;
+    if (a.modo === 'canto') {
+      const len = Geom.dist(a.ini.x, a.ini.y, a.x, a.y);
+      if (len * Vista.escala >= 4) {
+        Historial.registrar();
+        Escena.agregarRecta(a.ini.x, a.ini.y, a.x, a.y);
+        Sonido.tocar('punto');
+        UI.mensaje(`Recta trazada: ${this.mmTexto(len)}.`);
+        return;
+      }
+      // Toque corto junto al canto: marca un punto sobre el canto
+      Object.assign(a, a.ini);
+    }
+    this.marcarPunto(a);
+  },
+  marcarPunto(a) {
     if (a.x < 0 || a.y < 0 || a.x > Hoja.ancho || a.y > Hoja.alto) {
       UI.mensaje('Los puntos se marcan dentro de la hoja.');
       return;
     }
-    if (a.snap && a.snap.tipo === 'punto') {
-      UI.mensaje(`Ahí ya está el punto ${a.snap.obj.etiqueta}.`);
+    const existente = Escena.puntos.find(p => Geom.dist(p.x, p.y, a.x, a.y) < 0.05);
+    if (existente) {
+      UI.mensaje(`Ahí ya está el punto ${existente.etiqueta}.`);
       return;
     }
     Historial.registrar();
     const p = Escena.agregarPunto(a.x, a.y);
     Sonido.tocar('punto');
-    UI.mensaje(Config.get('etiquetas') ? `Punto ${p.etiqueta} marcado.` : 'Punto marcado.');
+    const nombre = Config.get('etiquetas') ? `Punto ${p.etiqueta} marcado` : 'Punto marcado';
+    UI.mensaje(a.mm != null ? `${nombre} en la marca de ${this.mmTexto(a.mm)}.` : `${nombre}.`);
   },
-  pasar(info) { this.hover = this.posicion(info); Render.pedir('instrumentos'); },
+  mmTexto(mm) {
+    const r = Math.round(mm * 10) / 10;
+    return (Number.isInteger(r) ? String(r) : r.toFixed(1).replace('.', ',')) + ' mm';
+  },
+  pasar(info) {
+    this.hover = this.posicion(info);
+    if (this.hover.modo === 'canto' && this.hover.mm != null && this.hover.mm >= 0 && this.hover.mm <= 300)
+      UI.mensaje(`Marca de la regla: ${this.mmTexto(this.hover.mm)}`);
+    Render.pedir('instrumentos');
+  },
   salir() { this.hover = null; Render.pedir('instrumentos'); },
   cancelar() { this.activo = null; this.hover = null; Render.pedir('instrumentos'); },
 
   overlay(ctx) {
     const px = 1 / Vista.escala;
-    const estado = this.activo || this.hover;
-    if (!estado) return;
-    if (estado.snap) Dibujo.halo(ctx, estado.snap.x, estado.snap.y);
-    // Vista previa del punto
-    ctx.globalAlpha = this.activo ? 0.85 : 0.4;
-    Dibujo.cruz(ctx, estado.x, estado.y, Paleta.grafito[Config.get('grafito')]);
-    ctx.globalAlpha = 1;
-    // Mientras se pulsa con el dedo, muestra una marca por encima del dedo
-    if (this.activo && this.activo.tipo === 'touch') {
-      ctx.strokeStyle = 'rgba(47, 111, 208, .8)';
-      ctx.lineWidth = 1.5 * px;
+    const e = this.activo || this.hover;
+    if (!e) return;
+    const color = Paleta.grafito[Config.get('grafito')];
+    if (e.modo === 'canto') {
+      // Canto resaltado
+      ctx.strokeStyle = 'rgba(47, 111, 208, .45)';
+      ctx.lineWidth = 4 * px;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(estado.x, estado.y - 8 * px);
-      ctx.lineTo(estado.x, estado.y - 40 * px);
+      ctx.moveTo(e.canto.a.x, e.canto.a.y); ctx.lineTo(e.canto.b.x, e.canto.b.y);
       ctx.stroke();
     }
+    if (this.activo && e.modo === 'canto') {
+      if (e.ini.snap) Dibujo.halo(ctx, e.ini.x, e.ini.y);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = Dibujo.grosor();
+      ctx.beginPath();
+      ctx.moveTo(e.ini.x, e.ini.y); ctx.lineTo(e.x, e.y);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      // Longitud junto al final, por fuera del instrumento
+      const len = Geom.dist(e.ini.x, e.ini.y, e.x, e.y);
+      if (len * Vista.escala > 20) this.rotulo(ctx, e.x, e.y, this.mmTexto(len), e.canto);
+    }
+    if (e.snap) Dibujo.halo(ctx, e.x, e.y);
+    ctx.globalAlpha = this.activo ? 0.85 : 0.4;
+    Dibujo.cruz(ctx, e.x, e.y, color);
+    ctx.globalAlpha = 1;
+  },
+  // Etiqueta con fondo en tamaño de pantalla
+  rotulo(ctx, x, y, texto, canto) {
+    const px = 1 / Vista.escala;
+    const centro = canto.inst.aMundo(...canto.inst.centroLocal());
+    const lado = ((centro.x - x) * canto.n.x + (centro.y - y) * canto.n.y) > 0 ? -1 : 1;
+    const tx = x + canto.n.x * lado * 16 * px, ty = y + canto.n.y * lado * 16 * px;
+    ctx.font = `600 ${13 * px}px ${getComputedStyle(document.body).fontFamily}`;
+    const w = ctx.measureText(texto).width + 10 * px, h = 20 * px;
+    ctx.fillStyle = 'rgba(45, 48, 71, .88)';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(tx - w / 2, ty - h / 2, w, h, 6 * px); else ctx.rect(tx - w / 2, ty - h / 2, w, h);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(texto, tx, ty);
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
   },
 };
 
@@ -1114,16 +1194,418 @@ const Dibujo = {
 };
 
 /* =====================================================================
+   Instrumentos de dibujo (base común: polígono rígido en mm)
+   ===================================================================== */
+class Instrumento {
+  constructor(tipo, nombre) {
+    this.tipo = tipo;
+    this.nombre = nombre;
+    this.x = 0; this.y = 0; this.rot = 0;   // posición del origen local y giro (rad)
+    this.visible = false;
+    this.colocado = false;
+    this.poligono = [];   // vértices locales [[x, y], …]
+    this.cantos = [];     // [{i, j, graduado, origen: [x, y]}] lados útiles para trazar
+    this.asas = [];       // [{x, y, pivote: [x, y]}] asas de giro
+  }
+  aMundo(lx, ly) {
+    const c = Math.cos(this.rot), s = Math.sin(this.rot);
+    return { x: this.x + lx * c - ly * s, y: this.y + lx * s + ly * c };
+  }
+  aLocal(wx, wy) {
+    const c = Math.cos(this.rot), s = Math.sin(this.rot), dx = wx - this.x, dy = wy - this.y;
+    return { x: dx * c + dy * s, y: -dx * s + dy * c };
+  }
+  // Fija el giro manteniendo un punto local en una posición del mundo
+  colocarPivote(local, mundo) {
+    const c = Math.cos(this.rot), s = Math.sin(this.rot);
+    this.x = mundo.x - (local[0] * c - local[1] * s);
+    this.y = mundo.y - (local[0] * s + local[1] * c);
+  }
+  centroLocal() {
+    let x = 0, y = 0;
+    for (const v of this.poligono) { x += v[0]; y += v[1]; }
+    return [x / this.poligono.length, y / this.poligono.length];
+  }
+  contiene(wx, wy) {
+    const p = this.aLocal(wx, wy), v = this.poligono;
+    let dentro = false;
+    for (let i = 0, j = v.length - 1; i < v.length; j = i++) {
+      if ((v[i][1] > p.y) !== (v[j][1] > p.y) &&
+          p.x < (v[j][0] - v[i][0]) * (p.y - v[i][1]) / (v[j][1] - v[i][1]) + v[i][0]) dentro = !dentro;
+    }
+    return dentro;
+  }
+  // Cantos en coordenadas del mundo, con vectores unitarios
+  cantosMundo() {
+    return this.cantos.map(k => {
+      const a = this.aMundo(...this.poligono[k.i]), b = this.aMundo(...this.poligono[k.j]);
+      const len = Geom.dist(a.x, a.y, b.x, b.y);
+      const u = { x: (b.x - a.x) / len, y: (b.y - a.y) / len };
+      return { inst: this, def: k, a, b, len, u, n: { x: -u.y, y: u.x },
+               graduado: !!k.graduado, origen: k.origen ? this.aMundo(...k.origen) : null };
+    });
+  }
+  radioAsa() { return Math.max(5, 14 / Vista.escala); }
+
+  // Dibujo común: cuerpo de plástico translúcido
+  dibujarCuerpo(ctx) {
+    const v = this.poligono;
+    ctx.beginPath();
+    ctx.moveTo(v[0][0], v[0][1]);
+    for (let i = 1; i < v.length; i++) ctx.lineTo(v[i][0], v[i][1]);
+    ctx.closePath();
+    ctx.save();
+    ctx.shadowColor = 'rgba(30, 40, 60, .22)';
+    ctx.shadowBlur = 10 * Capas.dpr;
+    ctx.shadowOffsetY = 3 * Capas.dpr;
+    ctx.fillStyle = 'rgba(214, 234, 250, .55)';
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(40, 90, 150, .7)';
+    ctx.lineWidth = 1.2 / Vista.escala;
+    ctx.stroke();
+  }
+  dibujarAsas(ctx) {
+    const R = this.radioAsa(), px = 1 / Vista.escala;
+    for (const a of this.asas) {
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, R, 0, Geom.DOS_PI);
+      ctx.fillStyle = 'rgba(47, 111, 208, .14)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(47, 111, 208, .7)';
+      ctx.lineWidth = 1.5 * px;
+      ctx.stroke();
+      // Flecha circular
+      const r = R * 0.55;
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, r, -Math.PI * 0.85, Math.PI * 0.55);
+      ctx.lineWidth = Math.max(0.5, 2 * px);
+      ctx.stroke();
+      const fx = a.x + r * Math.cos(Math.PI * 0.55), fy = a.y + r * Math.sin(Math.PI * 0.55);
+      const k = R * 0.32;
+      ctx.beginPath();
+      ctx.moveTo(fx + k, fy - k * 0.2);
+      ctx.lineTo(fx, fy);
+      ctx.lineTo(fx + k * 0.2, fy - k);
+      ctx.stroke();
+    }
+  }
+  dibujar(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    this.dibujarCuerpo(ctx);
+    this.dibujarMarcas(ctx);
+    this.dibujarAsas(ctx);
+    ctx.restore();
+  }
+  dibujarMarcas() {}
+}
+
+class Regla extends Instrumento {
+  constructor() {
+    super('regla', 'Regla');
+    const L = this.L = 310, W = this.W = 32;
+    this.cero = 5;                       // la marca 0 está a 5 mm del extremo
+    this.poligono = [[0, 0], [L, 0], [L, W], [0, W]];
+    this.cantos = [
+      { i: 0, j: 1, graduado: true, origen: [this.cero, 0] },
+      { i: 3, j: 2 },
+    ];
+    // Asa derecha: gira alrededor del 0; asa izquierda: alrededor del 30 cm
+    this.asas = [
+      { x: 14, y: 22, pivote: [this.cero + 300, 0] },
+      { x: L - 14, y: 22, pivote: [this.cero, 0] },
+    ];
+    this.origenIman = [this.cero, 0];
+  }
+  dibujarMarcas(ctx) {
+    const px = 1 / Vista.escala;
+    const verMm = Vista.escala >= 2.5, verMedio = Vista.escala >= 1;
+    ctx.strokeStyle = '#1d2b44';
+    ctx.lineWidth = Math.max(0.12, 0.8 * px);
+    ctx.beginPath();
+    for (let i = 0; i <= 300; i++) {
+      const cm = i % 10 === 0, medio = i % 5 === 0;
+      if (!cm && !medio && !verMm) continue;
+      if (!cm && !verMedio) continue;
+      const x = this.cero + i, l = cm ? 6 : medio ? 4 : 2.5;
+      ctx.moveTo(x, 0); ctx.lineTo(x, l);
+    }
+    ctx.stroke();
+    ctx.fillStyle = '#1d2b44';
+    const tam = 3.2;
+    ctx.font = `600 ${tam}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const paso = Vista.escala * 10 < 14 ? 5 : 1;  // menos números si están muy juntos
+    for (let c = 0; c <= 30; c += paso) ctx.fillText(String(c), this.cero + c * 10, 7);
+    ctx.textAlign = 'left';
+    ctx.font = `${tam * 0.8}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.fillText('cm', this.cero + 1.5, 7.3 + tam);
+    ctx.textAlign = 'start';
+  }
+}
+
+const Instrumentos = {
+  lista: [],          // de abajo arriba
+  porTipo: {},
+
+  registrar(inst) { this.lista.push(inst); this.porTipo[inst.tipo] = inst; },
+  visibles() { return this.lista.filter(i => i.visible); },
+  deArribaAbajo() { return this.visibles().reverse(); },
+  alFrente(inst) {
+    const i = this.lista.indexOf(inst);
+    if (i >= 0) { this.lista.splice(i, 1); this.lista.push(inst); }
+  },
+
+  alternar(tipo) {
+    const inst = this.porTipo[tipo];
+    if (!inst) return false;
+    inst.visible = !inst.visible;
+    if (inst.visible) {
+      if (!inst.colocado) this.colocarEnVista(inst);
+      this.alFrente(inst);
+      UI.mensaje(`${inst.nombre}: arrastra el cuerpo para moverla y usa las asas redondas para girarla.`);
+    } else {
+      if (Manip.estado && Manip.estado.inst === inst) Manip.fin();
+      UI.mensaje(`${inst.nombre} guardada.`);
+    }
+    UI.marcarInstrumentos();
+    Render.pedir('instrumentos');
+    return true;
+  },
+  colocarEnVista(inst) {
+    const c = Vista.aMundo(Capas.w / 2, Capas.h / 2);
+    const cx = Geom.clamp(c.x, 0, Hoja.ancho), cy = Geom.clamp(c.y, 0, Hoja.alto);
+    const cl = inst.centroLocal();
+    inst.rot = 0;
+    inst.x = cx - cl[0]; inst.y = cy - cl[1];
+    inst.colocado = true;
+  },
+
+  bandaPx(tipo) { return tipo === 'touch' ? 22 : 12; },
+
+  // Canto más cercano al puntero (para trazar con el portaminas)
+  cantoCercano(info) {
+    const banda = this.bandaPx(info.tipo) / Vista.escala;
+    let mejor = null;
+    for (const inst of this.deArribaAbajo()) {
+      for (const k of inst.cantosMundo()) {
+        const d = Geom.distSegmento(info.x, info.y, k.a.x, k.a.y, k.b.x, k.b.y);
+        if (d <= banda && (!mejor || d < mejor.d)) mejor = Object.assign(k, { d });
+      }
+      if (mejor) return mejor;                         // el instrumento de arriba tapa a los de abajo
+      if (inst.contiene(info.x, info.y)) return null;
+    }
+    return mejor;
+  },
+
+  // Asa o cuerpo bajo el puntero. conCantos = deja libre la franja de los cantos (para el portaminas)
+  tocar(info, conCantos) {
+    const extra = (info.tipo === 'touch' ? 8 : 2) / Vista.escala;
+    for (const inst of this.deArribaAbajo()) {
+      for (const a of inst.asas) {
+        const w = inst.aMundo(a.x, a.y);
+        if (Geom.dist(info.x, info.y, w.x, w.y) <= inst.radioAsa() + extra) return { inst, modo: 'girar', asa: a };
+      }
+      if (inst.contiene(info.x, info.y)) {
+        if (conCantos) {
+          const banda = this.bandaPx(info.tipo) / Vista.escala;
+          for (const k of inst.cantosMundo())
+            if (Geom.distSegmento(info.x, info.y, k.a.x, k.a.y, k.b.x, k.b.y) <= banda) return null;
+        }
+        return { inst, modo: 'mover' };
+      }
+    }
+    return null;
+  },
+
+  // Punto sobre un canto, con imán a puntos cercanos y a las marcas de milímetro
+  puntoEnCanto(k, info) {
+    const proy = (x, y) => {
+      const t = Geom.clamp((x - k.a.x) * k.u.x + (y - k.a.y) * k.u.y, 0, k.len);
+      return { x: k.a.x + k.u.x * t, y: k.a.y + k.u.y * t };
+    };
+    let p = proy(info.x, info.y);
+    let snap = null;
+    const radio = Snap.radioPx(info.tipo) / Vista.escala;
+    const s = Snap.buscar(p.x, p.y, info.tipo);
+    if (s) {
+      const q = proy(s.x, s.y);
+      if (Geom.dist(q.x, q.y, s.x, s.y) <= radio) { p = q; snap = s; }
+    }
+    let mm = null;
+    if (k.graduado && k.origen) {
+      mm = (p.x - k.origen.x) * k.u.x + (p.y - k.origen.y) * k.u.y;
+      const r = Math.round(mm);
+      if (!snap && Math.abs(mm - r) * Vista.escala <= (info.tipo === 'touch' ? 6 : 4) && r >= 0 && r <= 300) {
+        p = { x: k.origen.x + k.u.x * r, y: k.origen.y + k.u.y * r };
+        mm = r;
+        snap = { tipo: 'marca', x: p.x, y: p.y };
+      }
+    }
+    return { x: p.x, y: p.y, snap, mm };
+  },
+
+  // Imán al mover: el 0 a un punto, o un canto que pase por un punto
+  imanMover(inst, tipo) {
+    const radio = Snap.radioPx(tipo) / Vista.escala;
+    const objetivos = Escena.puntos;
+    if (inst.origenIman) {
+      const o = inst.aMundo(...inst.origenIman);
+      let mejor = null;
+      for (const p of objetivos) {
+        const d = Geom.dist(o.x, o.y, p.x, p.y);
+        if (d <= radio && (!mejor || d < mejor.d)) mejor = { p, d };
+      }
+      if (mejor) {
+        inst.x += mejor.p.x - o.x; inst.y += mejor.p.y - o.y;
+        return { x: mejor.p.x, y: mejor.p.y };
+      }
+    }
+    let mejor = null;
+    for (const k of inst.cantosMundo()) {
+      for (const p of objetivos) {
+        const t = (p.x - k.a.x) * k.u.x + (p.y - k.a.y) * k.u.y;
+        if (t < 0 || t > k.len) continue;
+        const d = (p.x - k.a.x) * k.n.x + (p.y - k.a.y) * k.n.y;
+        if (Math.abs(d) <= radio && (!mejor || Math.abs(d) < Math.abs(mejor.d))) mejor = { p, d, k };
+      }
+    }
+    if (mejor) {
+      inst.x += mejor.k.n.x * mejor.d; inst.y += mejor.k.n.y * mejor.d;
+      return { x: mejor.p.x, y: mejor.p.y };
+    }
+    return null;
+  },
+
+  // Imán al girar: el canto que pasa por el pivote se alinea con otro punto
+  imanGirar(inst, pivLocal, piv, tipo) {
+    const radio = Snap.radioPx(tipo) / Vista.escala;
+    let mejor = null;
+    for (const k of inst.cantosMundo()) {
+      // ¿El pivote está sobre este canto?
+      const dp = (piv.x - k.a.x) * k.n.x + (piv.y - k.a.y) * k.n.y;
+      if (Math.abs(dp) > 1e-6) continue;
+      for (const p of Escena.puntos) {
+        const vx = p.x - piv.x, vy = p.y - piv.y, dist = Math.hypot(vx, vy);
+        if (dist < 3) continue;
+        const along = vx * k.u.x + vy * k.u.y;
+        const tPiv = (piv.x - k.a.x) * k.u.x + (piv.y - k.a.y) * k.u.y;
+        if (tPiv + along < 0 || tPiv + along > k.len) continue;
+        const perp = k.u.x * vy - k.u.y * vx;
+        if (Math.abs(perp) > radio) continue;
+        const w = along >= 0 ? k.u : { x: -k.u.x, y: -k.u.y };
+        const delta = Math.atan2(w.x * vy - w.y * vx, w.x * vx + w.y * vy);
+        if (!mejor || Math.abs(perp) < Math.abs(mejor.perp)) mejor = { delta, perp, p };
+      }
+    }
+    if (!mejor) return null;
+    inst.rot += mejor.delta;
+    inst.colocarPivote(pivLocal, piv);
+    return { x: mejor.p.x, y: mejor.p.y };
+  },
+};
+
+/* Manipulación de instrumentos: mover, girar y dos dedos */
+const Manip = {
+  estado: null,
+  halo: null,
+
+  usa(id) {
+    const e = this.estado;
+    return !!e && (e.id === id || (e.modo === 'dos' && e.ids.includes(id)));
+  },
+  iniciar(hit, info) {
+    const inst = hit.inst;
+    Instrumentos.alFrente(inst);
+    if (hit.modo === 'girar') {
+      const pv = hit.asa.pivote, piv = inst.aMundo(pv[0], pv[1]);
+      this.estado = { inst, modo: 'girar', id: info.id, tipo: info.tipo, pivLocal: pv, piv,
+                      ang0: Math.atan2(info.y - piv.y, info.x - piv.x), rot0: inst.rot };
+    } else {
+      this.estado = { inst, modo: 'mover', id: info.id, tipo: info.tipo, dx: inst.x - info.x, dy: inst.y - info.y };
+    }
+    Capas.contenedor.classList.add('arrastrando');
+    Render.pedir('instrumentos');
+  },
+  // Segundo dedo sobre la pantalla mientras se arrastra un instrumento: mover + girar
+  dosDedos(toques) {
+    const e = this.estado;
+    if (!e || e.modo !== 'mover') return false;
+    const [a, b] = toques;
+    this.estado = { inst: e.inst, modo: 'dos', tipo: 'touch', ids: [a.id, b.id], pos: { [a.id]: Vista.aMundo(a.x, a.y), [b.id]: Vista.aMundo(b.x, b.y) } };
+    return true;
+  },
+  mover(info, e) {
+    const s = this.estado;
+    if (!s) return;
+    const inst = s.inst;
+    this.halo = null;
+    if (s.modo === 'mover') {
+      inst.x = info.x + s.dx; inst.y = info.y + s.dy;
+      this.halo = Instrumentos.imanMover(inst, s.tipo);
+    } else if (s.modo === 'girar') {
+      const ang = Math.atan2(info.y - s.piv.y, info.x - s.piv.x);
+      inst.rot = s.rot0 + ang - s.ang0;
+      if (e && e.shiftKey) {
+        const paso = Math.PI / 12;
+        inst.rot = Math.round(inst.rot / paso) * paso;
+        inst.colocarPivote(s.pivLocal, s.piv);
+      } else {
+        inst.colocarPivote(s.pivLocal, s.piv);
+        this.halo = Instrumentos.imanGirar(inst, s.pivLocal, s.piv, s.tipo);
+      }
+      UI.mensaje(`Ángulo: ${this.anguloTexto(inst)}`);
+    } else if (s.modo === 'dos') {
+      const ids = s.ids, viejo = { a: s.pos[ids[0]], b: s.pos[ids[1]] };
+      const nuevo = Object.assign({}, s.pos, { [info.id]: { x: info.x, y: info.y } });
+      const a = nuevo[ids[0]], b = nuevo[ids[1]];
+      const m0 = { x: (viejo.a.x + viejo.b.x) / 2, y: (viejo.a.y + viejo.b.y) / 2 };
+      const m1 = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      const d = Math.atan2(b.y - a.y, b.x - a.x) - Math.atan2(viejo.b.y - viejo.a.y, viejo.b.x - viejo.a.x);
+      const c = Math.cos(d), sn = Math.sin(d);
+      const rx = inst.x - m0.x, ry = inst.y - m0.y;
+      inst.x = m0.x + rx * c - ry * sn + (m1.x - m0.x);
+      inst.y = m0.y + rx * sn + ry * c + (m1.y - m0.y);
+      inst.rot += d;
+      s.pos = nuevo;
+      UI.mensaje(`Ángulo: ${this.anguloTexto(inst)}`);
+    }
+    Render.pedir('instrumentos');
+  },
+  // Ángulo del canto principal respecto a la horizontal (sentido antihorario)
+  anguloTexto(inst) {
+    let g = -inst.rot * 180 / Math.PI;
+    g = ((g % 360) + 360) % 360;
+    const r = Math.round(g * 10) / 10;
+    return (Number.isInteger(r) ? String(r) : r.toFixed(1).replace('.', ',')) + '°';
+  },
+  fin() {
+    this.estado = null;
+    this.halo = null;
+    Capas.contenedor.classList.remove('arrastrando');
+    Render.pedir('instrumentos');
+  },
+  overlay(ctx) {
+    if (this.halo) Dibujo.halo(ctx, this.halo.x, this.halo.y);
+  },
+};
+
+Instrumentos.registrar(new Regla());
+
+/* =====================================================================
    Herramientas
    ===================================================================== */
 const Herramientas = [
   { id: 'lapiz',         nombre: 'Portaminas',     tecla: 'P', icono: 'lapiz',         cursor: 'precision', fase: 2 },
   { id: 'mover',         nombre: 'Mover la vista', tecla: 'M', icono: 'mover',         cursor: 'mover',     fase: 1 },
-  { id: 'regla',         nombre: 'Regla',          tecla: 'R', icono: 'regla',         cursor: '',          fase: 3 },
-  { id: 'escuadra',      nombre: 'Escuadra',       tecla: 'E', icono: 'escuadra',      cursor: '',          fase: 4 },
-  { id: 'cartabon',      nombre: 'Cartabón',       tecla: 'T', icono: 'cartabon',      cursor: '',          fase: 4 },
-  { id: 'compas',        nombre: 'Compás',         tecla: 'C', icono: 'compas',        cursor: 'precision', fase: 5 },
-  { id: 'transportador', nombre: 'Transportador',  tecla: 'A', icono: 'transportador', cursor: 'precision', fase: 6 },
+  { id: 'regla',         nombre: 'Regla',          tecla: 'R', icono: 'regla',         instrumento: true,   fase: 3 },
+  { id: 'escuadra',      nombre: 'Escuadra',       tecla: 'E', icono: 'escuadra',      instrumento: true,   fase: 4 },
+  { id: 'cartabon',      nombre: 'Cartabón',       tecla: 'T', icono: 'cartabon',      instrumento: true,   fase: 4 },
+  { id: 'compas',        nombre: 'Compás',         tecla: 'C', icono: 'compas',        instrumento: true,   fase: 5 },
+  { id: 'transportador', nombre: 'Transportador',  tecla: 'A', icono: 'transportador', instrumento: true,   fase: 6 },
   { id: 'goma',          nombre: 'Goma',           tecla: 'B', icono: 'goma',          cursor: 'precision', fase: 2 },
 ];
 
@@ -1132,6 +1614,11 @@ const App = {
   seleccionar(id) {
     const h = Herramientas.find(t => t.id === id);
     if (!h) return;
+    // Los instrumentos se muestran u ocultan sin cambiar la herramienta activa
+    if (h.instrumento) {
+      if (!Instrumentos.alternar(id)) UI.mensaje(`${h.nombre}: llegará en la fase ${h.fase}.`);
+      return;
+    }
     if (id !== this.herramienta) Acciones.cancelarActual();
     this.herramienta = id;
     UI.marcarHerramienta(id);
@@ -1166,6 +1653,7 @@ const Entrada = {
     el.addEventListener('pointerleave', e => {
       if (e.pointerType === 'touch') return;
       UI.coords(null);
+      if (!this.accion) this.cursorInstrumento(null);
       const acc = Acciones.actual();
       if (acc && !this.accion) acc.salir();
     });
@@ -1193,18 +1681,35 @@ const Entrada = {
     if (e.pointerType === 'pen') this.lapizDigitalActivo = true;
 
     const p = this.local(e);
-    this.punteros.set(e.pointerId, { x: p.x, y: p.y, tipo: e.pointerType });
+    this.punteros.set(e.pointerId, { id: e.pointerId, x: p.x, y: p.y, tipo: e.pointerType });
     try { Capas.contenedor.setPointerCapture(e.pointerId); } catch (_) {}
 
     const toques = [...this.punteros.values()].filter(q => q.tipo === 'touch');
     if (e.pointerType === 'touch' && toques.length === 2) {
+      // Segundo dedo mientras se arrastra un instrumento: mover y girar con dos dedos
+      if (this.accion && this.accion.manip && Manip.dosDedos(toques)) return;
       // Empieza pellizco: cancela cualquier arrastre o acción de un dedo
+      if (this.accion && this.accion.manip) { Manip.fin(); this.accion = null; }
       this.arrastre = null;
       if (this.accion) Acciones.cancelarActual();
       this.gesto = this.medirGesto(toques);
       return;
     }
     if (this.gesto) return;
+
+    // Instrumentos: asas de giro y cuerpo (la goma trabaja por debajo de ellos)
+    const info = this.info(e, p);
+    if (e.button === 0 && !this.accion && !this.espacio && App.herramienta !== 'goma') {
+      const hit = Instrumentos.tocar(info, App.herramienta === 'lapiz');
+      if (hit) {
+        e.preventDefault();
+        const acc = Acciones.actual();
+        if (acc) acc.salir();
+        this.accion = { id: e.pointerId, manip: true };
+        Manip.iniciar(hit, info);
+        return;
+      }
+    }
 
     const quiereMover =
       App.herramienta === 'mover' ||
@@ -1222,7 +1727,7 @@ const Entrada = {
     if (acc && e.button === 0 && !this.accion) {
       e.preventDefault();
       this.accion = { id: e.pointerId };
-      acc.abajo(this.info(e, p));
+      acc.abajo(info);
     }
   },
 
@@ -1236,12 +1741,20 @@ const Entrada = {
     if (e.pointerType !== 'touch') UI.coords(Vista.aMundo(p.x, p.y));
     const q = this.punteros.get(e.pointerId);
     if (!q) {
-      // Ratón o lápiz sin pulsar: vista previa de la herramienta
+      // Ratón o lápiz sin pulsar: vista previa de la herramienta o del instrumento
+      if (e.pointerType === 'touch' || this.arrastre || this.espacio) return;
+      const info = this.info(e, p);
+      const hit = App.herramienta !== 'goma' && Instrumentos.tocar(info, App.herramienta === 'lapiz');
+      this.cursorInstrumento(hit);
       const acc = Acciones.actual();
-      if (acc && !this.arrastre && !this.espacio && e.pointerType !== 'touch') acc.pasar(this.info(e, p));
+      if (acc) { if (hit) acc.salir(); else acc.pasar(info); }
       return;
     }
     q.x = p.x; q.y = p.y;
+    if (this.accion && this.accion.manip) {
+      if (Manip.usa(e.pointerId)) Manip.mover(this.info(e, p), e);
+      return;
+    }
     if (this.accion && this.accion.id === e.pointerId) {
       const acc = Acciones.actual();
       if (acc) acc.mover(this.info(e, p));
@@ -1267,7 +1780,12 @@ const Entrada = {
     if (!this.punteros.has(e.pointerId)) return;
     this.punteros.delete(e.pointerId);
     if (e.pointerType === 'pen') this.lapizDigitalActivo = false;
-    if (this.accion && this.accion.id === e.pointerId) {
+    if (this.accion && this.accion.manip) {
+      if (Manip.usa(e.pointerId)) {
+        this.accion = null;
+        Manip.fin();
+      }
+    } else if (this.accion && this.accion.id === e.pointerId) {
       this.accion = null;
       const acc = Acciones.actual();
       if (acc) {
@@ -1336,6 +1854,12 @@ const Entrada = {
 
   zoomCentro(f) { Vista.zoomEn(Capas.w / 2, Capas.h / 2, f); },
 
+  cursorInstrumento(hit) {
+    const el = Capas.contenedor;
+    el.classList.toggle('sobre-asa', !!hit && hit.modo === 'girar');
+    el.classList.toggle('sobre-instrumento', !!hit && hit.modo === 'mover');
+  },
+
   actualizarCursor() {
     const el = Capas.contenedor;
     const h = Herramientas.find(t => t.id === App.herramienta);
@@ -1370,14 +1894,18 @@ const UI = {
     const grupo = () => { const g = document.createElement('div'); g.className = 'grupo'; barra.appendChild(g); return g; };
     const sep = () => { const s = document.createElement('div'); s.className = 'sep'; barra.appendChild(s); };
 
-    const gH = grupo();
-    for (const h of Herramientas) {
-      gH.appendChild(this.crearBoton({
-        id: h.id, nombre: h.nombre, tecla: h.tecla, icono: h.icono, conmutable: true,
-        alPulsar: () => App.seleccionar(h.id),
-      }));
+    // Herramientas de mano y, aparte, los instrumentos (se muestran u ocultan)
+    for (const instr of [false, true]) {
+      const g = grupo();
+      for (const h of Herramientas.filter(t => !!t.instrumento === instr)) {
+        g.appendChild(this.crearBoton({
+          id: h.id, nombre: instr ? `${h.nombre} (mostrar u ocultar)` : h.nombre, tecla: h.tecla, icono: h.icono, conmutable: true,
+          alPulsar: () => App.seleccionar(h.id),
+        }));
+        if (instr) g.lastChild.dataset.instrumento = '1';
+      }
+      sep();
     }
-    sep();
     const gHist = grupo();
     this.btnDeshacer = this.crearBoton({ nombre: 'Deshacer', tecla: 'Ctrl+Z', icono: 'deshacer', alPulsar: () => Historial.deshacer() });
     this.btnRehacer  = this.crearBoton({ nombre: 'Rehacer',  tecla: 'Ctrl+Y', icono: 'rehacer',  alPulsar: () => Historial.rehacer() });
@@ -1396,8 +1924,14 @@ const UI = {
   },
 
   marcarHerramienta(id) {
-    document.querySelectorAll('#barra .btn[data-id]').forEach(b =>
+    document.querySelectorAll('#barra .btn[data-id]:not([data-instrumento])').forEach(b =>
       b.setAttribute('aria-pressed', String(b.dataset.id === id)));
+  },
+  marcarInstrumentos() {
+    document.querySelectorAll('#barra .btn[data-instrumento]').forEach(b => {
+      const inst = Instrumentos.porTipo[b.dataset.id];
+      b.setAttribute('aria-pressed', String(!!(inst && inst.visible)));
+    });
   },
 
   actualizarHistorial() {
@@ -1672,7 +2206,7 @@ function iniciar() {
 }
 
 // Acceso para pruebas automáticas
-window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom };
+window.DibuTec = { Config, Vista, Capas, Hoja, App, Entrada, UI, Render, Iconos, Papel, Panel, Escena, Historial, Snap, Geom, Instrumentos, Manip };
 
 iniciar();
 </script>
