@@ -798,6 +798,17 @@ const Escena = {
     return false;
   },
 
+  // Lugares que atraen a los instrumentos: puntos, extremos y centros
+  objetivos() {
+    const o = this.puntos.map(p => ({ x: p.x, y: p.y }));
+    for (const r of this.rectas) o.push({ x: r.x1, y: r.y1 }, { x: r.x2, y: r.y2 });
+    for (const a of this.arcos) {
+      o.push({ x: a.cx, y: a.cy });
+      if (!Geom.esCircunferencia(a)) o.push(...Geom.extremosArco(a));
+    }
+    return o;
+  },
+
   // Elemento más cercano dentro de «radio» mm; los puntos tienen preferencia
   buscarElemento(x, y, radio) {
     let mejor = null;
@@ -939,6 +950,8 @@ const Lapiz = {
   hover: null,    // sin pulsar (ratón o lápiz digital)
 
   posicion(info) {
+    const z = Instrumentos.zonaMarcado(info);
+    if (z) return { modo: 'marca', inst: z.inst, x: z.x, y: z.y, grados: z.grados, snap: null, tipo: info.tipo };
     const c = Instrumentos.cantoCercano(info);
     if (c) {
       const p = Instrumentos.puntoEnCanto(c, info);
@@ -964,8 +977,9 @@ const Lapiz = {
       const len = Geom.dist(a.ini.x, a.ini.y, a.x, a.y);
       UI.mensaje(`Recta: ${this.mmTexto(len)}`);
     } else {
-      const s = Snap.buscar(info.x, info.y, info.tipo);
-      Object.assign(a, { x: s ? s.x : info.x, y: s ? s.y : info.y, snap: s });
+      Object.assign(a, this.posicion(info));
+      if (a.modo === 'canto') { a.modo = 'punto'; a.canto = null; a.mm = null; }  // un arrastre libre no salta a trazar
+      if (a.modo === 'marca') UI.mensaje(this.gradosTexto(a.grados));
     }
     const ahora = a.snap && (a.snap.obj || a.snap.x + ',' + a.snap.y);
     if (a.snap && a.snap.tipo !== 'marca' && ahora !== antes) Sonido.tocar('iman');
@@ -990,6 +1004,7 @@ const Lapiz = {
     }
     this.marcarPunto(a);
   },
+  gradosTexto(g) { return `Ángulo: ${g}° (escala interior: ${180 - g}°)`; },
   marcarPunto(a) {
     if (a.x < 0 || a.y < 0 || a.x > Hoja.ancho || a.y > Hoja.alto) {
       UI.mensaje('Los puntos se marcan dentro de la hoja.');
@@ -1004,7 +1019,8 @@ const Lapiz = {
     const p = Escena.agregarPunto(a.x, a.y);
     Sonido.tocar('punto');
     const nombre = Config.get('etiquetas') ? `Punto ${p.etiqueta} marcado` : 'Punto marcado';
-    UI.mensaje(a.mm != null ? `${nombre} en la marca de ${this.mmTexto(a.mm)}.` : `${nombre}.`);
+    UI.mensaje(a.modo === 'marca' ? `${nombre} a ${a.grados}° (escala interior: ${180 - a.grados}°).`
+      : a.mm != null ? `${nombre} en la marca de ${this.mmTexto(a.mm)}.` : `${nombre}.`);
   },
   mmTexto(mm) {
     const r = Math.round(mm * 10) / 10;
@@ -1012,7 +1028,8 @@ const Lapiz = {
   },
   pasar(info) {
     this.hover = this.posicion(info);
-    if (this.hover.modo === 'canto' && this.hover.mm != null)
+    if (this.hover.modo === 'marca') UI.mensaje(this.gradosTexto(this.hover.grados));
+    else if (this.hover.modo === 'canto' && this.hover.mm != null)
       UI.mensaje(`Marca de ${this.hover.canto.inst.conArticulo}: ${this.mmTexto(this.hover.mm)}`);
     Render.pedir('instrumentos');
   },
@@ -1044,7 +1061,22 @@ const Lapiz = {
       ctx.globalAlpha = 1;
       // Longitud junto al final, por fuera del instrumento
       const len = Geom.dist(e.ini.x, e.ini.y, e.x, e.y);
-      if (len * Vista.escala > 20) this.rotulo(ctx, e.x, e.y, this.mmTexto(len), e.canto);
+      if (len * Vista.escala > 20) {
+        const centro = e.canto.inst.centroMundo();
+        const lado = ((centro.x - e.x) * e.canto.n.x + (centro.y - e.y) * e.canto.n.y) > 0 ? -1 : 1;
+        this.rotulo(ctx, e.x, e.y, this.mmTexto(len), { x: e.canto.n.x * lado, y: e.canto.n.y * lado });
+      }
+    }
+    if (e.modo === 'marca') {
+      // Línea desde el centro del transportador hasta la marca
+      const c = e.inst.aMundo(0, 0), L = Geom.dist(c.x, c.y, e.x, e.y) || 1;
+      ctx.save();
+      ctx.setLineDash([5 * px, 4 * px]);
+      ctx.strokeStyle = 'rgba(47, 111, 208, .7)';
+      ctx.lineWidth = 1.5 * px;
+      ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(e.x, e.y); ctx.stroke();
+      ctx.restore();
+      this.rotulo(ctx, e.x, e.y, `${e.grados}°`, { x: (e.x - c.x) / L, y: (e.y - c.y) / L });
     }
     if (e.snap) Dibujo.halo(ctx, e.x, e.y);
     ctx.globalAlpha = this.activo ? 0.85 : 0.4;
@@ -1052,11 +1084,10 @@ const Lapiz = {
     ctx.globalAlpha = 1;
   },
   // Etiqueta con fondo en tamaño de pantalla
-  rotulo(ctx, x, y, texto, canto) {
+  // Etiqueta con fondo, en tamaño de pantalla, desplazada en la dirección «dir»
+  rotulo(ctx, x, y, texto, dir) {
     const px = 1 / Vista.escala;
-    const centro = canto.inst.aMundo(...canto.inst.centroLocal());
-    const lado = ((centro.x - x) * canto.n.x + (centro.y - y) * canto.n.y) > 0 ? -1 : 1;
-    const tx = x + canto.n.x * lado * 16 * px, ty = y + canto.n.y * lado * 16 * px;
+    const tx = x + dir.x * 18 * px, ty = y + dir.y * 18 * px;
     ctx.font = `600 ${13 * px}px ${getComputedStyle(document.body).fontFamily}`;
     const w = ctx.measureText(texto).width + 10 * px, h = 20 * px;
     ctx.fillStyle = 'rgba(45, 48, 71, .88)';
@@ -1560,6 +1591,80 @@ class Compas extends Instrumento {
   }
 }
 
+// Transportador: semicírculo con el centro en el canto de la base; 0° a la derecha, en sentido antihorario
+class Transportador extends Instrumento {
+  constructor() {
+    super('transportador', 'Transportador', 'o');
+    const Ro = this.Ro = 65;
+    const arco = (r, a0, a1, paso) => {
+      const v = [];
+      for (let g = a0; g <= a1 + 1e-9; g += paso) v.push([r * Math.cos(g * Math.PI / 180), -r * Math.sin(g * Math.PI / 180)]);
+      return v;
+    };
+    this.poligono = arco(Ro, 0, 180, 2);                 // de (Ro, 0) a (−Ro, 0); se cierra por la base
+    this.agujero = arco(26, 14, 166, 4);
+    this.cantos = [{ i: this.poligono.length - 1, j: 0 }];
+    const asa = g => ({ x: 36 * Math.cos(g * Math.PI / 180), y: -36 * Math.sin(g * Math.PI / 180), pivote: [0, 0] });
+    this.asas = [asa(35), asa(145)];
+    this.candado = [0, -36];
+    this.origenIman = [0, 0];
+    this.ayuda = 'Transportador: pon el centro sobre el vértice, gira con las asas hasta que la base pase por la recta y, con el portaminas, toca el borde para marcar el ángulo.';
+  }
+  centroLocal() { return [0, -this.Ro * 0.42]; }
+  zonaLapiz(info) {
+    const p = this.aLocal(info.x, info.y), r = Math.hypot(p.x, p.y);
+    const banda = Instrumentos.bandaPx(info.tipo) / Vista.escala;
+    if (r < this.Ro - 14 || r > this.Ro + banda || p.y > banda * 0.5) return null;
+    const g = Math.round(Geom.clamp(Math.atan2(-p.y, p.x), 0, Math.PI) * 180 / Math.PI);
+    const t = g * Math.PI / 180;
+    const w = this.aMundo(this.Ro * Math.cos(t), -this.Ro * Math.sin(t));
+    return { x: w.x, y: w.y, grados: g };
+  }
+  dibujarMarcas(ctx) {
+    const Ro = this.Ro, px = 1 / Vista.escala;
+    const verGrado = Ro * Math.PI / 180 * Vista.escala >= 2.5;
+    const pt = (r, g) => [r * Math.cos(g * Math.PI / 180), -r * Math.sin(g * Math.PI / 180)];
+    ctx.strokeStyle = '#1d2b44';
+    ctx.lineWidth = Math.max(0.12, 0.8 * px);
+    ctx.beginPath();
+    for (let g = 0; g <= 180; g++) {
+      const diez = g % 10 === 0, cinco = g % 5 === 0;
+      if (!cinco && !verGrado) continue;
+      const l = diez ? 6 : cinco ? 4 : 2.2;
+      const a = pt(Ro, g), b = pt(Ro - l, g);
+      ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+      if (diez) { const c = pt(Ro - 18.5, g), d = pt(Ro - 20.5, g); ctx.moveTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); }
+    }
+    // Línea de 90° y cruz del centro
+    ctx.moveTo(0, -26); ctx.lineTo(0, 0);
+    ctx.moveTo(-4, 0); ctx.lineTo(4, 0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 1.2, 0, Geom.DOS_PI);
+    ctx.stroke();
+    // Números: escala exterior (oscura) e interior (roja, al revés)
+    const fuente = getComputedStyle(document.body).fontFamily;
+    const numero = (texto, r, g, tam, color) => {
+      const p = pt(r, g);
+      ctx.save();
+      ctx.translate(p[0], p[1]);
+      ctx.rotate(Math.PI / 2 - g * Math.PI / 180);
+      ctx.fillStyle = color;
+      ctx.font = `600 ${tam}px ${fuente}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(texto, 0, 0);
+      ctx.restore();
+    };
+    const paso = Ro * Math.PI / 18 * Vista.escala < 18 ? 30 : 10;
+    for (let g = 0; g <= 180; g += paso) {
+      const pos = g === 0 ? 3.5 : g === 180 ? 176.5 : g;   // el 0 y el 180 no caben sobre la base
+      numero(String(g), Ro - 9.5, pos, 3.2, '#1d2b44');
+      numero(String(180 - g), Ro - 15, pos, 2.6, '#b23a2e');
+    }
+  }
+}
+
 const Instrumentos = {
   lista: [],          // de abajo arriba
   porTipo: {},
@@ -1599,6 +1704,18 @@ const Instrumentos = {
 
   bandaPx(tipo) { return tipo === 'touch' ? 22 : 12; },
 
+  // Borde graduado del transportador bajo el puntero (marca el grado exacto)
+  zonaMarcado(info) {
+    for (const inst of this.deArribaAbajo()) {
+      if (inst.zonaLapiz) {
+        const z = inst.zonaLapiz(info);
+        if (z) return Object.assign(z, { inst });
+      }
+      if (inst.contiene(info.x, info.y)) return null;
+    }
+    return null;
+  },
+
   // Canto más cercano al puntero (para trazar con el portaminas)
   cantoCercano(info, excluir) {
     const banda = this.bandaPx(info.tipo) / Vista.escala;
@@ -1637,6 +1754,7 @@ const Instrumentos = {
       if (inst.contiene(info.x, info.y)) {
         if (inst.bloqueado) return null;               // fijo: no se mueve y tapa a los de abajo
         if (conCantos) {
+          if (inst.zonaLapiz && inst.zonaLapiz(info)) return null;
           const banda = this.bandaPx(info.tipo) / Vista.escala;
           for (const k of inst.cantosMundo())
             if (Geom.distSegmento(info.x, info.y, k.a.x, k.a.y, k.b.x, k.b.y) <= banda) return null;
@@ -1678,7 +1796,7 @@ const Instrumentos = {
   // Imán al mover: el 0 a un punto, o un canto que pase por un punto
   imanMover(inst, tipo) {
     const radio = Snap.radioPx(tipo) / Vista.escala;
-    const objetivos = Escena.puntos;
+    const objetivos = Escena.objetivos();
     if (inst.origenIman) {
       const o = inst.aMundo(...inst.origenIman);
       let mejor = null;
@@ -1714,14 +1832,14 @@ const Instrumentos = {
     for (const k of inst.cantosMundo()) {
       const dp = (piv.x - k.a.x) * k.n.x + (piv.y - k.a.y) * k.n.y;
       if (Math.abs(dp) > 1e-6) continue;           // el pivote no está sobre este canto
-      for (const p of Escena.puntos) {
+      for (const p of Escena.objetivos()) {
         const vx = p.x - piv.x, vy = p.y - piv.y, dist = Math.hypot(vx, vy);
         if (dist < 3) continue;
         const along = vx * k.u.x + vy * k.u.y;
-        const tPiv = (piv.x - k.a.x) * k.u.x + (piv.y - k.a.y) * k.u.y;
-        if (tPiv + along < 0 || tPiv + along > k.len) continue;
+        // Vale cualquier punto de la prolongación del canto (alinear con una recta)
         const perp = k.u.x * vy - k.u.y * vx;
-        if (Math.abs(perp) > radio) continue;
+        // Tolerancia: el radio del imán o 2° de giro, lo que sea mayor (puntos lejanos)
+        if (Math.abs(perp) > Math.max(radio, dist * Math.tan(2 * Math.PI / 180))) continue;
         const w = along >= 0 ? k.u : { x: -k.u.x, y: -k.u.y };
         const delta = Math.atan2(w.x * vy - w.y * vx, w.x * vx + w.y * vy);
         if (!mejor || Math.abs(perp) < Math.abs(mejor.perp)) mejor = { delta, perp, p };
@@ -1794,7 +1912,7 @@ const Instrumentos = {
       if (k.def === c.kdef) continue;
       const dn = c.g.u.x * k.n.x + c.g.u.y * k.n.y;
       if (Math.abs(dn) < 0.3) continue;
-      for (const p of Escena.puntos) {
+      for (const p of Escena.objetivos()) {
         const t = (p.x - k.a.x) * k.u.x + (p.y - k.a.y) * k.u.y;
         if (t < -radio || t > k.len + radio) continue;
         const d = (p.x - k.a.x) * k.n.x + (p.y - k.a.y) * k.n.y;
@@ -1965,7 +2083,7 @@ const Manip = {
       // Imán: terminar el arco justo en un punto de la circunferencia
       const radio = Snap.radioPx(s.tipo) / Vista.escala, fin = s.a0 + b;
       let mejor = null;
-      for (const p of Escena.puntos) {
+      for (const p of Escena.objetivos()) {
         if (Math.abs(Geom.dist(p.x, p.y, c.x, c.y) - inst.r) > radio) continue;
         let df = Math.atan2(p.y - c.y, p.x - c.x) - fin;
         df = Math.atan2(Math.sin(df), Math.cos(df));
@@ -2035,6 +2153,7 @@ Instrumentos.registrar(new Regla());
 Instrumentos.registrar(new Escuadra());
 Instrumentos.registrar(new Cartabon());
 Instrumentos.registrar(new Compas());
+Instrumentos.registrar(new Transportador());
 
 /* =====================================================================
    Herramientas
