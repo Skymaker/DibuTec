@@ -2162,12 +2162,15 @@ const Manip = {
   abrirCompas(s, info) {
     const inst = s.inst, c = { x: inst.x, y: inst.y };
     let obj = { x: info.x, y: info.y }, halo = null;
-    const sn = Snap.buscar(info.x, info.y, s.tipo);
-    if (sn && Geom.dist(sn.x, sn.y, c.x, c.y) > 0.5) { obj = sn; halo = sn; }
+    let sn = Snap.buscar(info.x, info.y, s.tipo);
+    if (sn && Geom.dist(sn.x, sn.y, c.x, c.y) <= 0.5) sn = null;
+    // Prioridad: puntos, extremos, cruces y centros; luego medidas en un instrumento; luego el trazo de una línea
+    if (sn && sn.prio <= 3) { obj = sn; halo = sn; }
     else {
-      // Tomar la medida en una regla, escuadra o cartabón
       const k = Instrumentos.cantoCercano(info, inst);
-      if (k) { const q = Instrumentos.puntoEnCanto(k, info); if (q.snap) { obj = q; halo = q; } }
+      const q = k && Instrumentos.puntoEnCanto(k, info);
+      if (q && q.snap) { obj = q; halo = q; }
+      else if (sn) { obj = sn; halo = sn; }
     }
     let r = Geom.dist(obj.x, obj.y, c.x, c.y);
     if (!halo) { const rr = Math.round(r); if (Math.abs(r - rr) * Vista.escala <= 3) r = rr; }
