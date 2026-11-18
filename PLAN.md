@@ -13,10 +13,10 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 2 | Portaminas, puntos magnéticos, goma y deshacer/rehacer | ✅ Hecha |
 | 3 | Regla | ✅ Hecha |
 | 4 | Escuadra, cartabón, deslizamiento y candado | ✅ Hecha |
-| 5 | Compás | ⏳ Pendiente |
-| 6 | Transportador | ⏳ Pendiente |
-| 7 | Pulido | ⏳ Pendiente |
-| 8 | Ejercicios guiados (opcional) | ⏳ Pendiente |
+| 5 | Compás | ✅ Hecha |
+| 6 | Transportador | ✅ Hecha |
+| 7 | Pulido: guardado, archivo, PNG, lupa, ayuda, deshacer instrumentos, imán en líneas y cruces | ✅ Hecha |
+| 8 | Ejercicios guiados en archivos JSON independientes | ✅ Hecha |
 
 ---
 
@@ -167,7 +167,7 @@ adaptación automática con `@media (pointer: coarse)` y `pointerType`.
 | **5. Compás** | Pinchar, abrir, girar; arcos y circunferencias | Construir una mediatriz |
 | **6. Transportador** | Escala, alineación, marcado de ángulos | Dibujar un ángulo de 60° |
 | **7. Pulido** | Lupa táctil, rechazo de palma, imán a cuadrícula, intersecciones, guardar/exportar PNG (con o sin fondo), sonidos, ayuda | Uso completo en tablet |
-| **8. Opcional** | Ejercicios guiados (mediatriz, bisectriz, hexágono, cubo isométrico) | Modo tutorial |
+| **8. Ejercicios guiados** | Motor de ejercicios: cada uno en su archivo JSON de `ejercicios/` (formato en `ejercicios/LEEME.md`), listados en `ejercicios/indice.json`; comprobación automática de cada paso, explicaciones, pistas y progreso guardado | Mediatriz, bisectriz, paralela, perpendicular, ángulo, hexágono y cubo isométrico se completan |
 
 Cada fase se prueba con ratón y con táctil.
 

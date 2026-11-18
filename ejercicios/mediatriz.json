@@ -1,0 +1,49 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "mediatriz",
+  "titulo": "Mediatriz de un segmento",
+  "nivel": "1.º ESO",
+  "descripcion": "Traza con el compás y la regla la recta perpendicular que pasa por el punto medio del segmento AB.",
+  "papel": { "papel": "blanco", "hoja": "A4-h" },
+  "inicial": {
+    "puntos": [
+      { "nombre": "A", "x": 90, "y": 110 },
+      { "nombre": "B", "x": 200, "y": 110 }
+    ],
+    "rectas": [
+      { "nombre": "AB", "desde": "A", "hasta": "B" }
+    ]
+  },
+  "textos": {
+    "AB": "el segmento AB",
+    "arcoA": "el primer arco",
+    "arcoB": "el segundo arco"
+  },
+  "pasos": [
+    {
+      "texto": "Saca el compás, pincha la punta seca en A y ábrelo algo más de la mitad del segmento (por ejemplo, 70 mm). Traza un arco grande que pase por encima y por debajo de AB.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa de arriba para trazar.",
+      "herramientas": ["compas"],
+      "objetivo": { "tipo": "arco", "centro": "A", "radio": { "min": 60, "max": 140 }, "barridoMin": 100, "nombrar": "arcoA" }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha el compás en B y traza otro arco que corte al primero por arriba y por abajo.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": ["compas"],
+      "objetivo": { "tipo": "arco", "centro": "B", "radioComo": "arcoA", "cortaA": [{ "elemento": "arcoA", "cortes": 2 }], "nombrar": "arcoB" }
+    },
+    {
+      "texto": "Con el portaminas, marca los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": ["lapiz"],
+      "objetivo": { "tipo": "punto", "cruce": ["arcoA", "arcoB"], "cantidad": 2, "nombrar": ["C", "D"] }
+    },
+    {
+      "texto": "Con la regla, une los dos puntos que has marcado. Esa recta es la mediatriz de AB.",
+      "herramientas": ["regla", "lapiz"],
+      "objetivo": { "tipo": "recta", "pasaPor": ["C", "D"], "nombrar": "mediatriz" }
+    }
+  ],
+  "final": "¡Muy bien! La mediatriz corta al segmento AB justo por su punto medio y es perpendicular a él."
+}

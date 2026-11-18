@@ -1,0 +1,39 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "angulo-60",
+  "titulo": "Ángulo de 60° con el transportador",
+  "nivel": "1.º ESO",
+  "descripcion": "Mide y dibuja un ángulo de 60 grados a partir de una semirrecta.",
+  "papel": { "papel": "blanco", "hoja": "A4-h" },
+  "inicial": {
+    "puntos": [
+      { "nombre": "V", "x": 100, "y": 150 },
+      { "nombre": "B", "x": 230, "y": 150 }
+    ],
+    "rectas": [
+      { "nombre": "r", "desde": "V", "hasta": "B" }
+    ]
+  },
+  "textos": { "r": "la semirrecta VB" },
+  "pasos": [
+    {
+      "texto": "Saca el transportador, pon su centro sobre el vértice V y gíralo para que la base quede encima de la semirrecta.",
+      "pista": "El centro se pega a V al acercarlo; luego gira con las asas.",
+      "herramientas": ["transportador"],
+      "objetivo": { "tipo": "instrumento", "instrumento": "transportador", "origenEn": "V", "cantoSobre": "r", "tolerancia": 1.5 }
+    },
+    {
+      "texto": "Con el portaminas, toca el borde del transportador en la marca de 60° para marcar un punto.",
+      "pista": "Al pasar por el borde verás los grados. Usa la escala que empieza en 0 sobre la semirrecta.",
+      "herramientas": ["lapiz"],
+      "objetivo": { "tipo": "punto", "angulo": { "vertice": "V", "desde": "B", "grados": 60 }, "nombrar": "P" }
+    },
+    {
+      "texto": "Guarda el transportador y une V con el punto marcado usando la regla.",
+      "herramientas": ["transportador", "regla", "lapiz"],
+      "objetivo": { "tipo": "recta", "pasaPor": ["V", "P"], "longitudMin": 40 }
+    }
+  ],
+  "final": "¡Muy bien! Has dibujado un ángulo de 60°."
+}
