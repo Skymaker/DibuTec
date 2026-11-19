@@ -4,6 +4,28 @@ Cada ejercicio es **un archivo JSON** en esta carpeta. DibuTec lee
 `indice.json` y carga cada ejercicio de su propio archivo, así que un archivo
 con errores no impide usar los demás.
 
+## Editor de ejercicios
+
+`editor.html` (en la raíz) crea y modifica ejercicios sin escribir JSON:
+
+- **Hoja interactiva**: el enunciado se dibuja con las herramientas Punto, Recta
+  y Arco (con imán a puntos, cruces y cuadrícula) y los instrumentos se colocan
+  y giran arrastrándolos.
+- **Pasos**: instrucción, pista, herramientas resaltadas y objetivos con todas
+  las condiciones de este documento. Los puntos y líneas de cada condición se
+  pueden escribir o **elegir tocando la hoja**.
+- **Construcción esperada**: la hoja dibuja lo que se espera en el paso
+  seleccionado (naranja) y en los anteriores (gris).
+- **Revisión**: avisa de nombres que no existen o que aún no se han creado,
+  nombres repetidos, tipos equivocados y campos que faltan.
+- **Probar en DibuTec** abre el ejercicio en la aplicación
+  (`index.html?prueba=editor`); **Guardar** descarga el `.json` con el mismo
+  estilo que los de esta carpeta. **De la lista** abre los ejercicios del índice
+  (solo desde un servidor web). También se puede abrir uno con
+  `editor.html?ejercicio=ejercicios/mediatriz.json`.
+
+El trabajo se guarda solo en el navegador mientras se edita.
+
 ## Añadir un ejercicio
 
 1. Crea `mi-ejercicio.json` en esta carpeta (puedes copiar uno existente).

@@ -21,6 +21,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 10 | Barrita del portaminas (color y grosor por trazo) y opciones del imán en la configuración | ✅ Hecha |
 | 11 | Botón para dar la vuelta a la escuadra y el cartabón (en espejo, con lo impreso al revés) | ✅ Hecha |
 | 12 | Ejercicios guiados agrupados por temas, en grupos desplegables que cada persona puede reordenar | ✅ Hecha |
+| 13 | Editor gráfico de ejercicios guiados (`editor.html`): enunciado sobre la hoja, pasos y objetivos, construcción esperada, revisión y prueba en DibuTec | ✅ Hecha |
 
 ---
 

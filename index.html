@@ -384,7 +384,7 @@
     display: flex; align-items: center; justify-content: center; gap: 8px;
     width: 100%; min-height: var(--ctl); margin-top: 26px;
     border: 1px solid var(--borde); border-radius: 12px; background: #fff;
-    color: var(--texto); font: inherit; font-size: 15px; cursor: pointer; touch-action: manipulation;
+    color: var(--texto); font: inherit; font-size: 15px; cursor: pointer; touch-action: manipulation; text-decoration: none;
   }
   .btn-texto svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .btn-texto svg .a { fill: var(--acento); }
@@ -4727,6 +4727,14 @@ const Catalogo = {
     b.innerHTML = Iconos.abrir + '<span>Cargar un ejercicio (.json)</span>';
     b.addEventListener('click', () => document.getElementById('abrir-ejercicio').click());
     c.appendChild(b);
+    titulo('Crear ejercicios');
+    const ed = document.createElement('a');
+    ed.className = 'btn-texto primero';
+    ed.href = 'editor.html';
+    ed.target = '_blank';
+    ed.rel = 'noopener';
+    ed.innerHTML = Iconos.ejercicios + '<span>Abrir el editor de ejercicios</span>';
+    c.appendChild(ed);
     const n = document.createElement('p');
     n.className = 'nota-final';
     n.textContent = 'También puedes arrastrar un archivo de ejercicio sobre la hoja. Para añadir ejercicios a la lista, ' +
@@ -4812,6 +4820,14 @@ function iniciar() {
   if (ruta && /^[\w./-]+\.json$/.test(ruta) && !ruta.includes('..') && !ruta.startsWith('/')) {
     fetch(ruta, { cache: 'no-cache' }).then(r => r.json()).then(d => Ejercicio.iniciar(d))
       .catch(() => UI.aviso('No se ha podido abrir el ejercicio indicado en la dirección.'));
+  }
+
+  // Probar un ejercicio desde el editor (editor.html): lo deja en localStorage y abre index.html?prueba=editor
+  if (new URLSearchParams(location.search).get('prueba') === 'editor') {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem('dibutec.editor.prueba')); } catch (_) { d = null; }
+    if (d && d.formato === 'dibutec-ejercicio') Ejercicio.iniciar(d);
+    else UI.aviso('No hay ningún ejercicio del editor para probar.');
   }
 
   // Arrastrar un archivo sobre la hoja: ejercicio o dibujo guardado

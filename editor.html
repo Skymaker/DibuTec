@@ -1,0 +1,2696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f1ea">
+<title>Editor de ejercicios · DibuTec</title>
+<link rel="icon" href="iconos/icono.svg" type="image/svg+xml">
+<link rel="icon" href="iconos/favicon-32.png" type="image/png" sizes="32x32">
+<style>
+  :root {
+    --ui-bg: #f4f1ea;
+    --barra: #ffffff;
+    --borde: #ddd6c8;
+    --texto: #2d3047;
+    --texto-suave: #6b6f85;
+    --activo: #2f6fd0;
+    --activo-fondo: #e2edfd;
+    --hover: #f2eee6;
+    --acento: #ffd166;
+    --acento-activo: #b9d3fb;
+    --foco: #ff9f1c;
+    --mesa: #cdbb9f;
+    --error: #c0392b;
+    --error-fondo: #fdecea;
+    --avisoc: #a06a00;
+    --aviso-fondo: #fff4d6;
+    --bien: #24814f;
+    --paso: #e07b12;
+    --radio: 12px;
+    --btn: 40px;
+    --fuente: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (pointer: coarse) { :root { --btn: 48px; } }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--ui-bg); color: var(--texto); font-family: var(--fuente); font-size: 15px; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+
+  #app {
+    display: grid; height: 100%; height: 100dvh;
+    grid-template-columns: 300px minmax(0, 1fr) 380px;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "cab cab cab" "esquema zona inspector";
+  }
+
+  /* ---------- Cabecera ---------- */
+  #cab {
+    grid-area: cab; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 6px 12px; background: var(--barra); border-bottom: 1px solid var(--borde);
+  }
+  .marca { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; margin-right: auto; }
+  .marca img { width: 32px; height: 32px; }
+  .marca b { font-size: 18px; }
+  .marca span { color: var(--texto-suave); font-size: 14px; }
+  .acciones { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .acciones .sep { width: 1px; height: 26px; background: var(--borde); margin: 0 4px; }
+
+  .btn {
+    min-width: var(--btn); height: var(--btn); border: none; border-radius: 10px;
+    background: transparent; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 0 8px; cursor: pointer; touch-action: manipulation; white-space: nowrap;
+  }
+  .btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .btn svg .a { fill: var(--acento); }
+  @media (hover: hover) { .btn:hover:not(:disabled) { background: var(--hover); } }
+  .btn[aria-pressed="true"] { background: var(--activo-fondo); color: var(--activo); box-shadow: inset 0 0 0 2px var(--activo); }
+  .btn[aria-pressed="true"] svg .a { fill: var(--acento-activo); }
+  .btn:disabled { opacity: .3; cursor: default; }
+  .btn.primario { background: var(--activo); color: #fff; padding: 0 14px; }
+  .btn.primario svg .a { fill: rgba(255,255,255,.35); }
+  @media (hover: hover) { .btn.primario:hover:not(:disabled) { background: #245cb3; } }
+  .btn:focus-visible, .chip:focus-visible, .paso-item:focus-visible, .esq-item:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+  .btn .txt { font-size: 14px; }
+  @media (max-width: 1250px) { .acciones .btn .txt.opc { display: none; } }
+
+  /* ---------- Esquema (izquierda) ---------- */
+  #esquema {
+    grid-area: esquema; overflow-y: auto; background: var(--barra); border-right: 1px solid var(--borde);
+    padding: 10px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .esq-titulo { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-suave); margin: 10px 4px 2px; display: flex; align-items: center; justify-content: space-between; }
+  .esq-item, .paso-item {
+    display: flex; gap: 10px; align-items: flex-start; width: 100%; text-align: left;
+    padding: 9px 10px; border: 1px solid var(--borde); border-radius: var(--radio); background: #fff; cursor: pointer;
+  }
+  .esq-item svg { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--texto); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .esq-item svg .a { fill: var(--acento); }
+  .esq-item .t { display: flex; flex-direction: column; min-width: 0; }
+  .esq-item small, .paso-item small { color: var(--texto-suave); font-size: 13px; }
+  @media (hover: hover) { .esq-item:hover, .paso-item:hover { border-color: var(--activo); } }
+  .esq-item.sel, .paso-item.sel { border-color: var(--activo); background: var(--activo-fondo); box-shadow: inset 0 0 0 1px var(--activo); }
+  .paso-item .num {
+    flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--acento); font-weight: 700; font-size: 14px;
+  }
+  .paso-item.sel .num { background: var(--paso); color: #fff; }
+  .paso-item .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .paso-item .texto { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; font-size: 14px; }
+  .paso-item .texto.vacio { color: var(--error); font-style: italic; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { font-size: 12px; padding: 1px 7px; border-radius: 999px; background: #f2eee6; color: var(--texto-suave); }
+  .tag.tag-obj { background: #fdeedd; color: #8a4a08; font-weight: 600; }
+  .marca-error { width: 9px; height: 9px; border-radius: 50%; background: var(--error); flex: none; margin-top: 4px; }
+  .marca-aviso { width: 9px; height: 9px; border-radius: 50%; background: #e0a800; flex: none; margin-top: 4px; }
+  .paso-item.arrastrado { opacity: .4; }
+  .paso-item.destino { box-shadow: 0 -3px 0 var(--activo); }
+  .anadir {
+    width: 100%; padding: 10px; border: 2px dashed var(--borde); border-radius: var(--radio);
+    background: transparent; color: var(--activo); font-weight: 600; cursor: pointer;
+  }
+  @media (hover: hover) { .anadir:hover { border-color: var(--activo); background: var(--activo-fondo); } }
+
+  /* ---------- Zona central ---------- */
+  #zona { grid-area: zona; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; }
+  #herr {
+    display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+    padding: 6px 8px; background: var(--barra); border-bottom: 1px solid var(--borde);
+  }
+  #herr .sep { width: 1px; height: 26px; background: var(--borde); margin: 0 4px; }
+  #herr .espacio { flex: 1; }
+  #lienzo { position: relative; overflow: hidden; background: var(--mesa); touch-action: none; }
+  #lienzo svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; }
+  #lienzo.h-sel { cursor: default; }
+  #lienzo.h-punto, #lienzo.h-recta, #lienzo.h-arco, #lienzo.eligiendo { cursor: crosshair; }
+  #lienzo.sobre { cursor: pointer; }
+  #lienzo.arrastrando { cursor: grabbing; }
+  #banda {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 20px);
+    background: var(--texto); color: #fff; border-radius: 10px; padding: 8px 12px; font-size: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.2); display: flex; gap: 10px; align-items: center; pointer-events: auto;
+  }
+  #banda[hidden] { display: none; }
+  #banda button { border: 1px solid rgba(255,255,255,.5); background: transparent; color: #fff; border-radius: 8px; padding: 2px 10px; cursor: pointer; }
+  #leyenda {
+    position: absolute; left: 10px; bottom: 10px; background: rgba(255,255,255,.92); border: 1px solid var(--borde);
+    border-radius: 10px; padding: 6px 10px; font-size: 12.5px; display: flex; gap: 12px; flex-wrap: wrap; max-width: calc(100% - 20px);
+  }
+  #leyenda[hidden] { display: none; }
+  #leyenda i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 5px; }
+  #estado {
+    display: flex; align-items: center; gap: 12px; min-height: 34px; padding: 4px 12px;
+    background: var(--barra); border-top: 1px solid var(--borde); font-size: 13.5px; color: var(--texto-suave);
+  }
+  #mensaje { flex: 1; min-width: 0; color: var(--texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #coords { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  #btn-problemas { border: 1px solid var(--borde); background: #fff; border-radius: 999px; padding: 3px 12px; cursor: pointer; font-size: 13.5px; white-space: nowrap; }
+  #btn-problemas.mal { border-color: var(--error); color: var(--error); background: var(--error-fondo); font-weight: 600; }
+  #btn-problemas.regular { border-color: #e0a800; color: var(--avisoc); background: var(--aviso-fondo); font-weight: 600; }
+  #btn-problemas.bien { border-color: var(--bien); color: var(--bien); }
+
+  /* ---------- Inspector (derecha) ---------- */
+  #inspector { grid-area: inspector; overflow-y: auto; background: var(--barra); border-left: 1px solid var(--borde); padding: 12px 14px 40px; }
+  #inspector h2 { font-size: 18px; margin: 2px 0 4px; display: flex; align-items: center; gap: 8px; }
+  #inspector h2 .num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--paso); color: #fff; font-size: 14px; flex: none; }
+  #inspector h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-suave); margin: 18px 0 6px; }
+  #inspector .ayuda { font-size: 13px; color: var(--texto-suave); line-height: 1.4; margin: 4px 0 8px; }
+  .fila { display: flex; flex-direction: column; gap: 4px; margin: 10px 0; }
+  .fila > label, .fila > .et { font-size: 13.5px; font-weight: 600; }
+  .fila.linea { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
+  .fila.linea > label { font-weight: 500; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%; min-height: 36px; padding: 6px 9px; border: 1px solid var(--borde); border-radius: 9px; background: #fff;
+  }
+  textarea { resize: vertical; min-height: 64px; line-height: 1.4; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--activo); outline-offset: -1px; border-color: var(--activo); }
+  input.mal { border-color: var(--error); background: var(--error-fondo); }
+  input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--activo); }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tres { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .dos label, .tres label { font-size: 12.5px; color: var(--texto-suave); display: flex; flex-direction: column; gap: 2px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 6px; min-height: 34px;
+    border: 1px solid var(--borde); border-radius: 999px; background: #fff; cursor: pointer; font-size: 13.5px;
+  }
+  .chip svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .chip svg .a { fill: var(--acento); }
+  .chip[aria-pressed="true"] { border-color: var(--activo); background: var(--activo-fondo); color: var(--activo); font-weight: 600; }
+  .chip[aria-pressed="true"] svg .a { fill: var(--acento-activo); }
+  .seg { display: inline-flex; border: 1px solid var(--borde); border-radius: 9px; overflow: hidden; }
+  .seg button { border: none; background: #fff; padding: 6px 10px; cursor: pointer; font-size: 13.5px; }
+  .seg button + button { border-left: 1px solid var(--borde); }
+  .seg button[aria-pressed="true"] { background: var(--activo-fondo); color: var(--activo); font-weight: 600; }
+
+  .obj {
+    border: 1px solid var(--borde); border-left: 4px solid var(--paso); border-radius: var(--radio);
+    padding: 8px 10px 10px; margin: 10px 0; background: #fffdf9;
+  }
+  .obj-cab { display: flex; align-items: center; gap: 6px; }
+  .obj-cab select { flex: 1; font-weight: 600; }
+  .obj-cab svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .obj-cab svg .a { fill: var(--acento); }
+  .mini {
+    width: 32px; height: 32px; flex: none; border: 1px solid var(--borde); border-radius: 8px; background: #fff;
+    cursor: pointer; display: inline-grid; place-items: center; padding: 0; font-size: 15px; line-height: 1;
+  }
+  .mini svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .mini svg .a { fill: var(--acento); }
+  @media (hover: hover) { .mini:hover:not(:disabled) { border-color: var(--activo); color: var(--activo); } }
+  .mini:disabled { opacity: .35; cursor: default; }
+  .mini.peligro { color: var(--error); }
+  .mini[aria-pressed="true"] { background: var(--activo-fondo); border-color: var(--activo); color: var(--activo); }
+  .cond { border-top: 1px dashed var(--borde); padding-top: 8px; margin-top: 8px; }
+  .cond-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+  .cond-cab .et { font-size: 13.5px; font-weight: 600; }
+  .cond-cab .ex { font-size: 12px; color: var(--texto-suave); font-weight: 400; }
+  .ref { display: flex; gap: 4px; align-items: center; }
+  .ref input { flex: 1; min-width: 0; }
+  .ref .xy { display: flex; gap: 4px; flex: 1; min-width: 0; }
+  .ref .xy input { width: 50%; }
+  .lista-ref { display: flex; flex-direction: column; gap: 5px; }
+  .lista-ref .par { display: flex; gap: 4px; align-items: center; }
+  .lista-ref .par > .ref { flex: 1; min-width: 0; }
+  .anadir-cond { display: flex; gap: 6px; margin-top: 10px; }
+  .anadir-cond select { flex: 1; }
+  .btn-texto {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; min-height: 36px;
+    border: 1px solid var(--borde); border-radius: 9px; background: #fff; cursor: pointer; font-size: 14px;
+  }
+  .btn-texto svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .btn-texto svg .a { fill: var(--acento); }
+  @media (hover: hover) { .btn-texto:hover { border-color: var(--activo); color: var(--activo); } }
+  .btn-texto.peligro { color: var(--error); }
+  .botonera { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  details.mas { margin-top: 8px; }
+  details.mas > summary { cursor: pointer; font-size: 13px; color: var(--activo); font-weight: 600; }
+  .vista-tarjeta {
+    border: 2px solid var(--activo); border-radius: 14px; padding: 10px 12px; background: #fff;
+    box-shadow: 0 6px 18px rgba(47,111,208,.15); margin: 8px 0 4px; font-size: 14.5px; line-height: 1.45;
+  }
+  .vista-tarjeta .vt-cab { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--activo); font-weight: 700; margin-bottom: 4px; }
+  .vista-tarjeta .vt-pista { margin-top: 6px; font-size: 13.5px; color: var(--texto-suave); border-top: 1px dashed var(--borde); padding-top: 6px; }
+  .tabla-textos { display: grid; grid-template-columns: 90px 1fr 32px; gap: 6px; align-items: center; }
+  .problema { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: 10px; margin: 6px 0; cursor: pointer; font-size: 14px; line-height: 1.4; border: 1px solid transparent; text-align: left; width: 100%; }
+  .problema.error { background: var(--error-fondo); border-color: #f2c4bf; }
+  .problema.aviso { background: var(--aviso-fondo); border-color: #f0dc9c; }
+  .problema b { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .problema.error b { color: var(--error); }
+  .problema.aviso b { color: var(--avisoc); }
+  .vacio-insp { color: var(--texto-suave); font-size: 14px; line-height: 1.5; }
+
+  /* ---------- Ventanas ---------- */
+  dialog {
+    border: none; border-radius: 16px; padding: 0; width: min(760px, calc(100% - 24px)); max-height: calc(100% - 40px);
+    box-shadow: 0 20px 60px rgba(0,0,0,.3); color: var(--texto);
+  }
+  dialog::backdrop { background: rgba(30, 32, 50, .35); }
+  .dlg-cab { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--borde); position: sticky; top: 0; background: #fff; z-index: 1; }
+  .dlg-cab h2 { margin: 0; font-size: 19px; }
+  .dlg-cuerpo { padding: 12px 16px 18px; }
+  .dlg-cuerpo p, .dlg-cuerpo li { line-height: 1.5; }
+  #json-texto { width: 100%; min-height: 50vh; font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+  .ej-lista { display: flex; flex-direction: column; gap: 6px; }
+  .ej-lista button { text-align: left; padding: 9px 12px; border: 1px solid var(--borde); border-radius: 12px; background: #fff; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+  .ej-lista button small { color: var(--texto-suave); }
+  @media (hover: hover) { .ej-lista button:hover { border-color: var(--activo); background: var(--activo-fondo); } }
+  pre.cod { background: #faf8f4; border: 1px solid var(--borde); border-radius: 10px; padding: 10px; overflow-x: auto; font-size: 13px; }
+
+  #aviso {
+    position: fixed; left: 50%; bottom: 60px; transform: translateX(-50%) translateY(20px);
+    background: var(--texto); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14.5px;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; max-width: calc(100% - 24px);
+  }
+  #aviso.visible { opacity: 1; transform: translateX(-50%); }
+
+  /* ---------- Pantallas estrechas: todo en una columna ---------- */
+  @media (max-width: 1000px) {
+    html, body { height: auto; }
+    #app {
+      height: auto; grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 70vh auto auto;
+      grid-template-areas: "cab" "zona" "inspector" "esquema";
+    }
+    #inspector, #esquema { border: none; border-top: 1px solid var(--borde); overflow: visible; }
+    .acciones .btn .txt { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="cab">
+    <a class="marca" href="index.html" title="Volver a DibuTec">
+      <img src="iconos/icono.svg" alt="">
+      <b>DibuTec</b><span>Editor de ejercicios guiados</span>
+    </a>
+    <div class="acciones" id="acciones"></div>
+  </header>
+
+  <nav id="esquema" aria-label="Partes del ejercicio"></nav>
+
+  <main id="zona">
+    <div id="herr" role="toolbar" aria-label="Herramientas de la hoja"></div>
+    <div id="lienzo">
+      <svg id="hoja" xmlns="http://www.w3.org/2000/svg" aria-label="Hoja del ejercicio"></svg>
+      <div id="banda" hidden></div>
+      <div id="leyenda" hidden></div>
+    </div>
+    <div id="estado">
+      <span id="mensaje"></span>
+      <span id="coords"></span>
+      <button id="btn-problemas" type="button"></button>
+    </div>
+  </main>
+
+  <aside id="inspector" aria-label="Propiedades"></aside>
+</div>
+
+<dialog id="dlg"><div class="dlg-cab"><h2 id="dlg-titulo"></h2><button class="btn" type="button" id="dlg-cerrar" aria-label="Cerrar"></button></div><div class="dlg-cuerpo" id="dlg-cuerpo"></div></dialog>
+<input type="file" id="abrir-archivo" accept=".json,application/json" hidden>
+<div id="aviso" role="status"></div>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   Iconos (mismo estilo que DibuTec: viewBox 24, trazo currentColor, acento .a)
+   ===================================================================== */
+const Iconos = (() => {
+  const d = {
+    nuevo: `<path class="a" d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v5h5M12 11v6M9 14h6"/>`,
+    abrir: `<path class="a" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>`,
+    lista: `<rect class="a" x="4.5" y="4" width="15" height="17.5" rx="2"/><path d="M9 4V2.5h6V4"/><path d="M8.5 10h7M8.5 14h7M8.5 18h4"/>`,
+    guardar: `<path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M7 3v5h8V3"/><rect class="a" x="7" y="13" width="10" height="8"/>`,
+    probar: `<circle class="a" cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4Z"/>`,
+    json: `<path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/><circle class="a" cx="12" cy="12" r="1.6"/>`,
+    copiar: `<rect class="a" x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>`,
+    deshacer: `<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>`,
+    rehacer: `<path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>`,
+    ayuda: `<circle class="a" cx="12" cy="12" r="10"/><path d="M9.2 9a2.9 2.9 0 0 1 5.6 1c0 2-2.8 2.6-2.8 4"/><path d="M12 17.5h.01"/>`,
+    cerrar: `<path d="M6 6l12 12M18 6 6 18"/>`,
+    seleccionar: `<path class="a" d="M5 3l14 7-6 2-2 6Z"/><path d="m13 12 5 5"/>`,
+    punto: `<path d="M7 7l10 10M17 7 7 17"/><circle class="a" cx="12" cy="12" r="2.2"/>`,
+    recta: `<path d="M4 19 20 5"/><circle class="a" cx="4" cy="19" r="2.2"/><circle class="a" cx="20" cy="5" r="2.2"/>`,
+    arco: `<circle cx="12" cy="12" r="8.5"/><path d="M12 12h8.5"/><circle class="a" cx="12" cy="12" r="2.2"/>`,
+    iman: `<path class="a" d="M6 3v9a6 6 0 0 0 12 0V3h-4v9a2 2 0 0 1-4 0V3Z"/><path d="M6 7h4M14 7h4"/>`,
+    ojo: `<path class="a" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>`,
+    zoomMas: `<circle class="a" cx="10.5" cy="10.5" r="7"/><path d="m21 21-5.5-5.5M10.5 7.5v6M7.5 10.5h6"/>`,
+    zoomMenos: `<circle class="a" cx="10.5" cy="10.5" r="7"/><path d="m21 21-5.5-5.5M7.5 10.5h6"/>`,
+    ajustar: `<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3"/><rect class="a" x="7" y="8" width="10" height="8" rx="1"/>`,
+    ficha: `<rect class="a" x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>`,
+    enunciado: `<path d="M4 18 20 6"/><circle class="a" cx="4" cy="18" r="2.2"/><circle class="a" cx="20" cy="6" r="2.2"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2.5"/>`,
+    textos: `<path class="a" d="M4 5h16v11H9l-5 4Z"/><path d="M8 9h8M8 12h5"/>`,
+    final: `<path class="a" d="m12 2 2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7Z"/>`,
+    elegir: `<circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle class="a" cx="12" cy="12" r="2"/>`,
+    papelera: `<path d="M3 6h18M8 6V4h8v2"/><path class="a" d="M6 6l1 15h10l1-15Z"/><path d="M10 11v6M14 11v6"/>`,
+    duplicar: `<rect class="a" x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M14.5 12v5M12 14.5h5"/>`,
+    arriba: `<path d="m6 15 6-6 6 6"/>`,
+    abajo: `<path d="m6 9 6 6 6-6"/>`,
+    cambiar: `<path d="M4 8h13l-3-3M20 16H7l3 3"/>`,
+    // Herramientas de DibuTec
+    lapiz: `<g transform="rotate(45 12 12)"><rect class="a" x="9.5" y="2" width="5" height="12.5" rx="1"/><path d="M9.5 14.5 12 19.5l2.5-5"/><path d="M12 19.5v2.5"/><path d="M12 4.5v4"/></g>`,
+    mover: `<path d="M12 2v20M2 12h20"/><path d="m9 5 3-3 3 3M9 19l3 3 3-3M5 9l-3 3 3 3M19 9l3 3-3 3"/><circle class="a" cx="12" cy="12" r="2.5"/>`,
+    goma: `<path class="a" d="M4.4 15.6 13.6 6.4a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L11.8 20H8.8Z"/><path d="m9 11 5.5 5.5"/><path d="M13 20h7"/>`,
+    regla: `<rect class="a" x="1.5" y="7.5" width="21" height="9" rx="1.5"/><path d="M5 7.5v3M8 7.5v2M11 7.5v4M14 7.5v2M17 7.5v3M20 7.5v2"/>`,
+    escuadra: `<path class="a" d="M3 21V3l18 18Z"/><path d="M7 17v-5.5l5.5 5.5Z"/>`,
+    cartabon: `<path class="a" d="M3 21V3l10.4 18Z"/><path d="M6.5 17.5v-6.2l3.6 6.2Z"/>`,
+    compas: `<circle class="a" cx="12" cy="4.5" r="2.5"/><path d="M12 2v-.5"/><path d="M10.8 6.8 5 21"/><path d="M13.2 6.8 17.6 17.4"/><path class="a" d="m16.6 17.8 2-.8 1 4Z"/><path d="M7.5 15h9" stroke-dasharray="1.5 2"/>`,
+    transportador: `<path class="a" d="M2 18a10 10 0 0 1 20 0Z"/><path d="M8 18a4 4 0 0 1 8 0"/><path d="M12 8v2M4.9 10.9l1.4 1.4M19.1 10.9l-1.4 1.4M12 18l4.5-6.5"/>`,
+  };
+  const out = {};
+  for (const k in d) out[k] = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${d[k]}</svg>`;
+  return out;
+})();
+
+/* =====================================================================
+   Utilidades
+   ===================================================================== */
+const U = {
+  r3: n => Math.round(n * 1000) / 1000,
+  r05: n => Math.round(n * 2) / 2,
+  copia: o => JSON.parse(JSON.stringify(o)),
+  esObj: v => v !== null && typeof v === 'object' && !Array.isArray(v),
+  esCoord: v => U.esObj(v) && Number.isFinite(v.x) && Number.isFinite(v.y),
+  num: s => { const n = parseFloat(String(s).replace(',', '.')); return Number.isFinite(n) ? n : null; },
+  el(tag, props, ...hijos) {
+    const e = document.createElement(tag);
+    if (props) for (const k in props) {
+      const v = props[k];
+      if (v === undefined || v === null || v === false) continue;
+      if (k === 'class') e.className = v;
+      else if (k === 'html') e.innerHTML = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+      else if (k in e && typeof v !== 'string') e[k] = v;
+      else e.setAttribute(k, v === true ? '' : v);
+    }
+    for (const h of hijos.flat()) if (h != null && h !== false) e.append(h);
+    return e;
+  },
+  esc: s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])),
+  fmt: n => (Math.round(n * 10) / 10).toLocaleString('es-ES'),
+  slug: s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50),
+};
+
+/* =====================================================================
+   Geometría (mm; y hacia abajo; los arcos guardan a0, a1 en radianes de pantalla)
+   ===================================================================== */
+const G = {
+  DOS_PI: Math.PI * 2,
+  dist: (ax, ay, bx, by) => Math.hypot(bx - ax, by - ay),
+  distSeg(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+    let t = l2 ? ((px - ax) * dx + (py - ay) * dy) / l2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+  },
+  completo: a => Math.abs(a.a1 - a.a0) >= G.DOS_PI - 1e-6,
+  enArco(a, t) {
+    if (G.completo(a)) return true;
+    const lo = Math.min(a.a0, a.a1), hi = Math.max(a.a0, a.a1);
+    const u = lo + (((t - lo) % G.DOS_PI) + G.DOS_PI) % G.DOS_PI;
+    return u <= hi + 1e-9;
+  },
+  distArco(px, py, a) {
+    const t = Math.atan2(py - a.cy, px - a.cx);
+    if (G.enArco(a, t)) return Math.abs(G.dist(px, py, a.cx, a.cy) - a.r);
+    const e = [a.a0, a.a1].map(u => ({ x: a.cx + a.r * Math.cos(u), y: a.cy + a.r * Math.sin(u) }));
+    return Math.min(...e.map(q => G.dist(px, py, q.x, q.y)));
+  },
+  distForma(p, f) {
+    return f.tipo === 'recta' ? G.distSeg(p.x, p.y, f.x1, f.y1, f.x2, f.y2) : f.tipo === 'arco' ? G.distArco(p.x, p.y, f) : G.dist(p.x, p.y, f.x, f.y);
+  },
+  // Cortes entre dos rectas (segmentos) o arcos
+  cortes(A, B) {
+    if (A.tipo === 'arco' && B.tipo === 'recta') return G.cortes(B, A);
+    const out = [];
+    if (A.tipo === 'recta' && B.tipo === 'recta') {
+      const d1x = A.x2 - A.x1, d1y = A.y2 - A.y1, d2x = B.x2 - B.x1, d2y = B.y2 - B.y1;
+      const den = d1x * d2y - d1y * d2x;
+      if (Math.abs(den) < 1e-9) return out;
+      const t = ((B.x1 - A.x1) * d2y - (B.y1 - A.y1) * d2x) / den;
+      const u = ((B.x1 - A.x1) * d1y - (B.y1 - A.y1) * d1x) / den;
+      if (t >= -1e-6 && t <= 1 + 1e-6 && u >= -1e-6 && u <= 1 + 1e-6) out.push({ x: A.x1 + t * d1x, y: A.y1 + t * d1y });
+      return out;
+    }
+    if (A.tipo === 'recta' && B.tipo === 'arco') {
+      const dx = A.x2 - A.x1, dy = A.y2 - A.y1, fx = A.x1 - B.cx, fy = A.y1 - B.cy;
+      const a = dx * dx + dy * dy, b = 2 * (fx * dx + fy * dy), c = fx * fx + fy * fy - B.r * B.r;
+      const disc = b * b - 4 * a * c;
+      if (disc < 0 || !a) return out;
+      const s = Math.sqrt(disc);
+      for (const t of disc === 0 ? [-b / (2 * a)] : [(-b - s) / (2 * a), (-b + s) / (2 * a)]) {
+        if (t < -1e-6 || t > 1 + 1e-6) continue;
+        const p = { x: A.x1 + t * dx, y: A.y1 + t * dy };
+        if (G.enArco(B, Math.atan2(p.y - B.cy, p.x - B.cx))) out.push(p);
+      }
+      return out;
+    }
+    // Arco con arco
+    const d = G.dist(A.cx, A.cy, B.cx, B.cy);
+    if (d < 1e-9 || d > A.r + B.r + 1e-9 || d < Math.abs(A.r - B.r) - 1e-9) return out;
+    const a = (A.r * A.r - B.r * B.r + d * d) / (2 * d), h = Math.sqrt(Math.max(0, A.r * A.r - a * a));
+    const mx = A.cx + a * (B.cx - A.cx) / d, my = A.cy + a * (B.cy - A.cy) / d;
+    const cands = h < 1e-9 ? [{ x: mx, y: my }] : [
+      { x: mx + h * (B.cy - A.cy) / d, y: my - h * (B.cx - A.cx) / d },
+      { x: mx - h * (B.cy - A.cy) / d, y: my + h * (B.cx - A.cx) / d },
+    ];
+    for (const p of cands)
+      if (G.enArco(A, Math.atan2(p.y - A.cy, p.x - A.cx)) && G.enArco(B, Math.atan2(p.y - B.cy, p.x - B.cx))) out.push(p);
+    return out;
+  },
+  // Recta larga que pasa por p con dirección ang (rad, pantalla)
+  rectaPor(p, ang, L = 90) {
+    const c = Math.cos(ang) * L, s = Math.sin(ang) * L;
+    return { tipo: 'recta', x1: p.x - c, y1: p.y - s, x2: p.x + c, y2: p.y + s };
+  },
+  dir: r => Math.atan2(r.y2 - r.y1, r.x2 - r.x1),
+};
+
+/* =====================================================================
+   Datos fijos de DibuTec
+   ===================================================================== */
+const HOJAS = { 'A4-h': [297, 210], 'A4-v': [210, 297], 'A3-h': [420, 297], 'A3-v': [297, 420] };
+const COLOR_LINEAS = { azul: '70, 125, 200', gris: '110, 112, 122', verde: '45, 145, 95' };
+const COLOR_PAPEL = { blanco: '#ffffff', crema: '#fbf5e3' };
+const PAPEL_DEF = { papel: 'blanco', cuadro: 5, triangulo: 5, colorLineas: 'azul', colorPapel: 'blanco', hoja: 'A4-h', margen: true, imanCuadricula: false };
+const HERRAMIENTAS = [
+  ['lapiz', 'Portaminas'], ['mover', 'Mover'], ['goma', 'Goma'], ['regla', 'Regla'],
+  ['escuadra', 'Escuadra'], ['cartabon', 'Cartabón'], ['compas', 'Compás'], ['transportador', 'Transportador'],
+];
+const INSTRUMENTOS = [['regla', 'Regla'], ['escuadra', 'Escuadra'], ['cartabon', 'Cartabón'], ['compas', 'Compás'], ['transportador', 'Transportador']];
+const NOMBRE_INST = Object.fromEntries(INSTRUMENTOS);
+const COLOR = { dado: '#2a4d8f', sel: '#e07b12', previo: '#8a8d9e', paso: '#e07b12', ref: '#2f6fd0', iman: '#ff9f1c' };
+
+/* Tipos de objetivo y sus condiciones: [clave, tipo de campo, etiqueta, explicación] */
+const OBJ = {
+  punto: {
+    nombre: 'Marcar un punto', corto: 'Punto', crea: 'punto', nombrar: 'lista',
+    ayuda: 'Un punto marcado con el portaminas.',
+    campos: [
+      ['cerca', 'pt', 'Cerca de', 'El punto tiene que estar en ese sitio.'],
+      ['sobre', 'linea', 'Sobre la línea', 'Sobre una recta, un arco o una circunferencia.'],
+      ['cruce', 'par', 'En el cruce de', 'Donde se cortan dos líneas.'],
+      ['angulo', 'angPunto', 'Formando un ángulo', 'Medido desde el vértice, a partir de otro punto.'],
+      ['distancia', 'dist', 'A una distancia', 'A tantos mm de un punto.'],
+      ['cantidad', 'int', 'Cantidad de puntos', 'Cuántos puntos distintos hacen falta.'],
+    ],
+  },
+  recta: {
+    nombre: 'Trazar una recta', corto: 'Recta', crea: 'recta', nombrar: 'uno',
+    ayuda: 'Una recta trazada con el portaminas a lo largo de un instrumento.',
+    campos: [
+      ['desde', 'pt', 'Desde', 'Un extremo de la recta.'],
+      ['hasta', 'pt', 'Hasta', 'El otro extremo (da igual el orden).'],
+      ['pasaPor', 'pts', 'Pasa por', 'Puntos por los que tiene que pasar.'],
+      ['paralelaA', 'linea', 'Paralela a', ''],
+      ['perpendicularA', 'linea', 'Perpendicular a', ''],
+      ['angulo', 'angRecta', 'Formando un ángulo con', ''],
+      ['longitudMin', 'num', 'Longitud mínima (mm)', ''],
+    ],
+  },
+  arco: {
+    nombre: 'Trazar un arco o circunferencia', corto: 'Arco', crea: 'arco', nombrar: 'uno',
+    ayuda: 'Un arco o una circunferencia trazados con el compás.',
+    campos: [
+      ['centro', 'pt', 'Centro', 'Donde se pincha la punta seca.'],
+      ['radio', 'radio', 'Radio (mm)', 'Un valor exacto o un intervalo.'],
+      ['radioComo', 'linea', 'Mismo radio que', 'Sin cambiar la abertura del compás.'],
+      ['completo', 'bool', 'Circunferencia completa', ''],
+      ['barridoMin', 'num', 'Barrido mínimo (°)', 'Lo largo que tiene que ser el arco.'],
+      ['pasaPor', 'pts', 'Pasa por', ''],
+      ['cortaA', 'cortes', 'Corta a', 'Líneas a las que tiene que cortar y cuántas veces.'],
+    ],
+  },
+  rectas: {
+    nombre: 'Trazar varias rectas', corto: 'Rectas', crea: null,
+    ayuda: 'Varias rectas a la vez. Cada segmento vale si una recta trazada pasa por sus dos extremos.',
+    campos: [
+      ['segmentos', 'segs', 'Segmentos', 'Cada uno, de un punto a otro.'],
+      ['poligono', 'pts', 'Polígono', 'Vértices en orden; se une cada uno con el siguiente.'],
+      ['cerrado', 'bool', 'Cerrar el polígono', 'Une el último vértice con el primero (por defecto, sí).'],
+    ],
+  },
+  vertices: {
+    nombre: 'Vértices de un polígono regular', corto: 'Vértices', crea: 'punto', nombrar: 'lista',
+    ayuda: 'Los vértices de un polígono regular inscrito en una circunferencia, a partir de uno de ellos.',
+    campos: [
+      ['circunferencia', 'linea', 'Circunferencia', ''],
+      ['desde', 'pt', 'Desde el vértice', ''],
+      ['lados', 'int', 'Número de lados', ''],
+    ],
+  },
+  instrumento: {
+    nombre: 'Colocar un instrumento', corto: 'Instrumento', crea: null,
+    ayuda: 'La posición de un instrumento. Solo con el instrumento, exige que esté a la vista.',
+    campos: [
+      ['instrumento', 'inst', 'Instrumento', ''],
+      ['cantoSobre', 'linea', 'Un canto sobre la recta', ''],
+      ['cantoPasaPor', 'pts', 'Un canto pasa por', ''],
+      ['paraleloA', 'linea', 'Ese canto, paralelo a', 'Se combina con «Un canto pasa por».'],
+      ['perpendicularA', 'linea', 'Ese canto, perpendicular a', 'Se combina con «Un canto pasa por».'],
+      ['apoyadoEn', 'inst', 'Apoyado en', 'Un canto apoyado en el canto de otro instrumento.'],
+      ['bloqueado', 'bool', 'Con el candado puesto', ''],
+      ['origenEn', 'pt', 'Centro / punta seca en', 'Centro del transportador o punta seca del compás.'],
+    ],
+  },
+  continuar: {
+    nombre: 'Leer y pulsar «Siguiente»', corto: 'Lectura', crea: null,
+    ayuda: 'Paso de lectura: se completa al pulsar «Siguiente» en la tarjeta.',
+    campos: [],
+  },
+};
+const CAMPOS_EXTRA = [
+  ['tolerancia', 'num', 'Tolerancia (mm)', 'Margen de error. Por defecto, 1 mm.'],
+  ['toleranciaGrados', 'num', 'Tolerancia (°)', 'Margen de error de los ángulos. Por defecto, 1°.'],
+  ['permitirDados', 'bool', 'Vale lo del enunciado', 'También cuentan los elementos que ya están dibujados.'],
+];
+// Claves cuyos valores son referencias a elementos (para renombrar y revisar)
+const CLAVES_NO_REF = new Set(['tipo', 'instrumento', 'apoyadoEn', 'sentido', 'nombrar']);
+
+/* =====================================================================
+   Modelo: el ejercicio tal como se guarda, con los objetivos siempre en lista
+   ===================================================================== */
+const Modelo = {
+  ej: null,
+  nuevo() {
+    return this.normalizar({
+      formato: 'dibutec-ejercicio', version: 1, id: '', titulo: 'Ejercicio nuevo', nivel: '1.º ESO', descripcion: '',
+      papel: { papel: 'blanco', hoja: 'A4-h' },
+      inicial: { puntos: [], rectas: [], arcos: [] },
+      pasos: [{ texto: '', objetivo: { tipo: 'punto' } }],
+      final: '¡Muy bien! Has terminado el ejercicio.',
+    });
+  },
+  normalizar(d) {
+    const e = U.copia(d);
+    e.formato = 'dibutec-ejercicio';
+    if (!U.esObj(e.inicial)) e.inicial = {};
+    for (const k of ['puntos', 'rectas', 'arcos']) if (!Array.isArray(e.inicial[k])) e.inicial[k] = [];
+    if (!U.esObj(e.papel)) e.papel = {};
+    if (!U.esObj(e.textos)) e.textos = {};
+    if (!U.esObj(e.instrumentos)) e.instrumentos = {};
+    if (!Array.isArray(e.pasos)) e.pasos = [];
+    e.pasos = e.pasos.map(p => {
+      const q = U.esObj(p) ? p : { texto: '' };
+      const objs = Array.isArray(q.objetivos) ? q.objetivos : q.objetivo ? [q.objetivo] : [];
+      q._enLista = '_enLista' in q ? !!q._enLista : Array.isArray(q.objetivos);
+      delete q.objetivo;
+      q.objetivos = objs.filter(U.esObj);
+      if (typeof q.texto !== 'string') q.texto = '';
+      return q;
+    });
+    return e;
+  },
+  // Archivo final con las claves en un orden cómodo de leer
+  exportar(e = this.ej) {
+    const o = {};
+    const orden = ['formato', 'version', 'id', 'titulo', 'nivel', 'descripcion', 'papel', 'inicial', 'instrumentos', 'textos', 'pasos', 'final'];
+    const poner = (k, v) => {
+      if (v === undefined || v === null) return;
+      if (typeof v === 'string' && !v.trim() && !['titulo'].includes(k)) return;
+      if (U.esObj(v) && !Object.keys(v).length) return;
+      o[k] = v;
+    };
+    for (const k of orden) {
+      if (k === 'version') { o.version = e.version || 1; continue; }
+      if (k === 'id') { o.id = e.id || U.slug(e.titulo) || 'ejercicio'; continue; }
+      if (k === 'inicial') {
+        const ini = {};
+        for (const t of ['puntos', 'rectas', 'arcos']) if (e.inicial[t].length) ini[t] = e.inicial[t];
+        for (const t in e.inicial) if (!['puntos', 'rectas', 'arcos'].includes(t)) ini[t] = e.inicial[t];
+        poner(k, ini);
+      } else if (k === 'pasos') {
+        o.pasos = e.pasos.map(p => {
+          const q = {};
+          for (const c of ['texto', 'pista', 'herramientas']) if (p[c] !== undefined && !(c === 'pista' && !p.pista) && !(c === 'herramientas' && !p.herramientas.length)) q[c] = p[c];
+          if (p.objetivos.length === 1 && !p._enLista) q.objetivo = p.objetivos[0];
+          else q.objetivos = p.objetivos;
+          for (const c in p) if (!(c in q) && !['objetivos', '_enLista', 'pista', 'herramientas'].includes(c)) q[c] = p[c];
+          return q;
+        });
+      } else poner(k, e[k]);
+    }
+    for (const k in e) if (!(k in o) && !orden.includes(k) && !k.startsWith('_')) o[k] = e[k];
+    return o;
+  },
+  texto(e) { return bonito(this.exportar(e)) + '\n'; },
+  nombreArchivo() { return (this.ej.id || U.slug(this.ej.titulo) || 'ejercicio') + '.json'; },
+};
+
+// JSON legible, con el mismo estilo que los ejercicios de la carpeta
+function plano(x) {
+  if (Array.isArray(x)) return x.length ? '[' + x.map(plano).join(', ') + ']' : '[]';
+  if (U.esObj(x)) { const k = Object.keys(x); return k.length ? '{ ' + k.map(c => JSON.stringify(c) + ': ' + plano(x[c])).join(', ') + ' }' : '{}'; }
+  return JSON.stringify(x);
+}
+function bonito(v, sangria = '', clave = '') {
+  const s2 = sangria + '  ';
+  const lineas = (pares, abre, cierra) => pares.length ? abre + '\n' + pares.map(t => s2 + t).join(',\n') + '\n' + sangria + cierra : abre + cierra;
+  const objeto = (o, f) => lineas(Object.keys(o).map(k => JSON.stringify(k) + ': ' + f(o[k], k)), '{', '}');
+  if (!sangria) return objeto(v, (x, k) => bonito(x, s2, k));
+  if (clave === 'inicial' && U.esObj(v)) return objeto(v, x => Array.isArray(x) ? lineas(x.map(plano), '[', ']').replace(/\n/g, '\n  ') : plano(x));
+  if (clave === 'textos' && U.esObj(v) && Object.keys(v).length > 1) return objeto(v, plano);
+  if (clave === 'pasos' && Array.isArray(v)) {
+    // Cada paso, con sus claves una por línea; cada objetivo, en una sola línea
+    const sp = s2 + '  ', so = sp + '  ';
+    return lineas(v.map(p => !U.esObj(p) ? plano(p) : '{\n' + Object.keys(p).map(k => {
+      const x = p[k];
+      const t = k === 'objetivo' ? objetivoBonito(x, sp)
+        : k === 'objetivos' && Array.isArray(x) ? (x.length ? '[\n' + x.map(o => so + objetivoBonito(o, so)).join(',\n') + '\n' + sp + ']' : '[]')
+        : plano(x);
+      return sp + JSON.stringify(k) + ': ' + t;
+    }).join(',\n') + '\n' + s2 + '}'), '[', ']');
+  }
+  const p = plano(v);
+  if (typeof v !== 'object' || v === null || sangria.length + clave.length + p.length <= 118) return p;
+  return Array.isArray(v) ? lineas(v.map(x => bonito(x, s2)), '[', ']') : objeto(v, (x, k) => bonito(x, s2, k));
+}
+// Un objetivo, en una línea; si es muy largo, sus listas largas van una por línea
+function objetivoBonito(o, sangria) {
+  const p = plano(o);
+  const larga = v => Array.isArray(v) && v.length > 1 && v.every(Array.isArray);   // varios segmentos
+  if (!U.esObj(o) || (p.length + sangria.length <= 200 && !Object.values(o).some(larga))) return p;
+  return '{ ' + Object.keys(o).map(k => {
+    const v = o[k];
+    if (larga(v) || (Array.isArray(v) && v.length > 1 && plano(v).length > 80))
+      return JSON.stringify(k) + ': [\n' + v.map(x => sangria + '  ' + plano(x)).join(',\n') + '\n' + sangria + ']';
+    return JSON.stringify(k) + ': ' + plano(v);
+  }).join(', ') + ' }';
+}
+
+/* =====================================================================
+   Construcción esperada: dónde estarán los elementos que nombra cada paso
+   ===================================================================== */
+const Construccion = {
+  // Devuelve { geo: Map(nombre -> forma), fantasmas: [{forma, paso, etiqueta}], tipos: Map(nombre -> tipo) }
+  calcular(ej, hasta) {
+    const geo = this.geo = new Map(), fantasmas = [];
+    const pt = ref => {
+      if (U.esCoord(ref)) return { tipo: 'punto', x: ref.x, y: ref.y };
+      const g = typeof ref === 'string' ? geo.get(ref) : null;
+      return g && g.tipo === 'punto' ? g : null;
+    };
+    const lin = ref => { const g = typeof ref === 'string' ? geo.get(ref) : null; return g && g.tipo !== 'punto' ? g : null; };
+    // Enunciado
+    for (const p of ej.inicial.puntos) {
+      if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
+      const n = p.nombre || p.etiqueta;
+      if (n) geo.set(n, { tipo: 'punto', x: p.x, y: p.y, dado: true });
+    }
+    for (const r of ej.inicial.rectas) {
+      const f = this.rectaInicial(r, pt);
+      if (f && r.nombre) geo.set(r.nombre, f);
+    }
+    for (const c of ej.inicial.arcos) {
+      const f = this.arcoInicial(c, pt);
+      if (f && c.nombre) geo.set(c.nombre, f);
+    }
+    const n = Math.min(hasta, ej.pasos.length - 1);
+    for (let i = 0; i <= n; i++) {
+      const nuevos = [];
+      for (const o of ej.pasos[i].objetivos) {
+        const r = this.objetivo(o, pt, lin);
+        for (const f of r.formas) fantasmas.push({ forma: f, paso: i });
+        const noms = o.nombrar === undefined ? [] : [].concat(o.nombrar);
+        noms.forEach((nm, k) => { if (typeof nm === 'string' && r.nombrables[k]) nuevos.push([nm, r.nombrables[k]]); });
+        if (r.nombrables.length && OBJ[o.tipo] && OBJ[o.tipo].crea === 'punto')
+          r.nombrables.forEach((f, k) => fantasmas.push({ forma: f, paso: i, etiqueta: noms[k] }));
+      }
+      // Los nombres de un paso solo se pueden usar en los siguientes
+      for (const [nm, f] of nuevos) geo.set(nm, Object.assign({}, f, { paso: i, nombre: nm }));
+    }
+    return { geo, fantasmas };
+  },
+  rectaInicial(r, pt) {
+    if (!r) return null;
+    const a = pt(r.desde) || (Number.isFinite(r.x1) && Number.isFinite(r.y1) ? { x: r.x1, y: r.y1 } : null);
+    const b = pt(r.hasta) || (Number.isFinite(r.x2) && Number.isFinite(r.y2) ? { x: r.x2, y: r.y2 } : null);
+    return a && b ? { tipo: 'recta', x1: a.x, y1: a.y, x2: b.x, y2: b.y, dado: true } : null;
+  },
+  arcoInicial(c, pt) {
+    if (!c) return null;
+    const o = pt(c.centro) || (Number.isFinite(c.cx) && Number.isFinite(c.cy) ? { x: c.cx, y: c.cy } : null);
+    if (!o || !Number.isFinite(c.radio) || c.radio <= 0) return null;
+    const g0 = Number.isFinite(c.desde) ? c.desde : 0, g1 = Number.isFinite(c.hasta) ? c.hasta : g0 + 360;
+    return { tipo: 'arco', cx: o.x, cy: o.y, r: c.radio, a0: -g0 * Math.PI / 180, a1: -g1 * Math.PI / 180, dado: true };
+  },
+  circ: (c, r) => ({ tipo: 'arco', cx: c.x, cy: c.y, r, a0: 0, a1: G.DOS_PI }),
+  // Formas que se dibujan para un objetivo y elementos a los que se pondrá nombre
+  objetivo(o, pt, lin) {
+    const formas = [], nombrables = [], geo = this.geo || new Map();
+    switch (o.tipo) {
+      case 'punto': {
+        let cand = null;
+        if (o.cerca !== undefined && pt(o.cerca)) cand = [pt(o.cerca)];
+        else if (Array.isArray(o.cruce) && lin(o.cruce[0]) && lin(o.cruce[1])) cand = G.cortes(lin(o.cruce[0]), lin(o.cruce[1]));
+        else if (o.angulo && pt(o.angulo.vertice) && pt(o.angulo.desde) && Number.isFinite(o.angulo.grados)) {
+          const V = pt(o.angulo.vertice), H = pt(o.angulo.desde);
+          const base = Math.atan2(-(H.y - V.y), H.x - V.x) * 180 / Math.PI;
+          const signos = o.angulo.sentido === 'horario' ? [-1] : o.angulo.sentido === 'antihorario' ? [1] : [1, -1];
+          const d = o.distancia && pt(o.distancia.de) && Number.isFinite(o.distancia.mm) ? o.distancia : null;
+          cand = [];
+          for (const s of signos) {
+            const g = (base + s * o.angulo.grados) * Math.PI / 180;
+            const ux = Math.cos(g), uy = -Math.sin(g);
+            if (d && G.dist(pt(d.de).x, pt(d.de).y, V.x, V.y) < 1e-6) cand.push({ x: V.x + ux * d.mm, y: V.y + uy * d.mm });
+            else {
+              formas.push({ tipo: 'recta', x1: V.x, y1: V.y, x2: V.x + ux * 90, y2: V.y + uy * 90, guia: true });
+              // Sin distancia: en el borde del transportador (65 mm), como al marcarlo en DibuTec
+              if (s === signos[0]) cand.push({ x: V.x + ux * 65, y: V.y + uy * 65 });
+            }
+          }
+          if (!cand.length) cand = null;
+        } else if (o.sobre !== undefined && lin(o.sobre) && o.distancia && pt(o.distancia.de) && Number.isFinite(o.distancia.mm)) {
+          cand = G.cortes(lin(o.sobre), this.circ(pt(o.distancia.de), o.distancia.mm));
+        } else if (o.distancia && pt(o.distancia.de) && Number.isFinite(o.distancia.mm)) {
+          formas.push(Object.assign(this.circ(pt(o.distancia.de), o.distancia.mm), { guia: true }));
+        }
+        if (cand && o.cruce !== undefined) {
+          // En un cruce se buscan puntos nuevos: los que ya existen van al final
+          const existe = q => [...geo.values()].some(f => f.tipo === 'punto' && G.dist(f.x, f.y, q.x, q.y) < .5);
+          cand = cand.filter(q => !existe(q)).concat(cand.filter(existe));
+        }
+        if (cand) {
+          const k = Number.isInteger(o.cantidad) && o.cantidad > 0 ? o.cantidad : 1;
+          cand.slice(0, k).forEach(p => nombrables.push({ tipo: 'punto', x: p.x, y: p.y }));
+        }
+        break;
+      }
+      case 'recta': {
+        const a = pt(o.desde), b = pt(o.hasta), pp = [].concat(o.pasaPor || []).map(pt).filter(Boolean);
+        let f = null;
+        if (a && b) f = { tipo: 'recta', x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+        else if (pp.length >= 2) {
+          const [p, q] = pp, d = G.dist(p.x, p.y, q.x, q.y) || 1, e = 15 / d;
+          f = { tipo: 'recta', x1: p.x - (q.x - p.x) * e, y1: p.y - (q.y - p.y) * e, x2: q.x + (q.x - p.x) * e, y2: q.y + (q.y - p.y) * e };
+        } else {
+          const p = a || b || pp[0];
+          let ang = null;
+          const L = k => { const g = lin(k); return g && g.tipo === 'recta' ? g : null; };
+          if (L(o.paralelaA)) ang = G.dir(L(o.paralelaA));
+          else if (L(o.perpendicularA)) ang = G.dir(L(o.perpendicularA)) + Math.PI / 2;
+          else if (o.angulo && L(o.angulo.con) && Number.isFinite(o.angulo.grados)) ang = G.dir(L(o.angulo.con)) - o.angulo.grados * Math.PI / 180;
+          if (p && ang !== null) f = G.rectaPor(p, ang);
+        }
+        if (f) { formas.push(f); nombrables.push(f); }
+        break;
+      }
+      case 'arco': {
+        const c = pt(o.centro);
+        let r = null, aprox = false;
+        if (Number.isFinite(o.radio)) r = o.radio;
+        else if (o.radioComo !== undefined && lin(o.radioComo) && lin(o.radioComo).tipo === 'arco') r = lin(o.radioComo).r;
+        else if (U.esObj(o.radio)) {
+          const mn = o.radio.min, mx = o.radio.max;
+          r = Number.isFinite(mn) && Number.isFinite(mx) ? (mn + mx) / 2 : Number.isFinite(mn) ? mn + 10 : Number.isFinite(mx) ? mx * .8 : null;
+          aprox = true;
+        } else if (c && o.pasaPor !== undefined && pt([].concat(o.pasaPor)[0])) {
+          const q = pt([].concat(o.pasaPor)[0]); r = G.dist(c.x, c.y, q.x, q.y);
+        }
+        if (c && !(r > 0)) { r = 50; aprox = true; }   // sin radio fijo: uno orientativo
+        if (c && r > 0) { const f = Object.assign(this.circ(c, r), { aprox }); formas.push(f); nombrables.push(f); }
+        break;
+      }
+      case 'rectas': {
+        const refs = Array.isArray(o.poligono) ? o.poligono : null;
+        const segs = refs ? refs.map((r, i) => [r, refs[(i + 1) % refs.length]]).slice(0, o.cerrado === false ? refs.length - 1 : refs.length)
+          : Array.isArray(o.segmentos) ? o.segmentos : [];
+        for (const s of segs) {
+          const a = pt(s && s[0]), b = pt(s && s[1]);
+          if (a && b) formas.push({ tipo: 'recta', x1: a.x, y1: a.y, x2: b.x, y2: b.y });
+        }
+        break;
+      }
+      case 'vertices': {
+        const L = lin(o.circunferencia), P0 = pt(o.desde), n = o.lados;
+        if (L && L.tipo === 'arco' && P0 && Number.isInteger(n) && n >= 3) {
+          const a0 = Math.atan2(P0.y - L.cy, P0.x - L.cx);
+          for (let k = 0; k < n; k++) {
+            const t = a0 + k * G.DOS_PI / n;
+            nombrables.push({ tipo: 'punto', x: L.cx + L.r * Math.cos(t), y: L.cy + L.r * Math.sin(t) });
+          }
+        }
+        break;
+      }
+      case 'instrumento': {
+        const pp = [].concat(o.cantoPasaPor || []).map(pt).filter(Boolean);
+        if (pp.length >= 2) {
+          const [p, q] = pp, d = G.dist(p.x, p.y, q.x, q.y) || 1, e = 20 / d;
+          formas.push({ tipo: 'recta', x1: p.x - (q.x - p.x) * e, y1: p.y - (q.y - p.y) * e, x2: q.x + (q.x - p.x) * e, y2: q.y + (q.y - p.y) * e, guia: true });
+        }
+        if (o.origenEn !== undefined && pt(o.origenEn)) formas.push({ tipo: 'diana', x: pt(o.origenEn).x, y: pt(o.origenEn).y });
+        break;
+      }
+    }
+    return { formas, nombrables };
+  },
+};
+
+/* =====================================================================
+   Nombres disponibles en cada paso y revisión del ejercicio
+   ===================================================================== */
+const Nombres = {
+  // Nombres que existen antes de empezar el paso i (i = −1: solo el enunciado)
+  disponibles(ej, i) {
+    const m = new Map();
+    for (const p of ej.inicial.puntos) { const n = p && (p.nombre || p.etiqueta); if (n) m.set(n, { tipo: 'punto', origen: 'enunciado' }); }
+    for (const r of ej.inicial.rectas) if (r && r.nombre) m.set(r.nombre, { tipo: 'recta', origen: 'enunciado' });
+    for (const c of ej.inicial.arcos) if (c && c.nombre) m.set(c.nombre, { tipo: 'arco', origen: 'enunciado' });
+    for (let k = 0; k < Math.min(i, ej.pasos.length); k++)
+      for (const o of ej.pasos[k].objetivos) {
+        const t = OBJ[o.tipo] && OBJ[o.tipo].crea;
+        if (!t || o.nombrar === undefined) continue;
+        for (const n of [].concat(o.nombrar)) if (typeof n === 'string' && n) m.set(n, { tipo: t, origen: `paso ${k + 1}` });
+      }
+    return m;
+  },
+  todos(ej) { return this.disponibles(ej, ej.pasos.length); },
+  siguiente(ej, tipo) {
+    const usados = this.todos(ej);
+    if (tipo === 'punto') {
+      for (let v = 0; ; v++) for (const L of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') { const n = v ? L + v : L; if (!usados.has(n)) return n; }
+    }
+    const base = tipo === 'recta' ? ['r', 's', 't', 'u', 'v', 'w'] : ['c', 'd', 'e', 'f'];
+    for (let v = 0; ; v++) for (const L of base) { const n = v ? L + v : L; if (!usados.has(n)) return n; }
+  },
+};
+
+const Revision = {
+  // Lista de {nivel: 'error'|'aviso', texto, ir: selección}
+  revisar(ej) {
+    const out = [], mal = (texto, ir) => out.push({ nivel: 'error', texto, ir }), ojo = (texto, ir) => out.push({ nivel: 'aviso', texto, ir });
+    const ficha = { tipo: 'ficha' };
+    if (!ej.titulo || !String(ej.titulo).trim()) mal('Falta el título del ejercicio.', ficha);
+    if (ej.id && !/^[a-z0-9-]+$/i.test(ej.id)) ojo('El identificador solo debería tener letras, números y guiones.', ficha);
+    if (!ej.pasos.length) mal('El ejercicio no tiene pasos.', ficha);
+    const [W, H] = HOJAS[ej.papel.hoja || 'A4-h'] || HOJAS['A4-h'];
+    // Enunciado
+    const vistos = new Map();
+    const registrar = (n, donde, ir) => {
+      if (typeof n !== 'string' || !n) return;
+      if (vistos.has(n)) ojo(`El nombre «${n}» se usa dos veces (${vistos.get(n)} y ${donde}).`, ir);
+      else vistos.set(n, donde);
+    };
+    const ini0 = Nombres.disponibles(ej, -1);
+    const refPunto = (ref, ir, donde) => {
+      if (U.esCoord(ref)) return;
+      if (typeof ref !== 'string' || !ref) { mal(`${donde}: falta un punto.`, ir); return; }
+      const t = ini0.get(ref);
+      if (!t) mal(`${donde}: no hay ningún punto «${ref}» en el enunciado.`, ir);
+      else if (t.tipo !== 'punto') mal(`${donde}: «${ref}» no es un punto.`, ir);
+    };
+    ej.inicial.puntos.forEach((p, i) => {
+      const ir = { tipo: 'punto', i };
+      if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) { mal(`Al punto ${i + 1} del enunciado le faltan las coordenadas.`, ir); return; }
+      if (p.x < 0 || p.y < 0 || p.x > W || p.y > H) ojo(`El punto ${p.nombre || i + 1} está fuera de la hoja.`, ir);
+      registrar(p.nombre || p.etiqueta, 'enunciado', ir);
+    });
+    ej.inicial.rectas.forEach((r, i) => {
+      const ir = { tipo: 'recta', i }, nm = `Recta ${r.nombre || i + 1} del enunciado`;
+      if (r.desde !== undefined) refPunto(r.desde, ir, nm); else if (!Number.isFinite(r.x1) || !Number.isFinite(r.y1)) mal(`${nm}: falta el primer extremo.`, ir);
+      if (r.hasta !== undefined) refPunto(r.hasta, ir, nm); else if (!Number.isFinite(r.x2) || !Number.isFinite(r.y2)) mal(`${nm}: falta el segundo extremo.`, ir);
+      registrar(r.nombre, 'enunciado', ir);
+    });
+    ej.inicial.arcos.forEach((c, i) => {
+      const ir = { tipo: 'arco', i }, nm = `Arco ${c.nombre || i + 1} del enunciado`;
+      if (c.centro !== undefined) refPunto(c.centro, ir, nm); else if (!Number.isFinite(c.cx) || !Number.isFinite(c.cy)) mal(`${nm}: falta el centro.`, ir);
+      if (!Number.isFinite(c.radio) || c.radio <= 0) mal(`${nm}: el radio tiene que ser mayor que 0.`, ir);
+      registrar(c.nombre, 'enunciado', ir);
+    });
+    // Pasos
+    ej.pasos.forEach((p, i) => {
+      const ir = { tipo: 'paso', i }, P = `Paso ${i + 1}`;
+      if (!p.texto.trim()) mal(`${P}: falta la instrucción.`, ir);
+      if (!p.objetivos.length) mal(`${P}: no tiene ningún objetivo.`, ir);
+      const disp = Nombres.disponibles(ej, i);
+      const ref = (v, tipos, que) => {
+        if (tipos.includes('punto') && U.esCoord(v)) return;
+        if (typeof v !== 'string' || !v.trim()) { mal(`${P}: falta ${que}.`, ir); return; }
+        const t = disp.get(v);
+        if (!t) {
+          const luego = Nombres.todos(ej).get(v);
+          mal(luego ? `${P}: «${v}» todavía no existe (se nombra en el ${luego.origen}).` : `${P}: no hay nada que se llame «${v}».`, ir);
+        } else if (!tipos.includes(t.tipo)) mal(`${P}: «${v}» es ${t.tipo === 'punto' ? 'un punto' : t.tipo === 'recta' ? 'una recta' : 'un arco'}; aquí hace falta ${tipos[0] === 'punto' ? 'un punto' : tipos.length > 1 ? 'una línea' : tipos[0] === 'recta' ? 'una recta' : 'un arco'}.`, ir);
+      };
+      for (const o of p.objetivos) {
+        const def = OBJ[o.tipo];
+        if (!def) { mal(`${P}: tipo de objetivo desconocido «${o.tipo}».`, ir); continue; }
+        const conds = def.campos.filter(c => o[c[0]] !== undefined);
+        if (['punto', 'recta', 'arco'].includes(o.tipo) && !conds.length) ojo(`${P}: el objetivo «${def.nombre.toLowerCase()}» no tiene condiciones; valdrá cualquiera.`, ir);
+        for (const [k, t, et] of def.campos) {
+          const v = o[k];
+          if (v === undefined) continue;
+          const q = `«${et.toLowerCase()}»`;
+          if (t === 'pt') ref(v, ['punto'], `el punto de ${q}`);
+          else if (t === 'linea') ref(v, k === 'circunferencia' || k === 'radioComo' ? ['arco'] : ['paralelaA', 'perpendicularA', 'cantoSobre', 'paraleloA'].includes(k) ? ['recta'] : ['recta', 'arco'], `la línea de ${q}`);
+          else if (t === 'pts') { const l = [].concat(v); if (!l.length) ojo(`${P}: ${q} está vacío.`, ir); l.forEach(x => ref(x, ['punto'], `un punto de ${q}`)); }
+          else if (t === 'par') { if (!Array.isArray(v) || v.length !== 2) mal(`${P}: ${q} necesita dos líneas.`, ir); else v.forEach(x => ref(x, ['recta', 'arco'], `una línea de ${q}`)); }
+          else if (t === 'segs') { if (!Array.isArray(v) || !v.length) mal(`${P}: no hay segmentos.`, ir); else v.forEach(s => (Array.isArray(s) && s.length === 2 ? s : [null, null]).forEach(x => ref(x, ['punto'], 'un extremo de un segmento'))); }
+          else if (t === 'cortes') [].concat(v).forEach(c => ref(typeof c === 'string' ? c : c && c.elemento, ['recta', 'arco'], `la línea de ${q}`));
+          else if (t === 'angPunto') { if (!U.esObj(v)) continue; ref(v.vertice, ['punto'], 'el vértice del ángulo'); ref(v.desde, ['punto'], 'el punto desde el que se mide el ángulo'); if (!Number.isFinite(v.grados)) mal(`${P}: faltan los grados del ángulo.`, ir); }
+          else if (t === 'angRecta') { if (!U.esObj(v)) continue; ref(v.con, ['recta'], 'la recta del ángulo'); if (!Number.isFinite(v.grados)) mal(`${P}: faltan los grados del ángulo.`, ir); }
+          else if (t === 'dist') { if (!U.esObj(v)) continue; ref(v.de, ['punto'], 'el punto de la distancia'); if (!Number.isFinite(v.mm)) mal(`${P}: faltan los milímetros de la distancia.`, ir); }
+          else if (t === 'inst' && !NOMBRE_INST[v]) mal(`${P}: instrumento desconocido «${v}».`, ir);
+          else if ((t === 'num' || t === 'int') && !Number.isFinite(v)) mal(`${P}: ${q} tiene que ser un número.`, ir);
+        }
+        if (o.tipo === 'rectas' && o.segmentos === undefined && o.poligono === undefined) mal(`${P}: indica los segmentos o el polígono.`, ir);
+        if (o.tipo === 'vertices') {
+          if (!Number.isInteger(o.lados) || o.lados < 3) mal(`${P}: el polígono necesita al menos 3 lados.`, ir);
+          for (const k of ['circunferencia', 'desde']) if (o[k] === undefined) mal(`${P}: falta «${k}» en los vértices.`, ir);
+        }
+        if (o.tipo === 'instrumento' && !o.instrumento) mal(`${P}: elige el instrumento.`, ir);
+        if (o.tipo === 'instrumento' && (o.paraleloA !== undefined || o.perpendicularA !== undefined) && o.cantoPasaPor === undefined)
+          ojo(`${P}: «paralelo a» y «perpendicular a» solo cuentan junto con «Un canto pasa por».`, ir);
+        if (o.nombrar !== undefined) {
+          if (!def.crea) ojo(`${P}: el objetivo «${def.nombre.toLowerCase()}» no puede poner nombres.`, ir);
+          for (const n of [].concat(o.nombrar)) registrar(n, P.toLowerCase(), ir);
+          const k = o.tipo === 'punto' ? (o.cantidad || 1) : o.tipo === 'vertices' ? o.lados : 1;
+          if ([].concat(o.nombrar).length > k) ojo(`${P}: hay más nombres (${[].concat(o.nombrar).length}) que elementos (${k}).`, ir);
+        }
+      }
+      if (Array.isArray(p.herramientas)) for (const h of p.herramientas)
+        if (!HERRAMIENTAS.some(x => x[0] === h)) ojo(`${P}: herramienta desconocida «${h}».`, ir);
+    });
+    const todos = Nombres.todos(ej);
+    for (const k in ej.textos) if (!todos.has(k)) ojo(`Hay un texto para «${k}», pero no hay nada con ese nombre.`, { tipo: 'textos' });
+    return out;
+  },
+  // Lo mismo que comprueba DibuTec al abrir el archivo
+  validarComoApp(d) {
+    if (!d || typeof d !== 'object' || d.formato !== 'dibutec-ejercicio') throw new Error('falta "formato": "dibutec-ejercicio"');
+    if (typeof d.titulo !== 'string' || !d.titulo.trim()) throw new Error('falta el título');
+    if (!Array.isArray(d.pasos) || !d.pasos.length) throw new Error('no tiene pasos');
+    d.pasos.forEach((p, i) => {
+      if (!p || typeof p.texto !== 'string') throw new Error(`el paso ${i + 1} no tiene texto`);
+      const objs = Array.isArray(p.objetivos) ? p.objetivos : p.objetivo ? [p.objetivo] : [];
+      if (!objs.length) throw new Error(`el paso ${i + 1} no tiene objetivo`);
+      for (const o of objs) if (!o || !OBJ[o.tipo]) throw new Error(`paso ${i + 1}: tipo de objetivo desconocido «${o && o.tipo}»`);
+    });
+    return d;
+  },
+};
+
+/* =====================================================================
+   Instrumentos: forma con los tamaños por defecto de DibuTec
+   ===================================================================== */
+const Inst = {
+  local(tipo, c) {
+    switch (tipo) {
+      case 'regla': return { poli: [[0, 0], [310, 0], [310, 32], [0, 32]], asa: [296, 16], marcas: Array.from({ length: 31 }, (_, i) => [5 + i * 10, 0, i % 5 ? 4 : 7]) };
+      case 'escuadra': return { poli: [[0, 0], [160, 0], [0, -160]], asa: [105, -18], marcas: Array.from({ length: 15 }, (_, i) => [5 + i * 10, 0, i % 5 ? 4 : 7]) };
+      case 'cartabon': {
+        const Lg = 160 * Math.SQRT2, S = Lg / Math.sqrt(3);
+        return { poli: [[0, 0], [S, 0], [0, -Lg]], asa: [S - 50, -16], marcas: Array.from({ length: 21 }, (_, i) => [0, -5 - i * 10, i % 5 ? 4 : 7]) };
+      }
+      case 'transportador': {
+        const v = [];
+        for (let g = 0; g <= 180; g += 4) v.push([65 * Math.cos(g * Math.PI / 180), -65 * Math.sin(g * Math.PI / 180)]);
+        return { poli: v, asa: [0, -58], marcas: [] };
+      }
+      case 'compas': {
+        const r = Number.isFinite(c && c.radio) ? c.radio : 40, m = r / 2;
+        const h = Math.sqrt(Math.max(75 * 75 - m * m, (75 * .18) ** 2));
+        return { compas: true, r, bisagra: [m, -h], asa: [r, 0], poli: [[0, 0], [m, -h], [r, 0]] };
+      }
+    }
+    return null;
+  },
+  // Posición del instrumento; sin x/y, DibuTec lo coloca a la vista (aquí, cerca del centro de la hoja)
+  pose(tipo, c, W, H) {
+    const fija = c && Number.isFinite(c.x) && Number.isFinite(c.y);
+    const def = { regla: [W / 2 - 155, H * .72], escuadra: [W * .2, H * .8], cartabon: [W * .62, H * .85], compas: [W * .7, H * .45], transportador: [W / 2, H * .55] }[tipo];
+    return { x: fija ? c.x : def[0], y: fija ? c.y : def[1], rot: -((c && Number.isFinite(c.giro)) ? c.giro : 0) * Math.PI / 180, sx: c && c.volteado ? -1 : 1, fija };
+  },
+  aMundo(p, lx, ly) {
+    const cs = Math.cos(p.rot), sn = Math.sin(p.rot);
+    lx *= p.sx;
+    return { x: p.x + lx * cs - ly * sn, y: p.y + lx * sn + ly * cs };
+  },
+  dentro(pt, v) {
+    let d = false;
+    for (let i = 0, j = v.length - 1; i < v.length; j = i++)
+      if ((v[i][1] > pt.y) !== (v[j][1] > pt.y) && pt.x < (v[j][0] - v[i][0]) * (pt.y - v[i][1]) / (v[j][1] - v[i][1]) + v[i][0]) d = !d;
+    return d;
+  },
+};
+
+/* =====================================================================
+   Vista: zoom y desplazamiento de la hoja (viewBox en mm)
+   ===================================================================== */
+const Vista = {
+  x: -10, y: -10, esc: 3,      // esc = px por mm
+  svg: null,
+  tam() { const r = this.svg.getBoundingClientRect(); return { w: r.width || 1, h: r.height || 1, l: r.left, t: r.top }; },
+  aMm(cx, cy) { const t = this.tam(); return { x: this.x + (cx - t.l) / this.esc, y: this.y + (cy - t.t) / this.esc }; },
+  px(mm) { return mm * this.esc; },
+  mmDe(px) { return px / this.esc; },
+  ajustar() {
+    const [W, H] = Editor.hoja(), t = this.tam(), m = 24;
+    this.esc = Math.max(.3, Math.min((t.w - 2 * m) / W, (t.h - 2 * m) / H));
+    this.x = -(t.w / this.esc - W) / 2;
+    this.y = -(t.h / this.esc - H) / 2;
+    Editor.pintarHoja();
+  },
+  zoom(f, cx, cy) {
+    const t = this.tam();
+    if (cx === undefined) { cx = t.l + t.w / 2; cy = t.t + t.h / 2; }
+    const a = this.aMm(cx, cy);
+    this.esc = Math.max(.3, Math.min(40, this.esc * f));
+    this.x = a.x - (cx - t.l) / this.esc;
+    this.y = a.y - (cy - t.t) / this.esc;
+    Editor.pintarHoja();
+  },
+  viewBox() { const t = this.tam(); return `${this.x} ${this.y} ${t.w / this.esc} ${t.h / this.esc}`; },
+};
+
+/* =====================================================================
+   Editor
+   ===================================================================== */
+const Editor = {
+  sel: { tipo: 'ficha' },     // ficha | enunciado | instrumentos | textos | final | paso{i} | punto{i} | recta{i} | arco{i} | inst{k}
+  herr: 'sel',                // sel | punto | recta | arco
+  iman: true,
+  verConstruccion: true,
+  pasoVista: -1,              // construcción que se ve en la hoja
+  borrador: null,             // trazo en curso: {tipo, a}
+  eligiendo: null,            // {tipo: 'punto'|'linea', alElegir, paso}
+  arrastre: null,
+  raton: null,                // última posición del ratón en mm
+  iman_: null,                // objetivo del imán bajo el ratón
+  historial: [], futuro: [], ultimoCambio: { clave: null, t: 0 },
+  CLAVE: 'dibutec.editor.borrador',
+  CLAVE_PRUEBA: 'dibutec.editor.prueba',
+
+  get ej() { return Modelo.ej; },
+  hoja() { return HOJAS[this.ej.papel.hoja || 'A4-h'] || HOJAS['A4-h']; },
+  papel(k) { return this.ej.papel[k] !== undefined ? this.ej.papel[k] : PAPEL_DEF[k]; },
+
+  // ---------- Cambios, historial y borrador ----------
+  cambio(clave = null, { inspector = true } = {}) {
+    const ahora = Date.now(), texto = JSON.stringify(this.ej);
+    if (clave && this.ultimoCambio.clave === clave && ahora - this.ultimoCambio.t < 1200 && this.historial.length) {
+      // Se sigue escribiendo en el mismo campo: un solo paso de deshacer
+    } else {
+      this.historial.push(this.estadoAnterior);
+      if (this.historial.length > 200) this.historial.shift();
+    }
+    this.estadoAnterior = texto;
+    this.futuro = [];
+    this.ultimoCambio = { clave, t: ahora };
+    this.guardarBorrador();
+    this.repintar({ inspector });
+  },
+  deshacer() {
+    if (!this.historial.length) return;
+    this.futuro.push(JSON.stringify(this.ej));
+    this.cargarEstado(this.historial.pop());
+  },
+  rehacer() {
+    if (!this.futuro.length) return;
+    this.historial.push(JSON.stringify(this.ej));
+    this.cargarEstado(this.futuro.pop());
+  },
+  cargarEstado(t) {
+    Modelo.ej = JSON.parse(t);
+    this.estadoAnterior = t;
+    this.ultimoCambio = { clave: null, t: 0 };
+    if (!this.selValida()) this.sel = { tipo: 'ficha' };
+    this.guardarBorrador();
+    this.repintar();
+  },
+  selValida() {
+    const s = this.sel;
+    if (s.tipo === 'paso') return s.i < this.ej.pasos.length;
+    if (['punto', 'recta', 'arco'].includes(s.tipo)) return s.i < this.ej.inicial[s.tipo + 's'].length;
+    return true;
+  },
+  guardarBorrador() {
+    try { localStorage.setItem(this.CLAVE, JSON.stringify(this.ej)); } catch (_) { /* sin almacenamiento */ }
+  },
+  abrir(def, { avisar = true } = {}) {
+    Modelo.ej = Modelo.normalizar(def);
+    this.estadoAnterior = JSON.stringify(Modelo.ej);
+    this.historial = []; this.futuro = [];
+    this.sel = { tipo: 'ficha' };
+    this.pasoVista = -1;
+    this.guardarBorrador();
+    this.repintar();
+    Vista.ajustar();
+    if (avisar) aviso(`Abierto: ${Modelo.ej.titulo}`);
+  },
+  abrirTexto(t, origen) {
+    let d;
+    try { d = JSON.parse(t); } catch (e) { aviso('El archivo no es JSON válido: ' + e.message); return false; }
+    if (!d || d.formato !== 'dibutec-ejercicio') { aviso('Ese archivo no es un ejercicio de DibuTec.'); return false; }
+    this.abrir(d);
+    if (origen) mensaje(`Abierto «${origen}». Los cambios se guardan solos en este navegador; usa «Guardar» para descargar el archivo.`);
+    return true;
+  },
+
+  // ---------- Selección ----------
+  seleccionar(s) {
+    this.sel = s;
+    if (s.tipo === 'paso') this.pasoVista = s.i;
+    else if (['ficha', 'enunciado', 'punto', 'recta', 'arco', 'instrumentos', 'inst'].includes(s.tipo)) this.pasoVista = Math.min(this.pasoVista, -1);
+    this.cancelarEleccion();
+    this.repintar();
+  },
+  eliminarSeleccion() {
+    const s = this.sel;
+    if (['punto', 'recta', 'arco'].includes(s.tipo)) {
+      const l = this.ej.inicial[s.tipo + 's'], el = l[s.i];
+      l.splice(s.i, 1);
+      if (el && el.nombre && this.ej.textos[el.nombre] !== undefined) delete this.ej.textos[el.nombre];
+      this.sel = { tipo: 'enunciado' };
+      this.cambio();
+      mensaje('Elemento borrado del enunciado.');
+    } else if (s.tipo === 'inst') {
+      delete this.ej.instrumentos[s.k];
+      this.sel = { tipo: 'instrumentos' };
+      this.cambio();
+    } else if (s.tipo === 'paso') this.borrarPaso(s.i);
+  },
+
+  // ---------- Pasos ----------
+  anadirPaso(tras = this.ej.pasos.length - 1) {
+    const p = { texto: '', objetivos: [{ tipo: 'punto' }] };
+    this.ej.pasos.splice(tras + 1, 0, p);
+    this.sel = { tipo: 'paso', i: tras + 1 };
+    this.pasoVista = tras + 1;
+    this.cambio();
+    setTimeout(() => { const t = document.querySelector('#inspector textarea'); if (t) t.focus(); }, 0);
+  },
+  borrarPaso(i) {
+    if (this.ej.pasos.length <= 1) { aviso('El ejercicio necesita al menos un paso.'); return; }
+    this.ej.pasos.splice(i, 1);
+    this.sel = { tipo: 'paso', i: Math.min(i, this.ej.pasos.length - 1) };
+    this.pasoVista = this.sel.i;
+    this.cambio();
+    aviso('Paso borrado. Ctrl+Z para recuperarlo.');
+  },
+  moverPaso(i, j) {
+    if (j < 0 || j >= this.ej.pasos.length || i === j) return;
+    const [p] = this.ej.pasos.splice(i, 1);
+    this.ej.pasos.splice(j, 0, p);
+    this.sel = { tipo: 'paso', i: j };
+    this.pasoVista = j;
+    this.cambio();
+  },
+  duplicarPaso(i) {
+    this.ej.pasos.splice(i + 1, 0, U.copia(this.ej.pasos[i]));
+    for (const o of this.ej.pasos[i + 1].objetivos) delete o.nombrar;
+    this.sel = { tipo: 'paso', i: i + 1 };
+    this.pasoVista = i + 1;
+    this.cambio();
+  },
+
+  // ---------- Renombrar: cambia también todas las referencias ----------
+  renombrar(viejo, nuevo) {
+    if (!viejo || viejo === nuevo) return;
+    const cambiar = (v, k) => {
+      if (CLAVES_NO_REF.has(k)) return v;
+      if (typeof v === 'string') return v === viejo ? nuevo : v;
+      if (Array.isArray(v)) return v.map(x => cambiar(x, null));
+      if (U.esObj(v)) { for (const c in v) v[c] = cambiar(v[c], c); return v; }
+      return v;
+    };
+    for (const p of this.ej.pasos) for (const o of p.objetivos) cambiar(o, null);
+    for (const r of this.ej.inicial.rectas) { if (r.desde === viejo) r.desde = nuevo; if (r.hasta === viejo) r.hasta = nuevo; }
+    for (const c of this.ej.inicial.arcos) if (c.centro === viejo) c.centro = nuevo;
+    if (this.ej.textos[viejo] !== undefined && this.ej.textos[nuevo] === undefined) { this.ej.textos[nuevo] = this.ej.textos[viejo]; delete this.ej.textos[viejo]; }
+  },
+
+  // ---------- Repintado ----------
+  repintar({ inspector = true } = {}) {
+    this.revision = Revision.revisar(this.ej);
+    Esquema.pintar();
+    if (inspector) Inspector.pintar();
+    this.pintarHoja();
+    this.pintarEstado();
+    Barra.actualizar();
+  },
+  pintarEstado() {
+    const b = document.getElementById('btn-problemas');
+    const e = this.revision.filter(p => p.nivel === 'error').length, a = this.revision.length - e;
+    b.className = e ? 'mal' : a ? 'regular' : 'bien';
+    b.textContent = e ? `${e} ${e === 1 ? 'error' : 'errores'}${a ? ` · ${a} ${a === 1 ? 'aviso' : 'avisos'}` : ''}` : a ? `${a} ${a === 1 ? 'aviso' : 'avisos'}` : '✓ Sin problemas';
+  },
+
+  // ---------- Hoja (SVG) ----------
+  pintarHoja() {
+    const svg = Vista.svg, ej = this.ej;
+    if (!ej) return;
+    svg.setAttribute('viewBox', Vista.viewBox());
+    const [W, H] = this.hoja(), k = 1 / Vista.esc;   // mm por píxel
+    const partes = [];
+    const tr = (w) => (w * k).toFixed(4);
+    // Papel
+    partes.push(`<rect x="${1.2 * k}" y="${2 * k}" width="${W}" height="${H}" fill="rgba(0,0,0,.18)"/>`);
+    partes.push(`<rect x="0" y="0" width="${W}" height="${H}" fill="${COLOR_PAPEL[this.papel('colorPapel')] || '#fff'}"/>`);
+    partes.push(this.cuadricula(W, H, k));
+    if (this.papel('margen')) partes.push(`<rect x="10" y="10" width="${W - 20}" height="${H - 20}" fill="none" stroke="rgba(${COLOR_LINEAS[this.papel('colorLineas')] || COLOR_LINEAS.azul}, .5)" stroke-width="${tr(1)}"/>`);
+
+    const vista = this.verConstruccion ? this.pasoVista : -1;
+    const C = Construccion.calcular(ej, vista);
+    this.construccion = C;
+    const actual = this.sel.tipo === 'paso' ? this.sel.i : -99;
+    // Elementos a los que se refiere el paso seleccionado
+    const refs = new Set();
+    if (actual >= 0 && ej.pasos[actual]) {
+      const juntar = (v, kk) => {
+        if (CLAVES_NO_REF.has(kk)) return;
+        if (typeof v === 'string') refs.add(v);
+        else if (Array.isArray(v)) v.forEach(x => juntar(x, null));
+        else if (U.esObj(v)) for (const c in v) juntar(v[c], c);
+      };
+      ej.pasos[actual].objetivos.forEach(o => juntar(o, null));
+    }
+    const forma = (f, color, ancho, extra = '') => {
+      const w = tr(ancho);
+      if (f.tipo === 'recta') return `<line x1="${f.x1}" y1="${f.y1}" x2="${f.x2}" y2="${f.y2}" stroke="${color}" stroke-width="${w}" stroke-linecap="round" ${extra}/>`;
+      if (f.tipo === 'arco') {
+        if (G.completo(f)) return `<circle cx="${f.cx}" cy="${f.cy}" r="${f.r}" fill="none" stroke="${color}" stroke-width="${w}" ${extra}/>`;
+        const p0 = { x: f.cx + f.r * Math.cos(f.a0), y: f.cy + f.r * Math.sin(f.a0) }, p1 = { x: f.cx + f.r * Math.cos(f.a1), y: f.cy + f.r * Math.sin(f.a1) };
+        const barr = Math.abs(f.a1 - f.a0), grande = barr > Math.PI ? 1 : 0, sentido = f.a1 > f.a0 ? 1 : 0;
+        return `<path d="M${p0.x} ${p0.y}A${f.r} ${f.r} 0 ${grande} ${sentido} ${p1.x} ${p1.y}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" ${extra}/>`;
+      }
+      return '';
+    };
+    const cruz = (x, y, color, t = 5, ancho = 1.6) => {
+      const s = t * k;
+      return `<path d="M${x - s} ${y - s}L${x + s} ${y + s}M${x + s} ${y - s}L${x - s} ${y + s}" stroke="${color}" stroke-width="${tr(ancho)}" stroke-linecap="round"/>`;
+    };
+    const etiqueta = (x, y, txt, color, negrita = true) =>
+      `<text x="${x + 6 * k}" y="${y - 6 * k}" font-size="${14 * k}" font-weight="${negrita ? 700 : 500}" fill="${color}" stroke="#fff" stroke-width="${3 * k}" paint-order="stroke" font-family="system-ui, sans-serif">${U.esc(txt)}</text>`;
+
+    // Construcción esperada (fantasmas)
+    if (this.verConstruccion && vista >= 0) {
+      for (const g of C.fantasmas) {
+        const esActual = g.paso === vista, col = esActual ? COLOR.paso : COLOR.previo;
+        const discont = `stroke-dasharray="${tr(esActual ? 7 : 5)} ${tr(esActual ? 5 : 5)}" opacity="${esActual ? .95 : .7}"`;
+        if (g.forma.tipo === 'punto') {
+          partes.push(cruz(g.forma.x, g.forma.y, col, 4.5, esActual ? 2 : 1.4));
+          if (g.etiqueta) partes.push(etiqueta(g.forma.x, g.forma.y, g.etiqueta, col));
+        } else if (g.forma.tipo === 'diana') {
+          partes.push(`<circle cx="${g.forma.x}" cy="${g.forma.y}" r="${8 * k}" fill="none" stroke="${col}" stroke-width="${tr(2)}" ${discont}/>`);
+        } else partes.push(forma(g.forma, col, g.forma.guia ? 1.2 : 2, discont));
+      }
+      // Nombres de las líneas construidas
+      for (const [n, f] of C.geo) {
+        if (f.dado || f.tipo === 'punto') continue;
+        const col = f.paso === vista ? COLOR.paso : COLOR.previo;
+        const p = f.tipo === 'recta' ? { x: f.x2, y: f.y2 } : { x: f.cx + f.r * Math.cos(-Math.PI / 4), y: f.cy + f.r * Math.sin(-Math.PI / 4) };
+        partes.push(etiqueta(p.x, p.y, n + (f.aprox ? ' (≈)' : ''), col, false));
+      }
+    }
+
+    // Enunciado
+    const pt = r => U.esCoord(r) ? r : (C.geo.get(r) && C.geo.get(r).tipo === 'punto' ? C.geo.get(r) : null);
+    const s = this.sel;
+    ej.inicial.rectas.forEach((r, i) => {
+      const f = Construccion.rectaInicial(r, pt);
+      if (!f) return;
+      const marcado = (s.tipo === 'recta' && s.i === i), ref = refs.has(r.nombre);
+      if (marcado) partes.push(forma(f, 'rgba(224,123,18,.35)', 9));
+      partes.push(forma(f, ref ? COLOR.ref : COLOR.dado, ref ? 2.6 : 1.6));
+      if (r.nombre) partes.push(etiqueta((f.x1 + f.x2) / 2, (f.y1 + f.y2) / 2, r.nombre, ref ? COLOR.ref : COLOR.dado, false));
+    });
+    ej.inicial.arcos.forEach((c, i) => {
+      const f = Construccion.arcoInicial(c, pt);
+      if (!f) return;
+      const marcado = (s.tipo === 'arco' && s.i === i), ref = refs.has(c.nombre);
+      if (marcado) partes.push(forma(f, 'rgba(224,123,18,.35)', 9));
+      partes.push(forma(f, ref ? COLOR.ref : COLOR.dado, ref ? 2.6 : 1.6));
+      partes.push(cruz(f.cx, f.cy, COLOR.dado, 2.5, 1));
+      if (c.nombre) { const a = (f.a0 + f.a1) / 2; partes.push(etiqueta(f.cx + f.r * Math.cos(a), f.cy + f.r * Math.sin(a), c.nombre, ref ? COLOR.ref : COLOR.dado, false)); }
+    });
+    ej.inicial.puntos.forEach((p, i) => {
+      if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+      const marcado = s.tipo === 'punto' && s.i === i, n = p.nombre || p.etiqueta, ref = refs.has(n);
+      if (marcado) partes.push(`<circle cx="${p.x}" cy="${p.y}" r="${11 * k}" fill="rgba(224,123,18,.25)" stroke="${COLOR.sel}" stroke-width="${tr(2)}"/>`);
+      else if (ref) partes.push(`<circle cx="${p.x}" cy="${p.y}" r="${10 * k}" fill="rgba(47,111,208,.15)" stroke="${COLOR.ref}" stroke-width="${tr(1.5)}"/>`);
+      partes.push(cruz(p.x, p.y, COLOR.dado, 5, 1.8));
+      if (p.etiqueta || p.nombre) partes.push(etiqueta(p.x, p.y, p.etiqueta || p.nombre, COLOR.dado));
+    });
+
+    // Coordenadas sueltas del paso seleccionado (objetivos con {x, y})
+    if (actual >= 0 && ej.pasos[actual]) {
+      const coords = [];
+      const juntar = v => {
+        if (U.esCoord(v)) coords.push(v);
+        else if (Array.isArray(v)) v.forEach(juntar);
+        else if (U.esObj(v)) for (const c in v) juntar(v[c]);
+      };
+      ej.pasos[actual].objetivos.forEach(juntar);
+      for (const c of coords) partes.push(`<circle cx="${c.x}" cy="${c.y}" r="${6 * k}" fill="none" stroke="${COLOR.ref}" stroke-width="${tr(1.5)}"/>${cruz(c.x, c.y, COLOR.ref, 3, 1.2)}`);
+    }
+
+    // Instrumentos
+    for (const [tipo] of INSTRUMENTOS) {
+      const c = ej.instrumentos[tipo];
+      if (!c) continue;
+      partes.push(this.dibujoInstrumento(tipo, c, W, H, k, s.tipo === 'inst' && s.k === tipo));
+    }
+
+    // Trazo en curso y objetivo del imán
+    if (this.borrador && this.raton) {
+      const a = this.borrador.a, b = this.iman_ || this.raton;
+      if (this.borrador.tipo === 'recta') partes.push(`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${COLOR.dado}" stroke-width="${tr(1.6)}" stroke-dasharray="${tr(6)} ${tr(4)}"/>`);
+      else {
+        const r = G.dist(a.x, a.y, b.x, b.y);
+        partes.push(`<circle cx="${a.x}" cy="${a.y}" r="${r}" fill="none" stroke="${COLOR.dado}" stroke-width="${tr(1.6)}" stroke-dasharray="${tr(6)} ${tr(4)}"/><line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${COLOR.dado}" stroke-width="${tr(1)}"/>`);
+        partes.push(etiqueta((a.x + b.x) / 2, (a.y + b.y) / 2, `r = ${U.fmt(this.radioRedondo(r, this.iman_))} mm`, COLOR.dado));
+      }
+      partes.push(cruz(a.x, a.y, COLOR.dado, 4, 1.5));
+    }
+    if (this.iman_ && (this.herr !== 'sel' || this.eligiendo || this.arrastre)) {
+      partes.push(`<circle cx="${this.iman_.x}" cy="${this.iman_.y}" r="${9 * k}" fill="rgba(255,159,28,.25)" stroke="${COLOR.iman}" stroke-width="${tr(2)}"/>`);
+      if (this.iman_.nombre && this.eligiendo) partes.push(etiqueta(this.iman_.x, this.iman_.y + 22 * k, this.iman_.nombre, COLOR.iman));
+    }
+    if (this.eligiendo && this.eligiendo.tipo === 'linea' && this.lineaBajo) partes.push(forma(this.lineaBajo, 'rgba(255,159,28,.6)', 8));
+    svg.innerHTML = partes.join('');
+    this.pintarLeyenda(vista);
+  },
+  pintarLeyenda(vista) {
+    const l = document.getElementById('leyenda');
+    if (!this.verConstruccion || vista < 0) { l.hidden = true; return; }
+    l.hidden = false;
+    l.innerHTML = `<span><i style="border-color:${COLOR.dado}"></i>Enunciado</span>` +
+      (vista > 0 ? `<span><i style="border-color:${COLOR.previo};border-top-style:dashed"></i>Pasos anteriores</span>` : '') +
+      `<span><i style="border-color:${COLOR.paso};border-top-style:dashed"></i>Paso ${vista + 1} (lo esperado)</span>` +
+      `<span><i style="border-color:${COLOR.ref}"></i>Lo que usa el paso</span>`;
+  },
+  cuadricula(W, H, k) {
+    const tipo = this.papel('papel');
+    if (tipo === 'blanco') return '';
+    const m = this.papel('margen') ? 10 : 0, a = { x0: m, y0: m, x1: W - m, y1: H - m };
+    const rgb = COLOR_LINEAS[this.papel('colorLineas')] || COLOR_LINEAS.azul;
+    const vis = sep => Math.max(0, Math.min(1, (sep * Vista.esc - 3) / 5));
+    let d = '';
+    const capa = (sep, alfa, ancho, saltar) => {
+      const v = vis(sep);
+      if (v <= 0) return '';
+      let p = '';
+      for (let i = 0; a.x0 + i * sep <= a.x1 + 1e-6; i++) { if (saltar && Math.round(i * sep) % saltar === 0) continue; p += `M${a.x0 + i * sep} ${a.y0}V${a.y1}`; }
+      for (let j = 0; a.y0 + j * sep <= a.y1 + 1e-6; j++) { if (saltar && Math.round(j * sep) % saltar === 0) continue; p += `M${a.x0} ${a.y0 + j * sep}H${a.x1}`; }
+      return `<path d="${p}" stroke="rgba(${rgb}, ${alfa * v})" stroke-width="${ancho * k}" fill="none"/>`;
+    };
+    if (tipo === 'cuadriculado') d += capa(this.papel('cuadro'), .55, .8);
+    else if (tipo === 'milimetrado') d += capa(1, .28, .5, 5) + capa(5, .5, .8, 10) + capa(10, .75, 1.2);
+    else if (tipo === 'isometrico') {
+      const s = this.papel('triangulo'), h = s * Math.sqrt(3) / 2, mm = 1 / Math.sqrt(3), v = vis(s * .5);
+      if (v > 0) {
+        let p = '';
+        for (let i = 0; a.x0 + i * h <= a.x1 + 1e-6; i++) p += `M${a.x0 + i * h} ${a.y0}V${a.y1}`;
+        const dx = a.x1 - a.x0;
+        for (let q = Math.ceil((a.y0 - mm * dx - a.y0) / s); q <= Math.floor((a.y1 - a.y0) / s); q++) { const c = a.y0 + q * s; p += `M${a.x0} ${c}L${a.x1} ${c + mm * dx}`; }
+        for (let q = Math.ceil(0); q <= Math.floor((a.y1 + mm * dx - a.y0) / s); q++) { const c = a.y0 + q * s; p += `M${a.x0} ${c}L${a.x1} ${c - mm * dx}`; }
+        d += `<path d="${p}" stroke="rgba(${rgb}, ${.55 * v})" stroke-width="${.8 * k}" fill="none"/>`;
+      }
+    }
+    return `<defs><clipPath id="zona-cuadricula"><rect x="${a.x0}" y="${a.y0}" width="${a.x1 - a.x0}" height="${a.y1 - a.y0}"/></clipPath></defs><g clip-path="url(#zona-cuadricula)">${d}</g>`;
+  },
+  dibujoInstrumento(tipo, c, W, H, k, marcado) {
+    const L = Inst.local(tipo, c), P = Inst.pose(tipo, c, W, H);
+    const m = (x, y) => Inst.aMundo(P, x, y);
+    const borde = marcado ? COLOR.sel : 'rgba(8, 92, 34, .9)', relleno = 'rgba(14, 150, 52, .32)';
+    const dash = P.fija ? '' : `stroke-dasharray="${6 * k} ${4 * k}"`;
+    let s = '';
+    if (L.compas) {
+      const o = m(0, 0), b = m(...L.bisagra), mi = m(L.r, 0);
+      s += `<path d="M${o.x} ${o.y}L${b.x} ${b.y}L${mi.x} ${mi.y}" fill="none" stroke="${borde}" stroke-width="${(marcado ? 4 : 3) * k}" stroke-linecap="round" stroke-linejoin="round" ${dash}/>`;
+      s += `<circle cx="${b.x}" cy="${b.y}" r="${6 * k}" fill="#8a8d9e" stroke="${borde}" stroke-width="${1.5 * k}"/>`;
+      s += `<circle cx="${o.x}" cy="${o.y}" r="${3.5 * k}" fill="${borde}"/>`;
+      s += `<circle cx="${mi.x}" cy="${mi.y}" r="${3.5 * k}" fill="#3b3b40"/>`;
+      s += `<circle cx="${o.x}" cy="${o.y}" r="${L.r}" fill="none" stroke="rgba(8,92,34,.35)" stroke-width="${k}" stroke-dasharray="${3 * k} ${4 * k}"/>`;
+    } else {
+      const pts = L.poli.map(v => m(...v)).map(p => `${p.x},${p.y}`).join(' ');
+      s += `<polygon points="${pts}" fill="${relleno}" stroke="${borde}" stroke-width="${(marcado ? 2.5 : 1.3) * k}" stroke-linejoin="round" ${dash}/>`;
+      if (tipo === 'transportador') { const c0 = m(-65, 0), c1 = m(65, 0); s += `<line x1="${c0.x}" y1="${c0.y}" x2="${c1.x}" y2="${c1.y}" stroke="${borde}" stroke-width="${1.3 * k}"/>`; }
+      let mk = '';
+      for (const [x, y, l] of L.marcas || []) {
+        const vert = tipo === 'cartabon';
+        const a = m(x, y), b = vert ? m(x + l, y) : m(x, y + (tipo === 'escuadra' ? -l : l));
+        mk += `M${a.x} ${a.y}L${b.x} ${b.y}`;
+      }
+      if (mk) s += `<path d="${mk}" stroke="rgba(12,36,20,.7)" stroke-width="${.9 * k}"/>`;
+      const c0 = L.poli.reduce((acc, v) => [acc[0] + v[0] / L.poli.length, acc[1] + v[1] / L.poli.length], [0, 0]);
+      const cm = m(...c0);
+      s += `<text x="${cm.x}" y="${cm.y}" text-anchor="middle" dominant-baseline="middle" font-size="${12 * k}" font-weight="700" fill="rgba(12,36,20,.75)" font-family="system-ui, sans-serif">${NOMBRE_INST[tipo]}${P.fija ? '' : ' (posición automática)'}</text>`;
+      const o = m(0, 0);
+      s += `<circle cx="${o.x}" cy="${o.y}" r="${3 * k}" fill="${borde}"/>`;
+    }
+    if (marcado) {
+      const a = m(...L.asa);
+      s += `<circle cx="${a.x}" cy="${a.y}" r="${9 * k}" fill="#fff" stroke="${COLOR.sel}" stroke-width="${2 * k}"/>` +
+        `<path d="M${a.x - 4 * k} ${a.y - 2 * k}a${4.5 * k} ${4.5 * k} 0 1 1 ${1 * k} ${5 * k}" fill="none" stroke="${COLOR.sel}" stroke-width="${1.6 * k}" stroke-linecap="round"/>`;
+    }
+    return `<g opacity="${P.fija ? 1 : .75}">${s}</g>`;
+  },
+
+  // ---------- Imán ----------
+  // Puntos con nombre (enunciado y, al elegir para un paso, los construidos en pasos anteriores),
+  // extremos y centros con coordenadas, cortes del enunciado y cruces de la cuadrícula
+  objetivoIman(p, { excluir = null, soloNombres = false, sinLineas = false } = {}) {
+    const radio = Vista.mmDe(window.matchMedia('(pointer: coarse)').matches ? 20 : 12);
+    let mejor = null;
+    const probar = (x, y, extra) => {
+      const d = G.dist(p.x, p.y, x, y);
+      if (d <= radio && (!mejor || d < mejor.d - 1e-9 || (extra.nombre && !mejor.nombre && d <= mejor.d + radio * .3))) mejor = Object.assign({ x, y, d }, extra);
+    };
+    const C = this.construccion;
+    if (C) for (const [n, f] of C.geo) {
+      if (f.tipo !== 'punto') continue;
+      if (excluir && excluir.tipo === 'punto' && this.ej.inicial.puntos[excluir.i] && (this.ej.inicial.puntos[excluir.i].nombre || this.ej.inicial.puntos[excluir.i].etiqueta) === n) continue;
+      if (!f.dado && !(this.eligiendo && f.paso < this.eligiendo.paso)) continue;
+      probar(f.x, f.y, { nombre: n });
+    }
+    if (soloNombres) return mejor;
+    if (!this.iman) return mejor;
+    if (C && !sinLineas) {
+      const lineas = [...C.geo.values()].filter(f => f.dado && f.tipo !== 'punto');
+      for (let i = 0; i < lineas.length; i++) for (let j = i + 1; j < lineas.length; j++)
+        for (const q of G.cortes(lineas[i], lineas[j])) probar(q.x, q.y, { cruce: true });
+      for (const f of lineas) {
+        if (f.tipo === 'recta') { probar(f.x1, f.y1, {}); probar(f.x2, f.y2, {}); }
+        else probar(f.cx, f.cy, {});
+      }
+    }
+    if (!mejor) {
+      const n = this.nodoCuadricula(p);
+      if (n && G.dist(p.x, p.y, n.x, n.y) <= radio) mejor = { x: n.x, y: n.y, rejilla: true };
+    }
+    return mejor;
+  },
+  nodoCuadricula(p) {
+    const tipo = this.papel('papel');
+    if (tipo === 'blanco') return null;
+    const [W, H] = this.hoja(), m = this.papel('margen') ? 10 : 0;
+    const a = { x0: m, y0: m, x1: W - m, y1: H - m };
+    let mejor = null;
+    const probar = (nx, ny) => {
+      if (nx < a.x0 - 1e-6 || nx > a.x1 + 1e-6 || ny < a.y0 - 1e-6 || ny > a.y1 + 1e-6) return;
+      const d = G.dist(p.x, p.y, nx, ny);
+      if (!mejor || d < mejor.d) mejor = { x: U.r3(nx), y: U.r3(ny), d };
+    };
+    if (tipo === 'isometrico') {
+      const s = this.papel('triangulo'), h = s * Math.sqrt(3) / 2, i0 = Math.round((p.x - a.x0) / h);
+      for (let i = i0 - 1; i <= i0 + 1; i++) {
+        const desfase = (((i % 2) + 2) % 2) * s / 2, j = Math.round((p.y - a.y0 - desfase) / s);
+        for (let jj = j - 1; jj <= j + 1; jj++) probar(a.x0 + i * h, a.y0 + desfase + jj * s);
+      }
+    } else {
+      const sep = tipo === 'cuadriculado' ? this.papel('cuadro') : 1;
+      probar(a.x0 + Math.round((p.x - a.x0) / sep) * sep, a.y0 + Math.round((p.y - a.y0) / sep) * sep);
+    }
+    return mejor;
+  },
+  // Punto final: el imán o, si no hay, redondeado a medio milímetro
+  ajustarPunto(p, opc) {
+    const t = this.objetivoIman(p, opc);
+    if (t) return t;
+    return { x: U.r05(p.x), y: U.r05(p.y) };
+  },
+  radioRedondo(r, iman) { return iman ? U.r3(r) : U.r05(r); },
+
+  // ---------- Elegir en la hoja (desde el inspector) ----------
+  elegir(tipo, alElegir) {
+    this.eligiendo = { tipo, alElegir, paso: this.sel.tipo === 'paso' ? this.sel.i : 0 };
+    this.verConstruccion = true;
+    this.pasoVista = Math.max(this.pasoVista, this.eligiendo.paso - 1);
+    if (this.sel.tipo === 'paso') this.pasoVista = this.sel.i;
+    document.getElementById('lienzo').classList.add('eligiendo');
+    const b = document.getElementById('banda');
+    b.hidden = false;
+    b.innerHTML = '';
+    b.append(U.el('span', { text: tipo === 'punto'
+      ? 'Toca la hoja para elegir el punto: un punto con nombre o un sitio cualquiera (coordenadas).'
+      : 'Toca una línea con nombre del enunciado o de un paso anterior.' }),
+      U.el('button', { type: 'button', text: 'Cancelar', onclick: () => this.cancelarEleccion() }));
+    this.pintarHoja();
+    Barra.actualizar();
+  },
+  cancelarEleccion() {
+    if (!this.eligiendo) return;
+    this.eligiendo = null;
+    this.lineaBajo = null;
+    document.getElementById('lienzo').classList.remove('eligiendo');
+    document.getElementById('banda').hidden = true;
+    this.pintarHoja();
+  },
+  lineaCercana(p) {
+    const C = this.construccion, radio = Vista.mmDe(12), paso = this.eligiendo ? this.eligiendo.paso : 0;
+    let mejor = null;
+    if (C) for (const [n, f] of C.geo) {
+      if (f.tipo === 'punto' || (!f.dado && !(f.paso < paso))) continue;
+      const d = G.distForma(p, f);
+      if (d <= radio && (!mejor || d < mejor.d)) mejor = { nombre: n, forma: f, d };
+    }
+    return mejor;
+  },
+
+  // ---------- Pulsaciones sobre la hoja ----------
+  tocar(p) {
+    // Asas y elementos, de arriba abajo
+    const k = Vista.mmDe(1), s = this.sel, [W, H] = this.hoja();
+    if (s.tipo === 'inst' && this.ej.instrumentos[s.k]) {
+      const c = this.ej.instrumentos[s.k], P = Inst.pose(s.k, c, W, H), a = Inst.aMundo(P, ...Inst.local(s.k, c).asa);
+      if (G.dist(p.x, p.y, a.x, a.y) <= 14 * k) return { tipo: 'asa', k: s.k };
+    }
+    if (s.tipo === 'arco') {
+      const c = this.ej.inicial.arcos[s.i], f = c && Construccion.arcoInicial(c, r => this.construccion.geo.get(r));
+      if (f) { const a = { x: f.cx + f.r * Math.cos(f.a0), y: f.cy + f.r * Math.sin(f.a0) }; if (G.dist(p.x, p.y, a.x, a.y) <= 10 * k) return { tipo: 'radio', i: s.i }; }
+    }
+    if (s.tipo === 'recta') {
+      const r = this.ej.inicial.rectas[s.i];
+      if (r && r.desde === undefined && G.dist(p.x, p.y, r.x1, r.y1) <= 10 * k) return { tipo: 'extremo', i: s.i, e: 1 };
+      if (r && r.hasta === undefined && G.dist(p.x, p.y, r.x2, r.y2) <= 10 * k) return { tipo: 'extremo', i: s.i, e: 2 };
+    }
+    let mejor = null;
+    this.ej.inicial.puntos.forEach((q, i) => { const d = G.dist(p.x, p.y, q.x, q.y); if (d <= 10 * k && (!mejor || d < mejor.d)) mejor = { tipo: 'punto', i, d }; });
+    if (mejor) return mejor;
+    const pt = r => U.esCoord(r) ? r : (this.construccion.geo.get(r) || null);
+    this.ej.inicial.rectas.forEach((r, i) => { const f = Construccion.rectaInicial(r, pt); if (f) { const d = G.distForma(p, f); if (d <= 8 * k && (!mejor || d < mejor.d)) mejor = { tipo: 'recta', i, d }; } });
+    this.ej.inicial.arcos.forEach((c, i) => { const f = Construccion.arcoInicial(c, pt); if (f) { const d = G.distForma(p, f); if (d <= 8 * k && (!mejor || d < mejor.d)) mejor = { tipo: 'arco', i, d }; } });
+    if (mejor) return mejor;
+    for (const [tipo] of INSTRUMENTOS.slice().reverse()) {
+      const c = this.ej.instrumentos[tipo];
+      if (!c) continue;
+      const L = Inst.local(tipo, c), P = Inst.pose(tipo, c, W, H);
+      if (L.compas) {
+        const o = Inst.aMundo(P, 0, 0), b = Inst.aMundo(P, ...L.bisagra), mi = Inst.aMundo(P, L.r, 0);
+        if (G.distSeg(p.x, p.y, o.x, o.y, b.x, b.y) <= 8 * k || G.distSeg(p.x, p.y, b.x, b.y, mi.x, mi.y) <= 8 * k) return { tipo: 'inst', k: tipo };
+      } else {
+        const cs = Math.cos(P.rot), sn = Math.sin(P.rot), dx = p.x - P.x, dy = p.y - P.y;
+        const loc = { x: (dx * cs + dy * sn) * P.sx, y: -dx * sn + dy * cs };
+        if (Inst.dentro(loc, L.poli)) return { tipo: 'inst', k: tipo };
+      }
+    }
+    return null;
+  },
+  alPulsar(e) {
+    const p = Vista.aMm(e.clientX, e.clientY);
+    // Elegir un punto o una línea para el inspector
+    if (this.eligiendo) {
+      const el = this.eligiendo;
+      if (el.tipo === 'punto') {
+        const t = this.ajustarPunto(p);
+        el.alElegir(t.nombre ? t.nombre : { x: U.r3(t.x), y: U.r3(t.y) });
+      } else {
+        const l = this.lineaCercana(p);
+        if (!l) { mensaje('Ahí no hay ninguna línea con nombre. Toca más cerca de una línea.'); return null; }
+        el.alElegir(l.nombre);
+      }
+      this.cancelarEleccion();
+      return null;
+    }
+    if (this.herr === 'punto') {
+      const t = this.ajustarPunto(p);
+      if (t.nombre) { mensaje(`Ya hay un punto ${t.nombre} ahí.`); this.seleccionar({ tipo: 'punto', i: this.ej.inicial.puntos.findIndex(q => (q.nombre || q.etiqueta) === t.nombre) }); return null; }
+      const n = Nombres.siguiente(this.ej, 'punto');
+      this.ej.inicial.puntos.push({ nombre: n, x: U.r3(t.x), y: U.r3(t.y) });
+      this.sel = { tipo: 'punto', i: this.ej.inicial.puntos.length - 1 };
+      this.cambio();
+      mensaje(`Punto ${n} en (${U.fmt(t.x)}, ${U.fmt(t.y)}) mm.`);
+      return null;
+    }
+    if (this.herr === 'recta' || this.herr === 'arco') {
+      const t = this.ajustarPunto(p);
+      if (!this.borrador) {
+        this.borrador = { tipo: this.herr, a: t, inicio: { x: e.clientX, y: e.clientY } };
+        mensaje(this.herr === 'recta' ? 'Ahora toca (o suelta) donde termina la recta.' : 'Ahora toca (o suelta) para fijar el radio.');
+        this.pintarHoja();
+        return { tipo: 'borrador' };
+      }
+      this.terminarBorrador(t);
+      return null;
+    }
+    // Seleccionar y arrastrar
+    const h = this.tocar(p);
+    if (!h) {
+      // Tocar la hoja vacía quita la selección de un elemento (y permite desplazar la vista)
+      if (['punto', 'recta', 'arco'].includes(this.sel.tipo)) this.seleccionar({ tipo: 'enunciado' });
+      else if (this.sel.tipo === 'inst') this.seleccionar({ tipo: 'instrumentos' });
+      return { tipo: 'pan', x: e.clientX, y: e.clientY, vx: Vista.x, vy: Vista.y };
+    }
+    if (h.tipo === 'asa') return { tipo: 'girar', k: h.k };
+    if (h.tipo === 'radio' || h.tipo === 'extremo') return h;
+    if (h.tipo === 'inst') {
+      if (!(this.sel.tipo === 'inst' && this.sel.k === h.k)) this.seleccionar({ tipo: 'inst', k: h.k });
+      const [W, H] = this.hoja(), P = Inst.pose(h.k, this.ej.instrumentos[h.k], W, H);
+      return { tipo: 'moverInst', k: h.k, dx: P.x - p.x, dy: P.y - p.y };
+    }
+    if (!(this.sel.tipo === h.tipo && this.sel.i === h.i)) this.seleccionar({ tipo: h.tipo, i: h.i });
+    if (h.tipo === 'punto') return { tipo: 'moverPunto', i: h.i };
+    if (h.tipo === 'recta') {
+      const r = this.ej.inicial.rectas[h.i];
+      if (r.desde === undefined && r.hasta === undefined) return { tipo: 'moverRecta', i: h.i, p0: p, orig: { x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2 } };
+    }
+    if (h.tipo === 'arco') {
+      const c = this.ej.inicial.arcos[h.i];
+      if (c.centro === undefined) return { tipo: 'moverArco', i: h.i, dx: c.cx - p.x, dy: c.cy - p.y };
+    }
+    return null;
+  },
+  alArrastrar(a, e) {
+    const p = Vista.aMm(e.clientX, e.clientY), ej = this.ej;
+    switch (a.tipo) {
+      case 'pan':
+        Vista.x = a.vx - (e.clientX - a.x) / Vista.esc;
+        Vista.y = a.vy - (e.clientY - a.y) / Vista.esc;
+        this.pintarHoja();
+        return;
+      case 'moverPunto': {
+        const t = this.ajustarPunto(p, { excluir: { tipo: 'punto', i: a.i }, sinLineas: true });   // sus propias rectas no lo atraen
+        this.iman_ = t.nombre ? null : (t.d !== undefined ? t : null);
+        const q = ej.inicial.puntos[a.i];
+        q.x = U.r3(t.nombre ? U.r05(p.x) : t.x); q.y = U.r3(t.nombre ? U.r05(p.y) : t.y);
+        a.movido = true;
+        break;
+      }
+      case 'extremo': {
+        const t = this.ajustarPunto(p), r = ej.inicial.rectas[a.i];
+        this.iman_ = t.d !== undefined ? t : null;
+        r['x' + a.e] = U.r3(t.x); r['y' + a.e] = U.r3(t.y);
+        a.movido = true;
+        break;
+      }
+      case 'moverRecta': {
+        const r = ej.inicial.rectas[a.i], dx = U.r05(p.x - a.p0.x), dy = U.r05(p.y - a.p0.y);
+        Object.assign(r, { x1: U.r3(a.orig.x1 + dx), y1: U.r3(a.orig.y1 + dy), x2: U.r3(a.orig.x2 + dx), y2: U.r3(a.orig.y2 + dy) });
+        a.movido = true;
+        break;
+      }
+      case 'moverArco': {
+        const c = ej.inicial.arcos[a.i], t = this.ajustarPunto({ x: p.x + a.dx, y: p.y + a.dy });
+        c.cx = U.r3(t.x); c.cy = U.r3(t.y);
+        a.movido = true;
+        break;
+      }
+      case 'radio': {
+        const c = ej.inicial.arcos[a.i], f = Construccion.arcoInicial(c, r => this.construccion.geo.get(r));
+        if (!f) return;
+        const t = this.objetivoIman(p);
+        c.radio = this.radioRedondo(G.dist(f.cx, f.cy, (t || p).x, (t || p).y), t);
+        mensaje(`Radio: ${U.fmt(c.radio)} mm`);
+        a.movido = true;
+        break;
+      }
+      case 'moverInst': {
+        const c = ej.instrumentos[a.k], [W, H] = this.hoja(), P = Inst.pose(a.k, c, W, H);
+        let x = p.x + a.dx, y = p.y + a.dy;
+        // El centro del transportador y la punta seca del compás se pegan a los puntos
+        if (a.k === 'compas' || a.k === 'transportador') { const t = this.objetivoIman({ x, y }); if (t) { x = t.x; y = t.y; } else { x = U.r05(x); y = U.r05(y); } }
+        else { x = U.r05(x); y = U.r05(y); }
+        c.x = U.r3(x); c.y = U.r3(y);
+        if (!Number.isFinite(c.giro)) c.giro = U.r3(-P.rot * 180 / Math.PI);
+        a.movido = true;
+        break;
+      }
+      case 'girar': {
+        const c = ej.instrumentos[a.k], [W, H] = this.hoja(), P = Inst.pose(a.k, c, W, H), L = Inst.local(a.k, c);
+        if (!P.fija) { c.x = U.r3(P.x); c.y = U.r3(P.y); }
+        if (a.k === 'compas') {
+          const t = this.objetivoIman(p), q = t || p;
+          c.radio = Math.min(147, Math.max(1, this.radioRedondo(G.dist(P.x, P.y, q.x, q.y), t)));
+          let g = -Math.atan2(q.y - P.y, q.x - P.x) * 180 / Math.PI;
+          c.giro = e.shiftKey ? Math.round(g / 15) * 15 : Math.round(g);
+          mensaje(`Compás: radio ${U.fmt(c.radio)} mm, giro ${c.giro}°`);
+        } else {
+          const phi = Math.atan2(p.y - P.y, p.x - P.x), rot = phi - Math.atan2(L.asa[1], P.sx * L.asa[0]);
+          let g = -rot * 180 / Math.PI;
+          g = ((g + 180) % 360 + 360) % 360 - 180;
+          c.giro = e.shiftKey ? Math.round(g / 15) * 15 : Math.round(g);
+          mensaje(`Giro: ${c.giro}° (Mayús: de 15 en 15)`);
+        }
+        a.movido = true;
+        break;
+      }
+      case 'borrador':
+        this.raton = p;
+        this.iman_ = this.objetivoIman(p);
+        this.pintarHoja();
+        return;
+    }
+    this.repintar({ inspector: false });
+  },
+  alSoltar(a, e) {
+    if (a.tipo === 'borrador') {
+      // Arrastrar y soltar también termina el trazo
+      if (Math.hypot(e.clientX - this.borrador.inicio.x, e.clientY - this.borrador.inicio.y) > 8)
+        this.terminarBorrador(this.ajustarPunto(Vista.aMm(e.clientX, e.clientY)));
+      return;
+    }
+    if (a.movido && a.tipo !== 'pan') this.alArrastrar(a, e);   // última posición, la de soltar
+    this.iman_ = null;
+    if (a.movido) { this.cambio(); }
+  },
+  terminarBorrador(t) {
+    const b = this.borrador;
+    this.borrador = null;
+    if (G.dist(b.a.x, b.a.y, t.x, t.y) < 1) { mensaje('Demasiado corto: se ha cancelado.'); this.pintarHoja(); return; }
+    if (b.tipo === 'recta') {
+      const r = {};
+      if (b.a.nombre && t.nombre) r.nombre = (b.a.nombre + t.nombre).length <= 4 && !Nombres.todos(this.ej).has(b.a.nombre + t.nombre) ? b.a.nombre + t.nombre : Nombres.siguiente(this.ej, 'recta');
+      else r.nombre = Nombres.siguiente(this.ej, 'recta');
+      if (b.a.nombre) r.desde = b.a.nombre; else { r.x1 = U.r3(b.a.x); r.y1 = U.r3(b.a.y); }
+      if (t.nombre) r.hasta = t.nombre; else { r.x2 = U.r3(t.x); r.y2 = U.r3(t.y); }
+      this.ej.inicial.rectas.push(r);
+      this.sel = { tipo: 'recta', i: this.ej.inicial.rectas.length - 1 };
+      mensaje(`Recta ${r.nombre} añadida al enunciado.`);
+    } else {
+      const c = { nombre: Nombres.siguiente(this.ej, 'arco') };
+      if (b.a.nombre) c.centro = b.a.nombre; else { c.cx = U.r3(b.a.x); c.cy = U.r3(b.a.y); }
+      c.radio = this.radioRedondo(G.dist(b.a.x, b.a.y, t.x, t.y), t.d !== undefined);
+      c.desde = 0; c.hasta = 360;
+      this.ej.inicial.arcos.push(c);
+      this.sel = { tipo: 'arco', i: this.ej.inicial.arcos.length - 1 };
+      mensaje(`Circunferencia ${c.nombre} de radio ${U.fmt(c.radio)} mm. Cambia «desde» y «hasta» para dejar solo un arco.`);
+    }
+    this.cambio();
+  },
+  alMoverRaton(e) {
+    const p = Vista.aMm(e.clientX, e.clientY);
+    this.raton = p;
+    document.getElementById('coords').textContent = `x ${U.fmt(p.x)} · y ${U.fmt(p.y)} mm`;
+    if (this.arrastre) return;
+    const lz = document.getElementById('lienzo');
+    if (this.eligiendo) {
+      if (this.eligiendo.tipo === 'punto') this.iman_ = this.objetivoIman(p);
+      else { const l = this.lineaCercana(p); this.lineaBajo = l && l.forma; this.iman_ = null; }
+      this.pintarHoja();
+      return;
+    }
+    if (this.herr !== 'sel') { this.iman_ = this.objetivoIman(p); this.pintarHoja(); return; }
+    lz.classList.toggle('sobre', !!this.tocar(p));
+  },
+  herramienta(h) {
+    this.herr = h;
+    this.borrador = null;
+    this.iman_ = null;
+    this.cancelarEleccion();
+    const lz = document.getElementById('lienzo');
+    lz.className = 'h-' + h;
+    Barra.actualizar();
+    this.pintarHoja();
+    mensaje({
+      sel: 'Seleccionar: toca un elemento para editarlo; arrastra para moverlo. Arrastra la hoja para desplazarla.',
+      punto: 'Punto: toca la hoja para añadir un punto al enunciado.',
+      recta: 'Recta: toca el primer extremo y luego el segundo. Si empieza o acaba en un punto, queda unida a él.',
+      arco: 'Arco: toca el centro y luego un punto de la circunferencia.',
+    }[h]);
+  },
+
+  // ---------- Probar en DibuTec ----------
+  probar() {
+    const d = Modelo.exportar();
+    try { Revision.validarComoApp(d); } catch (e) { aviso('DibuTec no podría abrirlo: ' + e.message); this.mostrarProblemas(); return; }
+    try { localStorage.setItem(this.CLAVE_PRUEBA, JSON.stringify(d)); } catch (_) {
+      aviso('El navegador no deja guardar datos: descarga el archivo y arrástralo sobre DibuTec.'); return;
+    }
+    const v = window.open('index.html?prueba=editor', 'dibutec-prueba');
+    if (!v) aviso('El navegador ha bloqueado la ventana nueva. Permite las ventanas emergentes para probar.');
+  },
+  descargar() {
+    const t = Modelo.texto(), nombre = Modelo.nombreArchivo();
+    const a = U.el('a', { href: URL.createObjectURL(new Blob([t], { type: 'application/json' })), download: nombre });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    aviso(`Descargado ${nombre}`);
+  },
+  copiar() {
+    const t = Modelo.texto();
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject())
+      .then(() => aviso('JSON copiado al portapapeles.'))
+      .catch(() => { this.verJSON(); aviso('No se ha podido copiar: cópialo desde la ventana.'); });
+  },
+
+  // ---------- Ventanas ----------
+  dialogo(titulo, cuerpo) {
+    const d = document.getElementById('dlg');
+    document.getElementById('dlg-titulo').textContent = titulo;
+    const c = document.getElementById('dlg-cuerpo');
+    c.textContent = '';
+    c.append(...[].concat(cuerpo));
+    if (!d.open) d.showModal();
+    return d;
+  },
+  cerrarDialogo() { const d = document.getElementById('dlg'); if (d.open) d.close(); },
+  verJSON() {
+    const ta = U.el('textarea', { id: 'json-texto', spellcheck: false });
+    ta.value = Modelo.texto();
+    const nota = U.el('p', { class: 'ayuda', text: 'Puedes editar el texto directamente y pulsar «Aplicar cambios».' });
+    this.dialogo(`JSON · ${Modelo.nombreArchivo()}`, [nota, ta, U.el('div', { class: 'botonera' },
+      U.el('button', { class: 'btn-texto', type: 'button', html: Iconos.probar + 'Aplicar cambios', onclick: () => {
+        let d;
+        try { d = JSON.parse(ta.value); Revision.validarComoApp(d); } catch (e) { aviso('No se puede aplicar: ' + e.message); return; }
+        const sel = this.sel;
+        Modelo.ej = Modelo.normalizar(d);
+        this.sel = sel;
+        if (!this.selValida()) this.sel = { tipo: 'ficha' };
+        this.cambio();
+        this.cerrarDialogo();
+        aviso('Cambios aplicados.');
+      } }),
+      U.el('button', { class: 'btn-texto', type: 'button', html: Iconos.copiar + 'Copiar', onclick: () => this.copiar() }),
+      U.el('button', { class: 'btn-texto', type: 'button', html: Iconos.guardar + 'Descargar', onclick: () => this.descargar() }))]);
+  },
+  mostrarProblemas() {
+    const l = this.revision;
+    const cuerpo = l.length ? l.map(p => U.el('button', { type: 'button', class: 'problema ' + p.nivel, onclick: () => { this.cerrarDialogo(); this.seleccionar(p.ir); } },
+      U.el('div', null, U.el('b', { text: p.nivel === 'error' ? 'Error' : 'Aviso' }), U.el('div', { text: p.texto }))))
+      : [U.el('p', { text: '✓ No se ha encontrado ningún problema. El ejercicio se puede abrir en DibuTec.' })];
+    cuerpo.unshift(U.el('p', { class: 'ayuda', text: 'Los errores impiden abrir el ejercicio o hacen que un paso no se pueda completar. Los avisos conviene mirarlos. Toca uno para ir a su sitio.' }));
+    this.dialogo('Revisión del ejercicio', cuerpo);
+  },
+  abrirDeLista() {
+    const cont = U.el('div', { class: 'ej-lista' }, U.el('p', { text: 'Cargando la lista…' }));
+    this.dialogo('Abrir un ejercicio de la carpeta', [cont]);
+    fetch('ejercicios/indice.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(async ind => {
+      const grupos = Array.isArray(ind.grupos) ? ind.grupos : [{ titulo: 'Ejercicios', ejercicios: ind.ejercicios || [] }];
+      cont.textContent = '';
+      for (const g of grupos) {
+        cont.append(U.el('h3', { text: g.titulo || 'Tema', style: 'margin:10px 0 0;font-size:15px' }));
+        for (const f of g.ejercicios || []) {
+          const b = U.el('button', { type: 'button' }, U.el('strong', { text: f }), U.el('small', { text: 'Cargando…' }));
+          cont.append(b);
+          fetch('ejercicios/' + f, { cache: 'no-cache' }).then(r => r.text()).then(t => {
+            let d = null; try { d = JSON.parse(t); } catch (_) { /* inválido */ }
+            b.firstChild.textContent = d && d.titulo ? d.titulo : f;
+            b.lastChild.textContent = d ? [f, d.nivel, d.pasos && `${d.pasos.length} pasos`].filter(Boolean).join(' · ') : `${f} · no es JSON válido`;
+            b.onclick = () => { if (this.abrirTexto(t, f)) this.cerrarDialogo(); };
+          }).catch(() => { b.lastChild.textContent = 'No se ha podido leer.'; });
+        }
+      }
+    }).catch(() => {
+      cont.textContent = '';
+      cont.append(U.el('p', { text: 'No se puede leer la carpeta «ejercicios». Pasa si el editor se abre con doble clic (file://): ábrelo desde un servidor web (GitHub Pages o «python3 -m http.server») o usa «Abrir archivo».' }));
+    });
+  },
+  ayuda() {
+    const h = (t) => U.el('h3', { text: t, style: 'margin:14px 0 4px;font-size:16px' });
+    const p = (t) => U.el('p', { html: t, style: 'margin:4px 0' });
+    this.dialogo('Cómo se usa el editor', [
+      p('Cada ejercicio guiado es un archivo <b>.json</b> con un <b>enunciado</b> (lo que ya está dibujado) y una lista de <b>pasos</b>. DibuTec comprueba cada paso solo y pasa al siguiente.'),
+      h('1 · Ficha'), p('Título, nivel, descripción, papel y mensaje final.'),
+      h('2 · Enunciado'), p('Con las herramientas <b>Punto</b>, <b>Recta</b> y <b>Arco</b> de la hoja dibuja lo que el alumnado verá al empezar. Si una recta empieza en un punto con nombre, queda unida a él. Arrastra con <b>Seleccionar</b> para mover; el <b>imán</b> pega a puntos, cruces y cuadrícula.'),
+      h('3 · Instrumentos'), p('Elige qué instrumentos aparecen al empezar y dónde. Arrástralos por la hoja y gíralos con su asa (Mayús: de 15° en 15°).'),
+      h('4 · Pasos'), p('Cada paso tiene una instrucción, una pista opcional, las herramientas que se resaltan y uno o varios <b>objetivos</b>. Usa <b>Nombrar</b> para poner nombre a lo que se consigue (por ejemplo, «arcoA») y usarlo en pasos siguientes. El botón <span style="white-space:nowrap">⌖</span> junto a cada campo permite elegir el punto o la línea tocando la hoja.'),
+      h('Construcción esperada'), p('Con el ojo activado, la hoja muestra en naranja discontinuo lo que se espera en el paso seleccionado y en gris lo de los pasos anteriores. Si algo no aparece donde esperas, revisa las condiciones.'),
+      h('Probar y guardar'), p('<b>Probar</b> abre el ejercicio en DibuTec en otra pestaña. <b>Guardar</b> descarga el .json: cópialo en la carpeta <code>ejercicios/</code> y añade su nombre a <code>ejercicios/indice.json</code>. El trabajo se guarda solo en este navegador mientras editas.'),
+      h('Atajos'), p('<kbd>V</kbd> seleccionar · <kbd>P</kbd> punto · <kbd>R</kbd> recta · <kbd>C</kbd> arco · <kbd>Supr</kbd> borrar · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> deshacer/rehacer · <kbd>Ctrl+S</kbd> guardar · <kbd>Esc</kbd> cancelar · rueda: zoom.'),
+    ]);
+  },
+};
+
+/* =====================================================================
+   Barras de botones
+   ===================================================================== */
+const Barra = {
+  b: {},
+  boton(id, icono, titulo, alPulsar, { texto, clase = '', opc = false } = {}) {
+    const b = U.el('button', { type: 'button', class: 'btn ' + clase, title: titulo, 'aria-label': titulo, onclick: alPulsar,
+      html: Iconos[icono] + (texto ? `<span class="txt${opc ? ' opc' : ''}">${texto}</span>` : '') });
+    this.b[id] = b;
+    return b;
+  },
+  construir() {
+    const ac = document.getElementById('acciones'), sep = () => U.el('span', { class: 'sep' });
+    ac.append(
+      this.boton('nuevo', 'nuevo', 'Ejercicio nuevo', () => {
+        if (!confirm('¿Empezar un ejercicio nuevo? Lo que no hayas guardado se perderá (puedes deshacer).')) return;
+        const antes = JSON.stringify(Modelo.ej);
+        Editor.abrir(Modelo.nuevo(), { avisar: false });
+        Editor.historial = [antes];
+        Barra.actualizar();
+      }, { texto: 'Nuevo', opc: true }),
+      this.boton('abrir', 'abrir', 'Abrir un archivo .json', () => document.getElementById('abrir-archivo').click(), { texto: 'Abrir', opc: true }),
+      this.boton('lista', 'lista', 'Abrir un ejercicio de la carpeta «ejercicios»', () => Editor.abrirDeLista(), { texto: 'De la lista', opc: true }),
+      this.boton('guardar', 'guardar', 'Descargar el archivo .json (Ctrl+S)', () => Editor.descargar(), { texto: 'Guardar' }),
+      this.boton('json', 'json', 'Ver y editar el JSON', () => Editor.verJSON(), { texto: 'JSON', opc: true }),
+      sep(),
+      this.boton('deshacer', 'deshacer', 'Deshacer (Ctrl+Z)', () => Editor.deshacer()),
+      this.boton('rehacer', 'rehacer', 'Rehacer (Ctrl+Y)', () => Editor.rehacer()),
+      this.boton('ayuda', 'ayuda', 'Cómo se usa', () => Editor.ayuda()),
+      sep(),
+      this.boton('probar', 'probar', 'Probar el ejercicio en DibuTec', () => Editor.probar(), { texto: 'Probar en DibuTec', clase: 'primario' }),
+    );
+    const he = document.getElementById('herr');
+    he.append(
+      this.boton('h-sel', 'seleccionar', 'Seleccionar y mover (V)', () => Editor.herramienta('sel'), { texto: 'Seleccionar', opc: true }),
+      this.boton('h-punto', 'punto', 'Añadir un punto al enunciado (P)', () => Editor.herramienta('punto'), { texto: 'Punto', opc: true }),
+      this.boton('h-recta', 'recta', 'Añadir una recta al enunciado (R)', () => Editor.herramienta('recta'), { texto: 'Recta', opc: true }),
+      this.boton('h-arco', 'arco', 'Añadir un arco o circunferencia al enunciado (C)', () => Editor.herramienta('arco'), { texto: 'Arco', opc: true }),
+      sep(),
+      this.boton('iman', 'iman', 'Imán: pegar a puntos, cruces y cuadrícula', () => { Editor.iman = !Editor.iman; Barra.actualizar(); }),
+      this.boton('ver', 'ojo', 'Ver la construcción esperada de los pasos', () => { Editor.verConstruccion = !Editor.verConstruccion; Barra.actualizar(); Editor.pintarHoja(); }),
+      U.el('span', { class: 'espacio' }),
+      this.boton('zmenos', 'zoomMenos', 'Alejar (−)', () => Vista.zoom(1 / 1.25)),
+      this.boton('zajustar', 'ajustar', 'Ver la hoja entera (0)', () => Vista.ajustar()),
+      this.boton('zmas', 'zoomMas', 'Acercar (+)', () => Vista.zoom(1.25)),
+    );
+    document.getElementById('dlg-cerrar').innerHTML = Iconos.cerrar;
+  },
+  actualizar() {
+    for (const h of ['sel', 'punto', 'recta', 'arco']) this.b['h-' + h].setAttribute('aria-pressed', Editor.herr === h && !Editor.eligiendo);
+    this.b.iman.setAttribute('aria-pressed', Editor.iman);
+    this.b.ver.setAttribute('aria-pressed', Editor.verConstruccion);
+    this.b.deshacer.disabled = !Editor.historial.length;
+    this.b.rehacer.disabled = !Editor.futuro.length;
+  },
+};
+
+/* =====================================================================
+   Esquema: ficha, enunciado, instrumentos, textos, pasos y final
+   ===================================================================== */
+const Esquema = {
+  arrastrado: null,
+  pintar() {
+    const c = document.getElementById('esquema'), ej = Editor.ej, s = Editor.sel;
+    const foco = document.activeElement && c.contains(document.activeElement) ? document.activeElement.dataset.clave : null;
+    c.textContent = '';
+    const marcas = ir => {
+      const l = Editor.revision.filter(p => ir(p.ir));
+      return l.some(p => p.nivel === 'error') ? U.el('span', { class: 'marca-error', title: 'Tiene errores' }) : l.length ? U.el('span', { class: 'marca-aviso', title: 'Tiene avisos' }) : null;
+    };
+    const item = (tipo, icono, titulo, sub, sel, filtro) => U.el('button', { type: 'button', class: 'esq-item' + (sel ? ' sel' : ''), 'data-clave': tipo, onclick: () => Editor.seleccionar({ tipo }) },
+      U.el('span', { html: Iconos[icono] }), U.el('span', { class: 't', style: 'flex:1' }, U.el('b', { text: titulo }), U.el('small', { text: sub })), marcas(filtro));
+    const ini = ej.inicial, nIni = ini.puntos.length + ini.rectas.length + ini.arcos.length, nInst = Object.keys(ej.instrumentos).length;
+    c.append(U.el('div', { class: 'esq-titulo', text: 'Ejercicio' }),
+      item('ficha', 'ficha', ej.titulo || 'Sin título', [ej.nivel, Modelo.nombreArchivo()].filter(Boolean).join(' · '), s.tipo === 'ficha', ir => ir.tipo === 'ficha'),
+      item('enunciado', 'enunciado', 'Enunciado', nIni ? `${ini.puntos.length} puntos · ${ini.rectas.length} rectas · ${ini.arcos.length} arcos` : 'Nada dibujado todavía', ['enunciado', 'punto', 'recta', 'arco'].includes(s.tipo), ir => ['punto', 'recta', 'arco'].includes(ir.tipo)),
+      item('instrumentos', 'regla', 'Instrumentos al empezar', nInst ? Object.keys(ej.instrumentos).map(k => NOMBRE_INST[k] || k).join(', ') : 'Ninguno a la vista', ['instrumentos', 'inst'].includes(s.tipo), () => false),
+      item('textos', 'textos', 'Cómo se llama cada cosa', `${Object.keys(ej.textos).length} textos para los mensajes`, s.tipo === 'textos', ir => ir.tipo === 'textos'));
+    c.append(U.el('div', { class: 'esq-titulo' }, U.el('span', { text: `Pasos (${ej.pasos.length})` })));
+    ej.pasos.forEach((p, i) => {
+      const b = U.el('button', { type: 'button', class: 'paso-item' + (s.tipo === 'paso' && s.i === i ? ' sel' : ''), draggable: true, 'data-clave': 'paso' + i,
+        onclick: () => Editor.seleccionar({ tipo: 'paso', i }),
+        ondragstart: e => { this.arrastrado = i; b.classList.add('arrastrado'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(i)); } catch (_) { /* */ } },
+        ondragend: () => { this.arrastrado = null; b.classList.remove('arrastrado'); c.querySelectorAll('.destino').forEach(x => x.classList.remove('destino')); },
+        ondragover: e => { if (this.arrastrado === null) return; e.preventDefault(); c.querySelectorAll('.destino').forEach(x => x.classList.remove('destino')); b.classList.add('destino'); },
+        ondrop: e => { e.preventDefault(); if (this.arrastrado !== null) Editor.moverPaso(this.arrastrado, i > this.arrastrado ? i : i); },
+      },
+        U.el('span', { class: 'num', text: i + 1 }),
+        U.el('span', { class: 't' },
+          U.el('span', { class: 'texto' + (p.texto.trim() ? '' : ' vacio'), text: p.texto.trim() || 'Sin instrucción' }),
+          U.el('span', { class: 'tags' }, p.objetivos.map(o => U.el('span', { class: 'tag tag-obj', text: OBJ[o.tipo] ? OBJ[o.tipo].corto : o.tipo })),
+            [].concat(p.objetivos.flatMap(o => o.nombrar === undefined ? [] : [].concat(o.nombrar))).map(n => U.el('span', { class: 'tag', text: '→ ' + n })))),
+        marcas(ir => ir.tipo === 'paso' && ir.i === i));
+      c.append(b);
+    });
+    c.append(U.el('button', { type: 'button', class: 'anadir', text: '+ Añadir un paso', onclick: () => Editor.anadirPaso() }));
+    c.append(U.el('div', { class: 'esq-titulo', text: 'Al terminar' }),
+      item('final', 'final', 'Mensaje final', ej.final ? ej.final.slice(0, 60) + (ej.final.length > 60 ? '…' : '') : 'Mensaje por defecto', s.tipo === 'final', () => false));
+    if (foco) { const f = c.querySelector(`[data-clave="${foco}"]`); if (f) f.focus(); }
+  },
+};
+
+/* =====================================================================
+   Inspector: propiedades de lo seleccionado
+   ===================================================================== */
+const Inspector = {
+  pintar() {
+    const c = document.getElementById('inspector'), s = Editor.sel;
+    const scroll = c.scrollTop;
+    c.textContent = '';
+    const f = { ficha: this.ficha, enunciado: this.enunciado, punto: this.punto, recta: this.recta, arco: this.arco,
+      instrumentos: this.instrumentos, inst: this.instrumentos, textos: this.textos, final: this.final, paso: this.paso }[s.tipo];
+    if (f) f.call(this, c, s);
+    c.scrollTop = scroll;
+  },
+  // ---------- Piezas ----------
+  fila(etiqueta, control, ayuda) {
+    const id = 'c' + Math.random().toString(36).slice(2, 8);
+    if (control.tagName && ['INPUT', 'SELECT', 'TEXTAREA'].includes(control.tagName)) control.id = id;
+    return U.el('div', { class: 'fila' }, U.el('label', { for: id, text: etiqueta }), control, ayuda ? U.el('div', { class: 'ayuda', text: ayuda }) : null);
+  },
+  texto(obj, k, { area = false, ph = '', clave = '', alCambiar, inspector = false } = {}) {
+    const e = U.el(area ? 'textarea' : 'input', { type: area ? undefined : 'text', placeholder: ph });
+    e.value = obj[k] == null ? '' : obj[k];
+    e.addEventListener('input', () => {
+      if (alCambiar) alCambiar(e.value); else obj[k] = e.value;
+      Editor.cambio(clave || k, { inspector });
+    });
+    return e;
+  },
+  numero(obj, k, { clave, paso = 'any', min, opcional = true, alCambiar } = {}) {
+    const e = U.el('input', { type: 'number', step: paso, min, inputmode: 'decimal' });
+    e.value = Number.isFinite(obj[k]) ? obj[k] : '';
+    e.addEventListener('input', () => {
+      const n = U.num(e.value);
+      if (n === null) { if (opcional) delete obj[k]; } else obj[k] = n;
+      if (alCambiar) alCambiar(n);
+      else Editor.cambio(clave || k, { inspector: false });
+    });
+    return e;
+  },
+  selector(obj, k, ops, { clave, vacio, alCambiar, inspector = true } = {}) {
+    const e = U.el('select');
+    if (vacio) e.append(U.el('option', { value: '', text: vacio }));
+    for (const [v, t] of ops) e.append(U.el('option', { value: String(v), text: t }));
+    e.value = obj[k] === undefined ? '' : String(obj[k]);
+    e.addEventListener('change', () => {
+      const op = ops.find(o => String(o[0]) === e.value);
+      if (!op) delete obj[k]; else obj[k] = op[0];
+      if (alCambiar) alCambiar();
+      Editor.cambio(clave || k, { inspector });
+    });
+    return e;
+  },
+  casilla(obj, k, etiqueta, { alCambiar, inspector = false, quitarSiNo = true } = {}) {
+    const e = U.el('input', { type: 'checkbox' });
+    e.checked = !!obj[k];
+    e.addEventListener('change', () => {
+      if (e.checked) obj[k] = true; else if (quitarSiNo) delete obj[k]; else obj[k] = false;
+      if (alCambiar) alCambiar(e.checked);
+      Editor.cambio(null, { inspector });
+    });
+    const id = 'c' + Math.random().toString(36).slice(2, 8);
+    e.id = id;
+    return U.el('div', { class: 'fila linea' }, U.el('label', { for: id, text: etiqueta }), e);
+  },
+  datalist(id, nombres) {
+    let dl = document.getElementById(id);
+    if (!dl) { dl = U.el('datalist', { id }); document.body.append(dl); }
+    dl.textContent = '';
+    for (const [n, info] of nombres) dl.append(U.el('option', { value: n, label: `${info.tipo} · ${info.origen}` }));
+    return id;
+  },
+  // Campo de nombre que renombra las referencias al cambiar
+  nombre(obj, k, tipo) {
+    const e = U.el('input', { type: 'text', maxlength: 12 });
+    e.value = obj[k] || '';
+    let previo = obj[k] || '';
+    e.addEventListener('input', () => {
+      const v = e.value.trim();
+      const usado = v && v !== previo && Nombres.todos(Editor.ej).has(v);
+      e.classList.toggle('mal', !!usado);
+      if (usado) { mensaje(`Ya hay algo que se llama «${v}».`); return; }
+      if (v) { Editor.renombrar(previo, v); obj[k] = v; previo = v; } else delete obj[k];
+      if (tipo === 'punto' && obj.etiqueta === undefined) { /* la etiqueta es el nombre */ }
+      Editor.cambio('nombre', { inspector: false });
+    });
+    return e;
+  },
+  btnMini(icono, titulo, alPulsar, { peligro = false, deshab = false, pulsado } = {}) {
+    return U.el('button', { type: 'button', class: 'mini' + (peligro ? ' peligro' : ''), title: titulo, 'aria-label': titulo, html: Iconos[icono] || icono, onclick: alPulsar, disabled: deshab, 'aria-pressed': pulsado === undefined ? undefined : String(pulsado) });
+  },
+
+  // ---------- Ficha ----------
+  ficha(c) {
+    const ej = Editor.ej;
+    c.append(U.el('h2', { html: 'Ficha del ejercicio' }),
+      U.el('p', { class: 'ayuda', text: 'Lo que se ve en la lista de ejercicios de DibuTec.' }));
+    const idIn = this.texto(ej, 'id', { ph: U.slug(ej.titulo) || 'mi-ejercicio' });
+    c.append(this.fila('Título', this.texto(ej, 'titulo', { alCambiar: v => { ej.titulo = v; idIn.placeholder = U.slug(v) || 'mi-ejercicio'; } })),
+      this.fila('Nivel', (() => {
+        const e = this.texto(ej, 'nivel', { ph: '1.º ESO' });
+        e.setAttribute('list', this.datalist('dl-niveles', [['1.º ESO', { tipo: 'nivel', origen: 'ESO' }], ['2.º ESO', { tipo: 'nivel', origen: 'ESO' }], ['3.º ESO', { tipo: 'nivel', origen: 'ESO' }], ['4.º ESO', { tipo: 'nivel', origen: 'ESO' }]]));
+        return e;
+      })()),
+      this.fila('Descripción', this.texto(ej, 'descripcion', { area: true, ph: 'Texto corto para la lista de ejercicios.' })),
+      this.fila('Identificador y nombre del archivo', idIn, `Se guardará como ${Modelo.nombreArchivo()}. Letras, números y guiones; si lo dejas vacío, se saca del título.`));
+    // Papel
+    c.append(U.el('h3', { text: 'Papel' }));
+    const pa = ej.papel;
+    const repintarPapel = () => { Vista.ajustar(); };
+    c.append(this.fila('Tipo de papel', this.selector(pa, 'papel', [['blanco', 'En blanco'], ['cuadriculado', 'Cuadriculado'], ['milimetrado', 'Milimetrado'], ['isometrico', 'Isométrico']], { vacio: 'El que tenga cada persona', alCambiar: repintarPapel })),
+      this.fila('Hoja', this.selector(pa, 'hoja', [['A4-h', 'A4 horizontal'], ['A4-v', 'A4 vertical'], ['A3-h', 'A3 horizontal'], ['A3-v', 'A3 vertical']], { vacio: 'La que tenga cada persona (A4 horizontal)', alCambiar: repintarPapel })));
+    if (pa.papel === 'cuadriculado') c.append(this.fila('Cuadros', this.selector(pa, 'cuadro', [[4, '4 mm'], [5, '5 mm'], [10, '10 mm']], { vacio: 'Sin indicar (5 mm)', alCambiar: repintarPapel })));
+    if (pa.papel === 'isometrico') c.append(this.fila('Triángulos', this.selector(pa, 'triangulo', [[5, '5 mm'], [10, '10 mm']], { vacio: 'Sin indicar (5 mm)', alCambiar: repintarPapel })));
+    const mas = U.el('details', { class: 'mas' }, U.el('summary', { text: 'Más opciones del papel' }),
+      this.fila('Color de las líneas', this.selector(pa, 'colorLineas', [['azul', 'Azul'], ['gris', 'Gris'], ['verde', 'Verde']], { vacio: 'Sin indicar' })),
+      this.fila('Color del papel', this.selector(pa, 'colorPapel', [['blanco', 'Blanco'], ['crema', 'Crema']], { vacio: 'Sin indicar' })),
+      this.fila('Margen', this.selector(pa, 'margen', [[true, 'Con margen'], [false, 'Sin margen']], { vacio: 'Sin indicar' })),
+      this.fila('Imán a la cuadrícula', this.selector(pa, 'imanCuadricula', [[true, 'Activado'], [false, 'Desactivado']], { vacio: 'Sin indicar' })),
+      U.el('p', { class: 'ayuda', text: 'Lo que no se indica se queda como lo tenga cada persona en su configuración. Al salir del ejercicio, DibuTec recupera su papel.' }));
+    if (['colorLineas', 'colorPapel', 'margen', 'imanCuadricula'].some(k => pa[k] !== undefined)) mas.open = true;
+    c.append(mas);
+    c.append(U.el('h3', { text: 'Para la lista de ejercicios' }),
+      U.el('p', { class: 'ayuda', html: `Copia <b>${U.esc(Modelo.nombreArchivo())}</b> en la carpeta <code>ejercicios/</code> y añade su nombre a un tema de <code>ejercicios/indice.json</code>:` }),
+      U.el('pre', { class: 'cod', text: `"ejercicios": [..., "${Modelo.nombreArchivo()}"]` }));
+  },
+
+  // ---------- Enunciado ----------
+  enunciado(c) {
+    const ini = Editor.ej.inicial;
+    c.append(U.el('h2', { text: 'Enunciado' }),
+      U.el('p', { class: 'ayuda', text: 'Lo que ya está dibujado al empezar, en azul y sin poder borrarse. Dibújalo en la hoja con las herramientas Punto, Recta y Arco, o añádelo aquí.' }),
+      U.el('div', { class: 'botonera' },
+        U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.punto + 'Punto', onclick: () => Editor.herramienta('punto') }),
+        U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.recta + 'Recta', onclick: () => Editor.herramienta('recta') }),
+        U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.arco + 'Arco', onclick: () => Editor.herramienta('arco') })));
+    const lista = (titulo, tipo, desc) => {
+      c.append(U.el('h3', { text: `${titulo} (${ini[tipo + 's'].length})` }));
+      if (!ini[tipo + 's'].length) c.append(U.el('p', { class: 'vacio-insp', text: 'Ninguno.' }));
+      ini[tipo + 's'].forEach((o, i) => c.append(U.el('button', { type: 'button', class: 'esq-item', onclick: () => Editor.seleccionar({ tipo, i }) },
+        U.el('span', { html: Iconos[tipo] }), U.el('span', { class: 't' }, U.el('b', { text: o.nombre || o.etiqueta || '(sin nombre)' }), U.el('small', { text: desc(o) })))));
+    };
+    const ref = (v, x, y) => typeof v === 'string' ? v : Number.isFinite(x) ? `(${U.fmt(x)}, ${U.fmt(y)})` : '?';
+    lista('Puntos', 'punto', p => `x ${U.fmt(p.x)} · y ${U.fmt(p.y)} mm`);
+    lista('Rectas', 'recta', r => `de ${ref(r.desde, r.x1, r.y1)} a ${ref(r.hasta, r.x2, r.y2)}`);
+    lista('Arcos y circunferencias', 'arco', a => `centro ${ref(a.centro, a.cx, a.cy)} · r ${U.fmt(a.radio || 0)} mm`);
+  },
+  cabElemento(c, titulo, tipo, s) {
+    c.append(U.el('div', { style: 'display:flex;align-items:center;gap:8px' },
+      U.el('button', { type: 'button', class: 'mini', title: 'Volver al enunciado', html: '‹', onclick: () => Editor.seleccionar({ tipo: 'enunciado' }) }),
+      U.el('h2', { text: titulo, style: 'flex:1' }),
+      this.btnMini('papelera', 'Borrar (Supr)', () => Editor.eliminarSeleccion(), { peligro: true })));
+  },
+  punto(c, s) {
+    const p = Editor.ej.inicial.puntos[s.i];
+    this.cabElemento(c, `Punto ${p.nombre || ''}`, 'punto', s);
+    c.append(this.fila('Nombre', this.nombre(p, 'nombre', 'punto'), 'Es también su etiqueta en la hoja. Si lo cambias, cambia en todos los pasos.'),
+      U.el('div', { class: 'dos' },
+        U.el('label', null, 'x (mm)', this.numero(p, 'x', { opcional: false })),
+        U.el('label', null, 'y (mm)', this.numero(p, 'y', { opcional: false }))),
+      this.fila('Etiqueta distinta del nombre (opcional)', this.texto(p, 'etiqueta', { ph: p.nombre || '', alCambiar: v => { if (v.trim()) p.etiqueta = v.slice(0, 6); else delete p.etiqueta; } }), 'Hasta 6 letras.'),
+      U.el('p', { class: 'ayuda', text: 'Medido desde la esquina superior izquierda de la hoja. Arrastra el punto en la hoja para moverlo.' }));
+  },
+  extremo(obj, kRef, kx, ky, etiqueta) {
+    const v = obj[kRef] !== undefined ? obj[kRef] : (Number.isFinite(obj[kx]) ? { x: obj[kx], y: obj[ky] } : '');
+    return this.fila(etiqueta, this.ref(v, 'punto', -1, nv => {
+      delete obj[kRef]; delete obj[kx]; delete obj[ky];
+      if (U.esCoord(nv)) { obj[kx] = nv.x; obj[ky] = nv.y; } else if (nv !== '') obj[kRef] = nv;
+      Editor.cambio('extremo-' + kRef, { inspector: false });
+    }));
+  },
+  recta(c, s) {
+    const r = Editor.ej.inicial.rectas[s.i];
+    this.cabElemento(c, `Recta ${r.nombre || ''}`, 'recta', s);
+    c.append(this.fila('Nombre', this.nombre(r, 'nombre', 'recta'), 'Para usarla en los pasos (por ejemplo, «paralela a r»).'),
+      this.extremo(r, 'desde', 'x1', 'y1', 'Desde'),
+      this.extremo(r, 'hasta', 'x2', 'y2', 'Hasta'),
+      U.el('p', { class: 'ayuda', text: 'Cada extremo puede ser un punto con nombre (la recta lo sigue si se mueve) o unas coordenadas.' }));
+  },
+  arco(c, s) {
+    const a = Editor.ej.inicial.arcos[s.i];
+    this.cabElemento(c, `Arco ${a.nombre || ''}`, 'arco', s);
+    c.append(this.fila('Nombre', this.nombre(a, 'nombre', 'arco')),
+      this.extremo(a, 'centro', 'cx', 'cy', 'Centro'),
+      this.fila('Radio (mm)', this.numero(a, 'radio', { opcional: false, min: 0 })),
+      U.el('div', { class: 'dos' },
+        U.el('label', null, 'Desde (°)', this.numero(a, 'desde')),
+        U.el('label', null, 'Hasta (°)', this.numero(a, 'hasta'))),
+      U.el('div', { class: 'botonera' }, U.el('button', { type: 'button', class: 'btn-texto', text: 'Circunferencia completa', onclick: () => { a.desde = 0; a.hasta = 360; Editor.cambio(); } })),
+      U.el('p', { class: 'ayuda', text: 'Los grados se miden en sentido contrario a las agujas del reloj, como en el transportador (0° hacia la derecha). De 0 a 360, circunferencia completa. Arrastra el asa del radio en la hoja.' }));
+  },
+
+  // ---------- Instrumentos ----------
+  instrumentos(c, s) {
+    const ins = Editor.ej.instrumentos;
+    c.append(U.el('h2', { text: 'Instrumentos al empezar' }),
+      U.el('p', { class: 'ayuda', text: 'Los marcados aparecen al empezar el ejercicio; los demás se guardan. Sin posición fija, DibuTec los coloca a la vista. Arrástralos en la hoja y gíralos con su asa.' }));
+    for (const [k, nombre] of INSTRUMENTOS) {
+      const c0 = ins[k], abierto = s.tipo === 'inst' && s.k === k;
+      const caja = U.el('div', { class: 'obj', style: `border-left-color:${c0 ? '#1fa646' : 'var(--borde)'}` });
+      const cab = U.el('div', { class: 'obj-cab' });
+      const chk = U.el('input', { type: 'checkbox', checked: !!c0, 'aria-label': `${nombre} a la vista` });
+      chk.addEventListener('change', () => {
+        if (chk.checked) { ins[k] = {}; Editor.sel = { tipo: 'inst', k }; } else { delete ins[k]; Editor.sel = { tipo: 'instrumentos' }; }
+        Editor.cambio();
+      });
+      cab.append(chk, U.el('span', { html: Iconos[k], style: 'width:22px;height:22px;display:inline-flex' }),
+        U.el('b', { text: nombre, style: 'flex:1;cursor:pointer', onclick: () => { if (c0) Editor.seleccionar({ tipo: 'inst', k }); } }));
+      caja.append(cab);
+      if (c0) {
+        const fija = Number.isFinite(c0.x) && Number.isFinite(c0.y);
+        const [W, H] = Editor.hoja();
+        caja.append(this.casilla({ v: fija }, 'v', 'Posición fija', { inspector: true, alCambiar: on => {
+          if (on) { const P = Inst.pose(k, c0, W, H); c0.x = U.r3(P.x); c0.y = U.r3(P.y); if (!Number.isFinite(c0.giro)) c0.giro = 0; Editor.sel = { tipo: 'inst', k }; }
+          else { delete c0.x; delete c0.y; delete c0.giro; }
+        } }));
+        if (fija) caja.append(U.el('div', { class: 'tres' },
+          U.el('label', null, 'x (mm)', this.numero(c0, 'x', { clave: k + 'x', opcional: false })),
+          U.el('label', null, 'y (mm)', this.numero(c0, 'y', { clave: k + 'y', opcional: false })),
+          U.el('label', null, 'Giro (°)', this.numero(c0, 'giro', { clave: k + 'g' }))));
+        if (k === 'compas') caja.append(this.fila('Abertura del compás (mm)', this.numero(c0, 'radio', { clave: 'compasr', min: 1 }), 'Sin indicar, 40 mm. Como mucho, 147 mm.'));
+        if (k === 'escuadra' || k === 'cartabon') caja.append(this.casilla(c0, 'volteado', 'Empieza dado la vuelta'));
+        if (abierto) caja.style.boxShadow = '0 0 0 2px var(--paso)';
+        const ayudas = { regla: 'Origen: esquina del canto graduado, junto al 0.', escuadra: 'Origen: el ángulo recto; los catetos van hacia la derecha y hacia arriba.', cartabon: 'Origen: el ángulo recto; el cateto mayor va hacia arriba.', compas: 'Origen: la punta seca; el giro es la dirección de la mina.', transportador: 'Origen: el centro de la línea de 0°-180°.' };
+        caja.append(U.el('p', { class: 'ayuda', text: ayudas[k] }));
+      }
+      c.append(caja);
+    }
+    c.append(U.el('p', { class: 'ayuda', text: 'Aquí se dibujan con los tamaños por defecto de DibuTec (regla de 30 cm, escuadra de 16 cm, cartabón de 23 cm y transportador de 13 cm). Cada persona puede tener otros tamaños en su configuración.' }));
+  },
+
+  // ---------- Textos ----------
+  textos(c) {
+    const ej = Editor.ej, t = ej.textos;
+    c.append(U.el('h2', { text: 'Cómo se llama cada cosa' }),
+      U.el('p', { class: 'ayuda', text: 'En los mensajes de ayuda, DibuTec llama a los elementos por su nombre («arcoA»). Aquí puedes darles un nombre más claro, como «el primer arco».' }));
+    const tabla = U.el('div', { class: 'tabla-textos' });
+    for (const k of Object.keys(t)) {
+      const inp = U.el('input', { type: 'text', value: t[k] });
+      inp.addEventListener('input', () => { t[k] = inp.value; Editor.cambio('texto-' + k, { inspector: false }); });
+      tabla.append(U.el('b', { text: k, style: 'overflow:hidden;text-overflow:ellipsis' }), inp,
+        this.btnMini('papelera', `Quitar el texto de ${k}`, () => { delete t[k]; Editor.cambio(); }, { peligro: true }));
+    }
+    c.append(tabla);
+    const sinTexto = [...Nombres.todos(ej)].filter(([n, i]) => t[n] === undefined && !(i.tipo === 'punto'));
+    if (sinTexto.length) {
+      c.append(U.el('h3', { text: 'Añadir un texto' }));
+      const sel = U.el('select', null, sinTexto.map(([n, i]) => U.el('option', { value: n, text: `${n} (${i.tipo}, ${i.origen})` })));
+      const sug = n => {
+        const i = Nombres.todos(ej).get(n);
+        return i.tipo === 'recta' ? (n.length === 2 && n === n.toUpperCase() ? `el segmento ${n}` : `la recta ${n}`) : i.tipo === 'arco' ? 'el arco' : `el punto ${n}`;
+      };
+      c.append(U.el('div', { class: 'anadir-cond' }, sel, U.el('button', { type: 'button', class: 'btn-texto', text: 'Añadir', onclick: () => { t[sel.value] = sug(sel.value); Editor.cambio(); } })));
+    }
+    c.append(U.el('p', { class: 'ayuda', text: 'Los puntos ya se nombran solos («el punto A»).' }));
+  },
+  final(c) {
+    c.append(U.el('h2', { text: 'Mensaje final' }),
+      this.fila('Felicitación al terminar', this.texto(Editor.ej, 'final', { area: true, ph: '¡Has terminado el ejercicio! Muy bien.' }), 'Se muestra en la barra de estado de DibuTec al completar el último paso.'));
+  },
+
+  // ---------- Paso ----------
+  paso(c, s) {
+    const ej = Editor.ej, p = ej.pasos[s.i], N = ej.pasos.length;
+    c.append(U.el('div', { style: 'display:flex;align-items:center;gap:6px' },
+      U.el('h2', { style: 'flex:1' }, U.el('span', { class: 'num', text: s.i + 1 }), `Paso ${s.i + 1} de ${N}`),
+      this.btnMini('arriba', 'Subir el paso', () => Editor.moverPaso(s.i, s.i - 1), { deshab: s.i === 0 }),
+      this.btnMini('abajo', 'Bajar el paso', () => Editor.moverPaso(s.i, s.i + 1), { deshab: s.i === N - 1 }),
+      this.btnMini('duplicar', 'Duplicar el paso', () => Editor.duplicarPaso(s.i)),
+      this.btnMini('papelera', 'Borrar el paso', () => Editor.borrarPaso(s.i), { peligro: true, deshab: N <= 1 })));
+    // Vista previa de la tarjeta
+    const vt = U.el('div', { class: 'vista-tarjeta' },
+      U.el('div', { class: 'vt-cab' }, U.el('span', { text: ej.titulo || 'Ejercicio' }), U.el('span', { text: `Paso ${s.i + 1} de ${N}` })),
+      U.el('div', { class: 'vt-texto', text: p.texto || '…' }),
+      p.pista ? U.el('div', { class: 'vt-pista', text: '💡 ' + p.pista }) : null);
+    const actualizarVista = () => {
+      vt.querySelector('.vt-texto').textContent = p.texto || '…';
+      let pi = vt.querySelector('.vt-pista');
+      if (p.pista) { if (!pi) { pi = U.el('div', { class: 'vt-pista' }); vt.append(pi); } pi.textContent = '💡 ' + p.pista; } else if (pi) pi.remove();
+    };
+    c.append(this.fila('Instrucción', this.texto(p, 'texto', { area: true, clave: 'texto' + s.i, ph: 'Por ejemplo: «Con el compás pinchado en A, traza un arco…»', alCambiar: v => { p.texto = v; actualizarVista(); } })),
+      this.fila('Pista (opcional)', this.texto(p, 'pista', { area: true, clave: 'pista' + s.i, ph: 'Se muestra al pulsar «Pista».', alCambiar: v => { if (v) p.pista = v; else delete p.pista; actualizarVista(); } })),
+      U.el('div', { class: 'ayuda', text: 'Así se verá la tarjeta en DibuTec:' }), vt);
+    // Herramientas sugeridas
+    const herr = U.el('div', { class: 'chips' });
+    for (const [id, nombre] of HERRAMIENTAS) {
+      const on = Array.isArray(p.herramientas) && p.herramientas.includes(id);
+      herr.append(U.el('button', { type: 'button', class: 'chip', 'aria-pressed': String(on), html: Iconos[id] + nombre, onclick: e => {
+        const l = Array.isArray(p.herramientas) ? p.herramientas : (p.herramientas = []);
+        const ya = l.includes(id);
+        if (ya) l.splice(l.indexOf(id), 1); else l.push(id);
+        p.herramientas = HERRAMIENTAS.map(h => h[0]).filter(h => l.includes(h)).concat(l.filter(h => !HERRAMIENTAS.some(x => x[0] === h)));
+        if (!p.herramientas.length) delete p.herramientas;
+        e.currentTarget.setAttribute('aria-pressed', String(!ya));
+        Editor.cambio(null, { inspector: false });
+      } }));
+    }
+    c.append(U.el('h3', { text: 'Herramientas que se resaltan' }), herr);
+    // Objetivos
+    c.append(U.el('h3', { text: p.objetivos.length > 1 ? `Objetivos (se tienen que cumplir todos)` : 'Objetivo' }));
+    p.objetivos.forEach((o, j) => c.append(this.objetivo(p, o, j, s.i)));
+    c.append(U.el('button', { type: 'button', class: 'anadir', text: '+ Añadir otro objetivo a este paso', onclick: () => { p.objetivos.push({ tipo: 'punto' }); Editor.cambio(); } }));
+    // Problemas de este paso
+    const probs = Editor.revision.filter(r => r.ir.tipo === 'paso' && r.ir.i === s.i);
+    if (probs.length) {
+      c.append(U.el('h3', { text: 'Revisión' }));
+      for (const r of probs) c.append(U.el('div', { class: 'problema ' + r.nivel }, U.el('div', null, U.el('b', { text: r.nivel === 'error' ? 'Error' : 'Aviso' }), U.el('div', { text: r.texto }))));
+    }
+    const disp = Nombres.disponibles(ej, s.i);
+    c.append(U.el('h3', { text: 'Nombres que se pueden usar aquí' }),
+      U.el('div', { class: 'tags' }, disp.size ? [...disp].map(([n, i]) => U.el('span', { class: 'tag', title: `${i.tipo} · ${i.origen}`, text: `${n} · ${i.tipo}` })) : U.el('span', { class: 'ayuda', text: 'Ninguno todavía.' })));
+  },
+  objetivo(p, o, j, iPaso) {
+    const def = OBJ[o.tipo], caja = U.el('div', { class: 'obj' });
+    const tipoSel = U.el('select', { 'aria-label': 'Tipo de objetivo' }, Object.entries(OBJ).map(([k, d]) => U.el('option', { value: k, text: d.nombre })));
+    if (!def) tipoSel.prepend(U.el('option', { value: o.tipo, text: `Desconocido: ${o.tipo}` }));
+    tipoSel.value = o.tipo;
+    tipoSel.addEventListener('change', () => {
+      const nuevo = { tipo: tipoSel.value };
+      const ini = { rectas: { segmentos: [['', '']] }, vertices: { circunferencia: '', desde: '', lados: 6 }, instrumento: { instrumento: 'regla' } }[nuevo.tipo];
+      Object.assign(nuevo, ini || {});
+      // Lo que sigue teniendo sentido se conserva
+      const campos = (OBJ[nuevo.tipo].campos.concat(CAMPOS_EXTRA)).map(c => c[0]);
+      for (const k in o) if (k !== 'tipo' && campos.includes(k) && nuevo[k] === undefined) nuevo[k] = o[k];
+      if (o.nombrar !== undefined && OBJ[nuevo.tipo].crea) nuevo.nombrar = o.nombrar;
+      p.objetivos[j] = nuevo;
+      Editor.cambio();
+    });
+    caja.append(U.el('div', { class: 'obj-cab' }, tipoSel,
+      p.objetivos.length > 1 ? this.btnMini('arriba', 'Subir', () => { p.objetivos.splice(j - 1, 0, p.objetivos.splice(j, 1)[0]); Editor.cambio(); }, { deshab: j === 0 }) : null,
+      p.objetivos.length > 1 ? this.btnMini('papelera', 'Quitar este objetivo', () => { p.objetivos.splice(j, 1); Editor.cambio(); }, { peligro: true }) : null));
+    if (!def) return caja;
+    caja.append(U.el('div', { class: 'ayuda', text: def.ayuda }));
+    // Condiciones presentes
+    const ctx = { paso: iPaso };
+    for (const [k, t, et, ex] of def.campos) {
+      if (o[k] === undefined) continue;
+      caja.append(this.condicion(o, k, t, et, ex, ctx, !(o.tipo === 'vertices' || (o.tipo === 'instrumento' && k === 'instrumento'))));
+    }
+    // Añadir condición
+    const faltan = def.campos.filter(c => o[c[0]] === undefined);
+    if (faltan.length) {
+      const sel = U.el('select', { 'aria-label': 'Condición que añadir' }, U.el('option', { value: '', text: '+ Añadir una condición…' }), faltan.map(c => U.el('option', { value: c[0], text: c[2] })));
+      sel.addEventListener('change', () => {
+        const c = faltan.find(x => x[0] === sel.value);
+        if (!c) return;
+        o[c[0]] = this.valorInicial(c[1], c[0]);
+        Editor.cambio();
+      });
+      caja.append(U.el('div', { class: 'anadir-cond' }, sel));
+    }
+    // Nombrar y opciones avanzadas
+    if (def.crea) {
+      const lista = def.nombrar === 'lista';
+      const inp = U.el('input', { type: 'text', placeholder: lista ? 'Por ejemplo: C, D' : 'Por ejemplo: arcoA' });
+      inp.value = o.nombrar === undefined ? '' : [].concat(o.nombrar).join(', ');
+      inp.addEventListener('input', () => {
+        const l = inp.value.split(/[,\s]+/).map(x => x.trim()).filter(Boolean);
+        if (!l.length) delete o.nombrar; else o.nombrar = lista && (l.length > 1 || Array.isArray(o.nombrar)) ? l : l[0];
+        Editor.cambio('nombrar' + iPaso + '-' + j, { inspector: false });
+      });
+      caja.append(U.el('div', { class: 'cond' }, this.fila(lista ? 'Nombrar lo conseguido (uno o varios)' : 'Nombrar lo conseguido', inp,
+        lista ? 'Nombres separados por comas, en orden. Sirven para usarlos en los pasos siguientes.' : 'Sirve para usarlo en los pasos siguientes.')));
+    }
+    if (o.tipo !== 'continuar') {
+      const mas = U.el('details', { class: 'mas' }, U.el('summary', { text: 'Tolerancias y más opciones' }));
+      for (const [k, t, et, ex] of CAMPOS_EXTRA) {
+        if (t === 'bool') mas.append(this.casilla(o, k, et), U.el('div', { class: 'ayuda', text: ex }));
+        else mas.append(this.fila(et, this.numero(o, k, { min: 0, paso: 'any' }), ex));
+      }
+      if (CAMPOS_EXTRA.some(c => o[c[0]] !== undefined)) mas.open = true;
+      caja.append(mas);
+    }
+    return caja;
+  },
+  valorInicial(t, k) {
+    return { pt: '', linea: '', par: ['', ''], pts: [''], angPunto: { vertice: '', desde: '', grados: 60 }, angRecta: { con: '', grados: 30 },
+      dist: { de: '', mm: 30 }, int: k === 'cantidad' ? 2 : 6, num: k === 'barridoMin' ? 90 : 50, bool: k !== 'cerrado' ? true : false, radio: 50,
+      cortes: [''], segs: [['', '']], inst: 'regla' }[t];
+  },
+  condicion(o, k, t, et, ex, ctx, quitable = true) {
+    const cont = U.el('div', { class: 'cond' });
+    cont.append(U.el('div', { class: 'cond-cab' }, U.el('span', { class: 'et' }, et, ex ? U.el('div', { class: 'ex', text: ex }) : null),
+      quitable ? this.btnMini('cerrar', `Quitar «${et}»`, () => { delete o[k]; Editor.cambio(); }) : null));
+    const set = v => { o[k] = v; Editor.cambio('c-' + ctx.paso + k, { inspector: false }); };
+    const setI = v => { o[k] = v; Editor.cambio(); };
+    const v = o[k];
+    switch (t) {
+      case 'pt': cont.append(this.ref(v, 'punto', ctx.paso, set)); break;
+      case 'linea': cont.append(this.ref(v, k === 'circunferencia' || k === 'radioComo' ? 'arco' : 'linea', ctx.paso, set)); break;
+      case 'par': {
+        const a = Array.isArray(v) ? v.slice(0, 2) : ['', ''];
+        while (a.length < 2) a.push('');
+        cont.append(U.el('div', { class: 'lista-ref' }, a.map((x, i) => this.ref(x, 'linea', ctx.paso, nv => { a[i] = nv; set(a.slice()); }))));
+        break;
+      }
+      case 'pts': {
+        const l = [].concat(v === undefined ? [] : v);
+        const box = U.el('div', { class: 'lista-ref' });
+        l.forEach((x, i) => box.append(U.el('div', { class: 'par' }, U.el('b', { text: (i + 1) + '.', style: 'width:20px;font-size:13px' }), this.ref(x, 'punto', ctx.paso, nv => { l[i] = nv; set(l.slice()); }),
+          this.btnMini('cerrar', 'Quitar', () => { l.splice(i, 1); setI(l.slice()); }))));
+        box.append(U.el('button', { type: 'button', class: 'btn-texto', text: '+ Punto', onclick: () => { l.push(''); setI(l.slice()); } }));
+        cont.append(box);
+        break;
+      }
+      case 'segs': {
+        const l = Array.isArray(v) ? v : [];
+        const box = U.el('div', { class: 'lista-ref' });
+        l.forEach((sg, i) => {
+          const par = Array.isArray(sg) ? sg : ['', ''];
+          box.append(U.el('div', { class: 'par', style: 'flex-wrap:wrap' },
+            U.el('b', { text: (i + 1) + '.', style: 'width:20px;font-size:13px' }),
+            U.el('div', { style: 'flex:1;min-width:0;display:flex;flex-direction:column;gap:4px' },
+              this.ref(par[0], 'punto', ctx.paso, nv => { par[0] = nv; l[i] = par; set(l); }),
+              this.ref(par[1], 'punto', ctx.paso, nv => { par[1] = nv; l[i] = par; set(l); })),
+            this.btnMini('cerrar', 'Quitar el segmento', () => { l.splice(i, 1); setI(l); })));
+        });
+        box.append(U.el('button', { type: 'button', class: 'btn-texto', text: '+ Segmento', onclick: () => { l.push(['', '']); setI(l); } }));
+        cont.append(box);
+        break;
+      }
+      case 'cortes': {
+        const l = [].concat(v === undefined ? [] : v);
+        const box = U.el('div', { class: 'lista-ref' });
+        l.forEach((x, i) => {
+          const el = typeof x === 'string' ? x : (x && x.elemento) || '', n = (x && x.cortes) || 1;
+          const guardar = (e2, n2) => { l[i] = n2 > 1 ? { elemento: e2, cortes: n2 } : e2; };
+          const num = U.el('input', { type: 'number', min: 1, max: 2, step: 1, value: n, style: 'width:62px', title: 'Número de cortes' });
+          num.addEventListener('input', () => { const m = parseInt(num.value, 10) || 1; guardar(typeof l[i] === 'string' ? l[i] : l[i].elemento, m); set(l.slice()); });
+          box.append(U.el('div', { class: 'par' }, this.ref(el, 'linea', ctx.paso, nv => { guardar(nv, typeof l[i] === 'string' ? 1 : l[i].cortes); set(l.slice()); }),
+            U.el('span', { class: 'ayuda', text: '×', style: 'margin:0' }), num, this.btnMini('cerrar', 'Quitar', () => { l.splice(i, 1); setI(l.slice()); })));
+        });
+        box.append(U.el('button', { type: 'button', class: 'btn-texto', text: '+ Línea', onclick: () => { l.push(''); setI(l.slice()); } }));
+        cont.append(box, U.el('div', { class: 'ayuda', text: 'El número es cuántas veces tiene que cortarla (1 o 2).' }));
+        break;
+      }
+      case 'angPunto': {
+        const a = U.esObj(v) ? v : (o[k] = { vertice: '', desde: '', grados: 60 });
+        cont.append(U.el('div', { class: 'ayuda', text: 'Vértice' }), this.ref(a.vertice, 'punto', ctx.paso, nv => { a.vertice = nv; set(a); }),
+          U.el('div', { class: 'ayuda', text: 'Se mide desde el punto' }), this.ref(a.desde, 'punto', ctx.paso, nv => { a.desde = nv; set(a); }),
+          U.el('div', { class: 'dos' },
+            U.el('label', null, 'Grados', this.numero(a, 'grados', { opcional: false, clave: 'g' + ctx.paso })),
+            U.el('label', null, 'Sentido', this.selector(a, 'sentido', [['antihorario', 'Antihorario ↺'], ['horario', 'Horario ↻']], { vacio: 'Cualquiera', inspector: false }))));
+        break;
+      }
+      case 'angRecta': {
+        const a = U.esObj(v) ? v : (o[k] = { con: '', grados: 30 });
+        cont.append(this.ref(a.con, 'recta', ctx.paso, nv => { a.con = nv; set(a); }),
+          U.el('label', { class: 'ayuda' }, 'Grados', this.numero(a, 'grados', { opcional: false, clave: 'g' + ctx.paso })));
+        break;
+      }
+      case 'dist': {
+        const a = U.esObj(v) ? v : (o[k] = { de: '', mm: 30 });
+        cont.append(this.ref(a.de, 'punto', ctx.paso, nv => { a.de = nv; set(a); }),
+          U.el('label', { class: 'ayuda' }, 'Milímetros', this.numero(a, 'mm', { opcional: false, clave: 'mm' + ctx.paso })));
+        break;
+      }
+      case 'radio': {
+        const rango = U.esObj(v);
+        const seg = U.el('div', { class: 'seg' },
+          U.el('button', { type: 'button', text: 'Exacto', 'aria-pressed': String(!rango), onclick: () => setI(rango ? (Number.isFinite(v.min) ? v.min : 50) : v) }),
+          U.el('button', { type: 'button', text: 'Entre', 'aria-pressed': String(rango), onclick: () => setI(rango ? v : { min: Number.isFinite(v) ? v : 40, max: Number.isFinite(v) ? v + 40 : 100 }) }));
+        cont.append(seg);
+        if (rango) cont.append(U.el('div', { class: 'dos', style: 'margin-top:6px' },
+          U.el('label', null, 'Mínimo (mm)', this.numero(v, 'min', { clave: 'rmin' + ctx.paso })),
+          U.el('label', null, 'Máximo (mm)', this.numero(v, 'max', { clave: 'rmax' + ctx.paso }))));
+        else cont.append(U.el('div', { style: 'margin-top:6px' }, this.numero(o, k, { opcional: false, clave: 'r' + ctx.paso, min: 0 })));
+        break;
+      }
+      case 'num': case 'int': cont.append(this.numero(o, k, { opcional: false, paso: t === 'int' ? 1 : 'any', clave: k + ctx.paso })); break;
+      case 'bool': {
+        const s2 = U.el('div', { class: 'seg' },
+          U.el('button', { type: 'button', text: 'Sí', 'aria-pressed': String(v === true), onclick: () => setI(true) }),
+          U.el('button', { type: 'button', text: 'No', 'aria-pressed': String(v === false), onclick: () => setI(false) }));
+        cont.append(s2);
+        break;
+      }
+      case 'inst': cont.append(this.selector(o, k, INSTRUMENTOS, { inspector: false })); break;
+    }
+    return cont;
+  },
+  // Referencia a un punto (nombre o coordenadas) o a una línea (nombre), con botón para elegirla en la hoja
+  ref(v, tipo, iPaso, alCambiar) {
+    const caja = U.el('div', { class: 'ref' });
+    const disp = Nombres.disponibles(Editor.ej, iPaso < 0 ? -1 : iPaso);
+    const filtro = [...disp].filter(([, i]) => tipo === 'punto' ? i.tipo === 'punto' : tipo === 'linea' ? i.tipo !== 'punto' : i.tipo === tipo);
+    const idDl = this.datalist('dl-' + tipo + '-' + iPaso, filtro);
+    const comprobar = (inp, val) => {
+      const ok = val === '' ? false : filtro.some(([n]) => n === val);
+      inp.classList.toggle('mal', !ok);
+      inp.title = ok ? `${disp.get(val).tipo} · ${disp.get(val).origen}` : val ? `No hay ${tipo === 'punto' ? 'ningún punto' : 'ninguna línea'} «${val}» disponible aquí` : 'Escribe un nombre o elígelo en la hoja';
+    };
+    const pintar = val => {
+      caja.textContent = '';
+      if (tipo === 'punto' && U.esCoord(val)) {
+        const xy = { x: val.x, y: val.y };
+        const cambiarXY = () => alCambiar({ x: xy.x, y: xy.y });
+        caja.append(U.el('div', { class: 'xy' },
+          this.numero(xy, 'x', { opcional: false, alCambiar: cambiarXY, clave: 'xy' }),
+          this.numero(xy, 'y', { opcional: false, alCambiar: cambiarXY, clave: 'xy' })));
+        caja.querySelectorAll('input')[0].title = 'x (mm)';
+        caja.querySelectorAll('input')[1].title = 'y (mm)';
+        caja.append(this.btnMini('cambiar', 'Usar un punto con nombre', () => {
+          // Si hay un punto con nombre justo ahí, se usa
+          const C = Construccion.calcular(Editor.ej, iPaso - 1);
+          let n = '';
+          for (const [nm, f] of C.geo) if (f.tipo === 'punto' && disp.has(nm) && G.dist(f.x, f.y, val.x, val.y) < .01) n = nm;
+          alCambiar(n); pintar(n);
+        }));
+      } else {
+        const inp = U.el('input', { type: 'text', list: idDl, placeholder: tipo === 'punto' ? 'Nombre del punto' : 'Nombre de la línea', value: typeof val === 'string' ? val : '' });
+        comprobar(inp, inp.value);
+        inp.addEventListener('input', () => { comprobar(inp, inp.value.trim()); alCambiar(inp.value.trim()); });
+        caja.append(inp);
+        if (tipo === 'punto') caja.append(this.btnMini('cambiar', 'Usar coordenadas', () => {
+          const C = Construccion.calcular(Editor.ej, iPaso - 1), f = C.geo.get(inp.value.trim());
+          const [W, H] = Editor.hoja();
+          const nv = f && f.tipo === 'punto' ? { x: U.r3(f.x), y: U.r3(f.y) } : { x: U.r05(W / 2), y: U.r05(H / 2) };
+          alCambiar(nv); pintar(nv);
+        }));
+      }
+      caja.append(this.btnMini('elegir', 'Elegir en la hoja', () => {
+        Editor.elegir(tipo === 'punto' ? 'punto' : 'linea', nv => {
+          Editor.ultimoCambio = { clave: null, t: 0 };   // cada elección, un paso de deshacer
+          alCambiar(nv);
+          Editor.repintar();
+        });
+      }));
+    };
+    pintar(v);
+    return caja;
+  },
+};
+
+/* =====================================================================
+   Mensajes
+   ===================================================================== */
+function mensaje(t) { document.getElementById('mensaje').textContent = t || ''; }
+let temporizadorAviso = 0;
+function aviso(t) {
+  const a = document.getElementById('aviso');
+  a.textContent = t;
+  a.classList.add('visible');
+  clearTimeout(temporizadorAviso);
+  temporizadorAviso = setTimeout(() => a.classList.remove('visible'), 2600);
+}
+
+/* =====================================================================
+   Entrada: ratón, táctil y teclado
+   ===================================================================== */
+function iniciarEntrada() {
+  const lz = document.getElementById('lienzo'), svg = Vista.svg;
+  const punteros = new Map();
+  let gesto = null;
+  svg.addEventListener('pointerdown', e => {
+    if (e.button === 2) return;
+    svg.setPointerCapture(e.pointerId);
+    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (punteros.size === 2) {
+      // Dos dedos: zoom y desplazamiento
+      Editor.arrastre = null;
+      const [a, b] = [...punteros.values()];
+      gesto = { d: Math.hypot(b.x - a.x, b.y - a.y), cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, esc: Vista.esc, m: Vista.aMm((a.x + b.x) / 2, (a.y + b.y) / 2) };
+      return;
+    }
+    if (e.button === 1 || espacio) { Editor.arrastre = { tipo: 'pan', x: e.clientX, y: e.clientY, vx: Vista.x, vy: Vista.y }; lz.classList.add('arrastrando'); return; }
+    Editor.arrastre = Editor.alPulsar(e);
+    if (Editor.arrastre && Editor.arrastre.tipo !== 'borrador') lz.classList.add('arrastrando');
+  });
+  svg.addEventListener('pointermove', e => {
+    if (punteros.has(e.pointerId)) punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (gesto && punteros.size === 2) {
+      const [a, b] = [...punteros.values()], t = Vista.tam();
+      const d = Math.hypot(b.x - a.x, b.y - a.y), cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+      Vista.esc = Math.max(.3, Math.min(40, gesto.esc * d / (gesto.d || 1)));
+      Vista.x = gesto.m.x - (cx - t.l) / Vista.esc;
+      Vista.y = gesto.m.y - (cy - t.t) / Vista.esc;
+      Editor.pintarHoja();
+      return;
+    }
+    if (Editor.arrastre && Editor.arrastre.tipo !== 'borrador') Editor.alArrastrar(Editor.arrastre, e);
+    else if (Editor.borrador) Editor.alArrastrar({ tipo: 'borrador' }, e);
+    else Editor.alMoverRaton(e);
+  });
+  const fin = e => {
+    punteros.delete(e.pointerId);
+    if (gesto) { if (punteros.size < 2) gesto = null; return; }
+    lz.classList.remove('arrastrando');
+    const a = Editor.arrastre;
+    Editor.arrastre = null;
+    if (a) Editor.alSoltar(a, e);
+  };
+  svg.addEventListener('pointerup', fin);
+  svg.addEventListener('pointercancel', fin);
+  svg.addEventListener('pointerleave', () => { if (!Editor.arrastre) { document.getElementById('coords').textContent = ''; } });
+  svg.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (e.ctrlKey || Math.abs(e.deltaY) >= Math.abs(e.deltaX)) Vista.zoom(Math.exp(-e.deltaY * (e.deltaMode ? .05 : .0015)), e.clientX, e.clientY);
+    else { Vista.x += e.deltaX / Vista.esc; Editor.pintarHoja(); }
+  }, { passive: false });
+  svg.addEventListener('contextmenu', e => e.preventDefault());
+
+  let espacio = false;
+  const escribiendo = () => { const a = document.activeElement; return a && (['INPUT', 'TEXTAREA', 'SELECT'].includes(a.tagName) || a.isContentEditable); };
+  window.addEventListener('keydown', e => {
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); Editor.descargar(); return; }
+    if (document.getElementById('dlg').open) return;
+    if (ctrl && !escribiendo() && e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); Editor.deshacer(); return; }
+    if (ctrl && !escribiendo() && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) { e.preventDefault(); Editor.rehacer(); return; }
+    if (e.key === 'Escape') {
+      if (Editor.eligiendo) Editor.cancelarEleccion();
+      else if (Editor.borrador) { Editor.borrador = null; Editor.pintarHoja(); mensaje('Trazo cancelado.'); }
+      else if (Editor.herr !== 'sel') Editor.herramienta('sel');
+      if (escribiendo()) document.activeElement.blur();
+      return;
+    }
+    if (escribiendo() || ctrl || e.altKey) return;
+    if (e.key === ' ') { espacio = true; e.preventDefault(); return; }
+    const k = e.key.toLowerCase();
+    if (k === 'v') Editor.herramienta('sel');
+    else if (k === 'p') Editor.herramienta('punto');
+    else if (k === 'r') Editor.herramienta('recta');
+    else if (k === 'c') Editor.herramienta('arco');
+    else if (k === '+' || k === '=') Vista.zoom(1.25);
+    else if (k === '-') Vista.zoom(1 / 1.25);
+    else if (k === '0') Vista.ajustar();
+    else if ((e.key === 'Delete' || e.key === 'Backspace') && ['punto', 'recta', 'arco', 'inst'].includes(Editor.sel.tipo)) { e.preventDefault(); Editor.eliminarSeleccion(); }
+    else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) && Editor.sel.tipo === 'punto') {
+      e.preventDefault();
+      const q = Editor.ej.inicial.puntos[Editor.sel.i], d = e.shiftKey ? 5 : .5;
+      if (e.key === 'ArrowLeft') q.x = U.r3(q.x - d); if (e.key === 'ArrowRight') q.x = U.r3(q.x + d);
+      if (e.key === 'ArrowUp') q.y = U.r3(q.y - d); if (e.key === 'ArrowDown') q.y = U.r3(q.y + d);
+      Editor.cambio('flechas', { inspector: true });
+    }
+  });
+  window.addEventListener('keyup', e => { if (e.key === ' ') espacio = false; });
+
+  // Abrir archivos: botón y arrastrar sobre la ventana
+  const abrirArchivo = f => {
+    if (!f) return;
+    if (f.size > 5e6) { aviso('Ese archivo es demasiado grande.'); return; }
+    f.text().then(t => Editor.abrirTexto(t, f.name));
+  };
+  document.getElementById('abrir-archivo').addEventListener('change', e => { abrirArchivo(e.target.files && e.target.files[0]); e.target.value = ''; });
+  window.addEventListener('dragover', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
+  window.addEventListener('drop', e => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    e.preventDefault();
+    abrirArchivo(f);
+  });
+  document.getElementById('btn-problemas').addEventListener('click', () => Editor.mostrarProblemas());
+  document.getElementById('dlg-cerrar').addEventListener('click', () => Editor.cerrarDialogo());
+  new ResizeObserver(() => Editor.pintarHoja()).observe(lz);
+}
+
+/* =====================================================================
+   Arranque
+   ===================================================================== */
+function iniciar() {
+  Vista.svg = document.getElementById('hoja');
+  Barra.construir();
+  iniciarEntrada();
+  // ¿Se pide un ejercicio por la dirección? editor.html?ejercicio=ejercicios/mediatriz.json
+  const ruta = new URLSearchParams(location.search).get('ejercicio');
+  let borrador = null;
+  try { borrador = JSON.parse(localStorage.getItem(Editor.CLAVE)); } catch (_) { borrador = null; }
+  if (borrador && borrador.formato === 'dibutec-ejercicio' && Array.isArray(borrador.pasos)) {
+    Editor.abrir(borrador, { avisar: false });
+    mensaje(`Sigues con «${borrador.titulo || 'el ejercicio'}» donde lo dejaste. Pulsa ? para ver cómo se usa.`);
+  } else {
+    Editor.abrir(Modelo.nuevo(), { avisar: false });
+    mensaje('Empieza por la ficha, dibuja el enunciado en la hoja y añade los pasos. Pulsa ? para ver cómo se usa.');
+  }
+  if (ruta && /^[\w./-]+\.json$/.test(ruta) && !ruta.includes('..') && !ruta.startsWith('/')) {
+    fetch(ruta, { cache: 'no-cache' }).then(r => r.text()).then(t => Editor.abrirTexto(t, ruta))
+      .catch(() => aviso('No se ha podido abrir el ejercicio indicado en la dirección.'));
+  }
+  Editor.herramienta('sel');
+  requestAnimationFrame(() => Vista.ajustar());
+}
+
+window.Editor = { Editor, Modelo, Revision, Construccion, Vista, Nombres, bonito };
+iniciar();
+</script>
+</body>
+</html>
