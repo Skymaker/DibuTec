@@ -1884,9 +1884,10 @@ class Instrumento {
     for (let c2 = 0; c2 * 10 <= k.max; c2 += paso) texto(String(c2), P(c2 * 10, 8.6), 3.2, 'center');
     texto('cm', P(1.5, 12.3), 2.6, 'left');
   }
+  // Los controles (asas, candado, volteo) no se reflejan: se dibujan sin espejo en su sitio
   dibujarAsas(ctx) {
     if (this.bloqueado) return;
-    for (const a of this.asas) this.dibujarAsa(ctx, a);
+    for (const a of this.asas) this.dibujarAsa(ctx, { x: a.x * this.sx, y: a.y });
   }
   dibujarAsa(ctx, a) {
     const R = this.radioAsa(), px = 1 / Vista.escala;
@@ -1914,7 +1915,7 @@ class Instrumento {
   }
   dibujarCandado(ctx) {
     if (!this.candado) return;
-    const [x, y] = this.candado, R = this.radioCandado(), px = 1 / Vista.escala;
+    const x = this.candado[0] * this.sx, y = this.candado[1], R = this.radioCandado(), px = 1 / Vista.escala;
     const col = this.bloqueado ? 'rgba(200, 120, 20, .95)' : 'rgba(47, 111, 208, .6)';
     ctx.beginPath();
     ctx.arc(x, y, R, 0, Geom.DOS_PI);
@@ -1939,7 +1940,7 @@ class Instrumento {
   // Botón de dar la vuelta: dos medios triángulos simétricos a cada lado de un eje
   dibujarVolteo(ctx) {
     if (!this.volteo || this.bloqueado) return;
-    const [x, y] = this.volteo, R = this.radioCandado(), px = 1 / Vista.escala;
+    const x = this.volteo[0] * this.sx, y = this.volteo[1], R = this.radioCandado(), px = 1 / Vista.escala;
     const col = 'rgba(47, 111, 208, .75)';
     ctx.beginPath();
     ctx.arc(x, y, R, 0, Geom.DOS_PI);
@@ -1966,9 +1967,11 @@ class Instrumento {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
+    ctx.save();
     if (this.volteado) ctx.scale(-1, 1);   // forma, números y rótulos, como vistos por detrás
     this.dibujarCuerpo(ctx);
     this.dibujarMarcas(ctx);
+    ctx.restore();
     this.dibujarAsas(ctx);
     this.dibujarCandado(ctx);
     this.dibujarVolteo(ctx);
