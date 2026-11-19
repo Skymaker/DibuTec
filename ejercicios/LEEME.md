@@ -51,7 +51,7 @@ motivo (por ejemplo, «paso 3: tipo de objetivo desconocido «arcoo»»).
 | `nivel`, `descripcion` | no | Se muestran en la lista de ejercicios. |
 | `papel` | no | Papel del ejercicio: `papel` (`blanco`, `cuadriculado`, `milimetrado`, `isometrico`), `cuadro` (4, 5, 10), `triangulo` (5, 10), `colorLineas`, `colorPapel`, `hoja` (`A4-h`, `A4-v`, `A3-h`, `A3-v`), `margen`, `imanCuadricula`. Al salir del ejercicio se recupera el papel anterior. |
 | `inicial` | no | El enunciado: puntos, rectas y arcos que ya están dibujados (en azul y sin poder borrarse). |
-| `instrumentos` | no | Instrumentos que aparecen al empezar, con `x`, `y` (mm), `giro` (grados) y, para el compás, `radio`. Los demás se guardan. |
+| `instrumentos` | no | Instrumentos que aparecen al empezar, con `x`, `y` (mm), `giro` (grados), para el compás `radio` y, para la escuadra y el cartabón, `"volteado": true` si deben empezar dados la vuelta. Los demás se guardan. |
 | `textos` | no | Cómo llamar a cada nombre en los mensajes de ayuda («el primer arco» en vez de «arcoA»). |
 | `final` | no | Mensaje de felicitación. |
 

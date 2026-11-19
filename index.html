@@ -1073,7 +1073,7 @@ const Escena = {
   // Instantánea: dibujo y posición de los instrumentos
   datos() {
     const inst = Instrumentos.lista.map(i => ({ tipo: i.tipo, x: i.x, y: i.y, rot: i.rot, r: i.r,
-      bloqueado: i.bloqueado, colocado: i.colocado, visible: i.visible, levantada: i.levantada }));
+      bloqueado: i.bloqueado, colocado: i.colocado, visible: i.visible, levantada: i.levantada, volteado: i.volteado }));
     return JSON.stringify({ puntos: this.puntos, rectas: this.rectas, arcos: this.arcos, sigId: this.sigId, instrumentos: inst });
   },
   // completo = también la visibilidad y el orden de los instrumentos (al abrir un dibujo)
@@ -1090,6 +1090,7 @@ const Escena = {
       if ('r' in inst && fin(e.r) && e.r > 0) inst.r = Math.min(e.r, inst.rMax);
       inst.bloqueado = !!e.bloqueado;
       if ('levantada' in inst) inst.levantada = !!e.levantada;
+      inst.volteado = !!(inst.volteo && e.volteado);
       inst.colocado = !!e.colocado;
       if (completo) { inst.visible = !!e.visible; orden.push(inst); }
     }
@@ -1705,6 +1706,8 @@ class Instrumento {
     this.cantos = [];     // [{i, j, graduado, origen: [x, y], max}] lados útiles para trazar
     this.asas = [];       // [{x, y, pivote: [x, y]}] asas de giro
     this.candado = null;  // [x, y] botón del candado
+    this.volteo = null;   // [x, y] botón para dar la vuelta al instrumento (escuadra y cartabón)
+    this.volteado = false; // dado la vuelta: la forma y lo impreso se ven como en un espejo
     this.origenIman = null;
     this.rotulos = [];    // [{x, y, ang, texto, tam, marca}] nombre de la aplicación y tamaño, en mm locales
   }
@@ -1712,19 +1715,29 @@ class Instrumento {
   medir() {}
   get conArticulo() { return (this.g === 'a' ? 'la ' : 'el ') + this.nombre.toLowerCase(); }
 
+  // Volteado = simetría respecto al eje y local, antes de girar y trasladar
+  get sx() { return this.volteado ? -1 : 1; }
   aMundo(lx, ly) {
     const c = Math.cos(this.rot), s = Math.sin(this.rot);
+    lx *= this.sx;
     return { x: this.x + lx * c - ly * s, y: this.y + lx * s + ly * c };
   }
   aLocal(wx, wy) {
     const c = Math.cos(this.rot), s = Math.sin(this.rot), dx = wx - this.x, dy = wy - this.y;
-    return { x: dx * c + dy * s, y: -dx * s + dy * c };
+    return { x: (dx * c + dy * s) * this.sx, y: -dx * s + dy * c };
+  }
+  // Da la vuelta al instrumento sin moverlo de sitio (el centro queda donde estaba)
+  voltear() {
+    const c0 = this.centroMundo();
+    this.volteado = !this.volteado;
+    const c1 = this.centroMundo();
+    this.x += c0.x - c1.x; this.y += c0.y - c1.y;
   }
   // Fija el giro manteniendo un punto local en una posición del mundo
   colocarPivote(local, mundo) {
-    const c = Math.cos(this.rot), s = Math.sin(this.rot);
-    this.x = mundo.x - (local[0] * c - local[1] * s);
-    this.y = mundo.y - (local[0] * s + local[1] * c);
+    const c = Math.cos(this.rot), s = Math.sin(this.rot), lx = local[0] * this.sx;
+    this.x = mundo.x - (lx * c - local[1] * s);
+    this.y = mundo.y - (lx * s + local[1] * c);
   }
   // Gira el instrumento alrededor de un punto del mundo
   girarEn(p, d) {
@@ -1923,14 +1936,42 @@ class Instrumento {
     ctx.lineWidth = Math.max(0.35, 1.8 * px);
     ctx.stroke();
   }
+  // Botón de dar la vuelta: dos medios triángulos simétricos a cada lado de un eje
+  dibujarVolteo(ctx) {
+    if (!this.volteo || this.bloqueado) return;
+    const [x, y] = this.volteo, R = this.radioCandado(), px = 1 / Vista.escala;
+    const col = 'rgba(47, 111, 208, .75)';
+    ctx.beginPath();
+    ctx.arc(x, y, R, 0, Geom.DOS_PI);
+    ctx.fillStyle = 'rgba(255, 255, 255, .5)';
+    ctx.fill();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.3 * px;
+    ctx.stroke();
+    const a = R * 0.62, h = R * 0.55, g = R * 0.14;
+    ctx.beginPath();                                  // mitad llena
+    ctx.moveTo(x - g, y - h); ctx.lineTo(x - g, y + h); ctx.lineTo(x - a, y + h); ctx.closePath();
+    ctx.fillStyle = col;
+    ctx.fill();
+    ctx.beginPath();                                  // mitad reflejada, solo el contorno
+    ctx.moveTo(x + g, y - h); ctx.lineTo(x + g, y + h); ctx.lineTo(x + a, y + h); ctx.closePath();
+    ctx.lineWidth = Math.max(0.25, 1.2 * px);
+    ctx.stroke();
+    ctx.save();                                       // eje de simetría
+    ctx.setLineDash([R * 0.12, R * 0.1]);
+    ctx.beginPath(); ctx.moveTo(x, y - R * 0.8); ctx.lineTo(x, y + R * 0.8); ctx.stroke();
+    ctx.restore();
+  }
   dibujar(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
+    if (this.volteado) ctx.scale(-1, 1);   // forma, números y rótulos, como vistos por detrás
     this.dibujarCuerpo(ctx);
     this.dibujarMarcas(ctx);
     this.dibujarAsas(ctx);
     this.dibujarCandado(ctx);
+    this.dibujarVolteo(ctx);
     ctx.restore();
   }
 }
@@ -1984,6 +2025,7 @@ class Escuadra extends Instrumento {
       { x: 18, y: -(L - 55), pivote: [5, 0] },
     ];
     this.candado = [16, -18];
+    this.volteo = [32, -18];
     this.origenIman = [5, 0];
     // A lo largo del cateto vertical, leyéndose de abajo arriba
     const y = -(L - 55 + 26) / 2 - 4;
@@ -2017,6 +2059,7 @@ class Cartabon extends Instrumento {
       { x: 20, y: -(Lg - 75), pivote: [0, -5] },
     ];
     this.candado = [17, -18];
+    this.volteo = [33, -18];
     this.origenIman = [0, -5];
     // Junto al cateto graduado, leyéndose de abajo arriba
     const y = -(Lg - 75 + 30) / 2 - 2;
@@ -2382,6 +2425,10 @@ const Instrumentos = {
       if (inst.candado) {
         const w = inst.aMundo(...inst.candado);
         if (Geom.dist(info.x, info.y, w.x, w.y) <= inst.radioCandado() + extra) return { inst, modo: 'candado' };
+      }
+      if (inst.volteo && !inst.bloqueado) {
+        const w = inst.aMundo(...inst.volteo);
+        if (Geom.dist(info.x, info.y, w.x, w.y) <= inst.radioCandado() + extra) return { inst, modo: 'voltear' };
       }
       if (!inst.bloqueado) {
         for (const a of inst.asas) {
@@ -2995,6 +3042,15 @@ const Entrada = {
         hit.inst.alternarMina();
         return;
       }
+      if (hit && hit.modo === 'voltear') {
+        e.preventDefault();
+        Historial.registrar();
+        hit.inst.voltear();
+        Sonido.tocar('iman');
+        UI.mensaje(`${hit.inst.nombre} ${hit.inst.volteado ? 'del revés' : 'del derecho'}: le has dado la vuelta.`);
+        Render.pedir('instrumentos');
+        return;
+      }
       if (hit && hit.modo === 'candado') {
         e.preventDefault();
         const inst = hit.inst;
@@ -3178,7 +3234,7 @@ const Entrada = {
     const el = Capas.contenedor;
     el.classList.toggle('sobre-asa', !!hit && hit.modo === 'girar');
     el.classList.toggle('sobre-instrumento', !!hit && hit.modo === 'mover');
-    el.classList.toggle('sobre-candado', !!hit && (hit.modo === 'candado' || hit.modo === 'mina'));
+    el.classList.toggle('sobre-candado', !!hit && (hit.modo === 'candado' || hit.modo === 'mina' || hit.modo === 'voltear'));
   },
 
   actualizarCursor() {
@@ -3897,7 +3953,7 @@ const Ayuda = {
     const b = (icono, titulo, texto) => `<div class="ayuda-bloque"><div class="ico">${Iconos[icono]}</div><div><h4>${titulo}</h4><p>${texto}</p></div></div>`;
     document.getElementById('ayuda-cuerpo').innerHTML = [
       b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta. En la barrita de abajo eliges el color y el grosor de la mina; el compás pinta con ellos. En Configuración › Imán decides qué atrae a la punta.'),
-      b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos.'),
+      b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos. La escuadra y el cartabón tienen además un botón con dos medios triángulos que les da la vuelta, como al girar el plástico: los números y el nombre se ven al revés.'),
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
       b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
       b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
@@ -4027,7 +4083,7 @@ const Ejercicio = {
     this.iniciales = Object.keys(this.nombres);
   },
   colocarInstrumentos(cfg) {
-    for (const inst of Instrumentos.lista) { inst.visible = false; inst.bloqueado = false; }
+    for (const inst of Instrumentos.lista) { inst.visible = false; inst.bloqueado = false; inst.volteado = false; }
     if (cfg && typeof cfg === 'object') {
       for (const tipo of Object.keys(cfg)) {
         const inst = Instrumentos.porTipo[tipo], c = cfg[tipo];
@@ -4035,6 +4091,7 @@ const Ejercicio = {
         inst.visible = true;
         if (Number.isFinite(c.x) && Number.isFinite(c.y)) { inst.x = c.x; inst.y = c.y; inst.colocado = true; }
         if (Number.isFinite(c.giro)) inst.rot = -c.giro * Math.PI / 180;
+        if (c.volteado === true && inst.volteo) inst.volteado = true;
         if (Number.isFinite(c.radio) && 'r' in inst) inst.r = Geom.clamp(c.radio, 1, inst.rMax);
         if (!inst.colocado) Instrumentos.colocarEnVista(inst);
         Instrumentos.alFrente(inst);
