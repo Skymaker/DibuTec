@@ -3,6 +3,8 @@
 Simulador de dibujo técnico para la ESO. Funciona en el navegador, con ratón o
 en tablet, con portaminas, regla, escuadra, cartabón, compás y transportador.
 
+Pruébalo: https://skymaker.github.io/DibuTec/
+
 ## Cómo abrirlo
 
 - **Con doble clic** en `index.html`: funciona todo menos la lista de
