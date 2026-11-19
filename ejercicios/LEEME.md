@@ -7,11 +7,7 @@ con errores no impide usar los demás.
 ## Añadir un ejercicio
 
 1. Crea `mi-ejercicio.json` en esta carpeta (puedes copiar uno existente).
-2. Añade su nombre a la lista de `indice.json`:
-
-   ```json
-   { "ejercicios": ["segmento.json", "mediatriz.json", "mi-ejercicio.json"] }
-   ```
+2. Añade su nombre a uno de los temas de `indice.json` (ver abajo).
 
 3. Abre DibuTec desde un servidor web (por ejemplo, GitHub Pages o
    `python3 -m http.server`) y pulsa el botón **Ejercicios guiados**.
@@ -23,6 +19,47 @@ la dirección `index.html?ejercicio=ejercicios/mi-ejercicio.json`.
 
 Si un archivo tiene un error, la lista de ejercicios lo muestra en rojo con el
 motivo (por ejemplo, «paso 3: tipo de objetivo desconocido «arcoo»»).
+
+## Temas: `indice.json`
+
+Los ejercicios se agrupan por temas. Cada tema es un grupo desplegable en la
+lista de ejercicios; los temas y los ejercicios de cada tema aparecen **en el
+orden en que se escriben** en el índice:
+
+```json
+{
+  "grupos": [
+    {
+      "id": "trazados-fundamentales",
+      "titulo": "Trazados fundamentales",
+      "descripcion": "Mediatriz, bisectriz, perpendiculares y paralelas.",
+      "ejercicios": ["mediatriz.json", "bisectriz.json"]
+    },
+    {
+      "id": "perspectiva",
+      "titulo": "Perspectiva",
+      "abierto": false,
+      "ejercicios": ["cubo-isometrico.json"]
+    }
+  ]
+}
+```
+
+| Campo del tema | Obligatorio | Significado |
+|---|---|---|
+| `titulo` | sí | Nombre del tema. |
+| `ejercicios` | sí | Archivos del tema, en orden. Un mismo archivo puede estar en varios temas. |
+| `id` | no | Identificador fijo (letras, números y guiones). Sirve para recordar el orden y lo desplegado de cada persona aunque cambie el título; si falta, se saca del título. |
+| `descripcion` | no | Texto corto bajo el título. |
+| `abierto` | no | `false` para que el tema empiece plegado (por defecto, desplegado). |
+
+Cada persona puede, además, **reordenar los temas** con el botón «Ordenar
+temas» de la lista (flechas ↑ ↓) y plegarlos o desplegarlos. Su navegador lo
+recuerda; «Orden original» vuelve al orden del índice. Los temas nuevos que se
+añadan al índice aparecen al final de su orden.
+
+El formato antiguo, `{ "ejercicios": [...] }` sin temas, sigue funcionando:
+se muestra como un único tema «Ejercicios».
 
 ## Estructura
 

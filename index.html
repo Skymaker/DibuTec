@@ -198,6 +198,37 @@
   .ejercicio-item strong { font-size: 16px; }
   .ejercicio-item .meta { font-size: 13px; color: var(--activo); font-weight: 600; }
   .ejercicio-item .desc { font-size: 14px; color: var(--texto-suave); line-height: 1.4; }
+  /* Grupos de ejercicios: desplegables y ordenables */
+  .grupo-ej { margin-top: 10px; border: 1px solid var(--borde); border-radius: 14px; background: #faf8f4; }
+  .grupo-ej > summary {
+    display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 6px 8px 6px 12px;
+    list-style: none; cursor: pointer; touch-action: manipulation; border-radius: 14px;
+  }
+  .grupo-ej > summary::-webkit-details-marker { display: none; }
+  .grupo-ej > summary:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+  .grupo-ej .ge-flecha { width: 0; height: 0; border: 6px solid transparent; border-left: 8px solid var(--activo); margin-right: -2px; transition: transform .15s; flex: none; }
+  .grupo-ej[open] .ge-flecha { transform: rotate(90deg) translateX(-2px); }
+  .grupo-ej .ge-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .grupo-ej .ge-titulo { font-weight: 700; font-size: 16px; }
+  .grupo-ej .ge-desc { font-size: 13px; color: var(--texto-suave); }
+  .grupo-ej .ge-num { font-size: 13px; font-weight: 600; color: var(--activo); white-space: nowrap; }
+  .grupo-ej .ge-mover { display: flex; gap: 2px; }
+  .grupo-ej .ge-mover button {
+    width: 34px; height: 34px; border: 1px solid var(--borde); border-radius: 9px; background: #fff;
+    color: var(--texto); font: 700 15px var(--fuente); cursor: pointer; touch-action: manipulation;
+  }
+  @media (pointer: coarse) { .grupo-ej .ge-mover button { width: 44px; height: 44px; } }
+  .grupo-ej .ge-mover button:disabled { opacity: .3; cursor: default; }
+  .grupo-ej .ge-mover button:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+  .lista-ej:not(.ordenando) .ge-mover { display: none; }
+  .grupo-ej .ge-cuerpo { padding: 0 10px 10px; }
+  .grupo-ej .ge-cuerpo .ejercicio-item:first-child { margin-top: 0; }
+  .ej-herramientas { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+  .ej-herramientas button {
+    min-height: 36px; padding: 0 12px; border: 1px solid var(--borde); border-radius: 10px; background: #fff;
+    color: var(--texto); font: inherit; font-size: 14px; cursor: pointer; touch-action: manipulation;
+  }
+  .ej-herramientas button[aria-pressed="true"] { border-color: var(--activo); background: var(--activo-fondo); color: var(--activo); font-weight: 600; }
   .panel-cuerpo .nota { font-size: 14px; color: var(--texto-suave); }
   .panel-cuerpo .nota.error { color: #b23a2e; }
   #lienzo #tarjeta-ejercicio {
@@ -4523,6 +4554,39 @@ const Ejercicio = {
 const Catalogo = {
   estado: 'sin-cargar',   // sin-cargar | cargando | listo | error
   lista: [],              // {archivo, def} o {archivo, error}
+  grupos: [],             // [{id, titulo, descripcion, abierto, items: [...]}], en el orden del índice
+  ordenando: false,
+  // Preferencias de cada persona: orden de los grupos y cuáles están desplegados
+  CLAVE: 'dibutec.ejercicios.grupos',
+  prefs() {
+    try { const p = JSON.parse(localStorage.getItem(this.CLAVE)); if (p && typeof p === 'object') return p; } catch (_) {}
+    return {};
+  },
+  guardarPrefs(p) { try { localStorage.setItem(this.CLAVE, JSON.stringify(p)); } catch (_) { /* sin almacenamiento */ } },
+  aId(t) { return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'grupo'; },
+  // Grupos en el orden elegido por la persona; los grupos nuevos del índice van al final, en su orden
+  ordenados() {
+    const orden = Array.isArray(this.prefs().orden) ? this.prefs().orden : [];
+    const pos = id => { const i = orden.indexOf(id); return i < 0 ? Infinity : i; };
+    return this.grupos.map((g, i) => ({ g, i })).sort((a, b) => (pos(a.g.id) - pos(b.g.id)) || (a.i - b.i)).map(x => x.g);
+  },
+  mover(id, paso) {
+    const ids = this.ordenados().map(g => g.id), i = ids.indexOf(id), j = i + paso;
+    if (i < 0 || j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    const p = this.prefs(); p.orden = ids; this.guardarPrefs(p);
+    this.pintar();
+    // El foco sigue en el mismo botón del grupo movido
+    const b = document.querySelector(`.grupo-ej[data-id="${CSS.escape(id)}"] .ge-mover button[data-paso="${paso}"]`);
+    if (b && !b.disabled) b.focus();
+    else { const o = document.querySelector(`.grupo-ej[data-id="${CSS.escape(id)}"] .ge-mover button:not(:disabled)`); if (o) o.focus(); }
+    UI.mensaje(`«${this.grupos.find(g => g.id === id).titulo}» movido a la posición ${j + 1} de ${ids.length}.`);
+  },
+  restablecerOrden() {
+    const p = this.prefs(); delete p.orden; delete p.abiertos; this.guardarPrefs(p);
+    this.pintar();
+    UI.aviso('Orden de los temas restablecido');
+  },
   CARPETA: 'ejercicios/',
 
   async cargar() {
@@ -4533,10 +4597,14 @@ const Catalogo = {
       const r = await fetch(this.CARPETA + 'indice.json', { cache: 'no-cache' });
       if (!r.ok) throw new Error('sin índice');
       const indice = await r.json();
-      const archivos = (Array.isArray(indice.ejercicios) ? indice.ejercicios : [])
-        .filter(a => typeof a === 'string' && /^[\w.-]+\.json$/.test(a) && !a.startsWith('.'));
+      const valido = a => typeof a === 'string' && /^[\w.-]+\.json$/.test(a) && !a.startsWith('.');
+      // Índice por temas ({grupos: [...]}) o, en el formato antiguo, una lista sin grupos
+      const grupos = Array.isArray(indice.grupos)
+        ? indice.grupos.filter(g => g && typeof g === 'object')
+        : [{ id: 'ejercicios', titulo: 'Ejercicios', ejercicios: indice.ejercicios }];
+      const usados = new Set();
       // Cada ejercicio se carga de su propio archivo; uno roto no impide los demás
-      this.lista = await Promise.all(archivos.map(async archivo => {
+      const cargarUno = async archivo => {
         try {
           const rr = await fetch(this.CARPETA + archivo, { cache: 'no-cache' });
           if (!rr.ok) throw new Error('no se encuentra el archivo');
@@ -4544,7 +4612,17 @@ const Catalogo = {
         } catch (e) {
           return { archivo, error: e instanceof SyntaxError ? 'el JSON tiene un error de escritura' : e.message };
         }
+      };
+      this.grupos = await Promise.all(grupos.map(async (g, i) => {
+        const titulo = typeof g.titulo === 'string' && g.titulo.trim() ? g.titulo.trim() : `Grupo ${i + 1}`;
+        let id = typeof g.id === 'string' && g.id.trim() ? g.id.trim() : this.aId(titulo);
+        while (usados.has(id)) id += '-' + (i + 1);
+        usados.add(id);
+        const archivos = (Array.isArray(g.ejercicios) ? g.ejercicios : []).filter(valido);
+        return { id, titulo, descripcion: typeof g.descripcion === 'string' ? g.descripcion : '',
+                 abierto: g.abierto !== false, items: await Promise.all(archivos.map(cargarUno)) };
       }));
+      this.lista = this.grupos.flatMap(g => g.items);
       this.estado = 'listo';
     } catch (_) {
       this.estado = 'error';
@@ -4571,7 +4649,59 @@ const Catalogo = {
       return;
     }
     if (!this.lista.length) { c.append(crear('p', 'nota', 'La carpeta de ejercicios está vacía.')); return; }
-    for (const item of this.lista) {
+    // Barra: ordenar los temas y volver al orden original
+    const barra = crear('div', 'ej-herramientas');
+    const bOrd = crear('button', null, this.ordenando ? 'Hecho' : 'Ordenar temas');
+    bOrd.type = 'button';
+    bOrd.setAttribute('aria-pressed', String(this.ordenando));
+    bOrd.addEventListener('click', () => { this.ordenando = !this.ordenando; this.pintar(); document.querySelector('.ej-herramientas button').focus(); });
+    barra.append(bOrd);
+    if (this.ordenando) {
+      const bRes = crear('button', null, 'Orden original');
+      bRes.type = 'button';
+      bRes.addEventListener('click', () => this.restablecerOrden());
+      barra.append(bRes);
+    }
+    c.append(barra);
+    const lista = crear('div', 'lista-ej' + (this.ordenando ? ' ordenando' : ''));
+    c.append(lista);
+    const prefs = this.prefs(), abiertos = prefs.abiertos || {};
+    const ordenados = this.ordenados();
+    ordenados.forEach((g, n) => {
+      const det = crear('details', 'grupo-ej');
+      det.dataset.id = g.id;
+      det.open = g.id in abiertos ? !!abiertos[g.id] : g.abierto;
+      det.addEventListener('toggle', () => {
+        const p = this.prefs(); p.abiertos = Object.assign({}, p.abiertos, { [g.id]: det.open }); this.guardarPrefs(p);
+      });
+      const sum = crear('summary');
+      const texto = crear('span', 'ge-texto');
+      texto.append(crear('span', 'ge-titulo', g.titulo));
+      if (g.descripcion) texto.append(crear('span', 'ge-desc', g.descripcion));
+      const ok = g.items.filter(i => !i.error).length;
+      sum.append(crear('span', 'ge-flecha'), texto, crear('span', 'ge-num', `${ok} ${ok === 1 ? 'ejercicio' : 'ejercicios'}`));
+      const mov = crear('span', 'ge-mover');
+      for (const [paso, sim, nombre] of [[-1, '↑', 'Subir'], [1, '↓', 'Bajar']]) {
+        const b = crear('button', null, sim);
+        b.type = 'button';
+        b.dataset.paso = paso;
+        b.setAttribute('aria-label', `${nombre} el tema «${g.titulo}»`);
+        b.title = `${nombre} el tema`;
+        b.disabled = paso < 0 ? n === 0 : n === ordenados.length - 1;
+        // Dentro del summary: que el botón no despliegue ni pliegue el grupo
+        b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); this.mover(g.id, paso); });
+        mov.append(b);
+      }
+      sum.append(mov);
+      const cuerpo = crear('div', 'ge-cuerpo');
+      if (!g.items.length) cuerpo.append(crear('p', 'nota', 'Este tema todavía no tiene ejercicios.'));
+      this.pintarItems(g.items, cuerpo, crear);
+      det.append(sum, cuerpo);
+      lista.append(det);
+    });
+  },
+  pintarItems(items, c, crear) {
+    for (const item of items) {
       if (item.error) { c.append(crear('p', 'nota error', `${item.archivo}: ${item.error}.`)); continue; }
       const d = item.def;
       const b = crear('button', 'ejercicio-item');

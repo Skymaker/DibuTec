@@ -20,6 +20,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 9 | Instrumentos configurables: color del plástico y tamaño, con el nombre de la aplicación impreso | ✅ Hecha |
 | 10 | Barrita del portaminas (color y grosor por trazo) y opciones del imán en la configuración | ✅ Hecha |
 | 11 | Botón para dar la vuelta a la escuadra y el cartabón (en espejo, con lo impreso al revés) | ✅ Hecha |
+| 12 | Ejercicios guiados agrupados por temas, en grupos desplegables que cada persona puede reordenar | ✅ Hecha |
 
 ---
 

@@ -20,7 +20,7 @@ Pruébalo: https://skymaker.github.io/DibuTec/
 |---|---|
 | `index.html` | La aplicación completa (HTML, CSS y JavaScript en un único archivo). |
 | `ejercicios/` | Ejercicios guiados, uno por archivo JSON. |
-| `ejercicios/indice.json` | Lista de ejercicios que aparecen en la aplicación. |
+| `ejercicios/indice.json` | Temas y ejercicios que aparecen en la aplicación, en orden. |
 | `ejercicios/LEEME.md` | Formato de los ejercicios y cómo añadir otros nuevos. |
 | `iconos/` | Icono de la aplicación (`icono.svg` es el original; los PNG se generan a partir de él). |
 | `manifest.webmanifest` | Datos para instalar la aplicación en la pantalla de inicio. |
@@ -29,4 +29,4 @@ Pruébalo: https://skymaker.github.io/DibuTec/
 ## Añadir ejercicios
 
 Copia el archivo `.json` del ejercicio en `ejercicios/` y añade su nombre a
-`ejercicios/indice.json`. El formato está explicado en `ejercicios/LEEME.md`.
+uno de los temas de `ejercicios/indice.json`. El formato está explicado en `ejercicios/LEEME.md`.

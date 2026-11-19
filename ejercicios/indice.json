@@ -1,12 +1,32 @@
 {
-  "ejercicios": [
-    "segmento.json",
-    "mediatriz.json",
-    "bisectriz.json",
-    "perpendicular.json",
-    "paralela.json",
-    "angulo-60.json",
-    "hexagono.json",
-    "cubo-isometrico.json"
+  "grupos": [
+    {
+      "id": "primeros-pasos",
+      "titulo": "Primeros pasos",
+      "descripcion": "Para aprender a usar los instrumentos.",
+      "ejercicios": ["segmento.json"]
+    },
+    {
+      "id": "trazados-fundamentales",
+      "titulo": "Trazados fundamentales",
+      "descripcion": "Mediatriz, bisectriz, perpendiculares y paralelas.",
+      "ejercicios": ["mediatriz.json", "bisectriz.json", "perpendicular.json", "paralela.json"]
+    },
+    {
+      "id": "angulos",
+      "titulo": "Ángulos",
+      "ejercicios": ["angulo-60.json"]
+    },
+    {
+      "id": "poligonos",
+      "titulo": "Polígonos",
+      "ejercicios": ["hexagono.json"]
+    },
+    {
+      "id": "perspectiva",
+      "titulo": "Perspectiva",
+      "abierto": false,
+      "ejercicios": ["cubo-isometrico.json"]
+    }
   ]
 }
