@@ -9,8 +9,8 @@
     {
       "id": "trazados-fundamentales",
       "titulo": "Trazados fundamentales",
-      "descripcion": "Mediatriz, bisectriz, perpendiculares y paralelas.",
-      "ejercicios": ["mediatriz.json", "bisectriz.json", "perpendicular.json", "paralela.json"]
+      "descripcion": "Mediatriz, bisectriz, perpendiculares, paralelas y división de segmentos.",
+      "ejercicios": ["mediatriz.json", "bisectriz.json", "perpendicular.json", "paralela.json", "thales-5-partes.json"]
     },
     {
       "id": "angulos",

@@ -1,0 +1,361 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "thales-5-partes",
+  "titulo": "División de un segmento en 5 partes iguales (Thales)",
+  "nivel": "2.º ESO",
+  "descripcion": "Con el teorema de Thales, divide el segmento AB en 5 partes iguales.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 60,
+        "y": 150
+      },
+      {
+        "nombre": "B",
+        "x": 210,
+        "y": 150
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "AB",
+        "desde": "A",
+        "hasta": "B"
+      }
+    ]
+  },
+  "textos": {
+    "AB": "el segmento AB",
+    "r": "la semirrecta auxiliar",
+    "s": "la recta BP5"
+  },
+  "pasos": [
+    {
+      "texto": "Desde A, traza con la regla una semirrecta auxiliar r de unos 12 cm que forme un ángulo agudo con AB (unos 30°).",
+      "pista": "Apoya el canto de la regla en A, gírala unos 30° y traza la recta.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "A",
+        "angulo": {
+          "con": "AB",
+          "grados": 30
+        },
+        "longitudMin": 110,
+        "toleranciaGrados": 15,
+        "nombrar": "r"
+      }
+    },
+    {
+      "texto": "Abre el compás 20 mm, pincha en A y traza un arco que corte a r.",
+      "pista": "Arrastra la mina hasta que el compás marque 20 mm.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "A",
+        "radio": 20,
+        "cortaA": [
+          "r"
+        ],
+        "nombrar": "c1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas el punto P1, donde el arco corta a r.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "c1",
+          "r"
+        ],
+        "distancia": {
+          "de": "A",
+          "mm": 20
+        },
+        "tolerancia": 1.5,
+        "nombrar": "P1"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha el compás en P1 y traza otro arco que corte a r.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P1",
+        "radio": 20,
+        "cortaA": [
+          "r"
+        ],
+        "nombrar": "c2"
+      }
+    },
+    {
+      "texto": "Marca el punto P2, donde el nuevo arco corta a r.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "c2",
+          "r"
+        ],
+        "distancia": {
+          "de": "A",
+          "mm": 40
+        },
+        "tolerancia": 1.5,
+        "nombrar": "P2"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha el compás en P2 y traza otro arco que corte a r.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P2",
+        "radio": 20,
+        "cortaA": [
+          "r"
+        ],
+        "nombrar": "c3"
+      }
+    },
+    {
+      "texto": "Marca el punto P3, donde el nuevo arco corta a r.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "c3",
+          "r"
+        ],
+        "distancia": {
+          "de": "A",
+          "mm": 60
+        },
+        "tolerancia": 2,
+        "nombrar": "P3"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha el compás en P3 y traza otro arco que corte a r.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P3",
+        "radio": 20,
+        "cortaA": [
+          "r"
+        ],
+        "nombrar": "c4"
+      }
+    },
+    {
+      "texto": "Marca el punto P4, donde el nuevo arco corta a r.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "c4",
+          "r"
+        ],
+        "distancia": {
+          "de": "A",
+          "mm": 80
+        },
+        "tolerancia": 2,
+        "nombrar": "P4"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha el compás en P4 y traza otro arco que corte a r.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P4",
+        "radio": 20,
+        "cortaA": [
+          "r"
+        ],
+        "nombrar": "c5"
+      }
+    },
+    {
+      "texto": "Marca el punto P5, donde el nuevo arco corta a r.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "c5",
+          "r"
+        ],
+        "distancia": {
+          "de": "A",
+          "mm": 100
+        },
+        "tolerancia": 2,
+        "nombrar": "P5"
+      }
+    },
+    {
+      "texto": "Une P5 con B con la regla y el portaminas.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "P5",
+        "hasta": "B",
+        "nombrar": "s"
+      }
+    },
+    {
+      "texto": "Saca la escuadra y apoya uno de sus cantos justo encima de la recta s.",
+      "pista": "Gírala con un asa: el canto se pega a los extremos de la recta.",
+      "herramientas": [
+        "escuadra"
+      ],
+      "objetivo": {
+        "tipo": "instrumento",
+        "instrumento": "escuadra",
+        "cantoSobre": "s",
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Saca el cartabón, apóyalo contra otro canto de la escuadra y fíjalo con su candado.",
+      "herramientas": [
+        "cartabon"
+      ],
+      "objetivo": {
+        "tipo": "instrumento",
+        "instrumento": "cartabon",
+        "apoyadoEn": "escuadra",
+        "bloqueado": true
+      }
+    },
+    {
+      "texto": "Desliza la escuadra a lo largo del cartabón y traza por P4, P3, P2 y P1 rectas paralelas a s hasta que corten a AB.",
+      "pista": "Mientras toca el cartabón, la escuadra solo se mueve a lo largo de él.",
+      "herramientas": [
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P4"
+          ],
+          "paralelaA": "s",
+          "longitudMin": 30,
+          "nombrar": "s4"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P3"
+          ],
+          "paralelaA": "s",
+          "longitudMin": 30,
+          "nombrar": "s3"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P2"
+          ],
+          "paralelaA": "s",
+          "longitudMin": 30,
+          "nombrar": "s2"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P1"
+          ],
+          "paralelaA": "s",
+          "longitudMin": 30,
+          "nombrar": "s1"
+        }
+      ]
+    },
+    {
+      "texto": "Marca los puntos Q1, Q2, Q3 y Q4 donde las paralelas cortan al segmento AB.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "s4",
+            "AB"
+          ],
+          "nombrar": "Q4"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "s3",
+            "AB"
+          ],
+          "nombrar": "Q3"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "s2",
+            "AB"
+          ],
+          "nombrar": "Q2"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "s1",
+            "AB"
+          ],
+          "nombrar": "Q1"
+        }
+      ]
+    },
+    {
+      "texto": "Fíjate: como las rectas son paralelas, el teorema de Thales asegura que AQ1 = Q1Q2 = Q2Q3 = Q3Q4 = Q4B.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! Has dividido AB en 5 partes iguales con el teorema de Thales."
+}
