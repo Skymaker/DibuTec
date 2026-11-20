@@ -1261,7 +1261,7 @@ const Capas = {
    Render: repintado bajo demanda con requestAnimationFrame
    ===================================================================== */
 const Render = {
-  pendiente: { papel: false, dibujo: false, instrumentos: false },
+  pendiente: { papel: false, dibujo: false, instrumentos: false, animacion: false },
   programado: false,
   pedir(...capas) {
     for (const c of capas) this.pendiente[c] = true;
@@ -1279,8 +1279,8 @@ const Render = {
     // Primero se comprueba el ejercicio: puede poner nombres, y tienen que verse en este mismo repintado
     if (p.dibujo || p.instrumentos) { Guardado.programar(); Ejercicio.comprobar(); }
     this.programado = false;
-    const q = { papel: p.papel, dibujo: p.dibujo, instrumentos: p.instrumentos };
-    p.papel = p.dibujo = p.instrumentos = false;
+    const q = { papel: p.papel, dibujo: p.dibujo, instrumentos: p.instrumentos || p.animacion };
+    p.papel = p.dibujo = p.instrumentos = p.animacion = false;   // «animacion»: solo repintar, sin comprobar el ejercicio
     if (q.papel) this.papel();
     if (q.dibujo) this.dibujo();
     if (q.instrumentos) this.instrumentos();
@@ -2574,33 +2574,29 @@ class Compas extends Instrumento {
     this.levantada = false;      // mina levantada: el compás gira sin pintar
     this.autoLevantada = false;  // se levantó sola al terminar un trazo: se apoya sola al empezar el siguiente
     this.alzado = 0;             // 0: tumbado (visto desde arriba); 1: de pie, perpendicular al papel, al trazar
-    this.inclina = 0;            // al girar de pie, la cabeza se inclina hacia donde va (−1…1)
     this.ayuda = 'Compás: arrastra la punta seca hasta un punto, abre el compás moviendo la mina y gira el asa de arriba. El botón de la mina decide si pinta (apoyada) o solo gira (levantada).';
   }
   altura() {
     const m = this.r / 2;
     return Math.sqrt(Math.max(this.pierna ** 2 - m * m, (this.pierna * 0.18) ** 2));
   }
-  // De pie, visto desde arriba, la bisagra queda sobre el centro de las patas (con un poco de inclinación al girar)
-  bisagra() {
-    const a = this.alzado, h = this.altura();
-    return [this.r / 2, -h * (1 - a) + a * this.inclina * Math.min(8, h * 0.12)];
-  }
+  // De pie, visto desde arriba, la bisagra queda sobre el centro de las patas
+  bisagra() { return [this.r / 2, -this.altura() * (1 - this.alzado)]; }
   pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(12, 32 / Vista.escala) * (1 - this.alzado * 0.85)]; }
   // Animación al ponerse de pie (1) o tumbarse (0)
-  animarAlzado(objetivo, ms = 280) {
+  animarAlzado(objetivo, ms = 420) {
     let quieto = false;
     try { quieto = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { /* */ }
-    if (quieto) { this.alzado = objetivo; if (!objetivo) this.inclina = 0; Render.pedir('instrumentos'); return; }
+    if (quieto) { this.alzado = objetivo; Render.pedir('instrumentos'); return; }
     const desde = this.alzado, t0 = performance.now();
     this._anim = t0;
     const paso = ahora => {
       if (this._anim !== t0) return;                     // otra animación la ha sustituido
-      const k = Math.min(1, (ahora - t0) / ms), e = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      // Curva suave (seno) al empezar y al terminar
+      const k = Math.min(1, (ahora - t0) / ms), e = (1 - Math.cos(Math.PI * k)) / 2;
       this.alzado = desde + (objetivo - desde) * e;
-      if (!objetivo) this.inclina *= 0.85;
-      Render.pedir('instrumentos');
-      if (k < 1) requestAnimationFrame(paso); else if (!objetivo) this.inclina = 0;
+      Render.pedir('animacion');
+      if (k < 1) requestAnimationFrame(paso);
     };
     requestAnimationFrame(paso);
   }
@@ -3328,8 +3324,6 @@ const Manip = {
     if (d > Math.PI) d -= Geom.DOS_PI; else if (d < -Math.PI) d += Geom.DOS_PI;
     s.angPrev = ang;
     this.halo = null;
-    // De pie, la cabeza se inclina un poco hacia donde gira, como al trazar con la mano
-    inst.inclina = inst.inclina * 0.7 + Geom.clamp(d * 25, -1, 1) * 0.3;
     const levantada = inst.levantada || !!(e && e.altKey);
     if (levantada) {
       this.cerrarTramo(s);
