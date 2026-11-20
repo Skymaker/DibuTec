@@ -863,7 +863,7 @@ const Construccion = {
         const c = pt(o.centro);
         let r = null, aprox = false;
         if (Number.isFinite(o.radio)) r = o.radio;
-        else if (o.radioComo !== undefined && lin(o.radioComo) && lin(o.radioComo).tipo === 'arco') r = lin(o.radioComo).r;
+        else if (o.radioComo !== undefined && lin(o.radioComo) && lin(o.radioComo).tipo === 'arco') { r = lin(o.radioComo).r; aprox = !!lin(o.radioComo).aprox; }
         else if (U.esObj(o.radio)) {
           const mn = o.radio.min, mx = o.radio.max;
           r = Number.isFinite(mn) && Number.isFinite(mx) ? (mn + mx) / 2 : Number.isFinite(mn) ? mn + 10 : Number.isFinite(mx) ? mx * .8 : null;
@@ -1040,6 +1040,7 @@ const Encuadre = {
     const meter = (x, y) => { if (!Number.isFinite(x) || !Number.isFinite(y)) return; x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); };
     const forma = f => {
       if (!f) return;
+      if (f.aprox) { meter(f.cx, f.cy); return; }   // radio libre: su tamaño real no se sabe
       if (f.tipo === 'punto') meter(f.x, f.y);
       else if (f.tipo === 'recta' && f.ocupa) f.ocupa.forEach(q => meter(q.x, q.y));
       else if (f.tipo === 'recta') { meter(f.x1, f.y1); meter(f.x2, f.y2); }
@@ -1185,6 +1186,10 @@ const Revision = {
       if (Array.isArray(p.herramientas)) for (const h of p.herramientas)
         if (!HERRAMIENTAS.some(x => x[0] === h)) ojo(`${P}: herramienta desconocida «${h}».`, ir);
     });
+    // La construcción completa tiene que caber en la hoja
+    const caja = ej.pasos.length ? Encuadre.caja(ej) : null;
+    if (caja && (caja.x0 < 0 || caja.y0 < 0 || caja.x1 > W || caja.y1 > H))
+      ojo('Parte de la construcción esperada se sale de la hoja. Muévela con los botones de «Solución final».', { tipo: 'final' });
     const todos = Nombres.todos(ej);
     for (const k in ej.textos) if (!todos.has(k)) ojo(`Hay un texto para «${k}», pero no hay nada con ese nombre.`, { tipo: 'textos' });
     return out;
@@ -1491,7 +1496,7 @@ const Editor = {
   repintar({ inspector = true } = {}) {
     this.revision = Revision.revisar(this.ej);
     Esquema.pintar();
-    if (inspector) Inspector.pintar();
+    if (inspector) Inspector.pintar(); else Inspector.actualizarVivos();
     this.pintarHoja();
     this.pintarEstado();
     Barra.actualizar();
@@ -2186,6 +2191,7 @@ const Editor = {
       h('4 · Pasos'), p('Cada paso tiene una instrucción, una pista opcional, las herramientas que se resaltan y uno o varios <b>objetivos</b>. Usa <b>Nombrar</b> para poner nombre a lo que se consigue (por ejemplo, «arcoA») y usarlo en pasos siguientes. El botón <span style="white-space:nowrap">⌖</span> junto a cada campo permite elegir el punto o la línea tocando la hoja; también puedes tocar uno de los <b>Nombres que se pueden usar aquí</b> para ponerlo en el último campo que hayas tocado.'),
       h('Series de pasos'), p('Para construcciones que se repiten (llevar varias veces una medida con el compás, trazar varias paralelas…), <b>duplica</b> el paso o el objetivo: la copia recibe el siguiente nombre de la serie (c1 → c2, P1 → P2) y solo tienes que cambiar los puntos y líneas que usa.'),
       h('Puntos que ya cumplen el objetivo'), p('DibuTec da por bueno <b>cualquier</b> punto que cumpla las condiciones, también uno marcado en un paso anterior. Si en la construcción esperada eso ocurre (por ejemplo, la circunferencia de centro P2 pasa por P1), la revisión lo avisa: añade una condición que distinga el punto nuevo, como «A una distancia».'),
+      h('Revisión'), p('Se repite después de cada cambio, también mientras escribes: el botón de la barra inferior, las marcas del panel izquierdo, la lista «Revisión» del elemento seleccionado y los campos en rojo se ponen al día solos. También avisa si la construcción esperada se sale de la hoja.'),
       h('Dos cortes'), p('Si las dos líneas de «En el cruce de» se cortan en dos puntos (por ejemplo, un arco y una recta), elige cuál es el bueno con los botones que aparecen debajo o tocando en la hoja el corte marcado con un círculo gris. Si no eliges, DibuTec da por bueno cualquiera de los dos.'),
       h('Arcos que cortan dos veces'), p('En «Corta a», si la circunferencia del arco puede cortar a la línea en dos sitios y solo hace falta un corte, elige dónde va el arco con los botones o tocándolo en la hoja. Solo se dibuja ese arco y DibuTec pedirá que el alumno lo trace por ese lado.'),
       h('Cambiar un nombre'), p('Al cambiar un nombre en «Nombrar lo conseguido» o en el enunciado, se cambia en todos los pasos que lo usan. No se puede usar un nombre que ya tiene otro elemento.'),
@@ -2294,7 +2300,7 @@ const Esquema = {
     });
     c.append(U.el('button', { type: 'button', class: 'anadir', text: '+ Añadir un paso', onclick: () => Editor.anadirPaso() }));
     c.append(U.el('div', { class: 'esq-titulo', text: 'Al terminar' }),
-      item('final', 'final', 'Solución final', ej.final ? ej.final.slice(0, 60) + (ej.final.length > 60 ? '…' : '') : 'Colocación en la hoja y mensaje', s.tipo === 'final', () => false));
+      item('final', 'final', 'Solución final', ej.final ? ej.final.slice(0, 60) + (ej.final.length > 60 ? '…' : '') : 'Colocación en la hoja y mensaje', s.tipo === 'final', ir => ir.tipo === 'final'));
     if (foco) { const f = c.querySelector(`[data-clave="${foco}"]`); if (f) f.focus(); }
   },
 };
@@ -2303,14 +2309,44 @@ const Esquema = {
    Inspector: propiedades de lo seleccionado
    ===================================================================== */
 const Inspector = {
+  vivos: [],      // partes del panel que se rehacen tras cada cambio sin repintarlo entero
   pintar() {
     const c = document.getElementById('inspector'), s = Editor.sel;
     const scroll = c.scrollTop;
     c.textContent = '';
+    this.vivos = [];
     const f = { ficha: this.ficha, enunciado: this.enunciado, punto: this.punto, recta: this.recta, arco: this.arco,
       instrumentos: this.instrumentos, inst: this.instrumentos, textos: this.textos, final: this.final, paso: this.paso }[s.tipo];
     if (f) f.call(this, c, s);
+    // Problemas de lo seleccionado (los del paso van en su sitio, dentro del panel del paso)
+    const filtro = {
+      ficha: ir => ir.tipo === 'ficha', textos: ir => ir.tipo === 'textos', final: ir => ir.tipo === 'final',
+      enunciado: ir => ['punto', 'recta', 'arco'].includes(ir.tipo),
+      punto: ir => ir.tipo === 'punto' && ir.i === s.i, recta: ir => ir.tipo === 'recta' && ir.i === s.i, arco: ir => ir.tipo === 'arco' && ir.i === s.i,
+    }[s.tipo];
+    if (filtro) { const r = this.revisionDe(filtro, s.tipo === 'enunciado'); c.insertBefore(r, c.children[1] || null); }
     c.scrollTop = scroll;
+  },
+  // Zona que se vuelve a construir con fn(el) después de cada cambio
+  vivo(fn, attrs = {}) {
+    const el = U.el('div', attrs);
+    const hacer = () => { el.textContent = ''; fn(el); };
+    hacer();
+    this.vivos.push(() => { if (el.isConnected) hacer(); });
+    return el;
+  },
+  actualizarVivos() {
+    for (const f of this.vivos) { try { f(); } catch (e) { console.error(e); } }
+  },
+  // Lista de errores y avisos que cumplen filtro(ir), siempre al día
+  revisionDe(filtro, irA = false) {
+    return this.vivo(el => {
+      const probs = Editor.revision.filter(r => filtro(r.ir));
+      if (!probs.length) return;
+      el.append(U.el('h3', { text: 'Revisión' }));
+      for (const r of probs) el.append(U.el(irA ? 'button' : 'div', { type: irA ? 'button' : undefined, class: 'problema ' + r.nivel, onclick: irA ? () => Editor.seleccionar(r.ir) : undefined },
+        U.el('div', null, U.el('b', { text: r.nivel === 'error' ? 'Error' : 'Aviso' }), U.el('div', { text: r.texto }))));
+    }, { class: 'revision-viva', 'aria-live': 'polite' });
   },
   // ---------- Piezas ----------
   fila(etiqueta, control, ayuda) {
@@ -2567,12 +2603,10 @@ const Inspector = {
         Editor.cambio();
         aviso(`Ejercicio movido ${[r.dx ? `${U.fmt(Math.abs(r.dx))} mm a la ${r.dx > 0 ? 'derecha' : 'izquierda'}` : '', r.dy ? `${U.fmt(Math.abs(r.dy))} mm hacia ${r.dy > 0 ? 'abajo' : 'arriba'}` : ''].filter(Boolean).join(' y ')}. Ctrl+Z para deshacerlo.`);
       };
-      const fuera = caja.x0 < 0 || caja.y0 < 0 || caja.x1 > W || caja.y1 > H;
       c.append(...[U.el('h3', { text: 'Colocar en la hoja' }),
         U.el('div', { class: 'margenes' },
           U.el('span', { text: `Izquierda: ${mm(caja.x0)}` }), U.el('span', { text: `Derecha: ${mm(W - caja.x1)}` }),
           U.el('span', { text: `Arriba: ${mm(caja.y0)}` }), U.el('span', { text: `Abajo: ${mm(H - caja.y1)}` })),
-        fuera ? U.el('div', { class: 'problema aviso' }, U.el('div', null, U.el('b', { text: 'Aviso' }), U.el('div', { text: 'Parte de la construcción se sale de la hoja.' }))) : null,
         U.el('div', { class: 'botones-centrar' },
           U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.centrarH + '<span>Centrar en horizontal</span>', onclick: () => centrar(true, false) }),
           U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.centrarV + '<span>Centrar en vertical</span>', onclick: () => centrar(false, true) }),
@@ -2624,14 +2658,12 @@ const Inspector = {
     p.objetivos.forEach((o, j) => c.append(this.objetivo(p, o, j, s.i)));
     c.append(U.el('button', { type: 'button', class: 'anadir', text: '+ Añadir otro objetivo a este paso', onclick: () => { p.objetivos.push({ tipo: 'punto' }); Editor.cambio(); } }));
     // Problemas de este paso
-    const probs = Editor.revision.filter(r => r.ir.tipo === 'paso' && r.ir.i === s.i);
-    if (probs.length) {
-      c.append(U.el('h3', { text: 'Revisión' }));
-      for (const r of probs) c.append(U.el('div', { class: 'problema ' + r.nivel }, U.el('div', null, U.el('b', { text: r.nivel === 'error' ? 'Error' : 'Aviso' }), U.el('div', { text: r.texto }))));
-    }
-    const disp = Nombres.disponibles(ej, s.i);
-    c.append(U.el('h3', { text: 'Nombres que se pueden usar aquí' }),
-      U.el('div', { class: 'tags' }, disp.size ? [...disp].map(([n, i]) => U.el('button', { type: 'button', class: 'tag', title: `${i.tipo} · ${i.origen}. Tócalo para ponerlo en el último campo que hayas tocado.`, text: `${n} · ${i.tipo}`, onclick: () => this.ponerNombre(n, i.tipo) })) : U.el('span', { class: 'ayuda', text: 'Ninguno todavía.' })));
+    c.append(this.revisionDe(ir => ir.tipo === 'paso' && ir.i === s.i));
+    c.append(this.vivo(el => {
+      const disp = Nombres.disponibles(Editor.ej, s.i);
+      el.append(U.el('h3', { text: 'Nombres que se pueden usar aquí' }),
+        U.el('div', { class: 'tags' }, disp.size ? [...disp].map(([n, i]) => U.el('button', { type: 'button', class: 'tag', title: `${i.tipo} · ${i.origen}. Tócalo para ponerlo en el último campo que hayas tocado.`, text: `${n} · ${i.tipo}`, onclick: () => this.ponerNombre(n, i.tipo) })) : U.el('span', { class: 'ayuda', text: 'Ninguno todavía.' })));
+    }));
   },
   // Pone un nombre en el último campo de punto o línea que se ha tocado
   ponerNombre(n, tipoNombre) {
@@ -2724,13 +2756,13 @@ const Inspector = {
     return caja;
   },
   // Cuando las dos líneas se cortan en varios puntos, cuál de ellos es el bueno
-  eleccionCorte(o, iPaso) {
-    const caja = U.el('div', { class: 'corte' });
+  eleccionCorte(o, iPaso) { return this.vivo(caja => this.pintarCorte(caja, o, iPaso), { class: 'corte' }); },
+  pintarCorte(caja, o, iPaso) {
     const cs = Cortes.de(Editor.ej, iPaso, o);
-    if (cs.length < 2) return caja;
+    if (cs.length < 2) return;
     if (o.cantidad > 1) {
       caja.append(U.el('div', { class: 'ayuda', text: `Se cortan en ${cs.length} puntos; con «Cantidad de puntos» valen todos.` }));
-      return caja;
+      return;
     }
     const elegido = U.esCoord(o.corte) ? Cortes.masCercano(cs, o.corte) : null;
     const noms = Cortes.nombres(cs);
@@ -2741,13 +2773,14 @@ const Inspector = {
         U.el('button', { type: 'button', text: 'Cualquiera', 'aria-pressed': String(o.corte === false), title: 'Vale el punto en cualquiera de los cortes',
           onclick: () => { o.corte = false; Editor.cambio(); } })),
       U.el('div', { class: 'ayuda', text: 'También puedes tocar en la hoja el corte marcado con un círculo gris. Elige «Cualquiera» si los dos sirven.' }));
-    return caja;
   },
   // «Corta a» con un solo corte cuando la circunferencia corta la línea en dos sitios: cuál vale
-  eleccionArco(o, ix, iPaso) {
-    const caja = U.el('div', { class: 'corte' });
+  eleccionArco(o, ix, iPaso) { return this.vivo(caja => this.pintarArco(caja, o, ix, iPaso), { class: 'corte' }); },
+  pintarArco(caja, o, ix, iPaso) {
+    const actual = [].concat(o.cortaA || [])[ix];
+    if (U.esObj(actual) && actual.cortes > 1) return;   // con dos cortes no hay que elegir
     const cs = Cortes.deArco(Editor.ej, iPaso, o, ix);
-    if (cs.length < 2) return caja;
+    if (cs.length < 2) return;
     const x = [].concat(o.cortaA)[ix], ref = U.esObj(x) && U.esCoord(x.corte) ? x.corte : null;
     const elegido = ref ? Cortes.masCercano(cs, ref) : null, noms = Cortes.nombres(cs);
     caja.append(U.el('div', { class: 'ayuda', style: 'margin:4px 0 4px', text: `Puede cortarla en ${cs.length} sitios. ¿Dónde va el arco?` }),
@@ -2757,7 +2790,6 @@ const Inspector = {
         U.el('button', { type: 'button', text: 'Cualquiera', 'aria-pressed': String(!elegido), title: 'Vale el arco en cualquiera de los dos sitios',
           onclick: () => { Cortes.elegirArco(o, ix, null); Editor.cambio(); } })),
       U.el('div', { class: 'ayuda', text: elegido ? 'Solo se dibuja ese arco y DibuTec pedirá que corte por ese lado.' : 'También puedes tocar en la hoja el arco que vale.' }));
-    return caja;
   },
   valorInicial(t, k) {
     return { pt: '', linea: '', par: ['', ''], pts: [''], angPunto: { vertice: '', desde: '', grados: 60 }, angRecta: { con: '', grados: 30 },
@@ -2820,7 +2852,7 @@ const Inspector = {
           num.addEventListener('input', () => { const m = parseInt(num.value, 10) || 1; guardar(typeof l[i] === 'string' ? l[i] : l[i].elemento, m); set(l.slice()); });
           box.append(U.el('div', { class: 'par' }, this.ref(el, 'linea', ctx.paso, nv => { guardar(nv, typeof l[i] === 'string' ? 1 : l[i].cortes || 1); set(l.slice()); }),
             U.el('span', { class: 'ayuda', text: '×', style: 'margin:0' }), num, this.btnMini('cerrar', 'Quitar', () => { l.splice(i, 1); setI(l.slice()); })));
-          if (n === 1) box.append(this.eleccionArco(o, i, ctx.paso));
+          box.append(this.eleccionArco(o, i, ctx.paso));
         });
         box.append(U.el('button', { type: 'button', class: 'btn-texto', text: '+ Línea', onclick: () => { l.push(''); setI(l.slice()); } }));
         cont.append(box, U.el('div', { class: 'ayuda', text: 'El número es cuántas veces tiene que cortarla (1 o 2).' }));
@@ -2874,8 +2906,12 @@ const Inspector = {
   // Referencia a un punto (nombre o coordenadas) o a una línea (nombre), con botón para elegirla en la hoja
   ref(v, tipo, iPaso, alCambiar) {
     const caja = U.el('div', { class: 'ref' });
-    const disp = Nombres.disponibles(Editor.ej, iPaso < 0 ? -1 : iPaso);
-    const filtro = [...disp].filter(([, i]) => tipo === 'punto' ? i.tipo === 'punto' : tipo === 'linea' ? i.tipo !== 'punto' : i.tipo === tipo);
+    let disp, filtro;
+    const leer = () => {
+      disp = Nombres.disponibles(Editor.ej, iPaso < 0 ? -1 : iPaso);
+      filtro = [...disp].filter(([, i]) => tipo === 'punto' ? i.tipo === 'punto' : tipo === 'linea' ? i.tipo !== 'punto' : i.tipo === tipo);
+    };
+    leer();
     const idDl = this.datalist('dl-' + tipo + '-' + iPaso, filtro);
     const comprobar = (inp, val) => {
       const ok = val === '' ? false : filtro.some(([n]) => n === val);
@@ -2904,6 +2940,8 @@ const Inspector = {
         comprobar(inp, inp.value);
         inp.addEventListener('input', () => { comprobar(inp, inp.value.trim()); alCambiar(inp.value.trim()); });
         inp.addEventListener('focus', () => { Editor.ultimoCampo = { inp, tipo }; });
+        // Tras cualquier cambio (un nombre nuevo, uno cambiado…) se vuelve a comprobar
+        this.vivos.push(() => { if (inp.isConnected) { leer(); comprobar(inp, inp.value.trim()); } });
         caja.append(inp);
         if (tipo === 'punto') caja.append(this.btnMini('cambiar', 'Usar coordenadas', () => {
           const C = Construccion.calcular(Editor.ej, iPaso - 1), f = C.geo.get(inp.value.trim());
