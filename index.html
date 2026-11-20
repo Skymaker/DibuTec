@@ -1170,9 +1170,9 @@ const Escena = {
     d = d && typeof d === 'object' ? d : {};
     // Color y grosor de cada trazo (los dibujos antiguos no los tienen)
     const trazo = o => ({ c: Config.valido('colorLapiz', o.c) || 'grafito', g: Config.valido('grosorLapiz', o.g) || 0.5 });
-    const nombre = o => (o.nombre ? { nombre: String(o.nombre).slice(0, 6) } : {});
+    const nombre = o => (o.nombre ? { nombre: String(o.nombre).slice(0, 12) } : {});
     const puntos = lista(d.puntos).filter(p => p && fin(p.x) && fin(p.y))
-      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 6), dado: !!p.dado, ...(p.manual ? { manual: true } : {}), ...trazo(p) }));
+      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 12), dado: !!p.dado, ...(p.manual ? { manual: true } : {}), ...trazo(p) }));
     const rectas = lista(d.rectas).filter(r => r && [r.x1, r.y1, r.x2, r.y2].every(fin))
       .map(r => ({ id: fin(r.id) ? r.id : 0, x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2, dado: !!r.dado, ...nombre(r), ...trazo(r) }));
     const arcos = lista(d.arcos).filter(a => a && [a.cx, a.cy, a.r, a.a0, a.a1].every(fin) && a.r > 0)
@@ -4276,7 +4276,7 @@ const Ejercicio = {
       const q = Escena.agregarPunto(p.x, p.y);
       q.dado = true;
       const et = p.etiqueta || p.nombre;
-      if (et) q.etiqueta = String(et).slice(0, 6);
+      if (et) q.etiqueta = String(et).slice(0, 12);
       nombrar(p.nombre || q.etiqueta, 'punto', q.id);
     }
     const coord = (ref, x, y) => this.punto(ref) || (fin(x) && fin(y) ? { x, y } : null);
@@ -4475,13 +4475,14 @@ const Ejercicio = {
       if (k < n) return n > 1 ? `El arco tiene que cortar a ${this.nombreDe(ref)} en ${n} puntos.` : `El arco tiene que cortar a ${this.nombreDe(ref)}.`;
       // Con un corte elegido («corte»: {x, y}), el arco tiene que cortar por ese lado: de los dos
       // sitios donde su circunferencia corta a la línea, el más cercano al elegido
+      // Vale el corte más cercano al sitio elegido. Si los dos quedan casi igual de cerca (el sitio no
+      // distingue, o el alumno ha inclinado mucho la línea), no se exige ningún lado.
       const elegido = n === 1 && c && c.corte && typeof c.corte === 'object' ? this.punto(c.corte) : null;
       if (elegido) {
-        const todos = Geom.intersecciones({ tipo: 'arco', o: Object.assign({}, a, { a0: 0, a1: Geom.DOS_PI }) }, L);
-        if (todos.length > 1) {
-          const q = todos.reduce((m, t) => (Geom.dist(t.x, t.y, elegido.x, elegido.y) < Geom.dist(m.x, m.y, elegido.x, elegido.y) ? t : m), todos[0]);
-          if (Geom.distArco(q.x, q.y, a) > tol) return `El arco tiene que cortar a ${this.nombreDe(ref)} por el otro lado.`;
-        }
+        const todos = Geom.intersecciones({ tipo: 'arco', o: Object.assign({}, a, { a0: 0, a1: Geom.DOS_PI }) }, L)
+          .map(t => ({ t, d: Geom.dist(t.x, t.y, elegido.x, elegido.y) })).sort((p, q) => p.d - q.d);
+        if (todos.length > 1 && todos[1].d - todos[0].d >= Math.max(3, a.r / 4) && Geom.distArco(todos[0].t.x, todos[0].t.y, a) > tol)
+          return `El arco tiene que cortar a ${this.nombreDe(ref)} por el otro lado.`;
       }
     }
     return null;
@@ -4545,10 +4546,13 @@ const Ejercicio = {
     const tolA = Number.isFinite(o.toleranciaGrados) ? o.toleranciaGrados : 1;
     const nombrar = o.nombrar === undefined ? [] : [].concat(o.nombrar);
     const propios = l => l.filter(e => o.permitirDados || !e.dado);
+    // Un objetivo que pone nombre necesita un elemento nuevo: no vale uno que ya tenga otro nombre del ejercicio
+    const conNombre = new Set(Object.values(this.nombres).map(n => n.tipo + ':' + n.id));
+    const libres = (l, tipo) => (nombrar.length ? l.filter(e => !conNombre.has(tipo + ':' + e.id)) : l);
     const nuevos = l => l.filter(e => e.id >= this.ultimoId);   // para explicar qué falla
     const fallo = motivo => ({ ok: false, motivo });
     const elegirUno = (lista, cond, tipo) => {
-      const orden = propios(lista).sort((a, b) => b.id - a.id);    // lo más reciente primero
+      const orden = libres(propios(lista), tipo).sort((a, b) => b.id - a.id);    // lo más reciente primero
       const bueno = orden.find(e => !cond(e));
       if (bueno) return { ok: true, asignar: nombrar.slice(0, 1).map(n => ({ nombre: n, tipo, id: bueno.id })) };
       const nuevo = nuevos(orden)[0];
@@ -4560,7 +4564,7 @@ const Ejercicio = {
       case 'punto': {
         const n = Number.isInteger(o.cantidad) && o.cantidad > 0 ? o.cantidad : 1;
         const elegidos = [], usados = new Set();
-        for (const p of propios(Escena.puntos)) {
+        for (const p of libres(propios(Escena.puntos), 'punto')) {
           if (this.condPunto(p, o, tol, tolA)) continue;
           if (o.cruce !== undefined) {
             const i = this.indiceCruce(p, o, tol);
@@ -4635,7 +4639,7 @@ const Ejercicio = {
     let retrocede = false;
     for (let i = 0; i < this.paso; i++) {
       if ((this.asignados[i] || []).some(n => !this.elemento(n))) {
-        for (let j = i; j < this.paso; j++) for (const n of this.asignados[j] || []) delete this.nombres[n];
+        for (let j = i; j < this.paso; j++) for (const n of this.asignados[j] || []) { this.desetiquetar(n); delete this.nombres[n]; }
         this.asignados.length = i;
         this.paso = i;
         retrocede = true;
@@ -4647,7 +4651,7 @@ const Ejercicio = {
     while (this.paso < this.def.pasos.length) {
       const r = this.evaluarPaso(this.def.pasos[this.paso]);
       if (!r.ok) { motivo = r.motivo; break; }
-      for (const a of r.asignar) this.nombres[a.nombre] = { tipo: a.tipo, id: a.id };
+      for (const a of r.asignar) { this.nombres[a.nombre] = { tipo: a.tipo, id: a.id }; this.etiquetar(a); }
       this.asignados[this.paso] = r.asignar.map(a => a.nombre);
       this.paso++;
       avanza++;
@@ -4674,6 +4678,38 @@ const Ejercicio = {
       this.pintarTarjeta();
       this.marcarSugeridos();
     }
+  },
+  // El elemento conseguido lleva en el dibujo el nombre que le da el ejercicio
+  etiquetar(a) {
+    const el = this.buscarId(a.tipo, a.id);
+    if (!el || el.dado) return;
+    const n = String(a.nombre).slice(0, 12);
+    if (a.tipo === 'punto') {
+      if (el.etiqueta === n) return;
+      // Si otro punto ya se llamaba así, recibe la primera letra libre
+      for (const q of Escena.puntos) if (q !== el && q.etiqueta === n) { q.etiqueta = ''; q.etiqueta = Escena.siguienteEtiqueta(); }
+      if (el.etiquetaPrevia === undefined) el.etiquetaPrevia = el.etiqueta;
+      el.etiqueta = n;
+    } else {
+      for (const q of [...Escena.rectas, ...Escena.arcos]) if (q !== el && q.nombre === n) delete q.nombre;
+      if (!('nombrePrevio' in el)) el.nombrePrevio = el.nombre;
+      el.nombre = n;
+    }
+    Render.pedir('dibujo');
+  },
+  desetiquetar(n) {
+    const e = this.nombres[n], el = e && this.buscarId(e.tipo, e.id);
+    if (!el || el.dado) return;
+    if (e.tipo === 'punto' && el.etiqueta === n) {
+      el.etiqueta = '';
+      const previa = el.etiquetaPrevia;
+      el.etiqueta = previa && !Escena.puntos.some(q => q !== el && q.etiqueta === previa) ? previa : Escena.siguienteEtiqueta();
+      delete el.etiquetaPrevia;
+    } else if (e.tipo !== 'punto' && el.nombre === n) {
+      if (el.nombrePrevio) el.nombre = el.nombrePrevio; else delete el.nombre;
+      delete el.nombrePrevio;
+    }
+    Render.pedir('dibujo');
   },
   pulsarSiguiente() { this.siguiente = true; this.comprobar(); this.siguiente = false; },
 

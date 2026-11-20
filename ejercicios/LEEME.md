@@ -32,6 +32,10 @@ con errores no impide usar los demás.
 - **Solución final**: muestra la construcción completa, sus márgenes en la
   hoja y botones para centrarla en horizontal, en vertical o en los dos
   sentidos (se mueve todo: enunciado, sitios de los objetivos e instrumentos).
+  Con **Mover libremente** se coloca a mano: arrastrando en la hoja, con las
+  flechas (Mayús: 10 mm) o escribiendo los milímetros.
+- Al cambiar el **centro** de un arco, el sitio elegido en «Corta a» se mueve
+  con él (así una copia de un paso conserva el lado del arco).
 - **Series**: al duplicar un paso (Ctrl+D) o un objetivo, la copia recibe el
   siguiente nombre de la serie (c1 → c2, P1 → P2). Los nombres de «Nombres que
   se pueden usar aquí» se pueden tocar para ponerlos en el último campo tocado.
@@ -187,7 +191,7 @@ vuelve a ese paso.
 
 | Opción | Significado |
 |---|---|
-| `nombrar` | Pone nombre a lo que cumple el objetivo para usarlo en pasos siguientes. Una cadena o una lista (para varios puntos). |
+| `nombrar` | Pone nombre a lo que cumple el objetivo para usarlo en pasos siguientes. Una cadena o una lista (para varios puntos). En DibuTec, el elemento conseguido muestra ese nombre en el dibujo (las líneas, en su centro), y un elemento que ya tiene otro nombre del ejercicio no vale para este objetivo. |
 | `tolerancia` | Margen en mm (por defecto 1). |
 | `toleranciaGrados` | Margen en grados (por defecto 1). |
 | `permitirDados` | Si es `true`, también valen los elementos del enunciado. |
@@ -201,7 +205,7 @@ Un punto marcado con el portaminas.
 | `cerca` | `"cerca": { "x": 100, "y": 50 }` |
 | `sobre` | `"sobre": "c"` (sobre una recta o arco) |
 | `cruce` | `"cruce": ["arcoA", "arcoB"]` (donde se cortan dos líneas) |
-| `corte` | Junto con `cruce`, cuando las líneas se cortan en dos puntos: `"corte": { "x": 120, "y": 80 }` (sitio aproximado del corte bueno). Solo vale el corte más cercano a ese sitio. Con `"corte": false` vale cualquiera de los dos a propósito (sin `corte` también, pero el editor avisa). |
+| `corte` | Junto con `cruce`, cuando las líneas se cortan en dos puntos: `"corte": { "x": 120, "y": 80 }` (sitio aproximado del corte bueno). Solo vale el corte más cercano a ese sitio (si los dos quedan casi igual de cerca, no se exige ninguno y el editor avisa). Con `"corte": false` vale cualquiera de los dos a propósito (sin `corte` también, pero el editor avisa). |
 | `angulo` | `"angulo": { "vertice": "V", "desde": "B", "grados": 60 }`; con `"sentido": "antihorario"` u `"horario"` solo vale un lado |
 | `distancia` | `"distancia": { "de": "A", "mm": 35 }` |
 | `cantidad` | Número de puntos distintos que hacen falta (en un `cruce`, cada uno en un corte distinto). |

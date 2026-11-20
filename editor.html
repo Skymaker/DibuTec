@@ -145,6 +145,12 @@
   }
   #mensaje { flex: 1; min-width: 0; color: var(--texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #coords { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mover-mm { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; margin: 8px 0 12px; }
+  .seg.seg-varias button span { vertical-align: middle; }
+  .seg.seg-varias button svg { width: 16px; height: 16px; vertical-align: middle; margin-right: 6px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .seg.seg-varias button svg .a { fill: var(--acento); }
+  #lienzo.mover-todo { cursor: move; }
+  #lienzo.mover-todo.arrastrando { cursor: grabbing; }
   #btn-comprobar { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--borde); background: #fff; border-radius: 999px; padding: 3px 12px 3px 8px; cursor: pointer; font-size: 13.5px; white-space: nowrap; color: var(--texto); }
   #btn-comprobar svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   #btn-comprobar svg .a { fill: var(--acento); }
@@ -367,6 +373,7 @@ const Iconos = (() => {
     duplicar: `<rect class="a" x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M14.5 12v5M12 14.5h5"/>`,
     arriba: `<path d="m6 15 6-6 6 6"/>`,
     abajo: `<path d="m6 9 6 6 6-6"/>`,
+    mano: `<path class="a" d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12V4.5a1.5 1.5 0 0 1 3 0V12V5.5a1.5 1.5 0 0 1 3 0V13v-2.5a1.5 1.5 0 0 1 3 0V15a7 7 0 0 1-7 7h-1a7 7 0 0 1-6-3.4L3.3 14a1.5 1.5 0 0 1 2.6-1.5L8 15"/>`,
     comprobar: `<path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/><path class="a" d="m8.5 12 2.5 2.5 4.5-5"/>`,
     cambiar: `<path d="M4 8h13l-3-3M20 16H7l3 3"/>`,
     // Herramientas de DibuTec
@@ -891,7 +898,8 @@ const Construccion = {
             let cs = G.cortes(f, l);
             const uno = !(x && x.cortes > 1);
             // Un solo corte y dos posibles: el elegido o, si no hay, los dos (tocando uno se elige)
-            if (uno && cs.length > 1 && x && U.esCoord(x.corte)) cs = [Cortes.masCercano(cs, x.corte)];
+            const lado = uno && cs.length > 1 && x && U.esCoord(x.corte) ? Cortes.porLado(cs, x.corte, r) : null;
+            if (lado) cs = [lado];
             else if (uno && cs.length > 1) cs = cs.map(q => Object.assign(q, { eleccion: ix }));
             return cs;
           });
@@ -1009,6 +1017,12 @@ const Cortes = {
     for (const q of cs) for (const [n, f] of geo) if (f.tipo === 'punto' && G.dist(f.x, f.y, q.x, q.y) < .5) { q.en = n; break; }
     return cs;
   },
+  // De los cortes de un arco de radio r, el más cercano al sitio elegido, como lo comprueba DibuTec.
+  // Si los dos quedan casi igual de cerca, el sitio no distingue: null.
+  porLado(cs, ref, r) {
+    const orden = cs.map(q => [G.dist(q.x, q.y, ref.x, ref.y), q]).sort((a, b) => a[0] - b[0]);
+    return orden.length > 1 && orden[1][0] - orden[0][0] < Math.max(3, (r || 0) / 4) ? null : orden[0][1];
+  },
   masCercano(cs, ref) { return cs.reduce((m, q) => (G.dist(q.x, q.y, ref.x, ref.y) < G.dist(m.x, m.y, ref.x, ref.y) ? q : m), cs[0]); },
   // Cómo se llama cada corte: «El de la izquierda», «El de arriba»…
   nombres(cs) {
@@ -1029,6 +1043,7 @@ const Cortes = {
     if (!f || !l) return [];
     const cs = G.cortes(f, l);
     for (const q of cs) for (const [n, g] of geo) if (g.tipo === 'punto' && G.dist(g.x, g.y, q.x, q.y) < .5) { q.en = n; break; }
+    cs.radio = f.r;
     return cs;
   },
   elegirArco(o, ix, q) {
@@ -1178,6 +1193,17 @@ const Revision = {
           const n = Cortes.de(ej, i, o).length;
           if (n > 1) ojo(`${P}: «${o.cruce[0]}» y «${o.cruce[1]}» se cortan en ${n} puntos y DibuTec daría por bueno cualquiera. Elige el correcto en «En el cruce de» (o «Cualquiera», si los dos sirven).`, ir);
         }
+        if (o.tipo === 'punto' && U.esCoord(o.corte) && !(o.cantidad > 1)) {
+          const cs = Cortes.de(ej, i, o);
+          if (cs.length === 2 && Math.abs(G.dist(cs[0].x, cs[0].y, o.corte.x, o.corte.y) - G.dist(cs[1].x, cs[1].y, o.corte.x, o.corte.y)) < 1)
+            ojo(`${P}: el corte elegido en «En el cruce de» está a la misma distancia de los dos cortes, así que no distingue cuál vale (¿se copió de otro paso?). Vuelve a elegirlo.`, ir);
+        }
+        if (o.tipo === 'arco') [].concat(o.cortaA || []).forEach((x, ix) => {
+          if (!U.esObj(x) || !U.esCoord(x.corte) || x.cortes > 1) return;
+          const cs = Cortes.deArco(ej, i, o, ix);
+          if (cs.length > 1 && !Cortes.porLado(cs, x.corte, cs.radio))
+            ojo(`${P}: el sitio elegido en «Corta a ${x.elemento}» está casi a la misma distancia de los dos cortes, así que no indica por qué lado va el arco (¿se copió de otro paso?). Vuelve a elegir el arco que vale.`, ir);
+        });
         if (o.tipo === 'punto') {
           const ya = this.puntoQueYaCumple(ej, i, o);
           if (ya) ojo(`${P}: en la construcción esperada, el punto «${ya.nombre}» (paso ${ya.paso + 1}) ya cumple este objetivo, así que DibuTec lo daría por bueno sin que se marque ninguno nuevo. Añade una condición que lo distinga, como «A una distancia» o «Cerca de»${o.cruce !== undefined ? ', o elige el otro corte' : ''}.`, ir);
@@ -1207,6 +1233,7 @@ const Revision = {
   // anteriores. Devuelve el primero de esos puntos (según la construcción esperada) que ya cumple «o».
   puntoQueYaCumple(ej, i, o) {
     if (Number.isInteger(o.cantidad) && o.cantidad > 1) return null;
+    if (o.nombrar !== undefined) return null;   // DibuTec pide un punto nuevo (sin otro nombre del ejercicio)
     if (!['cerca', 'sobre', 'cruce', 'angulo', 'distancia'].some(k => o[k] !== undefined)) return null;
     const { geo } = Construccion.calcular(ej, i - 1);
     const tol = Number.isFinite(o.tolerancia) ? o.tolerancia : 1, tolA = Number.isFinite(o.toleranciaGrados) ? o.toleranciaGrados : 1;
@@ -1335,6 +1362,7 @@ const Editor = {
   herr: 'sel',                // sel | punto | recta | arco
   iman: true,
   verConstruccion: true,
+  moverLibre: false,          // en «Solución final»: arrastrar mueve todo el ejercicio
   pasoVista: -1,              // construcción que se ve en la hoja
   borrador: null,             // trazo en curso: {tipo, a}
   eligiendo: null,            // {tipo: 'punto'|'linea', alElegir, paso}
@@ -1506,6 +1534,7 @@ const Editor = {
     this.revision = Revision.revisar(this.ej);
     Esquema.pintar();
     if (inspector) Inspector.pintar(); else Inspector.actualizarVivos();
+    document.getElementById('lienzo').classList.toggle('mover-todo', this.sel.tipo === 'final' && this.moverLibre);
     this.pintarHoja();
     this.pintarEstado();
     Barra.actualizar();
@@ -1909,6 +1938,8 @@ const Editor = {
       this.terminarBorrador(t);
       return null;
     }
+    // Solución final con movimiento libre: arrastrar mueve todo el ejercicio
+    if (this.herr === 'sel' && this.sel.tipo === 'final' && this.moverLibre) return { tipo: 'moverTodo', p0: p, hecho: { x: 0, y: 0 } };
     // Otro corte de un cruce del paso seleccionado: tocarlo lo elige como el bueno
     if (this.herr === 'sel' && this.sel.tipo === 'paso' && this.construccion) {
       const r = 10 / Vista.esc;
@@ -1962,6 +1993,12 @@ const Editor = {
         Vista.y = a.vy - (e.clientY - a.y) / Vista.esc;
         this.pintarHoja();
         return;
+      case 'moverTodo': {
+        const dx = U.r05(p.x - a.p0.x), dy = U.r05(p.y - a.p0.y), ix = dx - a.hecho.x, iy = dy - a.hecho.y;
+        if (ix || iy) { Encuadre.desplazar(ej, ix, iy); a.hecho = { x: dx, y: dy }; a.movido = true; }
+        mensaje(`Moviendo el ejercicio: ${U.fmt(dx)} mm a la derecha, ${U.fmt(dy)} mm hacia abajo.`);
+        break;
+      }
       case 'moverPunto': {
         const t = this.ajustarPunto(p, { excluir: { tipo: 'punto', i: a.i }, sinLineas: true });   // sus propias rectas no lo atraen
         this.iman_ = t.nombre ? null : (t.d !== undefined ? t : null);
@@ -2218,7 +2255,7 @@ const Editor = {
       h('Dos cortes'), p('Si las dos líneas de «En el cruce de» se cortan en dos puntos (por ejemplo, un arco y una recta), elige cuál es el bueno con los botones que aparecen debajo o tocando en la hoja el corte marcado con un círculo gris. Si no eliges, DibuTec da por bueno cualquiera de los dos.'),
       h('Arcos que cortan dos veces'), p('En «Corta a», si la circunferencia del arco puede cortar a la línea en dos sitios y solo hace falta un corte, elige dónde va el arco con los botones o tocándolo en la hoja. Solo se dibuja ese arco y DibuTec pedirá que el alumno lo trace por ese lado.'),
       h('Cambiar un nombre'), p('Al cambiar un nombre en «Nombrar lo conseguido» o en el enunciado, se cambia en todos los pasos que lo usan. No se puede usar un nombre que ya tiene otro elemento.'),
-      h('Solución final'), p('En «Solución final» la hoja muestra la construcción completa con sus márgenes. Los botones <b>Centrar</b> mueven todo el ejercicio para dejarlo centrado en el papel, en horizontal, en vertical o en los dos sentidos.'),
+      h('Solución final'), p('En «Solución final» la hoja muestra la construcción completa con sus márgenes. Los botones <b>Centrar</b> mueven todo el ejercicio para dejarlo centrado en el papel, en horizontal, en vertical o en los dos sentidos. Con <b>Mover libremente</b> lo colocas a mano: arrastrándolo en la hoja, con las flechas (Mayús: 10 mm) o escribiendo los milímetros.'),
       h('Construcción esperada'), p('Con el ojo activado, la hoja muestra en naranja discontinuo lo que se espera en el paso seleccionado y en gris lo de los pasos anteriores. Si algo no aparece donde esperas, revisa las condiciones.'),
       h('Probar y guardar'), p('<b>Probar</b> abre el ejercicio en DibuTec en otra pestaña. <b>Guardar</b> descarga el .json: cópialo en la carpeta <code>ejercicios/</code> y añade su nombre a <code>ejercicios/indice.json</code>. El trabajo se guarda solo en este navegador mientras editas.'),
       h('Atajos'), p('<kbd>V</kbd> seleccionar · <kbd>P</kbd> punto · <kbd>R</kbd> recta · <kbd>C</kbd> arco · <kbd>Supr</kbd> borrar · <kbd>Ctrl+D</kbd> duplicar el paso · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> deshacer/rehacer · <kbd>Ctrl+S</kbd> guardar · <kbd>F7</kbd> comprobar · <kbd>Esc</kbd> cancelar · rueda: zoom.'),
@@ -2626,10 +2663,29 @@ const Inspector = {
         Editor.cambio();
         aviso(`Ejercicio movido ${[r.dx ? `${U.fmt(Math.abs(r.dx))} mm a la ${r.dx > 0 ? 'derecha' : 'izquierda'}` : '', r.dy ? `${U.fmt(Math.abs(r.dy))} mm hacia ${r.dy > 0 ? 'abajo' : 'arriba'}` : ''].filter(Boolean).join(' y ')}. Ctrl+Z para deshacerlo.`);
       };
+      // Movimiento libre: arrastrar en la hoja, flechas o milímetros exactos
+      const mover = { x: 0, y: 0 };
+      const libre = U.el('div', { class: 'seg seg-varias', role: 'group', 'aria-label': 'Movimiento libre' },
+        U.el('button', { type: 'button', html: Iconos.mano + '<span>Mover libremente</span>', 'aria-pressed': String(Editor.moverLibre),
+          onclick: () => { Editor.moverLibre = !Editor.moverLibre; Editor.repintar(); mensaje(Editor.moverLibre ? 'Movimiento libre: arrastra el dibujo en la hoja o usa las flechas (Mayús: 10 mm).' : 'Movimiento libre desactivado.'); } }));
       c.append(...[U.el('h3', { text: 'Colocar en la hoja' }),
-        U.el('div', { class: 'margenes' },
-          U.el('span', { text: `Izquierda: ${mm(caja.x0)}` }), U.el('span', { text: `Derecha: ${mm(W - caja.x1)}` }),
-          U.el('span', { text: `Arriba: ${mm(caja.y0)}` }), U.el('span', { text: `Abajo: ${mm(H - caja.y1)}` })),
+        this.vivo(el => {
+          const k = Encuadre.caja(Editor.ej);
+          if (!k) return;
+          el.append(U.el('span', { text: `Izquierda: ${mm(k.x0)}` }), U.el('span', { text: `Derecha: ${mm(W - k.x1)}` }),
+            U.el('span', { text: `Arriba: ${mm(k.y0)}` }), U.el('span', { text: `Abajo: ${mm(H - k.y1)}` }));
+        }, { class: 'margenes', 'aria-live': 'polite' }),
+        libre,
+        U.el('div', { class: 'ayuda', text: Editor.moverLibre ? 'Arrastra el dibujo en la hoja o usa las flechas del teclado (Mayús: de 10 en 10 mm). Se mueve de medio en medio milímetro.' : 'Actívalo para colocar el ejercicio a mano: arrastrándolo en la hoja o con las flechas.' }),
+        U.el('div', { class: 'mover-mm' },
+          U.el('label', null, 'Derecha (mm)', this.numero(mover, 'x', { opcional: false, alCambiar: () => {} })),
+          U.el('label', null, 'Abajo (mm)', this.numero(mover, 'y', { opcional: false, alCambiar: () => {} })),
+          U.el('button', { type: 'button', class: 'btn-texto', text: 'Mover', title: 'Mueve todo el ejercicio esos milímetros (negativos: a la izquierda o hacia arriba)', onclick: () => {
+            if (!mover.x && !mover.y) { aviso('Escribe cuántos milímetros quieres moverlo.'); return; }
+            Encuadre.desplazar(Editor.ej, mover.x || 0, mover.y || 0);
+            Editor.cambio();
+            aviso(`Ejercicio movido (${U.fmt(mover.x || 0)}, ${U.fmt(mover.y || 0)}) mm. Ctrl+Z para deshacerlo.`);
+          } })),
         U.el('div', { class: 'botones-centrar' },
           U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.centrarH + '<span>Centrar en horizontal</span>', onclick: () => centrar(true, false) }),
           U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.centrarV + '<span>Centrar en vertical</span>', onclick: () => centrar(false, true) }),
@@ -2805,7 +2861,7 @@ const Inspector = {
     const cs = Cortes.deArco(Editor.ej, iPaso, o, ix);
     if (cs.length < 2) return;
     const x = [].concat(o.cortaA)[ix], ref = U.esObj(x) && U.esCoord(x.corte) ? x.corte : null;
-    const elegido = ref ? Cortes.masCercano(cs, ref) : null, noms = Cortes.nombres(cs);
+    const elegido = ref ? Cortes.porLado(cs, ref, cs.radio) : null, noms = Cortes.nombres(cs);
     caja.append(U.el('div', { class: 'ayuda', style: 'margin:4px 0 4px', text: `Puede cortarla en ${cs.length} sitios. ¿Dónde va el arco?` }),
       U.el('div', { class: 'seg seg-varias', role: 'group', 'aria-label': 'Sitio del arco' },
         cs.map((q, n) => U.el('button', { type: 'button', text: noms[n], 'aria-pressed': String(q === elegido), title: `(${U.fmt(q.x)}, ${U.fmt(q.y)}) mm`,
@@ -2823,7 +2879,22 @@ const Inspector = {
     const cont = U.el('div', { class: 'cond' });
     cont.append(U.el('div', { class: 'cond-cab' }, U.el('span', { class: 'et' }, et, ex ? U.el('div', { class: 'ex', text: ex }) : null),
       quitable ? this.btnMini('cerrar', `Quitar «${et}»`, () => { delete o[k]; if (k === 'cruce') delete o.corte; Editor.cambio(); }) : null));
-    const set = v => { o[k] = v; Editor.cambio('c-' + ctx.paso + k, { inspector: false }); };
+    let set = v => { o[k] = v; Editor.cambio('c-' + ctx.paso + k, { inspector: false }); };
+    if (o.tipo === 'arco' && k === 'centro') {
+      // Al cambiar el centro, los sitios elegidos en «Corta a» se mueven con él (se conserva el lado)
+      // (con la construcción completa, por si el paso aún está antes del que nombra el centro)
+      const pos = r => { const g = U.esCoord(r) ? r : Construccion.calcular(Editor.ej, Editor.ej.pasos.length - 1).geo.get(r); return g && g.tipo !== undefined && g.tipo !== 'punto' ? null : g || null; };
+      let ultimo = pos(o.centro);
+      const base = set;
+      set = v => {
+        const nuevo = pos(v);
+        if (ultimo && nuevo) for (const x of [].concat(o.cortaA || [])) if (U.esObj(x) && U.esCoord(x.corte)) {
+          x.corte = { x: Math.round((x.corte.x + nuevo.x - ultimo.x) * 10) / 10, y: Math.round((x.corte.y + nuevo.y - ultimo.y) * 10) / 10 };
+        }
+        if (nuevo) ultimo = { x: nuevo.x, y: nuevo.y };
+        base(v);
+      };
+    }
     const setI = v => { o[k] = v; Editor.cambio(); };
     const v = o[k];
     switch (t) {
@@ -3082,6 +3153,12 @@ function iniciarEntrada() {
     else if (k === '-') Vista.zoom(1 / 1.25);
     else if (k === '0') Vista.ajustar();
     else if ((e.key === 'Delete' || e.key === 'Backspace') && ['punto', 'recta', 'arco', 'inst'].includes(Editor.sel.tipo)) { e.preventDefault(); Editor.eliminarSeleccion(); }
+    else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) && Editor.sel.tipo === 'final' && Editor.moverLibre) {
+      e.preventDefault();
+      const d = e.shiftKey ? 10 : 1;
+      Encuadre.desplazar(Editor.ej, e.key === 'ArrowLeft' ? -d : e.key === 'ArrowRight' ? d : 0, e.key === 'ArrowUp' ? -d : e.key === 'ArrowDown' ? d : 0);
+      Editor.cambio('flechasTodo', { inspector: false });
+    }
     else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) && Editor.sel.tipo === 'punto') {
       e.preventDefault();
       const q = Editor.ej.inicial.puntos[Editor.sel.i], d = e.shiftKey ? 5 : .5;
