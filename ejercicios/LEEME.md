@@ -20,6 +20,15 @@ con errores no impide usar los demás.
   nombres repetidos, tipos equivocados y campos que faltan. También avisa
   cuando un punto marcado en un paso anterior ya cumple el objetivo de un
   punto (DibuTec lo daría por bueno sin marcar nada nuevo).
+- **Cortes**: si las dos líneas de «En el cruce de» se cortan en dos puntos,
+  se elige cuál es el bueno con sus botones o tocando en la hoja el otro corte
+  (círculo gris). Se guarda como `corte`.
+- **Nombres**: al cambiar un nombre (en «Nombrar lo conseguido» o en el
+  enunciado), se cambia en todos los pasos que lo usan. No se puede poner un
+  nombre que ya existe.
+- **Solución final**: muestra la construcción completa, sus márgenes en la
+  hoja y botones para centrarla en horizontal, en vertical o en los dos
+  sentidos (se mueve todo: enunciado, sitios de los objetivos e instrumentos).
 - **Series**: al duplicar un paso (Ctrl+D) o un objetivo, la copia recibe el
   siguiente nombre de la serie (c1 → c2, P1 → P2). Los nombres de «Nombres que
   se pueden usar aquí» se pueden tocar para ponerlos en el último campo tocado.
@@ -189,6 +198,7 @@ Un punto marcado con el portaminas.
 | `cerca` | `"cerca": { "x": 100, "y": 50 }` |
 | `sobre` | `"sobre": "c"` (sobre una recta o arco) |
 | `cruce` | `"cruce": ["arcoA", "arcoB"]` (donde se cortan dos líneas) |
+| `corte` | Junto con `cruce`, cuando las líneas se cortan en dos puntos: `"corte": { "x": 120, "y": 80 }` (sitio aproximado del corte bueno). Solo vale el corte más cercano a ese sitio. Con `"corte": false` vale cualquiera de los dos a propósito (sin `corte` también, pero el editor avisa). |
 | `angulo` | `"angulo": { "vertice": "V", "desde": "B", "grados": 60 }`; con `"sentido": "antihorario"` u `"horario"` solo vale un lado |
 | `distancia` | `"distancia": { "de": "A", "mm": 35 }` |
 | `cantidad` | Número de puntos distintos que hacen falta (en un `cruce`, cada uno en un corte distinto). |

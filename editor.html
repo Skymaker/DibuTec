@@ -183,6 +183,14 @@
   .seg button { border: none; background: #fff; padding: 6px 10px; cursor: pointer; font-size: 13.5px; }
   .seg button + button { border-left: 1px solid var(--borde); }
   .seg button[aria-pressed="true"] { background: var(--activo-fondo); color: var(--activo); font-weight: 600; }
+  .seg.seg-varias { display: flex; flex-wrap: wrap; width: 100%; }
+  .seg.seg-varias button { flex: 1 1 auto; min-height: 34px; }
+  .seg.seg-varias button + button { border-left: 1px solid var(--borde); }
+  #inspector .ayuda.mal { color: var(--error); font-weight: 600; }
+  .margenes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 13.5px; color: var(--texto-suave); margin: 4px 0 10px; font-variant-numeric: tabular-nums; }
+  .botones-centrar { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .botones-centrar .btn-texto { display: flex; align-items: center; gap: 8px; justify-content: flex-start; }
+  .otro-corte { cursor: pointer; }
 
   .obj {
     border: 1px solid var(--borde); border-left: 4px solid var(--paso); border-radius: var(--radio);
@@ -342,6 +350,9 @@ const Iconos = (() => {
     ficha: `<rect class="a" x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>`,
     enunciado: `<path d="M4 18 20 6"/><circle class="a" cx="4" cy="18" r="2.2"/><circle class="a" cx="20" cy="6" r="2.2"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2.5"/>`,
     textos: `<path class="a" d="M4 5h16v11H9l-5 4Z"/><path d="M8 9h8M8 12h5"/>`,
+    centrarH: `<path d="M3 4v16M21 4v16"/><rect class="a" x="8" y="8" width="8" height="8" rx="1"/><path d="M5 12h3M16 12h3"/>`,
+    centrarV: `<path d="M4 3h16M4 21h16"/><rect class="a" x="8" y="8" width="8" height="8" rx="1"/><path d="M12 5v3M12 16v3"/>`,
+    centrarHV: `<path d="M3 3v18M21 3v18M7 3h10M7 21h10"/><rect class="a" x="8" y="8" width="8" height="8" rx="1"/>`,
     final: `<path class="a" d="m12 2 2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7Z"/>`,
     elegir: `<circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle class="a" cx="12" cy="12" r="2"/>`,
     papelera: `<path d="M3 6h18M8 6V4h8v2"/><path class="a" d="M6 6l1 15h10l1-15Z"/><path d="M10 11v6M14 11v6"/>`,
@@ -715,7 +726,7 @@ const Construccion = {
       const nuevos = [];
       for (const o of ej.pasos[i].objetivos) {
         const r = this.objetivo(o, pt, lin);
-        for (const f of r.formas) fantasmas.push({ forma: f, paso: i });
+        for (const f of r.formas) fantasmas.push({ forma: f, paso: i, objetivo: o });
         const noms = o.nombrar === undefined ? [] : [].concat(o.nombrar);
         noms.forEach((nm, k) => { if (typeof nm === 'string' && r.nombrables[k]) nuevos.push([nm, r.nombrables[k]]); });
         if (r.nombrables.length && OBJ[o.tipo] && OBJ[o.tipo].crea === 'punto')
@@ -785,7 +796,11 @@ const Construccion = {
         } else if (o.distancia && pt(o.distancia.de) && Number.isFinite(o.distancia.mm)) {
           formas.push(Object.assign(this.circ(pt(o.distancia.de), o.distancia.mm), { guia: true }));
         }
-        if (cand && o.cruce !== undefined) {
+        const ref = U.esCoord(o.corte) ? o.corte : null;
+        if (cand && o.cruce !== undefined && ref && cand.length > 1) {
+          // El autor ha elegido uno de los cortes: va primero el más cercano a ese sitio
+          cand = cand.slice().sort((a, b) => G.dist(a.x, a.y, ref.x, ref.y) - G.dist(b.x, b.y, ref.x, ref.y));
+        } else if (cand && o.cruce !== undefined) {
           // En un cruce se prefieren los cortes que cumplen las demás condiciones y los puntos nuevos
           const tol = Number.isFinite(o.tolerancia) ? o.tolerancia : 1;
           const existe = q => [...geo.values()].some(f => f.tipo === 'punto' && G.dist(f.x, f.y, q.x, q.y) < .5);
@@ -802,6 +817,8 @@ const Construccion = {
         if (cand) {
           const k = Number.isInteger(o.cantidad) && o.cantidad > 0 ? o.cantidad : 1;
           cand.slice(0, k).forEach(p => nombrables.push({ tipo: 'punto', x: p.x, y: p.y }));
+          // Los demás cortes se marcan para poder elegirlos en la hoja
+          if (o.cruce !== undefined) cand.slice(k).forEach(p => formas.push({ tipo: 'otroCorte', x: p.x, y: p.y }));
         }
         break;
       }
@@ -831,7 +848,12 @@ const Construccion = {
               const t = this.mejorSentido(p, dirs, largo);
               const q = { x: p.x + Math.cos(t) * largo, y: p.y + Math.sin(t) * largo };
               f = a ? { tipo: 'recta', x1: p.x, y1: p.y, x2: q.x, y2: q.y } : { tipo: 'recta', x1: q.x, y1: q.y, x2: p.x, y2: p.y };
-            } else f = G.rectaPor(p, angs[0]);
+            } else {
+              // Recta de largo libre: en la hoja se dibuja larga, pero solo ocupa sitio cerca de su punto
+              f = G.rectaPor(p, angs[0]);
+              const m = Number.isFinite(o.longitudMin) ? o.longitudMin / 2 : 0, c = Math.cos(angs[0]) * m, sn = Math.sin(angs[0]) * m;
+              f.ocupa = [{ x: p.x - c, y: p.y - sn }, { x: p.x + c, y: p.y + sn }];
+            }
           }
         }
         if (f) { formas.push(f); nombrables.push(f); }
@@ -955,6 +977,83 @@ const Nombres = {
   },
 };
 
+/* =====================================================================
+   Cortes de un objetivo «En el cruce de» y encuadre del ejercicio en la hoja
+   ===================================================================== */
+const Cortes = {
+  // Puntos donde se cortan las dos líneas del cruce, según la construcción hasta el paso anterior
+  de(ej, i, o) {
+    if (!Array.isArray(o.cruce)) return [];
+    const { geo } = Construccion.calcular(ej, i - 1);
+    const lin = r => (typeof r === 'string' && geo.get(r) && geo.get(r).tipo !== 'punto' ? geo.get(r) : null);
+    const A = lin(o.cruce[0]), B = lin(o.cruce[1]);
+    if (!A || !B) return [];
+    const cs = G.cortes(A, B);
+    // Nombre de un punto que ya está en ese sitio, si lo hay
+    for (const q of cs) for (const [n, f] of geo) if (f.tipo === 'punto' && G.dist(f.x, f.y, q.x, q.y) < .5) { q.en = n; break; }
+    return cs;
+  },
+  masCercano(cs, ref) { return cs.reduce((m, q) => (G.dist(q.x, q.y, ref.x, ref.y) < G.dist(m.x, m.y, ref.x, ref.y) ? q : m), cs[0]); },
+  // Cómo se llama cada corte: «El de la izquierda», «El de arriba»…
+  nombres(cs) {
+    if (cs.length !== 2) return cs.map((q, k) => `Corte ${k + 1}`);
+    const [a, b] = cs, dx = b.x - a.x, dy = b.y - a.y;
+    const n = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? ['El de la izquierda', 'El de la derecha'] : ['El de la derecha', 'El de la izquierda'])
+      : (dy > 0 ? ['El de arriba', 'El de abajo'] : ['El de abajo', 'El de arriba']);
+    return n.map((t, k) => cs[k].en ? `${t} (en ${cs[k].en})` : t);
+  },
+  elegir(o, q) { o.corte = { x: Math.round(q.x * 10) / 10, y: Math.round(q.y * 10) / 10 }; },
+};
+
+const Encuadre = {
+  // Rectángulo que ocupa el dibujo completo (enunciado y solución), sin los instrumentos
+  caja(ej) {
+    const C = Construccion.calcular(ej, ej.pasos.length - 1);
+    const pt = r => U.esCoord(r) ? r : (C.geo.get(r) && C.geo.get(r).tipo === 'punto' ? C.geo.get(r) : null);
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    const meter = (x, y) => { if (!Number.isFinite(x) || !Number.isFinite(y)) return; x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); };
+    const forma = f => {
+      if (!f) return;
+      if (f.tipo === 'punto') meter(f.x, f.y);
+      else if (f.tipo === 'recta' && f.ocupa) f.ocupa.forEach(q => meter(q.x, q.y));
+      else if (f.tipo === 'recta') { meter(f.x1, f.y1); meter(f.x2, f.y2); }
+      else if (f.tipo === 'arco') {
+        if (G.completo(f)) { meter(f.cx - f.r, f.cy - f.r); meter(f.cx + f.r, f.cy + f.r); return; }
+        for (let k = 0; k <= 48; k++) { const t = f.a0 + (f.a1 - f.a0) * k / 48; meter(f.cx + f.r * Math.cos(t), f.cy + f.r * Math.sin(t)); }
+      }
+    };
+    for (const p of ej.inicial.puntos) if (p) meter(p.x, p.y);
+    for (const r of ej.inicial.rectas) forma(Construccion.rectaInicial(r, pt));
+    for (const c of ej.inicial.arcos) forma(Construccion.arcoInicial(c, pt));
+    for (const g of C.fantasmas) if (!g.forma.guia && ['punto', 'recta', 'arco'].includes(g.forma.tipo)) forma(g.forma);
+    return x0 <= x1 ? { x0, y0, x1, y1 } : null;
+  },
+  // Mueve todo lo que tiene coordenadas: enunciado, instrumentos y sitios de los objetivos
+  desplazar(ej, dx, dy) {
+    const mv = (o, kx, ky) => { if (Number.isFinite(o[kx])) o[kx] = U.r3(o[kx] + dx); if (Number.isFinite(o[ky])) o[ky] = U.r3(o[ky] + dy); };
+    for (const p of ej.inicial.puntos) if (p) mv(p, 'x', 'y');
+    for (const r of ej.inicial.rectas) if (r) { mv(r, 'x1', 'y1'); mv(r, 'x2', 'y2'); }
+    for (const c of ej.inicial.arcos) if (c) mv(c, 'cx', 'cy');
+    for (const k in ej.instrumentos) if (U.esObj(ej.instrumentos[k])) mv(ej.instrumentos[k], 'x', 'y');
+    const coords = v => {
+      if (U.esCoord(v)) mv(v, 'x', 'y');
+      else if (Array.isArray(v)) v.forEach(coords);
+      else if (U.esObj(v)) for (const c in v) coords(v[c]);
+    };
+    for (const p of ej.pasos) for (const o of p.objetivos) coords(o);
+  },
+  centrar(ej, horizontal, vertical) {
+    const c = this.caja(ej);
+    if (!c) return null;
+    const [W, H] = HOJAS[ej.papel.hoja || 'A4-h'] || HOJAS['A4-h'];
+    // En milímetros enteros, para que las coordenadas sigan siendo redondas
+    const dx = horizontal ? Math.round((W - c.x0 - c.x1) / 2) : 0, dy = vertical ? Math.round((H - c.y0 - c.y1) / 2) : 0;
+    if (!dx && !dy) return { dx: 0, dy: 0 };
+    this.desplazar(ej, dx, dy);
+    return { dx, dy };
+  },
+};
+
 const Revision = {
   // Lista de {nivel: 'error'|'aviso', texto, ir: selección}
   revisar(ej) {
@@ -968,7 +1067,7 @@ const Revision = {
     const vistos = new Map();
     const registrar = (n, donde, ir) => {
       if (typeof n !== 'string' || !n) return;
-      if (vistos.has(n)) ojo(`El nombre «${n}» se usa dos veces (${vistos.get(n)} y ${donde}).`, ir);
+      if (vistos.has(n)) mal(`El nombre «${n}» se usa dos veces (${vistos.get(n)} y ${donde}). Cada elemento necesita un nombre distinto.`, ir);
       else vistos.set(n, donde);
     };
     const ini0 = Nombres.disponibles(ej, -1);
@@ -1038,9 +1137,14 @@ const Revision = {
           if (!Number.isInteger(o.lados) || o.lados < 3) mal(`${P}: el polígono necesita al menos 3 lados.`, ir);
           for (const k of ['circunferencia', 'desde']) if (o[k] === undefined) mal(`${P}: falta «${k}» en los vértices.`, ir);
         }
+        if (o.tipo === 'punto' && o.cruce !== undefined && o.corte === undefined && !(o.cantidad > 1) &&
+            !['cerca', 'sobre', 'angulo', 'distancia'].some(k => o[k] !== undefined)) {
+          const n = Cortes.de(ej, i, o).length;
+          if (n > 1) ojo(`${P}: «${o.cruce[0]}» y «${o.cruce[1]}» se cortan en ${n} puntos y DibuTec daría por bueno cualquiera. Elige el correcto en «En el cruce de» (o «Cualquiera», si los dos sirven).`, ir);
+        }
         if (o.tipo === 'punto') {
           const ya = this.puntoQueYaCumple(ej, i, o);
-          if (ya) ojo(`${P}: en la construcción esperada, el punto «${ya.nombre}» (paso ${ya.paso + 1}) ya cumple este objetivo, así que DibuTec lo daría por bueno sin que se marque ninguno nuevo. Añade una condición que lo distinga, como «A una distancia» o «Cerca de».`, ir);
+          if (ya) ojo(`${P}: en la construcción esperada, el punto «${ya.nombre}» (paso ${ya.paso + 1}) ya cumple este objetivo, así que DibuTec lo daría por bueno sin que se marque ninguno nuevo. Añade una condición que lo distinga, como «A una distancia» o «Cerca de»${o.cruce !== undefined ? ', o elige el otro corte' : ''}.`, ir);
         }
         if (o.tipo === 'instrumento' && !o.instrumento) mal(`${P}: elige el instrumento.`, ir);
         if (o.tipo === 'instrumento' && (o.paraleloA !== undefined || o.perpendicularA !== undefined) && o.cantoPasaPor === undefined)
@@ -1073,7 +1177,10 @@ const Revision = {
       if (o.sobre !== undefined) { const l = lin(o.sobre); if (!l || G.distForma(p, l) > tol) return false; }
       if (o.cruce !== undefined) {
         const A = Array.isArray(o.cruce) && lin(o.cruce[0]), B = Array.isArray(o.cruce) && lin(o.cruce[1]);
-        if (!A || !B || !G.cortes(A, B).some(q => G.dist(p.x, p.y, q.x, q.y) <= tol)) return false;
+        if (!A || !B) return false;
+        let cs = G.cortes(A, B);
+        if (U.esCoord(o.corte) && cs.length > 1) cs = [Cortes.masCercano(cs, o.corte)];
+        if (!cs.some(q => G.dist(p.x, p.y, q.x, q.y) <= tol)) return false;
       }
       if (o.distancia) { const c = pt(o.distancia.de); if (!c || !Number.isFinite(o.distancia.mm) || Math.abs(G.dist(p.x, p.y, c.x, c.y) - o.distancia.mm) > tol) return false; }
       if (o.angulo) {
@@ -1268,6 +1375,7 @@ const Editor = {
   seleccionar(s) {
     this.sel = s;
     if (s.tipo === 'paso') this.pasoVista = s.i;
+    else if (s.tipo === 'final') this.pasoVista = this.ej.pasos.length - 1;   // la solución completa
     else if (['ficha', 'enunciado', 'punto', 'recta', 'arco', 'instrumentos', 'inst'].includes(s.tipo)) this.pasoVista = Math.min(this.pasoVista, -1);
     this.cancelarEleccion();
     this.repintar();
@@ -1331,6 +1439,13 @@ const Editor = {
   },
 
   // ---------- Renombrar: cambia también todas las referencias ----------
+  // Varios a la vez (A→B y B→A sin mezclarse): primero a nombres provisionales
+  renombrarVarios(pares) {
+    pares = pares.filter(([a, b]) => a && b && a !== b);
+    const tmp = pares.map((_, k) => `\u0000tmp${k}\u0000`);
+    pares.forEach(([a], k) => this.renombrar(a, tmp[k]));
+    pares.forEach(([, b], k) => this.renombrar(tmp[k], b));
+  },
   renombrar(viejo, nuevo) {
     if (!viejo || viejo === nuevo) return;
     const cambiar = (v, k) => {
@@ -1417,6 +1532,9 @@ const Editor = {
         if (g.forma.tipo === 'punto') {
           partes.push(cruz(g.forma.x, g.forma.y, col, 4.5, esActual ? 2 : 1.4));
           if (g.etiqueta) partes.push(etiqueta(g.forma.x, g.forma.y, g.etiqueta, col));
+        } else if (g.forma.tipo === 'otroCorte') {
+          if (!esActual) continue;
+          partes.push(`<g class="otro-corte"><title>Otro corte. Tócalo para elegirlo como el bueno.</title><circle cx="${g.forma.x}" cy="${g.forma.y}" r="${9 * k}" fill="rgba(255,255,255,.01)" stroke="${COLOR.previo}" stroke-width="${tr(1.6)}" stroke-dasharray="${tr(3)} ${tr(3)}"/>${cruz(g.forma.x, g.forma.y, COLOR.previo, 3, 1.2)}</g>`);
         } else if (g.forma.tipo === 'diana') {
           partes.push(`<circle cx="${g.forma.x}" cy="${g.forma.y}" r="${8 * k}" fill="none" stroke="${col}" stroke-width="${tr(2)}" ${discont}/>`);
         } else partes.push(forma(g.forma, col, g.forma.guia ? 1.2 : 2, discont));
@@ -1751,6 +1869,17 @@ const Editor = {
       this.terminarBorrador(t);
       return null;
     }
+    // Otro corte de un cruce del paso seleccionado: tocarlo lo elige como el bueno
+    if (this.herr === 'sel' && this.sel.tipo === 'paso' && this.construccion) {
+      const r = 10 / Vista.esc;
+      const g = this.construccion.fantasmas.find(f => f.paso === this.sel.i && f.forma.tipo === 'otroCorte' && G.dist(f.forma.x, f.forma.y, p.x, p.y) <= r);
+      if (g) {
+        Cortes.elegir(g.objetivo, g.forma);
+        this.cambio();
+        mensaje('Corte elegido: DibuTec solo dará por bueno el punto marcado en ese corte.');
+        return null;
+      }
+    }
     // Seleccionar y arrastrar
     const h = this.tocar(p);
     if (!h) {
@@ -2024,6 +2153,9 @@ const Editor = {
       h('4 · Pasos'), p('Cada paso tiene una instrucción, una pista opcional, las herramientas que se resaltan y uno o varios <b>objetivos</b>. Usa <b>Nombrar</b> para poner nombre a lo que se consigue (por ejemplo, «arcoA») y usarlo en pasos siguientes. El botón <span style="white-space:nowrap">⌖</span> junto a cada campo permite elegir el punto o la línea tocando la hoja; también puedes tocar uno de los <b>Nombres que se pueden usar aquí</b> para ponerlo en el último campo que hayas tocado.'),
       h('Series de pasos'), p('Para construcciones que se repiten (llevar varias veces una medida con el compás, trazar varias paralelas…), <b>duplica</b> el paso o el objetivo: la copia recibe el siguiente nombre de la serie (c1 → c2, P1 → P2) y solo tienes que cambiar los puntos y líneas que usa.'),
       h('Puntos que ya cumplen el objetivo'), p('DibuTec da por bueno <b>cualquier</b> punto que cumpla las condiciones, también uno marcado en un paso anterior. Si en la construcción esperada eso ocurre (por ejemplo, la circunferencia de centro P2 pasa por P1), la revisión lo avisa: añade una condición que distinga el punto nuevo, como «A una distancia».'),
+      h('Dos cortes'), p('Si las dos líneas de «En el cruce de» se cortan en dos puntos (por ejemplo, un arco y una recta), elige cuál es el bueno con los botones que aparecen debajo o tocando en la hoja el corte marcado con un círculo gris. Si no eliges, DibuTec da por bueno cualquiera de los dos.'),
+      h('Cambiar un nombre'), p('Al cambiar un nombre en «Nombrar lo conseguido» o en el enunciado, se cambia en todos los pasos que lo usan. No se puede usar un nombre que ya tiene otro elemento.'),
+      h('Solución final'), p('En «Solución final» la hoja muestra la construcción completa con sus márgenes. Los botones <b>Centrar</b> mueven todo el ejercicio para dejarlo centrado en el papel, en horizontal, en vertical o en los dos sentidos.'),
       h('Construcción esperada'), p('Con el ojo activado, la hoja muestra en naranja discontinuo lo que se espera en el paso seleccionado y en gris lo de los pasos anteriores. Si algo no aparece donde esperas, revisa las condiciones.'),
       h('Probar y guardar'), p('<b>Probar</b> abre el ejercicio en DibuTec en otra pestaña. <b>Guardar</b> descarga el .json: cópialo en la carpeta <code>ejercicios/</code> y añade su nombre a <code>ejercicios/indice.json</code>. El trabajo se guarda solo en este navegador mientras editas.'),
       h('Atajos'), p('<kbd>V</kbd> seleccionar · <kbd>P</kbd> punto · <kbd>R</kbd> recta · <kbd>C</kbd> arco · <kbd>Supr</kbd> borrar · <kbd>Ctrl+D</kbd> duplicar el paso · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> deshacer/rehacer · <kbd>Ctrl+S</kbd> guardar · <kbd>Esc</kbd> cancelar · rueda: zoom.'),
@@ -2128,7 +2260,7 @@ const Esquema = {
     });
     c.append(U.el('button', { type: 'button', class: 'anadir', text: '+ Añadir un paso', onclick: () => Editor.anadirPaso() }));
     c.append(U.el('div', { class: 'esq-titulo', text: 'Al terminar' }),
-      item('final', 'final', 'Mensaje final', ej.final ? ej.final.slice(0, 60) + (ej.final.length > 60 ? '…' : '') : 'Mensaje por defecto', s.tipo === 'final', () => false));
+      item('final', 'final', 'Solución final', ej.final ? ej.final.slice(0, 60) + (ej.final.length > 60 ? '…' : '') : 'Colocación en la hoja y mensaje', s.tipo === 'final', () => false));
     if (foco) { const f = c.querySelector(`[data-clave="${foco}"]`); if (f) f.focus(); }
   },
 };
@@ -2389,7 +2521,30 @@ const Inspector = {
     c.append(U.el('p', { class: 'ayuda', text: 'Los puntos ya se nombran solos («el punto A»).' }));
   },
   final(c) {
-    c.append(U.el('h2', { text: 'Mensaje final' }),
+    const ej = Editor.ej, caja = Encuadre.caja(ej), [W, H] = Editor.hoja();
+    c.append(U.el('h2', { text: 'Solución final' }),
+      U.el('p', { class: 'ayuda', text: 'En la hoja se ve la construcción completa. Puedes centrarla en el papel: se mueven juntos el enunciado, los sitios de los objetivos y los instrumentos.' }));
+    if (caja) {
+      const mm = v => `${U.fmt(Math.round(v))} mm`;
+      const centrar = (h, v) => {
+        const r = Encuadre.centrar(ej, h, v);
+        if (!r) return;
+        if (!r.dx && !r.dy) { aviso('Ya estaba centrado.'); return; }
+        Editor.cambio();
+        aviso(`Ejercicio movido ${[r.dx ? `${U.fmt(Math.abs(r.dx))} mm a la ${r.dx > 0 ? 'derecha' : 'izquierda'}` : '', r.dy ? `${U.fmt(Math.abs(r.dy))} mm hacia ${r.dy > 0 ? 'abajo' : 'arriba'}` : ''].filter(Boolean).join(' y ')}. Ctrl+Z para deshacerlo.`);
+      };
+      const fuera = caja.x0 < 0 || caja.y0 < 0 || caja.x1 > W || caja.y1 > H;
+      c.append(...[U.el('h3', { text: 'Colocar en la hoja' }),
+        U.el('div', { class: 'margenes' },
+          U.el('span', { text: `Izquierda: ${mm(caja.x0)}` }), U.el('span', { text: `Derecha: ${mm(W - caja.x1)}` }),
+          U.el('span', { text: `Arriba: ${mm(caja.y0)}` }), U.el('span', { text: `Abajo: ${mm(H - caja.y1)}` })),
+        fuera ? U.el('div', { class: 'problema aviso' }, U.el('div', null, U.el('b', { text: 'Aviso' }), U.el('div', { text: 'Parte de la construcción se sale de la hoja.' }))) : null,
+        U.el('div', { class: 'botones-centrar' },
+          U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.centrarH + '<span>Centrar en horizontal</span>', onclick: () => centrar(true, false) }),
+          U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.centrarV + '<span>Centrar en vertical</span>', onclick: () => centrar(false, true) }),
+          U.el('button', { type: 'button', class: 'btn-texto', html: Iconos.centrarHV + '<span>Centrar en los dos sentidos</span>', onclick: () => centrar(true, true) }))].filter(Boolean));
+    }
+    c.append(U.el('h3', { text: 'Mensaje final' }),
       this.fila('Felicitación al terminar', this.texto(Editor.ej, 'final', { area: true, ph: '¡Has terminado el ejercicio! Muy bien.' }), 'Se muestra en la barra de estado de DibuTec al completar el último paso.'));
   },
 
@@ -2499,13 +2654,29 @@ const Inspector = {
       const lista = def.nombrar === 'lista';
       const inp = U.el('input', { type: 'text', placeholder: lista ? 'Por ejemplo: C, D' : 'Por ejemplo: arcoA' });
       inp.value = o.nombrar === undefined ? '' : [].concat(o.nombrar).join(', ');
+      // Últimos nombres aplicados: al cambiar uno, se cambia en todos los sitios donde se usa
+      let previos = o.nombrar === undefined ? [] : [].concat(o.nombrar).filter(x => typeof x === 'string');
+      const nota = U.el('div', { class: 'ayuda', role: 'status' });
       inp.addEventListener('input', () => {
         const l = inp.value.split(/[,\s]+/).map(x => x.trim()).filter(Boolean);
+        const propios = new Set([].concat(o.nombrar === undefined ? [] : o.nombrar));
+        const otros = Nombres.todos(Editor.ej);
+        const repetido = l.find((n, i) => l.indexOf(n) !== i) || l.find(n => !propios.has(n) && otros.has(n));
+        inp.classList.toggle('mal', !!repetido);
+        if (repetido) {
+          const d = otros.get(repetido);
+          nota.textContent = l.indexOf(repetido) !== l.lastIndexOf(repetido) ? `«${repetido}» está repetido.` : `Ya hay ${d.tipo === 'punto' ? 'un punto' : d.tipo === 'recta' ? 'una recta' : 'un arco'} «${repetido}» (${d.origen}). Elige otro nombre.`;
+          nota.classList.add('mal');
+          return;
+        }
+        nota.textContent = ''; nota.classList.remove('mal');
+        Editor.renombrarVarios(l.slice(0, previos.length).map((n, i) => [previos[i], n]));
+        previos = l.concat(previos.slice(l.length));
         if (!l.length) delete o.nombrar; else o.nombrar = lista && (l.length > 1 || Array.isArray(o.nombrar)) ? l : l[0];
         Editor.cambio('nombrar' + iPaso + '-' + j, { inspector: false });
       });
       caja.append(U.el('div', { class: 'cond' }, this.fila(lista ? 'Nombrar lo conseguido (uno o varios)' : 'Nombrar lo conseguido', inp,
-        lista ? 'Nombres separados por comas, en orden. Sirven para usarlos en los pasos siguientes.' : 'Sirve para usarlo en los pasos siguientes.')));
+        lista ? 'Nombres separados por comas, en orden. Sirven para usarlos en los pasos siguientes. Si cambias uno, se cambia en todos los pasos que lo usan.' : 'Sirve para usarlo en los pasos siguientes. Si lo cambias, se cambia en todos los pasos que lo usan.'), nota));
     }
     if (o.tipo !== 'continuar') {
       const mas = U.el('details', { class: 'mas' }, U.el('summary', { text: 'Tolerancias y más opciones' }));
@@ -2518,6 +2689,26 @@ const Inspector = {
     }
     return caja;
   },
+  // Cuando las dos líneas se cortan en varios puntos, cuál de ellos es el bueno
+  eleccionCorte(o, iPaso) {
+    const caja = U.el('div', { class: 'corte' });
+    const cs = Cortes.de(Editor.ej, iPaso, o);
+    if (cs.length < 2) return caja;
+    if (o.cantidad > 1) {
+      caja.append(U.el('div', { class: 'ayuda', text: `Se cortan en ${cs.length} puntos; con «Cantidad de puntos» valen todos.` }));
+      return caja;
+    }
+    const elegido = U.esCoord(o.corte) ? Cortes.masCercano(cs, o.corte) : null;
+    const noms = Cortes.nombres(cs);
+    caja.append(U.el('div', { class: 'ayuda', style: 'margin-top:8px', text: `Se cortan en ${cs.length} puntos. ¿Cuál es el bueno?` }),
+      U.el('div', { class: 'seg seg-varias', role: 'group', 'aria-label': 'Corte que vale' },
+        cs.map((q, n) => U.el('button', { type: 'button', text: noms[n], 'aria-pressed': String(q === elegido), title: `(${U.fmt(q.x)}, ${U.fmt(q.y)}) mm`,
+          onclick: () => { Cortes.elegir(o, q); Editor.cambio(); } })),
+        U.el('button', { type: 'button', text: 'Cualquiera', 'aria-pressed': String(o.corte === false), title: 'Vale el punto en cualquiera de los cortes',
+          onclick: () => { o.corte = false; Editor.cambio(); } })),
+      U.el('div', { class: 'ayuda', text: 'También puedes tocar en la hoja el corte marcado con un círculo gris. Elige «Cualquiera» si los dos sirven.' }));
+    return caja;
+  },
   valorInicial(t, k) {
     return { pt: '', linea: '', par: ['', ''], pts: [''], angPunto: { vertice: '', desde: '', grados: 60 }, angRecta: { con: '', grados: 30 },
       dist: { de: '', mm: 30 }, int: k === 'cantidad' ? 2 : 6, num: k === 'barridoMin' ? 90 : 50, bool: k !== 'cerrado' ? true : false, radio: 50,
@@ -2526,7 +2717,7 @@ const Inspector = {
   condicion(o, k, t, et, ex, ctx, quitable = true) {
     const cont = U.el('div', { class: 'cond' });
     cont.append(U.el('div', { class: 'cond-cab' }, U.el('span', { class: 'et' }, et, ex ? U.el('div', { class: 'ex', text: ex }) : null),
-      quitable ? this.btnMini('cerrar', `Quitar «${et}»`, () => { delete o[k]; Editor.cambio(); }) : null));
+      quitable ? this.btnMini('cerrar', `Quitar «${et}»`, () => { delete o[k]; if (k === 'cruce') delete o.corte; Editor.cambio(); }) : null));
     const set = v => { o[k] = v; Editor.cambio('c-' + ctx.paso + k, { inspector: false }); };
     const setI = v => { o[k] = v; Editor.cambio(); };
     const v = o[k];
@@ -2537,6 +2728,7 @@ const Inspector = {
         const a = Array.isArray(v) ? v.slice(0, 2) : ['', ''];
         while (a.length < 2) a.push('');
         cont.append(U.el('div', { class: 'lista-ref' }, a.map((x, i) => this.ref(x, 'linea', ctx.paso, nv => { a[i] = nv; set(a.slice()); }))));
+        if (k === 'cruce') cont.append(this.eleccionCorte(o, ctx.paso));
         break;
       }
       case 'pts': {

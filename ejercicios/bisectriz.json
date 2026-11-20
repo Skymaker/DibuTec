@@ -49,7 +49,7 @@
     {
       "texto": "Marca el punto donde se cortan los dos últimos arcos.",
       "herramientas": ["lapiz"],
-      "objetivo": { "tipo": "punto", "cruce": ["arcoP", "arcoQ"], "nombrar": "R" }
+      "objetivo": { "tipo": "punto", "cruce": ["arcoP", "arcoQ"], "corte": false, "nombrar": "R" }
     },
     {
       "texto": "Une el vértice V con ese punto usando la regla. ¡Es la bisectriz!",
