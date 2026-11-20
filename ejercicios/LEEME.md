@@ -227,7 +227,7 @@ Un arco o circunferencia trazado con el compás.
 | `completo` | `true` si tiene que ser una circunferencia entera. |
 | `barridoMin` | Grados mínimos del arco. |
 | `pasaPor` | Puntos por los que pasa. |
-| `cortaA` | `["r"]` o `[{ "elemento": "arcoA", "cortes": 2 }]` |
+| `cortaA` | `["r"]` o `[{ "elemento": "arcoA", "cortes": 2 }]`. Si con un corte la circunferencia podría cortar a la línea en dos sitios, `[{ "elemento": "r", "corte": { "x": 95, "y": 130 } }]` indica cuál vale: el arco tiene que cortar por el lado más cercano a ese sitio. |
 
 ### `rectas`
 

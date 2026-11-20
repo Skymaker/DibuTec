@@ -876,15 +876,22 @@ const Construccion = {
           const f = Object.assign(this.circ(c, r), { aprox });
           nombrables.push(f);
           // Si tiene que cortar a algo, se dibuja solo un trozo de arco en cada corte (como se traza a mano)
-          const cortes = o.completo ? [] : [].concat(o.cortaA || []).flatMap(x => {
+          const cortes = o.completo ? [] : [].concat(o.cortaA || []).flatMap((x, ix) => {
             const l = lin(typeof x === 'string' ? x : x && x.elemento);
-            return l ? G.cortes(f, l) : [];
+            if (!l) return [];
+            let cs = G.cortes(f, l);
+            const uno = !(x && x.cortes > 1);
+            // Un solo corte y dos posibles: el elegido o, si no hay, los dos (tocando uno se elige)
+            if (uno && cs.length > 1 && x && U.esCoord(x.corte)) cs = [Cortes.masCercano(cs, x.corte)];
+            else if (uno && cs.length > 1) cs = cs.map(q => Object.assign(q, { eleccion: ix }));
+            return cs;
           });
           if (cortes.length) {
             const medio = Math.min(Math.PI / 3, Math.max(14 / r, Number.isFinite(o.barridoMin) ? o.barridoMin * Math.PI / 360 : 0));
             for (const q of cortes) {
               const t = Math.atan2(q.y - c.y, q.x - c.x);
-              formas.push({ tipo: 'arco', cx: c.x, cy: c.y, r, a0: t - medio, a1: t + medio, aprox });
+              formas.push(Object.assign({ tipo: 'arco', cx: c.x, cy: c.y, r, a0: t - medio, a1: t + medio, aprox },
+                q.eleccion !== undefined ? { eleccion: q.eleccion, corte: { x: q.x, y: q.y } } : {}));
             }
             const t0 = Math.atan2(cortes[0].y - c.y, cortes[0].x - c.x) - medio;
             f.etq = { x: c.x + r * Math.cos(t0), y: c.y + r * Math.sin(t0) };
@@ -1003,6 +1010,25 @@ const Cortes = {
     return n.map((t, k) => cs[k].en ? `${t} (en ${cs[k].en})` : t);
   },
   elegir(o, q) { o.corte = { x: Math.round(q.x * 10) / 10, y: Math.round(q.y * 10) / 10 }; },
+  // «Corta a» de un arco: dónde puede cortar su circunferencia a la línea ix
+  deArco(ej, i, o, ix) {
+    const x = [].concat(o.cortaA || [])[ix];
+    const { geo } = Construccion.calcular(ej, i - 1);
+    const pt = r => { if (U.esCoord(r)) return { tipo: 'punto', x: r.x, y: r.y }; const g = typeof r === 'string' ? geo.get(r) : null; return g && g.tipo === 'punto' ? g : null; };
+    const lin = r => (typeof r === 'string' && geo.get(r) && geo.get(r).tipo !== 'punto' ? geo.get(r) : null);
+    const f = Construccion.objetivo(o, pt, lin).nombrables[0], l = lin(typeof x === 'string' ? x : x && x.elemento);
+    if (!f || !l) return [];
+    const cs = G.cortes(f, l);
+    for (const q of cs) for (const [n, g] of geo) if (g.tipo === 'punto' && G.dist(g.x, g.y, q.x, q.y) < .5) { q.en = n; break; }
+    return cs;
+  },
+  elegirArco(o, ix, q) {
+    const l = [].concat(o.cortaA || []), x = l[ix];
+    const e = U.esObj(x) ? Object.assign({}, x) : { elemento: x };
+    if (q) e.corte = { x: Math.round(q.x * 10) / 10, y: Math.round(q.y * 10) / 10 }; else delete e.corte;
+    l[ix] = e.cortes > 1 || e.corte ? e : e.elemento;
+    o.cortaA = l;
+  },
 };
 
 const Encuadre = {
@@ -1879,6 +1905,13 @@ const Editor = {
         mensaje('Corte elegido: DibuTec solo dará por bueno el punto marcado en ese corte.');
         return null;
       }
+      const a = this.construccion.fantasmas.find(f => f.paso === this.sel.i && f.forma.eleccion !== undefined && G.distForma(p, f.forma) <= r);
+      if (a) {
+        Cortes.elegirArco(a.objetivo, a.forma.eleccion, a.forma.corte);
+        this.cambio();
+        mensaje('Arco elegido: solo se dibuja ese y DibuTec pedirá que el arco corte por ese lado.');
+        return null;
+      }
     }
     // Seleccionar y arrastrar
     const h = this.tocar(p);
@@ -2154,6 +2187,7 @@ const Editor = {
       h('Series de pasos'), p('Para construcciones que se repiten (llevar varias veces una medida con el compás, trazar varias paralelas…), <b>duplica</b> el paso o el objetivo: la copia recibe el siguiente nombre de la serie (c1 → c2, P1 → P2) y solo tienes que cambiar los puntos y líneas que usa.'),
       h('Puntos que ya cumplen el objetivo'), p('DibuTec da por bueno <b>cualquier</b> punto que cumpla las condiciones, también uno marcado en un paso anterior. Si en la construcción esperada eso ocurre (por ejemplo, la circunferencia de centro P2 pasa por P1), la revisión lo avisa: añade una condición que distinga el punto nuevo, como «A una distancia».'),
       h('Dos cortes'), p('Si las dos líneas de «En el cruce de» se cortan en dos puntos (por ejemplo, un arco y una recta), elige cuál es el bueno con los botones que aparecen debajo o tocando en la hoja el corte marcado con un círculo gris. Si no eliges, DibuTec da por bueno cualquiera de los dos.'),
+      h('Arcos que cortan dos veces'), p('En «Corta a», si la circunferencia del arco puede cortar a la línea en dos sitios y solo hace falta un corte, elige dónde va el arco con los botones o tocándolo en la hoja. Solo se dibuja ese arco y DibuTec pedirá que el alumno lo trace por ese lado.'),
       h('Cambiar un nombre'), p('Al cambiar un nombre en «Nombrar lo conseguido» o en el enunciado, se cambia en todos los pasos que lo usan. No se puede usar un nombre que ya tiene otro elemento.'),
       h('Solución final'), p('En «Solución final» la hoja muestra la construcción completa con sus márgenes. Los botones <b>Centrar</b> mueven todo el ejercicio para dejarlo centrado en el papel, en horizontal, en vertical o en los dos sentidos.'),
       h('Construcción esperada'), p('Con el ojo activado, la hoja muestra en naranja discontinuo lo que se espera en el paso seleccionado y en gris lo de los pasos anteriores. Si algo no aparece donde esperas, revisa las condiciones.'),
@@ -2709,6 +2743,22 @@ const Inspector = {
       U.el('div', { class: 'ayuda', text: 'También puedes tocar en la hoja el corte marcado con un círculo gris. Elige «Cualquiera» si los dos sirven.' }));
     return caja;
   },
+  // «Corta a» con un solo corte cuando la circunferencia corta la línea en dos sitios: cuál vale
+  eleccionArco(o, ix, iPaso) {
+    const caja = U.el('div', { class: 'corte' });
+    const cs = Cortes.deArco(Editor.ej, iPaso, o, ix);
+    if (cs.length < 2) return caja;
+    const x = [].concat(o.cortaA)[ix], ref = U.esObj(x) && U.esCoord(x.corte) ? x.corte : null;
+    const elegido = ref ? Cortes.masCercano(cs, ref) : null, noms = Cortes.nombres(cs);
+    caja.append(U.el('div', { class: 'ayuda', style: 'margin:4px 0 4px', text: `Puede cortarla en ${cs.length} sitios. ¿Dónde va el arco?` }),
+      U.el('div', { class: 'seg seg-varias', role: 'group', 'aria-label': 'Sitio del arco' },
+        cs.map((q, n) => U.el('button', { type: 'button', text: noms[n], 'aria-pressed': String(q === elegido), title: `(${U.fmt(q.x)}, ${U.fmt(q.y)}) mm`,
+          onclick: () => { Cortes.elegirArco(o, ix, q); Editor.cambio(); } })),
+        U.el('button', { type: 'button', text: 'Cualquiera', 'aria-pressed': String(!elegido), title: 'Vale el arco en cualquiera de los dos sitios',
+          onclick: () => { Cortes.elegirArco(o, ix, null); Editor.cambio(); } })),
+      U.el('div', { class: 'ayuda', text: elegido ? 'Solo se dibuja ese arco y DibuTec pedirá que corte por ese lado.' : 'También puedes tocar en la hoja el arco que vale.' }));
+    return caja;
+  },
   valorInicial(t, k) {
     return { pt: '', linea: '', par: ['', ''], pts: [''], angPunto: { vertice: '', desde: '', grados: 60 }, angRecta: { con: '', grados: 30 },
       dist: { de: '', mm: 30 }, int: k === 'cantidad' ? 2 : 6, num: k === 'barridoMin' ? 90 : 50, bool: k !== 'cerrado' ? true : false, radio: 50,
@@ -2761,11 +2811,16 @@ const Inspector = {
         const box = U.el('div', { class: 'lista-ref' });
         l.forEach((x, i) => {
           const el = typeof x === 'string' ? x : (x && x.elemento) || '', n = (x && x.cortes) || 1;
-          const guardar = (e2, n2) => { l[i] = n2 > 1 ? { elemento: e2, cortes: n2 } : e2; };
+          // Se conserva el corte elegido (solo tiene sentido con un corte y la misma línea)
+          const guardar = (e2, n2) => {
+            const c = U.esObj(l[i]) && l[i].elemento === e2 && n2 === 1 ? l[i].corte : undefined;
+            l[i] = n2 > 1 ? { elemento: e2, cortes: n2 } : c ? { elemento: e2, corte: c } : e2;
+          };
           const num = U.el('input', { type: 'number', min: 1, max: 2, step: 1, value: n, style: 'width:62px', title: 'Número de cortes' });
           num.addEventListener('input', () => { const m = parseInt(num.value, 10) || 1; guardar(typeof l[i] === 'string' ? l[i] : l[i].elemento, m); set(l.slice()); });
-          box.append(U.el('div', { class: 'par' }, this.ref(el, 'linea', ctx.paso, nv => { guardar(nv, typeof l[i] === 'string' ? 1 : l[i].cortes); set(l.slice()); }),
+          box.append(U.el('div', { class: 'par' }, this.ref(el, 'linea', ctx.paso, nv => { guardar(nv, typeof l[i] === 'string' ? 1 : l[i].cortes || 1); set(l.slice()); }),
             U.el('span', { class: 'ayuda', text: '×', style: 'margin:0' }), num, this.btnMini('cerrar', 'Quitar', () => { l.splice(i, 1); setI(l.slice()); })));
+          if (n === 1) box.append(this.eleccionArco(o, i, ctx.paso));
         });
         box.append(U.el('button', { type: 'button', class: 'btn-texto', text: '+ Línea', onclick: () => { l.push(''); setI(l.slice()); } }));
         cont.append(box, U.el('div', { class: 'ayuda', text: 'El número es cuántas veces tiene que cortarla (1 o 2).' }));

@@ -4473,6 +4473,16 @@ const Ejercicio = {
       const ref = typeof c === 'string' ? c : c && c.elemento, n = (c && c.cortes) || 1;
       const L = this.linea(ref), k = L ? Geom.intersecciones({ tipo: 'arco', o: a }, L).length : 0;
       if (k < n) return n > 1 ? `El arco tiene que cortar a ${this.nombreDe(ref)} en ${n} puntos.` : `El arco tiene que cortar a ${this.nombreDe(ref)}.`;
+      // Con un corte elegido («corte»: {x, y}), el arco tiene que cortar por ese lado: de los dos
+      // sitios donde su circunferencia corta a la línea, el más cercano al elegido
+      const elegido = n === 1 && c && c.corte && typeof c.corte === 'object' ? this.punto(c.corte) : null;
+      if (elegido) {
+        const todos = Geom.intersecciones({ tipo: 'arco', o: Object.assign({}, a, { a0: 0, a1: Geom.DOS_PI }) }, L);
+        if (todos.length > 1) {
+          const q = todos.reduce((m, t) => (Geom.dist(t.x, t.y, elegido.x, elegido.y) < Geom.dist(m.x, m.y, elegido.x, elegido.y) ? t : m), todos[0]);
+          if (Geom.distArco(q.x, q.y, a) > tol) return `El arco tiene que cortar a ${this.nombreDe(ref)} por el otro lado.`;
+        }
+      }
     }
     return null;
   },

@@ -100,7 +100,10 @@
         "centro": "P1",
         "radio": 20,
         "cortaA": [
-          "r"
+          {
+            "elemento": "r",
+            "corte": { "x": 94.6, "y": 130 }
+          }
         ],
         "nombrar": "c2"
       }
@@ -134,7 +137,10 @@
         "centro": "P2",
         "radio": 20,
         "cortaA": [
-          "r"
+          {
+            "elemento": "r",
+            "corte": { "x": 112, "y": 120 }
+          }
         ],
         "nombrar": "c3"
       }
@@ -168,7 +174,10 @@
         "centro": "P3",
         "radio": 20,
         "cortaA": [
-          "r"
+          {
+            "elemento": "r",
+            "corte": { "x": 129.3, "y": 110 }
+          }
         ],
         "nombrar": "c4"
       }
@@ -202,7 +211,10 @@
         "centro": "P4",
         "radio": 20,
         "cortaA": [
-          "r"
+          {
+            "elemento": "r",
+            "corte": { "x": 146.6, "y": 100 }
+          }
         ],
         "nombrar": "c5"
       }
