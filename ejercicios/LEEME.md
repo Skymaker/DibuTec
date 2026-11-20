@@ -23,6 +23,9 @@ con errores no impide usar los demás.
   nombres repetidos, tipos equivocados y campos que faltan. También avisa
   cuando un punto marcado en un paso anterior ya cumple el objetivo de un
   punto (DibuTec lo daría por bueno sin marcar nada nuevo).
+- **Optativo**: casilla «Paso optativo» en cada paso y botón «Optativa» en
+  cada condición (por ejemplo, el candado). Se guardan como `optativo` y
+  `opcionales`.
 - **Cortes**: si las dos líneas de «En el cruce de» se cortan en dos puntos,
   se elige cuál es el bueno con sus botones o tocando en la hoja el otro corte
   (círculo gris). Se guarda como `corte`.
@@ -181,6 +184,9 @@ indica siempre con su nombre.
   `mover`, `goma`, `regla`, `escuadra`, `cartabon`, `compas`, `transportador`.
 - `objetivo` u `objetivos` (lista): lo que hay que conseguir. El paso se
   completa solo cuando se cumplen todos.
+- `optativo` (opcional): con `true`, el alumno puede saltarse el paso: si no
+  lo hace pero cumple el paso siguiente, continúa. No sirve para el último
+  paso ni para pasos cuyos nombres se usan después.
 
 DibuTec comprueba los objetivos cada vez que algo cambia. Si lo último que se
 dibujó no cumple el objetivo, explica el motivo en la barra de estado. Si se
@@ -195,6 +201,7 @@ vuelve a ese paso.
 | `tolerancia` | Margen en mm (por defecto 1). |
 | `toleranciaGrados` | Margen en grados (por defecto 1). |
 | `permitirDados` | Si es `true`, también valen los elementos del enunciado. |
+| `opcionales` | Condiciones optativas del objetivo, por su clave: `"opcionales": ["bloqueado"]`. DibuTec las pide, pero si el alumno no las cumple y hace bien el paso siguiente, continúa (la barra de progreso marca ese paso rayado). |
 
 ### `punto`
 

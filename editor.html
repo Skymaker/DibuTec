@@ -225,7 +225,13 @@
   .mini[aria-pressed="true"] { background: var(--activo-fondo); border-color: var(--activo); color: var(--activo); }
   .cond { border-top: 1px dashed var(--borde); padding-top: 8px; margin-top: 8px; }
   .cond-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
-  .cond-cab .et { font-size: 13.5px; font-weight: 600; }
+  .cond-cab .et { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .btn-opt { border: 1px solid var(--borde); background: #fff; border-radius: 999px; padding: 3px 10px; font-size: 12.5px; cursor: pointer; color: var(--texto-suave); white-space: nowrap; }
+  .btn-opt[aria-pressed="true"] { background: #eef6ee; border-color: #8cc79a; color: #2c7a43; font-weight: 600; }
+  @media (hover: hover) { .btn-opt:hover { border-color: var(--activo); } }
+  .marca-opt { margin-left: 6px; font-size: 11.5px; font-weight: 600; color: #2c7a43; background: #eef6ee; border-radius: 999px; padding: 1px 7px; }
+  .cond.optativa { border-left: 3px dashed #8cc79a; padding-left: 8px; }
+  .tag.tag-opt { background: #eef6ee; color: #2c7a43; font-weight: 600; }
   .cond-cab .ex { font-size: 12px; color: var(--texto-suave); font-weight: 400; }
   .ref { display: flex; gap: 4px; align-items: center; }
   .ref input { flex: 1; min-width: 0; }
@@ -596,7 +602,7 @@ const CAMPOS_EXTRA = [
   ['permitirDados', 'bool', 'Vale lo del enunciado', 'También cuentan los elementos que ya están dibujados.'],
 ];
 // Claves cuyos valores son referencias a elementos (para renombrar y revisar)
-const CLAVES_NO_REF = new Set(['tipo', 'instrumento', 'apoyadoEn', 'sentido', 'nombrar']);
+const CLAVES_NO_REF = new Set(['tipo', 'instrumento', 'apoyadoEn', 'sentido', 'nombrar', 'opcionales']);
 
 /* =====================================================================
    Modelo: el ejercicio tal como se guarda, con los objetivos siempre en lista
@@ -1225,6 +1231,19 @@ const Revision = {
     const caja = ej.pasos.length ? Encuadre.caja(ej) : null;
     if (caja && (caja.x0 < 0 || caja.y0 < 0 || caja.x1 > W || caja.y1 > H))
       ojo('Parte de la construcción esperada se sale de la hoja. Muévela con los botones de «Solución final».', { tipo: 'final' });
+    // Lo optativo no puede ser imprescindible para los pasos siguientes
+    ej.pasos.forEach((p, i) => {
+      const ir = { tipo: 'paso', i }, P = `Paso ${i + 1}`;
+      const opc = p.optativo === true || p.objetivos.some(o => Array.isArray(o.opcionales) && o.opcionales.length);
+      if (!opc) return;
+      if (i === ej.pasos.length - 1) ojo(`${P}: el último paso no se puede saltar (no hay un paso siguiente con el que seguir), así que lo optativo no cuenta.`, ir);
+      if (p.optativo !== true) return;
+      const noms = p.objetivos.flatMap(o => o.nombrar === undefined ? [] : [].concat(o.nombrar)).filter(n => typeof n === 'string' && n);
+      for (const n of noms) {
+        const usa = ej.pasos.findIndex((q, j) => j > i && JSON.stringify(q.objetivos, (k, v) => (CLAVES_NO_REF.has(k) ? undefined : v)).includes(JSON.stringify(n)));
+        if (usa >= 0) ojo(`${P} es optativo, pero lo que nombra («${n}») se usa en el paso ${usa + 1}: si el alumno se lo salta, no podrá seguir.`, ir);
+      }
+    });
     const todos = Nombres.todos(ej);
     for (const k in ej.textos) if (!todos.has(k)) ojo(`Hay un texto para «${k}», pero no hay nada con ese nombre.`, { tipo: 'textos' });
     return out;
@@ -2252,6 +2271,7 @@ const Editor = {
       h('Series de pasos'), p('Para construcciones que se repiten (llevar varias veces una medida con el compás, trazar varias paralelas…), <b>duplica</b> el paso o el objetivo: la copia recibe el siguiente nombre de la serie (c1 → c2, P1 → P2) y solo tienes que cambiar los puntos y líneas que usa.'),
       h('Puntos que ya cumplen el objetivo'), p('DibuTec da por bueno <b>cualquier</b> punto que cumpla las condiciones, también uno marcado en un paso anterior. Si en la construcción esperada eso ocurre (por ejemplo, la circunferencia de centro P2 pasa por P1), la revisión lo avisa: añade una condición que distinga el punto nuevo, como «A una distancia».'),
       h('Revisión'), p('El botón <b>Comprobar</b> (F7) de la barra inferior la fuerza en cualquier momento: revisa todo, prueba a abrir el archivo como lo haría DibuTec y muestra la lista. Además, se repite sola después de cada cambio, también mientras escribes: el botón de la barra inferior, las marcas del panel izquierdo, la lista «Revisión» del elemento seleccionado y los campos en rojo se ponen al día solos. También avisa si la construcción esperada se sale de la hoja.'),
+      h('Lo optativo'), p('Marca <b>Paso optativo</b> para que el alumno pueda saltarse un paso entero, o pulsa <b>Optativa</b> en una condición para que solo esa parte lo sea (por ejemplo, «Con el candado puesto»). DibuTec pide lo optativo, pero si el alumno no lo hace y sigue bien con el paso siguiente, continúa y lo marca rayado en la barra de progreso.'),
       h('Dos cortes'), p('Si las dos líneas de «En el cruce de» se cortan en dos puntos (por ejemplo, un arco y una recta), elige cuál es el bueno con los botones que aparecen debajo o tocando en la hoja el corte marcado con un círculo gris. Si no eliges, DibuTec da por bueno cualquiera de los dos.'),
       h('Arcos que cortan dos veces'), p('En «Corta a», si la circunferencia del arco puede cortar a la línea en dos sitios y solo hace falta un corte, elige dónde va el arco con los botones o tocándolo en la hoja. Solo se dibuja ese arco y DibuTec pedirá que el alumno lo trace por ese lado.'),
       h('Cambiar un nombre'), p('Al cambiar un nombre en «Nombrar lo conseguido» o en el enunciado, se cambia en todos los pasos que lo usan. No se puede usar un nombre que ya tiene otro elemento.'),
@@ -2353,7 +2373,8 @@ const Esquema = {
         U.el('span', { class: 'num', text: i + 1 }),
         U.el('span', { class: 't' },
           U.el('span', { class: 'texto' + (p.texto.trim() ? '' : ' vacio'), text: p.texto.trim() || 'Sin instrucción' }),
-          U.el('span', { class: 'tags' }, p.objetivos.map(o => U.el('span', { class: 'tag tag-obj', text: OBJ[o.tipo] ? OBJ[o.tipo].corto : o.tipo })),
+          U.el('span', { class: 'tags' }, p.optativo === true || p.objetivos.some(o => Array.isArray(o.opcionales) && o.opcionales.length) ? U.el('span', { class: 'tag tag-opt', text: p.optativo === true ? 'Optativo' : 'Parte optativa' }) : null,
+            p.objetivos.map(o => U.el('span', { class: 'tag tag-obj', text: OBJ[o.tipo] ? OBJ[o.tipo].corto : o.tipo })),
             [].concat(p.objetivos.flatMap(o => o.nombrar === undefined ? [] : [].concat(o.nombrar))).map(n => U.el('span', { class: 'tag', text: '→ ' + n })))),
         marcas(ir => ir.tipo === 'paso' && ir.i === i));
       c.append(b);
@@ -2732,6 +2753,8 @@ const Inspector = {
       } }));
     }
     c.append(U.el('h3', { text: 'Herramientas que se resaltan' }), herr);
+    c.append(this.casilla(p, 'optativo', 'Paso optativo', { inspector: true }),
+      U.el('div', { class: 'ayuda', text: 'El alumno puede saltárselo: si no lo hace pero sigue bien con el paso siguiente, continúa. Para que solo una parte sea optativa, pulsa «Optativa» en esa condición (por ejemplo, el candado).' }));
     // Objetivos
     c.append(U.el('h3', { text: p.objetivos.length > 1 ? `Objetivos (se tienen que cumplir todos)` : 'Objetivo' }));
     p.objetivos.forEach((o, j) => c.append(this.objetivo(p, o, j, s.i)));
@@ -2876,9 +2899,20 @@ const Inspector = {
       cortes: [''], segs: [['', '']], inst: 'regla' }[t];
   },
   condicion(o, k, t, et, ex, ctx, quitable = true) {
-    const cont = U.el('div', { class: 'cond' });
-    cont.append(U.el('div', { class: 'cond-cab' }, U.el('span', { class: 'et' }, et, ex ? U.el('div', { class: 'ex', text: ex }) : null),
-      quitable ? this.btnMini('cerrar', `Quitar «${et}»`, () => { delete o[k]; if (k === 'cruce') delete o.corte; Editor.cambio(); }) : null));
+    const opc = [].concat(o.opcionales || []).includes(k);
+    const cont = U.el('div', { class: 'cond' + (opc ? ' optativa' : '') });
+    const alternarOpc = () => {
+      const l = [].concat(o.opcionales || []).filter(x => x !== k);
+      if (!opc) l.push(k);
+      if (l.length) o.opcionales = l; else delete o.opcionales;
+      Editor.cambio();
+    };
+    const quitarOpc = () => { if (Array.isArray(o.opcionales)) { o.opcionales = o.opcionales.filter(x => x !== k); if (!o.opcionales.length) delete o.opcionales; } };
+    cont.append(U.el('div', { class: 'cond-cab' }, U.el('span', { class: 'et' }, et, opc ? U.el('span', { class: 'marca-opt', text: 'optativa' }) : null, ex ? U.el('div', { class: 'ex', text: ex }) : null),
+      quitable ? U.el('button', { type: 'button', class: 'btn-opt', 'aria-pressed': String(opc), text: 'Optativa',
+        title: opc ? 'Es optativa: si el alumno sigue bien con el paso siguiente, no hace falta. Pulsa para que sea obligatoria.' : 'Hacerla optativa: si el alumno no la cumple pero sigue bien con el paso siguiente, puede continuar.',
+        onclick: alternarOpc }) : null,
+      quitable ? this.btnMini('cerrar', `Quitar «${et}»`, () => { delete o[k]; quitarOpc(); if (k === 'cruce') delete o.corte; Editor.cambio(); }) : null));
     let set = v => { o[k] = v; Editor.cambio('c-' + ctx.paso + k, { inspector: false }); };
     if (o.tipo === 'arco' && k === 'centro') {
       // Al cambiar el centro, los sitios elegidos en «Corta a» se mueven con él (se conserva el lado)

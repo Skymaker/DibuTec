@@ -255,6 +255,8 @@
   .te-progreso i { flex: 1; height: 6px; border-radius: 3px; background: #e6e1d6; }
   .te-progreso i.hecho { background: #3bb273; }
   .te-progreso i.actual { background: var(--activo); }
+  .te-progreso i.omitido { background: repeating-linear-gradient(45deg, #3bb273 0 3px, #bfe6cf 3px 6px); }
+  .te-optativo { margin: 4px 0 0; font-size: 13px; color: var(--texto-suave); font-style: italic; }
   .te-boton {
     min-height: 36px; padding: 0 14px; border: 1px solid var(--borde); border-radius: 10px;
     background: #fff; color: var(--texto); font: inherit; font-size: 14px; cursor: pointer; touch-action: manipulation;
@@ -4297,7 +4299,7 @@ const Ejercicio = {
     for (const k of this.CLAVES_PAPEL) this.configPrevia[k] = Config.get(k);
     const papel = def.papel && typeof def.papel === 'object' ? def.papel : {};
     for (const k of this.CLAVES_PAPEL) if (k in papel) Config.set(k, papel[k]);
-    Object.assign(this, { def, paso: 0, nombres: {}, asignados: [], completado: false, minimizado: false, verPista: false });
+    Object.assign(this, { def, paso: 0, nombres: {}, asignados: [], omitidos: [], completado: false, minimizado: false, verPista: false });
     Escena.vaciar();
     this.crearInicial(def.inicial || {});
     this.colocarInstrumentos(def.instrumentos);
@@ -4313,7 +4315,7 @@ const Ejercicio = {
   salir(aviso = true) {
     if (!this.def) return;
     if (this.configPrevia) for (const k in this.configPrevia) Config.set(k, this.configPrevia[k]);
-    Object.assign(this, { def: null, paso: 0, nombres: {}, asignados: [], iniciales: [], completado: false, configPrevia: null });
+    Object.assign(this, { def: null, paso: 0, nombres: {}, asignados: [], omitidos: [], iniciales: [], completado: false, configPrevia: null });
     this.guardar();
     this.pintarTarjeta();
     this.marcarSugeridos();
@@ -4668,14 +4670,37 @@ const Ejercicio = {
     }
     return fallo(null);
   },
-  evaluarPaso(p) {
+  // sinOptativos: sin las condiciones marcadas como optativas (y nada si el paso entero lo es)
+  evaluarPaso(p, sinOptativos = false) {
+    if (sinOptativos && p.optativo === true) return { ok: true, asignar: [] };
     const asignar = [];
     for (const o of this.objetivosDe(p)) {
-      const r = this.evaluar(o);
+      const r = this.evaluar(sinOptativos ? this.reducido(o) : o);
       if (!r.ok) return r;
       asignar.push(...r.asignar);
     }
     return { ok: true, asignar };
+  },
+  // El objetivo sin sus condiciones optativas
+  reducido(o) {
+    const q = Object.assign({}, o);
+    for (const k of [].concat(o.opcionales || [])) if (k !== 'tipo') delete q[k];
+    delete q.opcionales;
+    return q;
+  },
+  tieneOptativos(p) { return p.optativo === true || this.objetivosDe(p).some(o => Array.isArray(o.opcionales) && o.opcionales.length > 0); },
+  // Un paso con algo optativo se da por bueno sin eso si el alumno ya ha hecho bien el paso siguiente
+  // (o los siguientes, si también tienen algo optativo). Devuelve el resultado reducido o null.
+  saltarOptativo(i, prof = 0) {
+    const pasos = this.def.pasos, p = pasos[i];
+    if (!p || !this.tieneOptativos(p) || i + 1 >= pasos.length || prof > 6) return null;
+    const r = this.evaluarPaso(p, true);
+    if (!r.ok) return null;
+    const antes = Object.assign({}, this.nombres);
+    for (const a of r.asignar) this.nombres[a.nombre] = { tipo: a.tipo, id: a.id };
+    const sigue = this.evaluarPaso(pasos[i + 1]).ok || !!this.saltarOptativo(i + 1, prof + 1);
+    this.nombres = antes;
+    return sigue ? r : null;
   },
 
   // ---------- Comprobación tras cada cambio ----------
@@ -4693,16 +4718,30 @@ const Ejercicio = {
       if ((this.asignados[i] || []).some(n => !this.elemento(n))) {
         for (let j = i; j < this.paso; j++) for (const n of this.asignados[j] || []) { this.desetiquetar(n); delete this.nombres[n]; }
         this.asignados.length = i;
+        this.omitidos = (this.omitidos || []).filter(k => k < i);
         this.paso = i;
         retrocede = true;
         break;
       }
     }
-    let avanza = 0, motivo = null;
+    let avanza = 0, motivo = null, saltados = 0;
     const hayNuevo = Escena.sigId > this.ultimoId;
+    if (!this.omitidos) this.omitidos = [];
     while (this.paso < this.def.pasos.length) {
-      const r = this.evaluarPaso(this.def.pasos[this.paso]);
-      if (!r.ok) { motivo = r.motivo; break; }
+      let r = this.evaluarPaso(this.def.pasos[this.paso]);
+      if (!r.ok) {
+        // Lo optativo no hace falta si el alumno ya ha seguido bien con el paso siguiente
+        const s = this.saltarOptativo(this.paso);
+        if (!s) {
+          motivo = r.motivo;
+          if (motivo && this.tieneOptativos(this.def.pasos[this.paso]) && this.evaluarPaso(this.def.pasos[this.paso], true).ok)
+            motivo += ' (Es optativo: también puedes seguir con el paso siguiente.)';
+          break;
+        }
+        r = s;
+        this.omitidos.push(this.paso);
+        saltados++;
+      }
       for (const a of r.asignar) { this.nombres[a.nombre] = { tipo: a.tipo, id: a.id }; this.etiquetar(a); }
       this.asignados[this.paso] = r.asignar.map(a => a.nombre);
       this.paso++;
@@ -4719,7 +4758,7 @@ const Ejercicio = {
     } else if (avanza) {
       Sonido.tocar('bien');
       UI.aviso('¡Bien hecho!');
-      UI.mensaje(`Paso ${this.paso + 1}: ${this.def.pasos[this.paso].texto}`);
+      UI.mensaje(`Paso ${this.paso + 1}: ${this.def.pasos[this.paso].texto}` + (saltados ? ' (Te has saltado algo optativo.)' : ''));
     } else if (retrocede) {
       UI.mensaje('Has quitado algo que hacía falta: vuelve a hacer este paso.');
     } else if (hayNuevo && motivo) {
@@ -4769,7 +4808,7 @@ const Ejercicio = {
   guardar() {
     try {
       if (this.def) localStorage.setItem(this.clave, JSON.stringify({
-        def: this.def, paso: this.paso, nombres: this.nombres, asignados: this.asignados,
+        def: this.def, paso: this.paso, nombres: this.nombres, asignados: this.asignados, omitidos: this.omitidos || [],
         iniciales: this.iniciales, completado: this.completado, configPrevia: this.configPrevia }));
       else localStorage.removeItem(this.clave);
     } catch (_) { /* sin almacenamiento */ }
@@ -4784,6 +4823,7 @@ const Ejercicio = {
       paso: Number.isInteger(d.paso) ? Geom.clamp(d.paso, 0, d.def.pasos.length) : 0,
       nombres: d.nombres && typeof d.nombres === 'object' ? d.nombres : {},
       asignados: Array.isArray(d.asignados) ? d.asignados : [],
+      omitidos: Array.isArray(d.omitidos) ? d.omitidos.filter(Number.isInteger) : [],
       iniciales: Array.isArray(d.iniciales) ? d.iniciales : [],
       completado: !!d.completado,
       configPrevia: d.configPrevia || null,
@@ -4821,7 +4861,12 @@ const Ejercicio = {
     const cuerpo = crear('div', 'te-cuerpo');
     const pie = crear('div', 'te-pie');
     const progreso = crear('div', 'te-progreso');
-    for (let i = 0; i < N; i++) progreso.append(crear('i', i < this.paso || this.completado ? 'hecho' : i === this.paso ? 'actual' : ''));
+    const omitidos = new Set(this.omitidos || []);
+    for (let i = 0; i < N; i++) {
+      const t = crear('i', omitidos.has(i) && (i < this.paso || this.completado) ? 'hecho omitido' : i < this.paso || this.completado ? 'hecho' : i === this.paso ? 'actual' : '');
+      if (omitidos.has(i)) t.title = `Paso ${i + 1}: te has saltado lo optativo`;
+      progreso.append(t);
+    }
     pie.append(progreso);
     const boton = (texto, accion, principal) => {
       const b = crear('button', 'te-boton' + (principal ? ' principal' : ''), texto);
@@ -4836,6 +4881,9 @@ const Ejercicio = {
     } else {
       const p = this.def.pasos[this.paso];
       cuerpo.append(crear('p', 'te-texto', p.texto));
+      if (this.tieneOptativos(p)) cuerpo.append(crear('p', 'te-optativo', p.optativo === true
+        ? 'Paso optativo: si quieres, puedes saltártelo y seguir con el siguiente.'
+        : 'Una parte de este paso es optativa: si sigues bien con el siguiente paso, vale igual.'));
       if (this.verPista && typeof p.pista === 'string') cuerpo.append(crear('p', 'te-pista', p.pista));
       if (typeof p.pista === 'string') boton(this.verPista ? 'Ocultar pista' : 'Pista', () => { this.verPista = !this.verPista; this.pintarTarjeta(); });
       if (this.objetivosDe(p).some(o => o.tipo === 'continuar')) boton('Siguiente', () => this.pulsarSiguiente(), true);
