@@ -100,6 +100,8 @@
   .tags { display: flex; flex-wrap: wrap; gap: 4px; }
   .tag { font-size: 12px; padding: 1px 7px; border-radius: 999px; background: #f2eee6; color: var(--texto-suave); }
   .tag.tag-obj { background: #fdeedd; color: #8a4a08; font-weight: 600; }
+  button.tag { border: 1px solid transparent; font: inherit; font-size: 12px; cursor: pointer; }
+  button.tag:hover, button.tag:focus-visible { border-color: var(--activo); background: var(--activo-fondo); color: var(--texto); outline: none; }
   .marca-error { width: 9px; height: 9px; border-radius: 50%; background: var(--error); flex: none; margin-top: 4px; }
   .marca-aviso { width: 9px; height: 9px; border-radius: 50%; background: #e0a800; flex: none; margin-top: 4px; }
   .paso-item.arrastrado { opacity: .4; }
@@ -687,6 +689,7 @@ const Construccion = {
   // Devuelve { geo: Map(nombre -> forma), fantasmas: [{forma, paso, etiqueta}], tipos: Map(nombre -> tipo) }
   calcular(ej, hasta) {
     const geo = this.geo = new Map(), fantasmas = [];
+    this.tam = HOJAS[ej.papel && ej.papel.hoja] || HOJAS['A4-h'];
     const pt = ref => {
       if (U.esCoord(ref)) return { tipo: 'punto', x: ref.x, y: ref.y };
       const g = typeof ref === 'string' ? geo.get(ref) : null;
@@ -737,6 +740,21 @@ const Construccion = {
     return { tipo: 'arco', cx: o.x, cy: o.y, r: c.radio, a0: -g0 * Math.PI / 180, a1: -g1 * Math.PI / 180, dado: true };
   },
   circ: (c, r) => ({ tipo: 'arco', cx: c.x, cy: c.y, r, a0: 0, a1: G.DOS_PI }),
+  // De varias direcciones (rad), la de la semirrecta desde p que más recorre dentro de la hoja
+  mejorSentido(p, dirs, largo) {
+    const [W, H] = this.tam || HOJAS['A4-h'], m = 8;
+    const dentro = t => {
+      let s = 0;
+      for (; s <= largo; s += 2) {
+        const x = p.x + Math.cos(t) * s, y = p.y + Math.sin(t) * s;
+        if (x < m || y < m || x > W - m || y > H - m) break;
+      }
+      return Math.min(s, largo);
+    };
+    let mejor = dirs[0], dm = -1;
+    for (const t of dirs) { const d = dentro(t); if (d > dm + .5) { dm = d; mejor = t; } }
+    return mejor;
+  },
   // Formas que se dibujan para un objetivo y elementos a los que se pondrá nombre
   objetivo(o, pt, lin) {
     const formas = [], nombrables = [], geo = this.geo || new Map();
@@ -768,9 +786,18 @@ const Construccion = {
           formas.push(Object.assign(this.circ(pt(o.distancia.de), o.distancia.mm), { guia: true }));
         }
         if (cand && o.cruce !== undefined) {
-          // En un cruce se buscan puntos nuevos: los que ya existen van al final
+          // En un cruce se prefieren los cortes que cumplen las demás condiciones y los puntos nuevos
+          const tol = Number.isFinite(o.tolerancia) ? o.tolerancia : 1;
           const existe = q => [...geo.values()].some(f => f.tipo === 'punto' && G.dist(f.x, f.y, q.x, q.y) < .5);
-          cand = cand.filter(q => !existe(q)).concat(cand.filter(existe));
+          const desvio = q => {
+            let d = 0;
+            if (o.distancia && pt(o.distancia.de) && Number.isFinite(o.distancia.mm)) d += Math.abs(G.dist(q.x, q.y, pt(o.distancia.de).x, pt(o.distancia.de).y) - o.distancia.mm);
+            if (o.cerca !== undefined && pt(o.cerca)) d += G.dist(q.x, q.y, pt(o.cerca).x, pt(o.cerca).y);
+            if (o.sobre !== undefined && lin(o.sobre)) d += G.distForma(q, lin(o.sobre));
+            return d;
+          };
+          const clave = q => [desvio(q) > tol ? 1 : 0, existe(q) ? 1 : 0, desvio(q)];
+          cand = cand.map(q => [clave(q), q]).sort((a, b) => a[0][0] - b[0][0] || a[0][1] - b[0][1] || a[0][2] - b[0][2]).map(x => x[1]);
         }
         if (cand) {
           const k = Number.isInteger(o.cantidad) && o.cantidad > 0 ? o.cantidad : 1;
@@ -787,12 +814,25 @@ const Construccion = {
           f = { tipo: 'recta', x1: p.x - (q.x - p.x) * e, y1: p.y - (q.y - p.y) * e, x2: q.x + (q.x - p.x) * e, y2: q.y + (q.y - p.y) * e };
         } else {
           const p = a || b || pp[0];
-          let ang = null;
+          let angs = null;
           const L = k => { const g = lin(k); return g && g.tipo === 'recta' ? g : null; };
-          if (L(o.paralelaA)) ang = G.dir(L(o.paralelaA));
-          else if (L(o.perpendicularA)) ang = G.dir(L(o.perpendicularA)) + Math.PI / 2;
-          else if (o.angulo && L(o.angulo.con) && Number.isFinite(o.angulo.grados)) ang = G.dir(L(o.angulo.con)) - o.angulo.grados * Math.PI / 180;
-          if (p && ang !== null) f = G.rectaPor(p, ang);
+          if (L(o.paralelaA)) angs = [G.dir(L(o.paralelaA))];
+          else if (L(o.perpendicularA)) angs = [G.dir(L(o.perpendicularA)) + Math.PI / 2];
+          else if (o.angulo && L(o.angulo.con) && Number.isFinite(o.angulo.grados)) {
+            // DibuTec acepta el ángulo hacia cualquiera de los dos lados
+            const base = G.dir(L(o.angulo.con)), g = o.angulo.grados * Math.PI / 180;
+            angs = [base - g, base + g];
+          }
+          if (p && angs) {
+            if ((a || b) && !pp.length) {
+              // Solo un extremo: una semirrecta, hacia el lado que mejor cabe en la hoja
+              const largo = Number.isFinite(o.longitudMin) ? Math.max(o.longitudMin, 40) : 90;
+              const dirs = angs.concat(angs.map(t => t + Math.PI));
+              const t = this.mejorSentido(p, dirs, largo);
+              const q = { x: p.x + Math.cos(t) * largo, y: p.y + Math.sin(t) * largo };
+              f = a ? { tipo: 'recta', x1: p.x, y1: p.y, x2: q.x, y2: q.y } : { tipo: 'recta', x1: q.x, y1: q.y, x2: p.x, y2: p.y };
+            } else f = G.rectaPor(p, angs[0]);
+          }
         }
         if (f) { formas.push(f); nombrables.push(f); }
         break;
@@ -810,7 +850,24 @@ const Construccion = {
           const q = pt([].concat(o.pasaPor)[0]); r = G.dist(c.x, c.y, q.x, q.y);
         }
         if (c && !(r > 0)) { r = 50; aprox = true; }   // sin radio fijo: uno orientativo
-        if (c && r > 0) { const f = Object.assign(this.circ(c, r), { aprox }); formas.push(f); nombrables.push(f); }
+        if (c && r > 0) {
+          const f = Object.assign(this.circ(c, r), { aprox });
+          nombrables.push(f);
+          // Si tiene que cortar a algo, se dibuja solo un trozo de arco en cada corte (como se traza a mano)
+          const cortes = o.completo ? [] : [].concat(o.cortaA || []).flatMap(x => {
+            const l = lin(typeof x === 'string' ? x : x && x.elemento);
+            return l ? G.cortes(f, l) : [];
+          });
+          if (cortes.length) {
+            const medio = Math.min(Math.PI / 3, Math.max(14 / r, Number.isFinite(o.barridoMin) ? o.barridoMin * Math.PI / 360 : 0));
+            for (const q of cortes) {
+              const t = Math.atan2(q.y - c.y, q.x - c.x);
+              formas.push({ tipo: 'arco', cx: c.x, cy: c.y, r, a0: t - medio, a1: t + medio, aprox });
+            }
+            const t0 = Math.atan2(cortes[0].y - c.y, cortes[0].x - c.x) - medio;
+            f.etq = { x: c.x + r * Math.cos(t0), y: c.y + r * Math.sin(t0) };
+          } else formas.push(f);
+        }
         break;
       }
       case 'rectas': {
@@ -867,6 +924,27 @@ const Nombres = {
     return m;
   },
   todos(ej) { return this.disponibles(ej, ej.pasos.length); },
+  // El siguiente nombre libre de la misma serie: c1 → c2, P4 → P5, arcoA → arcoA2
+  enSerie(ej, nombre, ocupados = new Set()) {
+    const usados = this.todos(ej), m = /^(.*?)(\d+)$/.exec(nombre);
+    const base = m ? m[1] : nombre;
+    for (let k = m ? +m[2] + 1 : 2; ; k++) { const n = base + k; if (!usados.has(n) && !ocupados.has(n)) return n; }
+  },
+  // Pone a los objetivos copiados los siguientes nombres de su serie; devuelve los cambios («c1 → c2»)
+  renombrarCopia(ej, objetivos) {
+    const ocupados = new Set(), cambios = [];
+    for (const o of objetivos) {
+      if (o.nombrar === undefined) continue;
+      const nuevos = [].concat(o.nombrar).map(n => {
+        if (typeof n !== 'string' || !n) return n;
+        const s = this.enSerie(ej, n, ocupados);
+        ocupados.add(s); cambios.push(`${n} → ${s}`);
+        return s;
+      });
+      o.nombrar = Array.isArray(o.nombrar) ? nuevos : nuevos[0];
+    }
+    return cambios;
+  },
   siguiente(ej, tipo) {
     const usados = this.todos(ej);
     if (tipo === 'punto') {
@@ -960,6 +1038,10 @@ const Revision = {
           if (!Number.isInteger(o.lados) || o.lados < 3) mal(`${P}: el polígono necesita al menos 3 lados.`, ir);
           for (const k of ['circunferencia', 'desde']) if (o[k] === undefined) mal(`${P}: falta «${k}» en los vértices.`, ir);
         }
+        if (o.tipo === 'punto') {
+          const ya = this.puntoQueYaCumple(ej, i, o);
+          if (ya) ojo(`${P}: en la construcción esperada, el punto «${ya.nombre}» (paso ${ya.paso + 1}) ya cumple este objetivo, así que DibuTec lo daría por bueno sin que se marque ninguno nuevo. Añade una condición que lo distinga, como «A una distancia» o «Cerca de».`, ir);
+        }
         if (o.tipo === 'instrumento' && !o.instrumento) mal(`${P}: elige el instrumento.`, ir);
         if (o.tipo === 'instrumento' && (o.paraleloA !== undefined || o.perpendicularA !== undefined) && o.cantoPasaPor === undefined)
           ojo(`${P}: «paralelo a» y «perpendicular a» solo cuentan junto con «Un canto pasa por».`, ir);
@@ -976,6 +1058,39 @@ const Revision = {
     const todos = Nombres.todos(ej);
     for (const k in ej.textos) if (!todos.has(k)) ojo(`Hay un texto para «${k}», pero no hay nada con ese nombre.`, { tipo: 'textos' });
     return out;
+  },
+  // DibuTec acepta cualquier punto marcado por el alumno que cumpla las condiciones, también los de pasos
+  // anteriores. Devuelve el primero de esos puntos (según la construcción esperada) que ya cumple «o».
+  puntoQueYaCumple(ej, i, o) {
+    if (Number.isInteger(o.cantidad) && o.cantidad > 1) return null;
+    if (!['cerca', 'sobre', 'cruce', 'angulo', 'distancia'].some(k => o[k] !== undefined)) return null;
+    const { geo } = Construccion.calcular(ej, i - 1);
+    const tol = Number.isFinite(o.tolerancia) ? o.tolerancia : 1, tolA = Number.isFinite(o.toleranciaGrados) ? o.toleranciaGrados : 1;
+    const pt = r => U.esCoord(r) ? r : (geo.get(r) && geo.get(r).tipo === 'punto' ? geo.get(r) : null);
+    const lin = r => (typeof r === 'string' && geo.get(r) && geo.get(r).tipo !== 'punto' ? geo.get(r) : null);
+    const cumple = p => {
+      if (o.cerca !== undefined) { const c = pt(o.cerca); if (!c || G.dist(p.x, p.y, c.x, c.y) > tol) return false; }
+      if (o.sobre !== undefined) { const l = lin(o.sobre); if (!l || G.distForma(p, l) > tol) return false; }
+      if (o.cruce !== undefined) {
+        const A = Array.isArray(o.cruce) && lin(o.cruce[0]), B = Array.isArray(o.cruce) && lin(o.cruce[1]);
+        if (!A || !B || !G.cortes(A, B).some(q => G.dist(p.x, p.y, q.x, q.y) <= tol)) return false;
+      }
+      if (o.distancia) { const c = pt(o.distancia.de); if (!c || !Number.isFinite(o.distancia.mm) || Math.abs(G.dist(p.x, p.y, c.x, c.y) - o.distancia.mm) > tol) return false; }
+      if (o.angulo) {
+        const a = o.angulo, V = pt(a.vertice), Hh = pt(a.desde);
+        if (!V || !Hh || !Number.isFinite(a.grados)) return false;
+        let g = (Math.atan2(-(p.y - V.y), p.x - V.x) - Math.atan2(-(Hh.y - V.y), Hh.x - V.x)) * 180 / Math.PI;
+        g = ((g % 360) + 540) % 360 - 180;
+        const ok = a.sentido === 'antihorario' ? Math.abs(g - a.grados) <= tolA : a.sentido === 'horario' ? Math.abs(g + a.grados) <= tolA : Math.abs(Math.abs(g) - a.grados) <= tolA;
+        if (!ok) return false;
+      }
+      return true;
+    };
+    for (const [nombre, f] of geo) {
+      if (f.tipo !== 'punto' || f.paso === undefined) continue;   // solo los que marca el alumno
+      if (cumple(f)) return { nombre, paso: f.paso };
+    }
+    return null;
   },
   // Lo mismo que comprueba DibuTec al abrir el archivo
   validarComoApp(d) {
@@ -1199,11 +1314,20 @@ const Editor = {
     this.cambio();
   },
   duplicarPaso(i) {
-    this.ej.pasos.splice(i + 1, 0, U.copia(this.ej.pasos[i]));
-    for (const o of this.ej.pasos[i + 1].objetivos) delete o.nombrar;
+    const copia = U.copia(this.ej.pasos[i]);
+    const cambios = Nombres.renombrarCopia(this.ej, copia.objetivos);
+    this.ej.pasos.splice(i + 1, 0, copia);
     this.sel = { tipo: 'paso', i: i + 1 };
     this.pasoVista = i + 1;
     this.cambio();
+    aviso(cambios.length ? `Paso duplicado. Nombres nuevos: ${cambios.join(', ')}. Revisa los puntos y líneas que usa.` : 'Paso duplicado.');
+  },
+  duplicarObjetivo(i, j) {
+    const objs = this.ej.pasos[i].objetivos, copia = U.copia(objs[j]);
+    const cambios = Nombres.renombrarCopia(this.ej, [copia]);
+    objs.splice(j + 1, 0, copia);
+    this.cambio();
+    aviso(cambios.length ? `Objetivo duplicado: ${cambios.join(', ')}.` : 'Objetivo duplicado.');
   },
 
   // ---------- Renombrar: cambia también todas las referencias ----------
@@ -1301,7 +1425,7 @@ const Editor = {
       for (const [n, f] of C.geo) {
         if (f.dado || f.tipo === 'punto') continue;
         const col = f.paso === vista ? COLOR.paso : COLOR.previo;
-        const p = f.tipo === 'recta' ? { x: f.x2, y: f.y2 } : { x: f.cx + f.r * Math.cos(-Math.PI / 4), y: f.cy + f.r * Math.sin(-Math.PI / 4) };
+        const p = f.etq || (f.tipo === 'recta' ? { x: f.x2, y: f.y2 } : { x: f.cx + f.r * Math.cos(-Math.PI / 4), y: f.cy + f.r * Math.sin(-Math.PI / 4) });
         partes.push(etiqueta(p.x, p.y, n + (f.aprox ? ' (≈)' : ''), col, false));
       }
     }
@@ -1897,10 +2021,12 @@ const Editor = {
       h('1 · Ficha'), p('Título, nivel, descripción, papel y mensaje final.'),
       h('2 · Enunciado'), p('Con las herramientas <b>Punto</b>, <b>Recta</b> y <b>Arco</b> de la hoja dibuja lo que el alumnado verá al empezar. Si una recta empieza en un punto con nombre, queda unida a él. Arrastra con <b>Seleccionar</b> para mover; el <b>imán</b> pega a puntos, cruces y cuadrícula.'),
       h('3 · Instrumentos'), p('Elige qué instrumentos aparecen al empezar y dónde. Arrástralos por la hoja y gíralos con su asa (Mayús: de 15° en 15°).'),
-      h('4 · Pasos'), p('Cada paso tiene una instrucción, una pista opcional, las herramientas que se resaltan y uno o varios <b>objetivos</b>. Usa <b>Nombrar</b> para poner nombre a lo que se consigue (por ejemplo, «arcoA») y usarlo en pasos siguientes. El botón <span style="white-space:nowrap">⌖</span> junto a cada campo permite elegir el punto o la línea tocando la hoja.'),
+      h('4 · Pasos'), p('Cada paso tiene una instrucción, una pista opcional, las herramientas que se resaltan y uno o varios <b>objetivos</b>. Usa <b>Nombrar</b> para poner nombre a lo que se consigue (por ejemplo, «arcoA») y usarlo en pasos siguientes. El botón <span style="white-space:nowrap">⌖</span> junto a cada campo permite elegir el punto o la línea tocando la hoja; también puedes tocar uno de los <b>Nombres que se pueden usar aquí</b> para ponerlo en el último campo que hayas tocado.'),
+      h('Series de pasos'), p('Para construcciones que se repiten (llevar varias veces una medida con el compás, trazar varias paralelas…), <b>duplica</b> el paso o el objetivo: la copia recibe el siguiente nombre de la serie (c1 → c2, P1 → P2) y solo tienes que cambiar los puntos y líneas que usa.'),
+      h('Puntos que ya cumplen el objetivo'), p('DibuTec da por bueno <b>cualquier</b> punto que cumpla las condiciones, también uno marcado en un paso anterior. Si en la construcción esperada eso ocurre (por ejemplo, la circunferencia de centro P2 pasa por P1), la revisión lo avisa: añade una condición que distinga el punto nuevo, como «A una distancia».'),
       h('Construcción esperada'), p('Con el ojo activado, la hoja muestra en naranja discontinuo lo que se espera en el paso seleccionado y en gris lo de los pasos anteriores. Si algo no aparece donde esperas, revisa las condiciones.'),
       h('Probar y guardar'), p('<b>Probar</b> abre el ejercicio en DibuTec en otra pestaña. <b>Guardar</b> descarga el .json: cópialo en la carpeta <code>ejercicios/</code> y añade su nombre a <code>ejercicios/indice.json</code>. El trabajo se guarda solo en este navegador mientras editas.'),
-      h('Atajos'), p('<kbd>V</kbd> seleccionar · <kbd>P</kbd> punto · <kbd>R</kbd> recta · <kbd>C</kbd> arco · <kbd>Supr</kbd> borrar · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> deshacer/rehacer · <kbd>Ctrl+S</kbd> guardar · <kbd>Esc</kbd> cancelar · rueda: zoom.'),
+      h('Atajos'), p('<kbd>V</kbd> seleccionar · <kbd>P</kbd> punto · <kbd>R</kbd> recta · <kbd>C</kbd> arco · <kbd>Supr</kbd> borrar · <kbd>Ctrl+D</kbd> duplicar el paso · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> deshacer/rehacer · <kbd>Ctrl+S</kbd> guardar · <kbd>Esc</kbd> cancelar · rueda: zoom.'),
     ]);
   },
 };
@@ -2274,7 +2400,7 @@ const Inspector = {
       U.el('h2', { style: 'flex:1' }, U.el('span', { class: 'num', text: s.i + 1 }), `Paso ${s.i + 1} de ${N}`),
       this.btnMini('arriba', 'Subir el paso', () => Editor.moverPaso(s.i, s.i - 1), { deshab: s.i === 0 }),
       this.btnMini('abajo', 'Bajar el paso', () => Editor.moverPaso(s.i, s.i + 1), { deshab: s.i === N - 1 }),
-      this.btnMini('duplicar', 'Duplicar el paso', () => Editor.duplicarPaso(s.i)),
+      this.btnMini('duplicar', 'Duplicar el paso, con los siguientes nombres de la serie (Ctrl+D)', () => Editor.duplicarPaso(s.i)),
       this.btnMini('papelera', 'Borrar el paso', () => Editor.borrarPaso(s.i), { peligro: true, deshab: N <= 1 })));
     // Vista previa de la tarjeta
     const vt = U.el('div', { class: 'vista-tarjeta' },
@@ -2316,7 +2442,17 @@ const Inspector = {
     }
     const disp = Nombres.disponibles(ej, s.i);
     c.append(U.el('h3', { text: 'Nombres que se pueden usar aquí' }),
-      U.el('div', { class: 'tags' }, disp.size ? [...disp].map(([n, i]) => U.el('span', { class: 'tag', title: `${i.tipo} · ${i.origen}`, text: `${n} · ${i.tipo}` })) : U.el('span', { class: 'ayuda', text: 'Ninguno todavía.' })));
+      U.el('div', { class: 'tags' }, disp.size ? [...disp].map(([n, i]) => U.el('button', { type: 'button', class: 'tag', title: `${i.tipo} · ${i.origen}. Tócalo para ponerlo en el último campo que hayas tocado.`, text: `${n} · ${i.tipo}`, onclick: () => this.ponerNombre(n, i.tipo) })) : U.el('span', { class: 'ayuda', text: 'Ninguno todavía.' })));
+  },
+  // Pone un nombre en el último campo de punto o línea que se ha tocado
+  ponerNombre(n, tipoNombre) {
+    const c = Editor.ultimoCampo;
+    if (!c || !document.body.contains(c.inp)) { aviso('Toca primero el campo donde quieres poner el nombre.'); return; }
+    const vale = c.tipo === 'punto' ? tipoNombre === 'punto' : c.tipo === 'linea' ? tipoNombre !== 'punto' : tipoNombre === c.tipo;
+    if (!vale) { aviso(`«${n}» es ${tipoNombre === 'punto' ? 'un punto' : tipoNombre === 'recta' ? 'una recta' : 'un arco'}; ese campo pide ${c.tipo === 'punto' ? 'un punto' : c.tipo === 'linea' ? 'una línea' : c.tipo === 'recta' ? 'una recta' : 'un arco'}.`); return; }
+    c.inp.value = n;
+    c.inp.dispatchEvent(new Event('input', { bubbles: true }));
+    if (document.body.contains(c.inp)) c.inp.focus();
   },
   objetivo(p, o, j, iPaso) {
     const def = OBJ[o.tipo], caja = U.el('div', { class: 'obj' });
@@ -2336,6 +2472,7 @@ const Inspector = {
     });
     caja.append(U.el('div', { class: 'obj-cab' }, tipoSel,
       p.objetivos.length > 1 ? this.btnMini('arriba', 'Subir', () => { p.objetivos.splice(j - 1, 0, p.objetivos.splice(j, 1)[0]); Editor.cambio(); }, { deshab: j === 0 }) : null,
+      this.btnMini('duplicar', 'Duplicar este objetivo (con el siguiente nombre de la serie)', () => Editor.duplicarObjetivo(iPaso, j)),
       p.objetivos.length > 1 ? this.btnMini('papelera', 'Quitar este objetivo', () => { p.objetivos.splice(j, 1); Editor.cambio(); }, { peligro: true }) : null));
     if (!def) return caja;
     caja.append(U.el('div', { class: 'ayuda', text: def.ayuda }));
@@ -2519,6 +2656,7 @@ const Inspector = {
         const inp = U.el('input', { type: 'text', list: idDl, placeholder: tipo === 'punto' ? 'Nombre del punto' : 'Nombre de la línea', value: typeof val === 'string' ? val : '' });
         comprobar(inp, inp.value);
         inp.addEventListener('input', () => { comprobar(inp, inp.value.trim()); alCambiar(inp.value.trim()); });
+        inp.addEventListener('focus', () => { Editor.ultimoCampo = { inp, tipo }; });
         caja.append(inp);
         if (tipo === 'punto') caja.append(this.btnMini('cambiar', 'Usar coordenadas', () => {
           const C = Construccion.calcular(Editor.ej, iPaso - 1), f = C.geo.get(inp.value.trim());
@@ -2616,6 +2754,7 @@ function iniciarEntrada() {
     if (document.getElementById('dlg').open) return;
     if (ctrl && !escribiendo() && e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); Editor.deshacer(); return; }
     if (ctrl && !escribiendo() && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) { e.preventDefault(); Editor.rehacer(); return; }
+    if (ctrl && !escribiendo() && e.key.toLowerCase() === 'd' && Editor.sel.tipo === 'paso') { e.preventDefault(); Editor.duplicarPaso(Editor.sel.i); return; }
     if (e.key === 'Escape') {
       if (Editor.eligiendo) Editor.cancelarEleccion();
       else if (Editor.borrador) { Editor.borrador = null; Editor.pintarHoja(); mensaje('Trazo cancelado.'); }

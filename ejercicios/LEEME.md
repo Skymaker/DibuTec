@@ -17,7 +17,12 @@ con errores no impide usar los demás.
 - **Construcción esperada**: la hoja dibuja lo que se espera en el paso
   seleccionado (naranja) y en los anteriores (gris).
 - **Revisión**: avisa de nombres que no existen o que aún no se han creado,
-  nombres repetidos, tipos equivocados y campos que faltan.
+  nombres repetidos, tipos equivocados y campos que faltan. También avisa
+  cuando un punto marcado en un paso anterior ya cumple el objetivo de un
+  punto (DibuTec lo daría por bueno sin marcar nada nuevo).
+- **Series**: al duplicar un paso (Ctrl+D) o un objetivo, la copia recibe el
+  siguiente nombre de la serie (c1 → c2, P1 → P2). Los nombres de «Nombres que
+  se pueden usar aquí» se pueden tocar para ponerlos en el último campo tocado.
 - **Probar en DibuTec** abre el ejercicio en la aplicación
   (`index.html?prueba=editor`); **Guardar** descarga el `.json` con el mismo
   estilo que los de esta carpeta. **De la lista** abre los ejercicios del índice
