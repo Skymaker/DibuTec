@@ -353,6 +353,18 @@
   .panel-cuerpo h3 { font-size: 15px; margin: 18px 0 6px; color: var(--activo); text-transform: uppercase; letter-spacing: .04em; }
   .panel-cuerpo h3:first-child { margin-top: 10px; }
   .fila { margin: 14px 0; }
+  .cartela-editor .fila-interruptor { margin: 6px 0 10px; }
+  .cartela-campos { display: flex; flex-direction: column; gap: 10px; }
+  .cartela-campos[hidden] { display: none; }
+  .cartela-logo { display: flex; align-items: center; gap: 12px; }
+  .cl-vista { width: 64px; height: 64px; flex: none; border: 1px dashed var(--borde); border-radius: 10px; display: grid; place-items: center; font-size: 11px; color: var(--texto-suave); text-align: center; background: #fff; overflow: hidden; }
+  .cl-vista img { max-width: 56px; max-height: 56px; object-fit: contain; }
+  .cl-botones { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .cl-botones .btn-texto { margin: 0; }
+  .cl-botones .btn-texto[hidden] { display: none; }
+  .cartela-texto { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--texto-suave); }
+  .cartela-texto input { height: var(--ctl); padding: 0 10px; border: 1px solid var(--borde); border-radius: 10px; font: inherit; font-size: 15px; color: var(--texto); }
+  .cartela-texto input:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
   .paleta-editor { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
   .pe-fila { display: flex; align-items: center; gap: 8px; }
   .pe-fila input[type=color] { width: var(--ctl); height: var(--ctl); padding: 2px; border: 1px solid var(--borde); border-radius: 10px; background: #fff; cursor: pointer; flex: none; }
@@ -851,6 +863,164 @@ const Hoja = {
 };
 
 /* =====================================================================
+   Zona de dibujo: la hoja o, si hay marco, dentro del marco; nunca sobre la cartela
+   ===================================================================== */
+const Zona = {
+  marco() { const mg = Config.get('margen') ? Hoja.margen : 0; return { x0: mg, y0: mg, x1: Hoja.ancho - mg, y1: Hoja.alto - mg }; },
+  dentro(x, y) {
+    const m = this.marco();
+    if (x < m.x0 - 1e-6 || y < m.y0 - 1e-6 || x > m.x1 + 1e-6 || y > m.y1 + 1e-6) return false;
+    const c = Cartela.caja();
+    return !(c && x > c.x0 && y > c.y0 && x < c.x1 && y < c.y1);
+  },
+  aviso() {
+    const sitio = Config.get('margen') ? 'dentro del marco' : 'dentro de la hoja';
+    return `Solo se puede dibujar ${sitio}${Cartela.caja() ? ', fuera de la cartela' : ''}.`;
+  },
+  // Tramos [t0, t1] de un recorrido punto(t), t ∈ [0, 1], que quedan dentro (muestreo y bisección)
+  tramos(punto, largo) {
+    const n = Math.max(16, Math.min(4000, Math.ceil(largo / 0.4)));
+    const dentro = t => { const q = punto(t); return this.dentro(q.x, q.y); };
+    const borde = (tIn, tOut) => { for (let i = 0; i < 40; i++) { const m = (tIn + tOut) / 2; if (dentro(m)) tIn = m; else tOut = m; } return tIn; };
+    const out = [];
+    let ini = dentro(0) ? 0 : null, prev = 0;
+    for (let k = 1; k <= n; k++) {
+      const t = k / n, d = dentro(t);
+      if (d && ini === null) ini = borde(t, prev);
+      else if (!d && ini !== null) { out.push([ini, borde(prev, t)]); ini = null; }
+      prev = t;
+    }
+    if (ini !== null) out.push([ini, 1]);
+    return out.filter(([a, b]) => (b - a) * largo > 0.3);
+  },
+  recta(x1, y1, x2, y2) {
+    const P = t => ({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t });
+    return this.tramos(P, Math.hypot(x2 - x1, y2 - y1)).map(([a, b]) => [P(a), P(b)]);
+  },
+  // Trozos [a0, a1] de un arco que quedan dentro
+  arco(cx, cy, r, a0, a1) {
+    const ang = t => a0 + (a1 - a0) * t;
+    const l = this.tramos(t => ({ x: cx + r * Math.cos(ang(t)), y: cy + r * Math.sin(ang(t)) }), Math.abs(a1 - a0) * r);
+    // En una circunferencia, el trozo del final y el del principio son el mismo
+    if (l.length > 1 && Math.abs(Math.abs(a1 - a0) - Geom.DOS_PI) < 1e-6 && l[0][0] === 0 && l[l.length - 1][1] === 1) {
+      const u = l.pop(); l[0] = [u[0], l[0][1] + 1];
+    }
+    return l.map(([a, b]) => [ang(a), ang(b)]);
+  },
+  // Recorta lo que se pinta en ctx a la zona de dibujo
+  recortar(ctx) {
+    const m = this.marco(), c = Cartela.caja();
+    ctx.beginPath();
+    ctx.rect(m.x0, m.y0, m.x1 - m.x0, m.y1 - m.y0);
+    if (c) ctx.rect(c.x0, c.y0, c.x1 - c.x0, c.y1 - c.y0);
+    ctx.clip('evenodd');
+  },
+};
+
+/* =====================================================================
+   Cartela: logotipo y nombre del colegio, nombre del alumno, nivel y clase
+   ===================================================================== */
+const Cartela = {
+  clave: 'dibutec.cartela',
+  datos: { activa: false, logo: '', colegio: '', alumno: '', nivel: '' },
+  img: null,
+  cargar() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(this.clave)); } catch (_) { d = null; }
+    if (d && typeof d === 'object') for (const k in this.datos) if (typeof d[k] === typeof this.datos[k]) this.datos[k] = d[k];
+    if (this.datos.logo && !/^data:image\/(png|jpeg);base64,/.test(this.datos.logo)) this.datos.logo = '';
+    this.prepararLogo();
+  },
+  guardar() {
+    try { localStorage.setItem(this.clave, JSON.stringify(this.datos)); }
+    catch (_) { UI.aviso('No se ha podido guardar la cartela en este navegador.'); }
+    Render.pedir('papel', 'dibujo', 'instrumentos');
+  },
+  prepararLogo() {
+    this.img = null;
+    if (!this.datos.logo) return;
+    const im = new Image();
+    im.onload = () => { this.img = im; Render.pedir('papel'); };
+    im.src = this.datos.logo;
+  },
+  // Logotipo PNG o JPEG, reducido para que quepa en el almacenamiento del navegador
+  leerLogo(archivo, alTerminar) {
+    if (!archivo) return;
+    if (!/^image\/(png|jpeg)$/.test(archivo.type)) { UI.aviso('El logotipo tiene que ser una imagen PNG o JPEG.'); return; }
+    if (archivo.size > 15e6) { UI.aviso('Esa imagen es demasiado grande.'); return; }
+    const url = URL.createObjectURL(archivo), im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 480 / Math.max(im.width, im.height));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k));
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      this.datos.logo = c.toDataURL(archivo.type, 0.9);
+      this.prepararLogo();
+      this.guardar();
+      if (alTerminar) alTerminar();
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); UI.aviso('No se ha podido leer la imagen.'); };
+    im.src = url;
+  },
+  // Rectángulo de la cartela (mm): abajo a la derecha, apoyada en el marco
+  caja() {
+    if (!this.datos.activa) return null;
+    const mg = Hoja.margen, w = Math.min(120, Hoja.ancho * 0.45), h = 30;
+    return { x0: Hoja.ancho - mg - w, y0: Hoja.alto - mg - h, x1: Hoja.ancho - mg, y1: Hoja.alto - mg };
+  },
+  dibujar(ctx) {
+    const c = this.caja();
+    if (!c) return;
+    const w = c.x1 - c.x0, h = c.y1 - c.y0, L = h;   // L: lado de la casilla del logotipo
+    const fuente = getComputedStyle(document.body).fontFamily, tinta = '#1f2433', suave = '#6a6f80';
+    ctx.save();
+    ctx.fillStyle = Paleta.papel[Config.get('colorPapel')] || '#fff';
+    ctx.fillRect(c.x0, c.y0, w, h);
+    ctx.strokeStyle = tinta;
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(c.x0, c.y0, w, h);
+    ctx.lineWidth = 0.25;
+    ctx.beginPath();
+    ctx.moveTo(c.x0 + L, c.y0); ctx.lineTo(c.x0 + L, c.y1);
+    const f1 = c.y0 + h * 0.4, f2 = c.y0 + h * 0.7;
+    ctx.moveTo(c.x0 + L, f1); ctx.lineTo(c.x1, f1);
+    ctx.moveTo(c.x0 + L, f2); ctx.lineTo(c.x1, f2);
+    ctx.stroke();
+    // Logotipo, entero dentro de su casilla
+    if (this.img) {
+      const pad = 2, s = Math.min((L - 2 * pad) / this.img.width, (L - 2 * pad) / this.img.height);
+      const iw = this.img.width * s, ih = this.img.height * s;
+      ctx.drawImage(this.img, c.x0 + (L - iw) / 2, c.y0 + (L - ih) / 2, iw, ih);
+    } else {
+      ctx.fillStyle = '#b9bccb';
+      ctx.font = `500 3px ${fuente}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('Logotipo', c.x0 + L / 2, c.y0 + L / 2);
+    }
+    // Texto que cabe en su casilla (se reduce si es largo)
+    const ancho = w - L - 4, x = c.x0 + L + 2;
+    const escribir = (t, y, tam, peso, color) => {
+      if (!t) return;
+      ctx.font = `${peso} ${tam}px ${fuente}`;
+      const m = ctx.measureText(t).width;
+      if (m > ancho) ctx.font = `${peso} ${tam * ancho / m}px ${fuente}`;
+      ctx.fillStyle = color;
+      ctx.fillText(t, x, y);
+    };
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    escribir(this.datos.colegio.trim() || 'Nombre del colegio', c.y0 + h * 0.2, 4.6, 700, this.datos.colegio.trim() ? tinta : '#b9bccb');
+    ctx.textBaseline = 'top';
+    escribir('Alumno/a', f1 + 0.8, 2.2, 500, suave);
+    escribir('Nivel y clase', f2 + 0.8, 2.2, 500, suave);
+    ctx.textBaseline = 'alphabetic';
+    escribir(this.datos.alumno.trim(), f2 - 1.4, 4, 600, tinta);
+    escribir(this.datos.nivel.trim(), c.y1 - 1.4, 4, 600, tinta);
+    ctx.restore();
+  },
+};
+
+/* =====================================================================
    Fondo del papel: cuadriculado, milimetrado, isométrico
    ===================================================================== */
 const Papel = {
@@ -1136,6 +1306,7 @@ const Render = {
     const v0 = Vista.aMundo(0, 0), v1 = Vista.aMundo(Capas.w, Capas.h);
     Papel.dibujar(m, { x0: v0.x, y0: v0.y, x1: v1.x, y1: v1.y });
     this.margen(m);
+    Cartela.dibujar(m);
   },
   margen(m) {
     if (!Config.get('margen')) return;
@@ -1537,10 +1708,13 @@ const Lapiz = {
     if (a.modo === 'canto') {
       const len = Geom.dist(a.ini.x, a.ini.y, a.x, a.y);
       if (len * Vista.escala >= 4) {
+        const trozos = Zona.recta(a.ini.x, a.ini.y, a.x, a.y);
+        if (!trozos.length) { UI.mensaje(Zona.aviso()); return; }
         Historial.registrar();
-        Escena.agregarRecta(a.ini.x, a.ini.y, a.x, a.y);
+        for (const [p, q] of trozos) Escena.agregarRecta(p.x, p.y, q.x, q.y);
         Sonido.tocar('punto');
-        UI.mensaje(`Recta trazada: ${this.mmTexto(len)}.`);
+        const dentro = trozos.reduce((s, [p, q]) => s + Geom.dist(p.x, p.y, q.x, q.y), 0);
+        UI.mensaje(`Recta trazada: ${this.mmTexto(dentro)}.` + (len - dentro > 0.05 ? ' ' + Zona.aviso().replace('Solo se puede dibujar', 'Se ha cortado: solo se dibuja') : ''));
         return;
       }
       // Toque corto junto al canto: marca un punto sobre el canto
@@ -1550,8 +1724,8 @@ const Lapiz = {
   },
   gradosTexto(g) { return `Ángulo: ${g}° (escala interior: ${180 - g}°)`; },
   marcarPunto(a) {
-    if (a.x < 0 || a.y < 0 || a.x > Hoja.ancho || a.y > Hoja.alto) {
-      UI.mensaje('Los puntos se marcan dentro de la hoja.');
+    if (!Zona.dentro(a.x, a.y)) {
+      UI.mensaje(Zona.aviso());
       return;
     }
     const existente = Escena.puntos.find(p => Geom.dist(p.x, p.y, a.x, a.y) < 0.05);
@@ -1602,13 +1776,15 @@ const Lapiz = {
     }
     if (this.activo && e.modo === 'canto') {
       if (e.ini.snap) Dibujo.halo(ctx, e.ini.x, e.ini.y);
+      ctx.save();
+      Zona.recortar(ctx);   // lo que quede fuera no se dibuja
       ctx.strokeStyle = color;
       ctx.globalAlpha = 0.85;
       ctx.lineWidth = Dibujo.grosor();
       ctx.beginPath();
       ctx.moveTo(e.ini.x, e.ini.y); ctx.lineTo(e.x, e.y);
       ctx.stroke();
-      ctx.globalAlpha = 1;
+      ctx.restore();
       // Longitud junto al final, por fuera del instrumento
       const len = Geom.dist(e.ini.x, e.ini.y, e.x, e.y);
       if (len * Vista.escala > 20) {
@@ -3192,7 +3368,8 @@ const Manip = {
     if (s && s.modo === 'trazar' && confirmar) {
       this.cerrarTramo(s);
       const inst = s.inst;
-      const arcos = s.tramos.map(t => Escena.agregarArco(inst.x, inst.y, inst.r, t.a0, t.a0 + t.barrido));
+      const arcos = s.tramos.flatMap(t => Zona.arco(inst.x, inst.y, inst.r, t.a0, t.a0 + t.barrido).map(([a0, a1]) => Escena.agregarArco(inst.x, inst.y, inst.r, a0, a1)));
+      if (s.tramos.length && !arcos.length) UI.mensaje(Zona.aviso());
       if (arcos.length) {
         Sonido.tocar('punto');
         const a = arcos[arcos.length - 1];
@@ -3235,13 +3412,15 @@ const Manip = {
         ctx.beginPath(); ctx.arc(inst.x, inst.y, inst.r, 0, Geom.DOS_PI); ctx.stroke();
         ctx.restore();
       }
+      ctx.save();
+      Zona.recortar(ctx);   // fuera de la zona de dibujo no pinta
       ctx.strokeStyle = Paleta.lapizActual();
       ctx.globalAlpha = 0.85;
       ctx.lineWidth = Dibujo.grosor();
       ctx.lineCap = 'round';
       for (const t of s.tramos.concat(s.tramo ? [s.tramo] : []))
         if (t.barrido) Dibujo.trazo(ctx, 'arco', { cx: inst.x, cy: inst.y, r: inst.r, a0: t.a0, a1: t.a0 + t.barrido });
-      ctx.globalAlpha = 1;
+      ctx.restore();
     }
     if (s && s.guia) {
       // Canto de apoyo en verde
@@ -3933,7 +4112,10 @@ const Panel = {
     ]));
     this.fila(c, 'Hoja', this.segmentado('hoja', [['A4-h', 'A4 ▭'], ['A4-v', 'A4 ▯'], ['A3-h', 'A3 ▭'], ['A3-v', 'A3 ▯']],
       { 'A4-h': 'A4 horizontal', 'A4-v': 'A4 vertical', 'A3-h': 'A3 horizontal', 'A3-v': 'A3 vertical' }));
-    this.interruptor(c, 'margen', 'Margen');
+    this.interruptor(c, 'margen', 'Margen', 'Con margen, solo se puede dibujar dentro del marco.');
+
+    titulo('Cartela');
+    c.appendChild(this.editorCartela());
 
     titulo('Dibujo');
     this.interruptor(c, 'etiquetas', 'Poner letras a los puntos (A, B, C…)');
@@ -3985,6 +4167,70 @@ const Panel = {
     this.actualizar();
   },
 
+  // Cartela: interruptor, logotipo (PNG o JPEG) y textos
+  editorCartela() {
+    const d = Cartela.datos, caja = document.createElement('div');
+    caja.className = 'cartela-editor';
+    const fi = document.createElement('div');
+    fi.className = 'fila-interruptor';
+    const etq = document.createElement('label');
+    etq.className = 'etq'; etq.id = 'etq-cartela'; etq.textContent = 'Incluir una cartela en la hoja';
+    const sw = document.createElement('button');
+    sw.type = 'button'; sw.className = 'interruptor';
+    sw.setAttribute('role', 'switch'); sw.setAttribute('aria-labelledby', 'etq-cartela');
+    const campos = document.createElement('div');
+    campos.className = 'cartela-campos';
+    const reflejar = () => { sw.setAttribute('aria-checked', String(d.activa)); campos.hidden = !d.activa; };
+    sw.addEventListener('click', () => { d.activa = !d.activa; reflejar(); Cartela.guardar(); });
+    etq.addEventListener('click', () => sw.click());
+    fi.append(etq, sw);
+    // Logotipo
+    const logo = document.createElement('div');
+    logo.className = 'cartela-logo';
+    const vista = document.createElement('div');
+    vista.className = 'cl-vista';
+    const archivo = document.createElement('input');
+    archivo.type = 'file'; archivo.accept = 'image/png,image/jpeg'; archivo.hidden = true;
+    const cargar = document.createElement('button');
+    cargar.type = 'button'; cargar.className = 'btn-texto';
+    const quitar = document.createElement('button');
+    quitar.type = 'button'; quitar.className = 'btn-texto'; quitar.textContent = 'Quitar';
+    const pintarLogo = () => {
+      vista.innerHTML = '';
+      if (d.logo) { const im = document.createElement('img'); im.src = d.logo; im.alt = 'Logotipo del colegio'; vista.appendChild(im); }
+      else vista.textContent = 'Sin logotipo';
+      cargar.textContent = d.logo ? 'Cambiar el logotipo' : 'Cargar el logotipo (PNG o JPEG)';
+      quitar.hidden = !d.logo;
+    };
+    cargar.addEventListener('click', () => archivo.click());
+    archivo.addEventListener('change', () => { Cartela.leerLogo(archivo.files[0], pintarLogo); archivo.value = ''; });
+    quitar.addEventListener('click', () => { d.logo = ''; Cartela.prepararLogo(); Cartela.guardar(); pintarLogo(); });
+    const botones = document.createElement('div');
+    botones.className = 'cl-botones';
+    botones.append(cargar, quitar);
+    logo.append(vista, botones, archivo);
+    pintarLogo();
+    // Textos
+    const texto = (k, etiqueta, ph) => {
+      const f = document.createElement('label');
+      f.className = 'cartela-texto';
+      const t = document.createElement('span'); t.textContent = etiqueta;
+      const i = document.createElement('input');
+      i.type = 'text'; i.maxLength = 60; i.value = d[k]; i.placeholder = ph;
+      i.addEventListener('input', () => { d[k] = i.value; Cartela.guardar(); });
+      f.append(t, i);
+      return f;
+    };
+    campos.append(logo, texto('colegio', 'Nombre del colegio', 'IES …'), texto('alumno', 'Nombre del alumno o alumna', 'Nombre y apellidos'),
+      texto('nivel', 'Nivel y clase', '2.º ESO B'));
+    const nota = document.createElement('div');
+    nota.className = 'nota';
+    nota.textContent = 'La cartela va abajo a la derecha, apoyada en el marco, y sale también en la imagen exportada. No se puede dibujar encima de ella. Se guarda en este navegador.';
+    campos.appendChild(nota);
+    caja.append(fi, campos);
+    reflejar();
+    return caja;
+  },
   // Lista editable de colores: muestra, nombre (si se deja vacío, se ve el código) y quitar
   editorPaleta() {
     const caja = document.createElement('div');
@@ -4299,6 +4545,7 @@ const Archivo = {
         Papel.dibujar(ctx, { x0: 0, y0: 0, x1: Hoja.ancho, y1: Hoja.alto });
         Render.margen(ctx);
       }
+      Cartela.dibujar(ctx);
       Render.pintarEscena(ctx);
     } finally {
       Object.assign(Vista, vista);
@@ -5274,6 +5521,7 @@ function aplicarConfig(clave) {
    ===================================================================== */
 function iniciar() {
   Config.cargar();
+  Cartela.cargar();
   Hoja.actualizar();
   Capas.iniciar();
   UI.iniciar();
