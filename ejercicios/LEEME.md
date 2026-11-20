@@ -16,7 +16,8 @@ con errores no impide usar los demás.
   pueden escribir o **elegir tocando la hoja**.
 - **Construcción esperada**: la hoja dibuja lo que se espera en el paso
   seleccionado (naranja) y en los anteriores (gris).
-- **Revisión**: se repite tras cada cambio, también mientras se escribe (botón
+- **Revisión**: el botón **Comprobar** (F7) la fuerza y prueba a abrir el
+  archivo como DibuTec. Además se repite tras cada cambio, también mientras se escribe (botón
   de la barra inferior, marcas del esquema, lista «Revisión» de lo
   seleccionado y campos en rojo). Avisa de nombres que no existen o que aún no se han creado,
   nombres repetidos, tipos equivocados y campos que faltan. También avisa

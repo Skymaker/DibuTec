@@ -145,6 +145,13 @@
   }
   #mensaje { flex: 1; min-width: 0; color: var(--texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #coords { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  #btn-comprobar { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--borde); background: #fff; border-radius: 999px; padding: 3px 12px 3px 8px; cursor: pointer; font-size: 13.5px; white-space: nowrap; color: var(--texto); }
+  #btn-comprobar svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #btn-comprobar svg .a { fill: var(--acento); }
+  @media (hover: hover) { #btn-comprobar:hover { border-color: var(--activo); color: var(--activo); } }
+  #btn-comprobar.girando svg { animation: girar .6s ease-in-out; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { #btn-comprobar.girando svg { animation: none; } }
   #btn-problemas { border: 1px solid var(--borde); background: #fff; border-radius: 999px; padding: 3px 12px; cursor: pointer; font-size: 13.5px; white-space: nowrap; }
   #btn-problemas.mal { border-color: var(--error); color: var(--error); background: var(--error-fondo); font-weight: 600; }
   #btn-problemas.regular { border-color: #e0a800; color: var(--avisoc); background: var(--aviso-fondo); font-weight: 600; }
@@ -308,6 +315,7 @@
     <div id="estado">
       <span id="mensaje"></span>
       <span id="coords"></span>
+      <button id="btn-comprobar" type="button" title="Comprobar ahora todos los errores y avisos (F7)"></button>
       <button id="btn-problemas" type="button"></button>
     </div>
   </main>
@@ -359,6 +367,7 @@ const Iconos = (() => {
     duplicar: `<rect class="a" x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M14.5 12v5M12 14.5h5"/>`,
     arriba: `<path d="m6 15 6-6 6 6"/>`,
     abajo: `<path d="m6 9 6 6 6-6"/>`,
+    comprobar: `<path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/><path class="a" d="m8.5 12 2.5 2.5 4.5-5"/>`,
     cambiar: `<path d="M4 8h13l-3-3M20 16H7l3 3"/>`,
     // Herramientas de DibuTec
     lapiz: `<g transform="rotate(45 12 12)"><rect class="a" x="9.5" y="2" width="5" height="12.5" rx="1"/><path d="M9.5 14.5 12 19.5l2.5-5"/><path d="M12 19.5v2.5"/><path d="M12 4.5v4"/></g>`,
@@ -2148,6 +2157,20 @@ const Editor = {
       U.el('button', { class: 'btn-texto', type: 'button', html: Iconos.copiar + 'Copiar', onclick: () => this.copiar() }),
       U.el('button', { class: 'btn-texto', type: 'button', html: Iconos.guardar + 'Descargar', onclick: () => this.descargar() }))]);
   },
+  // Comprobación completa a petición: rehace la revisión y el panel, y prueba a abrir el archivo como DibuTec
+  comprobarAhora() {
+    this.repintar();
+    let abrir = null;
+    try { Revision.validarComoApp(JSON.parse(Modelo.texto())); } catch (e) { abrir = e.message; }
+    if (abrir) this.revision.unshift({ nivel: 'error', texto: `DibuTec no podría abrir el archivo: ${abrir}.`, ir: { tipo: 'ficha' } });
+    this.pintarEstado();
+    const b = document.getElementById('btn-comprobar');
+    b.classList.remove('girando'); void b.offsetWidth; b.classList.add('girando');
+    const e = this.revision.filter(p => p.nivel === 'error').length, a = this.revision.length - e;
+    if (!e && !a) { aviso('Comprobado: ✓ sin errores ni avisos.'); mensaje('Comprobación completa: el ejercicio se puede abrir en DibuTec y no hay problemas.'); return; }
+    mensaje(`Comprobación completa: ${e} ${e === 1 ? 'error' : 'errores'} y ${a} ${a === 1 ? 'aviso' : 'avisos'}.`);
+    this.mostrarProblemas();
+  },
   mostrarProblemas() {
     const l = this.revision;
     const cuerpo = l.length ? l.map(p => U.el('button', { type: 'button', class: 'problema ' + p.nivel, onclick: () => { this.cerrarDialogo(); this.seleccionar(p.ir); } },
@@ -2191,14 +2214,14 @@ const Editor = {
       h('4 · Pasos'), p('Cada paso tiene una instrucción, una pista opcional, las herramientas que se resaltan y uno o varios <b>objetivos</b>. Usa <b>Nombrar</b> para poner nombre a lo que se consigue (por ejemplo, «arcoA») y usarlo en pasos siguientes. El botón <span style="white-space:nowrap">⌖</span> junto a cada campo permite elegir el punto o la línea tocando la hoja; también puedes tocar uno de los <b>Nombres que se pueden usar aquí</b> para ponerlo en el último campo que hayas tocado.'),
       h('Series de pasos'), p('Para construcciones que se repiten (llevar varias veces una medida con el compás, trazar varias paralelas…), <b>duplica</b> el paso o el objetivo: la copia recibe el siguiente nombre de la serie (c1 → c2, P1 → P2) y solo tienes que cambiar los puntos y líneas que usa.'),
       h('Puntos que ya cumplen el objetivo'), p('DibuTec da por bueno <b>cualquier</b> punto que cumpla las condiciones, también uno marcado en un paso anterior. Si en la construcción esperada eso ocurre (por ejemplo, la circunferencia de centro P2 pasa por P1), la revisión lo avisa: añade una condición que distinga el punto nuevo, como «A una distancia».'),
-      h('Revisión'), p('Se repite después de cada cambio, también mientras escribes: el botón de la barra inferior, las marcas del panel izquierdo, la lista «Revisión» del elemento seleccionado y los campos en rojo se ponen al día solos. También avisa si la construcción esperada se sale de la hoja.'),
+      h('Revisión'), p('El botón <b>Comprobar</b> (F7) de la barra inferior la fuerza en cualquier momento: revisa todo, prueba a abrir el archivo como lo haría DibuTec y muestra la lista. Además, se repite sola después de cada cambio, también mientras escribes: el botón de la barra inferior, las marcas del panel izquierdo, la lista «Revisión» del elemento seleccionado y los campos en rojo se ponen al día solos. También avisa si la construcción esperada se sale de la hoja.'),
       h('Dos cortes'), p('Si las dos líneas de «En el cruce de» se cortan en dos puntos (por ejemplo, un arco y una recta), elige cuál es el bueno con los botones que aparecen debajo o tocando en la hoja el corte marcado con un círculo gris. Si no eliges, DibuTec da por bueno cualquiera de los dos.'),
       h('Arcos que cortan dos veces'), p('En «Corta a», si la circunferencia del arco puede cortar a la línea en dos sitios y solo hace falta un corte, elige dónde va el arco con los botones o tocándolo en la hoja. Solo se dibuja ese arco y DibuTec pedirá que el alumno lo trace por ese lado.'),
       h('Cambiar un nombre'), p('Al cambiar un nombre en «Nombrar lo conseguido» o en el enunciado, se cambia en todos los pasos que lo usan. No se puede usar un nombre que ya tiene otro elemento.'),
       h('Solución final'), p('En «Solución final» la hoja muestra la construcción completa con sus márgenes. Los botones <b>Centrar</b> mueven todo el ejercicio para dejarlo centrado en el papel, en horizontal, en vertical o en los dos sentidos.'),
       h('Construcción esperada'), p('Con el ojo activado, la hoja muestra en naranja discontinuo lo que se espera en el paso seleccionado y en gris lo de los pasos anteriores. Si algo no aparece donde esperas, revisa las condiciones.'),
       h('Probar y guardar'), p('<b>Probar</b> abre el ejercicio en DibuTec en otra pestaña. <b>Guardar</b> descarga el .json: cópialo en la carpeta <code>ejercicios/</code> y añade su nombre a <code>ejercicios/indice.json</code>. El trabajo se guarda solo en este navegador mientras editas.'),
-      h('Atajos'), p('<kbd>V</kbd> seleccionar · <kbd>P</kbd> punto · <kbd>R</kbd> recta · <kbd>C</kbd> arco · <kbd>Supr</kbd> borrar · <kbd>Ctrl+D</kbd> duplicar el paso · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> deshacer/rehacer · <kbd>Ctrl+S</kbd> guardar · <kbd>Esc</kbd> cancelar · rueda: zoom.'),
+      h('Atajos'), p('<kbd>V</kbd> seleccionar · <kbd>P</kbd> punto · <kbd>R</kbd> recta · <kbd>C</kbd> arco · <kbd>Supr</kbd> borrar · <kbd>Ctrl+D</kbd> duplicar el paso · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> deshacer/rehacer · <kbd>Ctrl+S</kbd> guardar · <kbd>F7</kbd> comprobar · <kbd>Esc</kbd> cancelar · rueda: zoom.'),
     ]);
   },
 };
@@ -3036,6 +3059,7 @@ function iniciarEntrada() {
   window.addEventListener('keydown', e => {
     const ctrl = e.ctrlKey || e.metaKey;
     if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); Editor.descargar(); return; }
+    if (e.key === 'F7') { e.preventDefault(); if (!document.getElementById('dlg').open) Editor.comprobarAhora(); return; }
     if (document.getElementById('dlg').open) return;
     if (ctrl && !escribiendo() && e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); Editor.deshacer(); return; }
     if (ctrl && !escribiendo() && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) { e.preventDefault(); Editor.rehacer(); return; }
@@ -3083,6 +3107,10 @@ function iniciarEntrada() {
     abrirArchivo(f);
   });
   document.getElementById('btn-problemas').addEventListener('click', () => Editor.mostrarProblemas());
+  const bc = document.getElementById('btn-comprobar');
+  bc.innerHTML = Iconos.comprobar + '<span>Comprobar</span>';
+  bc.setAttribute('aria-label', 'Comprobar ahora todos los errores y avisos');
+  bc.addEventListener('click', () => Editor.comprobarAhora());
   document.getElementById('dlg-cerrar').addEventListener('click', () => Editor.cerrarDialogo());
   new ResizeObserver(() => Editor.pintarHoja()).observe(lz);
 }
