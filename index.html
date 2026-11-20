@@ -353,6 +353,18 @@
   .panel-cuerpo h3 { font-size: 15px; margin: 18px 0 6px; color: var(--activo); text-transform: uppercase; letter-spacing: .04em; }
   .panel-cuerpo h3:first-child { margin-top: 10px; }
   .fila { margin: 14px 0; }
+  .paleta-editor { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
+  .pe-fila { display: flex; align-items: center; gap: 8px; }
+  .pe-fila input[type=color] { width: var(--ctl); height: var(--ctl); padding: 2px; border: 1px solid var(--borde); border-radius: 10px; background: #fff; cursor: pointer; flex: none; }
+  .pe-fila input[type=text] { flex: 1; min-width: 0; height: var(--ctl); padding: 0 10px; border: 1px solid var(--borde); border-radius: 10px; font: inherit; font-size: 15px; }
+  .pe-fila input:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+  .pe-quitar { width: var(--ctl); height: var(--ctl); flex: none; border: 1px solid var(--borde); border-radius: 10px; background: #fff; cursor: pointer; color: #b23a2e; display: grid; place-items: center; }
+  .pe-quitar:disabled { opacity: .35; cursor: default; }
+  .pe-quitar svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pe-quitar svg .a { fill: #f6d4cf; }
+  .pe-acciones { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pe-acciones .btn-texto { margin: 0; }
+  .pe-acciones .btn-texto:disabled { opacity: .45; cursor: default; }
   .fila[hidden] { display: none; }
   .etq { display: block; font-size: 14px; color: var(--texto-suave); margin-bottom: 6px; }
   .nota { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
@@ -569,7 +581,7 @@ const Config = {
     imanMarcas:     { def: true,     ops: [true, false] },
     imanInstrumentos: { def: true,   ops: [true, false] },
     // Portaminas: color y grosor de los trazos nuevos
-    colorLapiz:     { def: 'grafito', ops: ['grafito', 'negro', 'azul', 'rojo', 'verde', 'naranja', 'morado', 'marron', 'rosa'] },
+    colorLapiz:     { def: 'grafito', ops: () => Paleta.lista().map(e => e.id) },   // colores de la paleta (personalizable)
     grosorLapiz:    { def: 0.5, min: 0.5, max: 1.5, paso: 0.1 },   // mm
     etiquetas:      { def: true,     ops: [true, false] },
     iman:           { def: 'medio',  ops: ['debil', 'medio', 'fuerte'] },
@@ -597,6 +609,7 @@ const Config = {
       const v = this.valido(k, guardado[k]);
       this.valores[k] = v === undefined ? this.esquema[k].def : v;
     }
+    if (!this.valido('colorLapiz', this.valores.colorLapiz)) this.valores.colorLapiz = Paleta.lista()[0].id;
     // Configuraciones antiguas: color del grafito y grosor de la mina
     if (guardado.colorLapiz === undefined && guardado.grafito) {
       const c = guardado.grafito === 'gris' ? 'grafito' : guardado.grafito;
@@ -608,7 +621,7 @@ const Config = {
   valido(k, v) {
     const e = this.esquema[k];
     if (!e) return undefined;
-    if (e.ops) return e.ops.includes(v) ? v : undefined;
+    if (e.ops) return (typeof e.ops === 'function' ? e.ops() : e.ops).includes(v) ? v : undefined;
     if (typeof v !== 'number' || !Number.isFinite(v)) return undefined;
     const paso = e.paso || 1;
     return Number((Math.round(Math.min(e.max, Math.max(e.min, v)) / paso) * paso).toFixed(6));
@@ -626,6 +639,7 @@ const Config = {
   },
   restaurar() {
     for (const k in this.esquema) this.valores[k] = this.esquema[k].def;
+    if (!this.valido('colorLapiz', this.valores.colorLapiz)) this.valores.colorLapiz = Paleta.lista()[0].id;
     this.guardar();
     this.oyentes.forEach(f => f('*'));
   },
@@ -635,13 +649,50 @@ const Config = {
 const Paleta = {
   papel:   { blanco: '#ffffff', crema: '#fbf5e3' },
   lineas:  { azul: '70, 125, 200', gris: '110, 112, 122', verde: '45, 145, 95' }, // rgb
-  // Biblioteca de colores del portaminas: [color, nombre]
+  // Colores de fábrica del portaminas (y de la mina del compás): [color, nombre]
   lapiz: {
     grafito: ['#3b3b40', 'Grafito'], negro: ['#141416', 'Negro'],   azul:   ['#2a4d8f', 'Azul'],
     rojo:    ['#c0392b', 'Rojo'],    verde: ['#24814f', 'Verde'],   naranja: ['#e07b12', 'Naranja'],
     morado:  ['#7b3fa0', 'Morado'],  marron: ['#7a4a22', 'Marrón'], rosa:   ['#d13a7c', 'Rosa'],
   },
-  colorLapiz(c) { return (this.lapiz[c] || this.lapiz.grafito)[0]; },
+  // La paleta que se ve al elegir el color: personalizable en Configuración (color y nombre de cada uno)
+  clavePaleta: 'dibutec.paleta',
+  MAX_COLORES: 12,
+  _lista: null,
+  hex: v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v),
+  deFabrica() { return Object.entries(this.lapiz).map(([id, [color, nombre]]) => ({ id, color, nombre })); },
+  lista() {
+    if (this._lista) return this._lista;
+    let l = null;
+    try { l = JSON.parse(localStorage.getItem(this.clavePaleta)); } catch (_) { l = null; }
+    const vistos = new Set();
+    l = Array.isArray(l) ? l.filter(e => e && typeof e.id === 'string' && /^[a-z0-9]{1,20}$/.test(e.id) && !vistos.has(e.id) && vistos.add(e.id) && this.hex(e.color))
+      .map(e => ({ id: e.id, color: e.color.toLowerCase(), nombre: typeof e.nombre === 'string' ? e.nombre.slice(0, 20) : '' })).slice(0, this.MAX_COLORES) : [];
+    return (this._lista = l.length ? l : this.deFabrica());
+  },
+  guardarLista(l) {
+    this._lista = l;
+    try { localStorage.setItem(this.clavePaleta, JSON.stringify(l)); } catch (_) { /* sin almacenamiento */ }
+    // Si se ha quitado el color que se estaba usando, se pasa al primero
+    if (!l.some(e => e.id === Config.get('colorLapiz'))) { Config.valores.colorLapiz = l[0].id; Config.guardar(); }
+    UI.actualizarOpcionesLapiz();
+    SelectorLapiz.cerrar();
+    Render.pedir('instrumentos');
+  },
+  restaurarLista() {
+    this._lista = null;
+    try { localStorage.removeItem(this.clavePaleta); } catch (_) { /* */ }
+    this.guardarLista(this.lista());
+  },
+  // Nombre que se muestra: el puesto o, si no tiene, su código hexadecimal
+  nombre(e) { return (e.nombre || '').trim() || e.color.toUpperCase(); },
+  info(id) { return this.lista().find(e => e.id === id) || this.lista()[0]; },
+  // Color de un trazo: los nuevos guardan el color (#rrggbb); los antiguos, el nombre del color
+  colorLapiz(c) {
+    if (this.hex(c)) return c;
+    const e = this.lista().find(x => x.id === c);
+    return e ? e.color : (this.lapiz[c] || this.lapiz.grafito)[0];
+  },
   lapizActual() { return this.colorLapiz(Config.get('colorLapiz')); },
   // Plástico de los instrumentos: relleno translúcido, borde, tinta de las escalas y color de la muestra
   instrumentos: {
@@ -1175,7 +1226,8 @@ const Escena = {
     const fin = Number.isFinite, lista = v => Array.isArray(v) ? v : [];
     d = d && typeof d === 'object' ? d : {};
     // Color y grosor de cada trazo (los dibujos antiguos no los tienen)
-    const trazo = o => ({ c: Config.valido('colorLapiz', o.c) || 'grafito', g: Config.valido('grosorLapiz', o.g) || 0.5 });
+    const trazo = o => ({ c: Paleta.hex(o.c) ? o.c.toLowerCase() : typeof o.c === 'string' && (Paleta.lapiz[o.c] || Paleta.lista().some(e => e.id === o.c)) ? o.c : 'grafito',
+      g: Config.valido('grosorLapiz', o.g) || 0.5 });
     const nombre = o => (o.nombre ? { nombre: String(o.nombre).slice(0, 12) } : {});
     const puntos = lista(d.puntos).filter(p => p && fin(p.x) && fin(p.y))
       .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 12), dado: !!p.dado, ...(p.manual ? { manual: true } : {}), ...trazo(p) }));
@@ -1202,7 +1254,7 @@ const Escena = {
   },
 
   // Color y grosor del portaminas con los que se guarda cada trazo nuevo
-  trazoActual() { return { c: Config.get('colorLapiz'), g: Config.get('grosorLapiz') }; },
+  trazoActual() { return { c: Paleta.lapizActual(), g: Config.get('grosorLapiz') }; },   // el color exacto: no cambia si se edita la paleta
   agregarPunto(x, y) {
     const p = Object.assign({ id: this.sigId++, x, y, etiqueta: this.siguienteEtiqueta() }, this.trazoActual());
     this.puntos.push(p);
@@ -2344,14 +2396,38 @@ class Compas extends Instrumento {
     this.rMax = 2 * this.pierna * 0.98;
     this.origenIman = [0, 0];    // la punta seca se pega a los puntos
     this.levantada = false;      // mina levantada: el compás gira sin pintar
+    this.autoLevantada = false;  // se levantó sola al terminar un trazo: se apoya sola al empezar el siguiente
+    this.alzado = 0;             // 0: tumbado (visto desde arriba); 1: de pie, perpendicular al papel, al trazar
+    this.inclina = 0;            // al girar de pie, la cabeza se inclina hacia donde va (−1…1)
     this.ayuda = 'Compás: arrastra la punta seca hasta un punto, abre el compás moviendo la mina y gira el asa de arriba. El botón de la mina decide si pinta (apoyada) o solo gira (levantada).';
   }
   altura() {
     const m = this.r / 2;
     return Math.sqrt(Math.max(this.pierna ** 2 - m * m, (this.pierna * 0.18) ** 2));
   }
-  bisagra() { return [this.r / 2, -this.altura()]; }
-  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(12, 32 / Vista.escala)]; }
+  // De pie, visto desde arriba, la bisagra queda sobre el centro de las patas (con un poco de inclinación al girar)
+  bisagra() {
+    const a = this.alzado, h = this.altura();
+    return [this.r / 2, -h * (1 - a) + a * this.inclina * Math.min(8, h * 0.12)];
+  }
+  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(12, 32 / Vista.escala) * (1 - this.alzado * 0.85)]; }
+  // Animación al ponerse de pie (1) o tumbarse (0)
+  animarAlzado(objetivo, ms = 280) {
+    let quieto = false;
+    try { quieto = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { /* */ }
+    if (quieto) { this.alzado = objetivo; if (!objetivo) this.inclina = 0; Render.pedir('instrumentos'); return; }
+    const desde = this.alzado, t0 = performance.now();
+    this._anim = t0;
+    const paso = ahora => {
+      if (this._anim !== t0) return;                     // otra animación la ha sustituido
+      const k = Math.min(1, (ahora - t0) / ms), e = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      this.alzado = desde + (objetivo - desde) * e;
+      if (!objetivo) this.inclina *= 0.85;
+      Render.pedir('instrumentos');
+      if (k < 1) requestAnimationFrame(paso); else if (!objetivo) this.inclina = 0;
+    };
+    requestAnimationFrame(paso);
+  }
   centroLocal() { return [this.r / 2, -this.altura() / 2]; }
   cantosMundo() { return []; }
   radioPunta() { return Math.max(3, 12 / Vista.escala); }
@@ -2361,6 +2437,7 @@ class Compas extends Instrumento {
   radioBotonMina() { return Math.max(4, 12 / Vista.escala); }
   alternarMina() {
     this.levantada = !this.levantada;
+    this.autoLevantada = false;
     Sonido.tocar('iman');
     UI.mensaje(this.levantada
       ? 'Mina levantada: el compás gira sin pintar.'
@@ -2426,23 +2503,26 @@ class Compas extends Instrumento {
     return fin;
   }
   dibujar(ctx) {
-    const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala;
+    const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala, a = this.alzado;
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
     ctx.save();
-    ctx.shadowColor = 'rgba(30, 40, 60, .25)';
-    ctx.shadowBlur = 8 * Capas.dpr;
-    ctx.shadowOffsetY = 3 * Capas.dpr;
+    // De pie, la cabeza está más cerca: sombra más lejana y difusa
+    ctx.shadowColor = `rgba(30, 40, 60, ${.25 - a * .07})`;
+    ctx.shadowBlur = (8 + a * 14) * Capas.dpr;
+    ctx.shadowOffsetY = (3 + a * 9) * Capas.dpr;
+    ctx.shadowOffsetX = a * 5 * Capas.dpr;
     // Vástago hasta el asa
     ctx.strokeStyle = '#6b7383';
     ctx.lineWidth = Math.max(1.6, 4 * px);
     ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(k[0], k[1]); ctx.stroke();
     // Patas: metálica (punta seca) y de color (mina)
-    this.pata(ctx, b, [0, 0], 5, 1.6, 'rgba(150, 160, 175, .92)', '#4b5363');
+    const w0 = 5 * (1 + a * 0.6);   // de pie, la parte de arriba de las patas se ve más ancha (más cerca)
+    this.pata(ctx, b, [0, 0], w0, 1.6, 'rgba(150, 160, 175, .92)', '#4b5363');
     const e = Paleta.instrumento();   // la pata de la mina es del color del juego (roja con el plástico transparente)
-    const finMina = this.pata(ctx, b, [this.r, 0], 5, 2.4, e.inversa ? 'rgba(232, 93, 80, .92)' : e.muestra, e.inversa ? '#9c3a30' : e.borde);
+    const finMina = this.pata(ctx, b, [this.r, 0], w0, 2.4, e.inversa ? 'rgba(232, 93, 80, .92)' : e.muestra, e.inversa ? '#9c3a30' : e.borde);
     ctx.restore();
     // Mina de grafito (más clara si está levantada)
     ctx.fillStyle = Paleta.lapizActual();
@@ -2468,13 +2548,13 @@ class Compas extends Instrumento {
     ctx.arc(0, 0, Math.max(0.5, 2 * px), 0, Geom.DOS_PI);
     ctx.fillStyle = '#2b2f3a';
     ctx.fill();
-    // Bisagra
+    // Bisagra (más grande de pie: está más cerca de quien mira)
     ctx.beginPath();
-    ctx.arc(b[0], b[1], 4.5, 0, Geom.DOS_PI);
+    ctx.arc(b[0], b[1], 4.5 * (1 + a * 0.5), 0, Geom.DOS_PI);
     ctx.fillStyle = '#5b6270';
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(b[0], b[1], 1.6, 0, Geom.DOS_PI);
+    ctx.arc(b[0], b[1], 1.6 * (1 + a * 0.5), 0, Geom.DOS_PI);
     ctx.fillStyle = '#c9ced8';
     ctx.fill();
     // Asa para girar y trazar
@@ -2932,6 +3012,10 @@ const Manip = {
     } else if (hit.modo === 'abrir') {
       this.estado = { inst, modo: 'abrir', id: info.id, tipo: info.tipo };
     } else if (hit.modo === 'trazar') {
+      // Si la mina se levantó sola tras el trazo anterior, se apoya otra vez; el compás se pone de pie
+      if (inst.autoLevantada && inst.levantada) inst.levantada = false;
+      inst.autoLevantada = false;
+      inst.animarAlzado(1);
       // tramos: arcos ya pintados en este giro; tramo: el que se está pintando ahora
       this.estado = { inst, modo: 'trazar', id: info.id, tipo: info.tipo, tramos: [], tramo: null,
                       angPrev: Math.atan2(info.y - inst.y, info.x - inst.x) };
@@ -3068,6 +3152,8 @@ const Manip = {
     if (d > Math.PI) d -= Geom.DOS_PI; else if (d < -Math.PI) d += Geom.DOS_PI;
     s.angPrev = ang;
     this.halo = null;
+    // De pie, la cabeza se inclina un poco hacia donde gira, como al trazar con la mano
+    inst.inclina = inst.inclina * 0.7 + Geom.clamp(d * 25, -1, 1) * 0.3;
     const levantada = inst.levantada || !!(e && e.altKey);
     if (levantada) {
       this.cerrarTramo(s);
@@ -3110,11 +3196,15 @@ const Manip = {
       if (arcos.length) {
         Sonido.tocar('punto');
         const a = arcos[arcos.length - 1];
-        UI.mensaje(arcos.length > 1 ? `${arcos.length} arcos trazados (radio ${Lapiz.mmTexto(a.r)}).`
+        // Al terminar, la mina se levanta sola (se vuelve a apoyar al empezar el siguiente trazo)
+        inst.levantada = true;
+        inst.autoLevantada = true;
+        UI.mensaje((arcos.length > 1 ? `${arcos.length} arcos trazados (radio ${Lapiz.mmTexto(a.r)}).`
           : Geom.esCircunferencia(a) ? `Circunferencia trazada (radio ${Lapiz.mmTexto(a.r)}).`
-          : `Arco trazado: ${Math.round(Math.abs(a.a1 - a.a0) * 180 / Math.PI)}°, radio ${Lapiz.mmTexto(a.r)}.`);
+          : `Arco trazado: ${Math.round(Math.abs(a.a1 - a.a0) * 180 / Math.PI)}°, radio ${Lapiz.mmTexto(a.r)}.`) + ' La mina se ha levantado.');
       }
     }
+    if (s && s.modo === 'trazar') s.inst.animarAlzado(0);   // vuelve a quedar tumbado
     if (s && s.antes && Escena.datos() !== s.antes) Historial.empujar(s.antes);
     this.estado = null;
     this.halo = null;
@@ -3616,7 +3706,7 @@ const UI = {
   actualizarOpcionesLapiz() {
     if (!this.btnColorLapiz) return;
     const c = Config.get('colorLapiz'), g = Config.get('grosorLapiz');
-    const nombre = Paleta.lapiz[c][1];
+    const nombre = Paleta.nombre(Paleta.info(c));
     this.btnColorLapiz.innerHTML = `<span class="pinta" style="background:${Paleta.colorLapiz(c)}"></span><span>${nombre}</span><span class="flecha"></span>`;
     this.btnColorLapiz.setAttribute('aria-label', `Color del portaminas: ${nombre}. Pulsa para cambiarlo`);
     this.btnGrosorLapiz.innerHTML = `<span style="color:${Paleta.colorLapiz(c)};display:contents">${SelectorLapiz.muestraGrosor(g)}</span><span>${SelectorLapiz.mm(g)}</span><span class="flecha"></span>`;
@@ -3789,9 +3879,12 @@ const SelectorLapiz = {
     if (this.abierto === 'color') {
       h.textContent = 'Color';
       g.setAttribute('aria-label', 'Color del portaminas');
-      for (const [k, [col, nombre]] of Object.entries(Paleta.lapiz))
-        opcion('sl-color', `<span class="pinta" style="background:${col}"></span><span>${nombre}</span>`, nombre,
-          () => Config.set('colorLapiz', k)).dataset.valor = k;
+      for (const e of Paleta.lista()) {
+        const nombre = Paleta.nombre(e);
+        const b = opcion('sl-color', `<span class="pinta" style="background:${e.color}"></span><span></span>`, nombre, () => Config.set('colorLapiz', e.id));
+        b.lastChild.textContent = nombre;   // el nombre lo escribe el usuario: como texto
+        b.dataset.valor = e.id;
+      }
     } else {
       h.textContent = 'Grosor de la mina';
       g.setAttribute('aria-label', 'Grosor de la mina');
@@ -3849,6 +3942,9 @@ const Panel = {
     nd.textContent = 'El color y el grosor del portaminas, y el modo y el tamaño de la goma, se eligen en la barrita que aparece abajo al seleccionarlos.';
     c.lastChild.appendChild(nd);
 
+    titulo('Colores del portaminas y del compás');
+    c.appendChild(this.editorPaleta());
+
     titulo('Imán');
     this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
     this.interruptor(c, 'imanPuntos', 'Puntos marcados');
@@ -3889,6 +3985,57 @@ const Panel = {
     this.actualizar();
   },
 
+  // Lista editable de colores: muestra, nombre (si se deja vacío, se ve el código) y quitar
+  editorPaleta() {
+    const caja = document.createElement('div');
+    caja.className = 'paleta-editor';
+    const pintar = () => {
+      caja.textContent = '';
+      const l = Paleta.lista().map(e => Object.assign({}, e));
+      const guardar = () => Paleta.guardarLista(l.map(e => Object.assign({}, e)));
+      l.forEach((e, i) => {
+        const fila = document.createElement('div');
+        fila.className = 'pe-fila';
+        const col = document.createElement('input');
+        col.type = 'color'; col.value = e.color;
+        col.setAttribute('aria-label', `Color ${i + 1}`);
+        const nom = document.createElement('input');
+        nom.type = 'text'; nom.maxLength = 20; nom.value = e.nombre; nom.placeholder = e.color.toUpperCase();
+        nom.setAttribute('aria-label', `Nombre del color ${i + 1} (vacío: su código)`);
+        col.addEventListener('input', () => { e.color = col.value.toLowerCase(); nom.placeholder = e.color.toUpperCase(); guardar(); });
+        nom.addEventListener('input', () => { e.nombre = nom.value; guardar(); });
+        const quitar = document.createElement('button');
+        quitar.type = 'button'; quitar.className = 'pe-quitar'; quitar.innerHTML = Iconos.papelera;
+        quitar.setAttribute('aria-label', `Quitar el color ${Paleta.nombre(e)}`); quitar.title = 'Quitar este color';
+        quitar.disabled = l.length <= 1;
+        quitar.addEventListener('click', () => { l.splice(i, 1); guardar(); pintar(); });
+        fila.append(col, nom, quitar);
+        caja.appendChild(fila);
+      });
+      const acciones = document.createElement('div');
+      acciones.className = 'pe-acciones';
+      const mas = document.createElement('button');
+      mas.type = 'button'; mas.className = 'btn-texto'; mas.textContent = '+ Añadir un color';
+      mas.disabled = l.length >= Paleta.MAX_COLORES;
+      mas.addEventListener('click', () => {
+        let n = 1; while (l.some(e => e.id === 'c' + n)) n++;
+        l.push({ id: 'c' + n, color: '#2a9d8f', nombre: '' });
+        guardar(); pintar();
+        const ult = caja.querySelectorAll('.pe-fila input[type=text]');
+        if (ult.length) ult[ult.length - 1].focus();
+      });
+      const rest = document.createElement('button');
+      rest.type = 'button'; rest.className = 'btn-texto'; rest.textContent = 'Colores de fábrica';
+      rest.addEventListener('click', () => { Paleta.restaurarLista(); pintar(); UI.aviso('Colores restaurados'); });
+      acciones.append(mas, rest);
+      const nota = document.createElement('div');
+      nota.className = 'nota';
+      nota.textContent = `Son los colores que aparecen al elegir el color del portaminas (el compás pinta con el mismo). Si un color no tiene nombre, se muestra su código. Hasta ${Paleta.MAX_COLORES} colores. Lo ya dibujado no cambia.`;
+      caja.append(acciones, nota);
+    };
+    pintar();
+    return caja;
+  },
   fila(c, etiqueta, control, condicion) {
     const f = document.createElement('div');
     f.className = 'fila';
@@ -4226,7 +4373,7 @@ const Ayuda = {
       b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta. En la barrita de abajo eliges el color y el grosor de la mina; el compás pinta con ellos. En Configuración › Imán decides qué atrae a la punta.'),
       b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos. La escuadra y el cartabón tienen además un botón con dos medios triángulos que les da la vuelta, como al girar el plástico: los números y el nombre se ven al revés.'),
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
-      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
+      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar: el compás se pone de pie mientras gira y, al soltarlo, se tumba con la mina levantada (se apoya sola al volver a trazar). El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
       b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
       b('goma', 'Goma', 'Tiene dos modos, en la barrita que aparece abajo a la izquierda: «A trozos» borra solo lo que pisa (para recortar poco a poco los extremos de las líneas y los arcos) y «Enteras» borra la línea, el arco o el punto que toques. Pulsa otra vez la goma para cambiar de modo. El deslizador elige su tamaño.'),
       b('nombrar', 'Nombrar', 'Toca un punto para cambiarle el nombre o una línea (recta, arco o circunferencia) para ponerle uno; el nombre de una línea se escribe en su centro. No puede haber dos elementos con el mismo nombre. Si dejas vacío el nombre de una línea, se le quita.'),
