@@ -1,0 +1,447 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-suma-resta-angulos",
+  "titulo": "Suma y resta de ángulos con compás",
+  "nivel": "1.º ESO · 3.1, ej. 1",
+  "descripcion": "Clasifica un ángulo agudo α y uno obtuso β y construye con regla y compás su suma α + β y su diferencia β − α.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "Va",
+        "x": 35.0,
+        "y": 108.0,
+        "etiqueta": "α"
+      },
+      {
+        "nombre": "Vb",
+        "x": 180.0,
+        "y": 108.0,
+        "etiqueta": "β"
+      },
+      {
+        "nombre": "O1",
+        "x": 95.0,
+        "y": 190.0,
+        "etiqueta": "O"
+      },
+      {
+        "nombre": "O2",
+        "x": 205.0,
+        "y": 190.0,
+        "etiqueta": "O'"
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "la1",
+        "desde": "Va",
+        "x2": 100.0,
+        "y2": 108.0
+      },
+      {
+        "nombre": "la2",
+        "desde": "Va",
+        "x2": 84.793,
+        "y2": 66.219
+      },
+      {
+        "nombre": "lb1",
+        "desde": "Vb",
+        "x2": 245.0,
+        "y2": 108.0
+      },
+      {
+        "nombre": "lb2",
+        "desde": "Vb",
+        "x2": 152.53,
+        "y2": 49.09
+      },
+      {
+        "nombre": "s1",
+        "desde": "O1",
+        "x2": 165.0,
+        "y2": 190.0
+      },
+      {
+        "nombre": "s2",
+        "desde": "O2",
+        "x2": 275.0,
+        "y2": 190.0
+      }
+    ]
+  },
+  "textos": {
+    "la1": "el lado horizontal de α",
+    "la2": "el lado inclinado de α",
+    "lb1": "el lado horizontal de β",
+    "lb2": "el lado inclinado de β",
+    "s1": "la semirrecta de O",
+    "s2": "la semirrecta de O'",
+    "kA": "el arco de α",
+    "Sk": "el arco grande de O",
+    "Dk": "el arco grande de O'"
+  },
+  "pasos": [
+    {
+      "texto": "Clasifica los ángulos: α mide menos de 90°, así que es agudo; β mide más de 90° y menos de 180°, así que es obtuso. Ahora vas a sumarlos y restarlos llevándolos con el compás.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    },
+    {
+      "texto": "Pincha el compás en el vértice de α y traza un arco que corte a sus dos lados.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "Va",
+        "radio": {
+          "min": 20,
+          "max": 55
+        },
+        "cortaA": [
+          "la1",
+          "la2"
+        ],
+        "nombrar": "kA"
+      }
+    },
+    {
+      "texto": "Marca los dos puntos donde el arco corta a los lados de α.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "kA",
+            "la1"
+          ],
+          "nombrar": "A1",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "kA",
+            "la2"
+          ],
+          "nombrar": "A2",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en el vértice de β y traza un arco que corte a sus dos lados.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "Vb",
+        "radioComo": "kA",
+        "cortaA": [
+          "lb1",
+          "lb2"
+        ],
+        "nombrar": "kB"
+      }
+    },
+    {
+      "texto": "Marca los dos puntos donde el arco corta a los lados de β.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "kB",
+            "lb1"
+          ],
+          "nombrar": "B1",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "kB",
+            "lb2"
+          ],
+          "nombrar": "B2",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Con la misma abertura, pincha en O y traza un arco grande por encima de su semirrecta (más de media circunferencia).",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O1",
+        "radioComo": "kA",
+        "cortaA": [
+          "s1"
+        ],
+        "barridoMin": 165,
+        "nombrar": "Sk"
+      }
+    },
+    {
+      "texto": "Marca el punto donde ese arco corta a la semirrecta.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "Sk",
+          "s1"
+        ],
+        "nombrar": "S0",
+        "rotular": "S0"
+      }
+    },
+    {
+      "texto": "Lleva α: toma con el compás la distancia de A1 a A2, pincha en S0 y corta el arco grande.",
+      "pista": "Pincha la punta seca en un punto y lleva la mina hasta el otro; luego arrastra el compás por la punta seca.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "S0",
+        "radioComo": [
+          "A1",
+          "A2"
+        ],
+        "cortaA": [
+          "Sk"
+        ],
+        "nombrar": "Sk1"
+      }
+    },
+    {
+      "texto": "Marca el corte que queda a 40° (hacia arriba).",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "Sk1",
+          "Sk"
+        ],
+        "angulo": {
+          "vertice": "O1",
+          "desde": {
+            "x": 165.0,
+            "y": 190.0
+          },
+          "grados": 40,
+          "sentido": "antihorario"
+        },
+        "nombrar": "S1",
+        "rotular": "S1"
+      }
+    },
+    {
+      "texto": "Lleva β a continuación: toma la distancia de B1 a B2, pincha en S1 y corta otra vez el arco grande, más allá.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "S1",
+        "radioComo": [
+          "B1",
+          "B2"
+        ],
+        "cortaA": [
+          "Sk"
+        ],
+        "nombrar": "Sk2"
+      }
+    },
+    {
+      "texto": "Marca el corte que queda a 155°.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "Sk2",
+          "Sk"
+        ],
+        "angulo": {
+          "vertice": "O1",
+          "desde": {
+            "x": 165.0,
+            "y": 190.0
+          },
+          "grados": 155,
+          "sentido": "antihorario"
+        },
+        "nombrar": "S2",
+        "rotular": "S2"
+      }
+    },
+    {
+      "texto": "Une O con S2 usando la regla: el ángulo formado es α + β.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "O1",
+          "S2"
+        ],
+        "longitudMin": 40
+      }
+    },
+    {
+      "texto": "Con la misma abertura, pincha en O' y traza un arco grande por encima de su semirrecta (más de media circunferencia).",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O2",
+        "radioComo": "kA",
+        "cortaA": [
+          "s2"
+        ],
+        "barridoMin": 125,
+        "nombrar": "Dk"
+      }
+    },
+    {
+      "texto": "Marca el punto donde ese arco corta a la semirrecta.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "Dk",
+          "s2"
+        ],
+        "nombrar": "D0",
+        "rotular": "D0"
+      }
+    },
+    {
+      "texto": "Diferencia β − α. Toma la distancia de B1 a B2, pincha en D0 y corta el arco grande.",
+      "pista": "Pincha la punta seca en un punto y lleva la mina hasta el otro; luego arrastra el compás por la punta seca.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "D0",
+        "radioComo": [
+          "B1",
+          "B2"
+        ],
+        "cortaA": [
+          "Dk"
+        ],
+        "nombrar": "Dk1"
+      }
+    },
+    {
+      "texto": "Marca el corte que queda a 115° (hacia arriba).",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "Dk1",
+          "Dk"
+        ],
+        "angulo": {
+          "vertice": "O2",
+          "desde": {
+            "x": 275.0,
+            "y": 190.0
+          },
+          "grados": 115,
+          "sentido": "antihorario"
+        },
+        "nombrar": "D1",
+        "rotular": "D1"
+      }
+    },
+    {
+      "texto": "Ahora resta α: toma la distancia de A1 a A2, pincha en D1 y corta el arco hacia atrás (hacia D0).",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "D1",
+        "radioComo": [
+          "A1",
+          "A2"
+        ],
+        "cortaA": [
+          "Dk"
+        ],
+        "nombrar": "Dk2"
+      }
+    },
+    {
+      "texto": "Marca el corte que queda a 75°.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "Dk2",
+          "Dk"
+        ],
+        "angulo": {
+          "vertice": "O2",
+          "desde": {
+            "x": 275.0,
+            "y": 190.0
+          },
+          "grados": 75,
+          "sentido": "antihorario"
+        },
+        "nombrar": "D2",
+        "rotular": "D2"
+      }
+    },
+    {
+      "texto": "Une O' con D2 usando la regla: el ángulo formado es β − α.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "O2",
+          "D2"
+        ],
+        "longitudMin": 40
+      }
+    }
+  ],
+  "final": "¡Muy bien! α = 40° y β = 115°, así que α + β = 155° (obtuso) y β − α = 75° (agudo). Compruébalo con el transportador."
+}

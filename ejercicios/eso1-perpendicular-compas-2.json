@@ -1,0 +1,133 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-perpendicular-compas-2",
+  "titulo": "Perpendicular por un punto exterior",
+  "nivel": "1.º ESO · 2.2, ej. 1 (2)",
+  "descripcion": "Con regla y compás, traza la perpendicular a una recta r por un punto Q que está fuera de ella.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "Q",
+        "x": 148.5,
+        "y": 75.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "r",
+        "x1": 30.0,
+        "y1": 140.0,
+        "x2": 267.0,
+        "y2": 140.0
+      }
+    ]
+  },
+  "textos": {
+    "r": "la recta r",
+    "aQ": "el arco con centro en Q",
+    "a3": "el arco con centro en E1"
+  },
+  "pasos": [
+    {
+      "texto": "Pincha el compás en Q, ábrelo más que la distancia de Q a r y traza un arco que corte a r en dos puntos.",
+      "pista": "Si el arco no llega a r, abre más el compás.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "Q",
+        "cortaA": [
+          {
+            "elemento": "r",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "aQ"
+      }
+    },
+    {
+      "texto": "Marca los dos puntos donde el arco corta a r.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "aQ",
+          "r"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "E1",
+          "E2"
+        ],
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Pincha en E1 y traza un arco por debajo de r (con una abertura de unos 6 o 7 cm).",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "E1",
+        "nombrar": "a3",
+        "posteriorA": "E2"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en E2 y traza otro arco que corte al anterior por debajo de r.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "E2",
+        "radioComo": "a3",
+        "cortaA": [
+          "a3"
+        ],
+        "nombrar": "a4"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan esos dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "a3",
+          "a4"
+        ],
+        "nombrar": "F",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Une Q con F con la regla: es la perpendicular a r que pasa por Q.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "Q",
+          "F"
+        ],
+        "perpendicularA": "r",
+        "longitudMin": 40
+      }
+    }
+  ],
+  "final": "¡Muy bien! Q y F están a la misma distancia de E1 y de E2, por eso la recta QF es perpendicular a r."
+}

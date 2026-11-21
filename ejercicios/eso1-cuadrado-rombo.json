@@ -1,0 +1,328 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-cuadrado-rombo",
+  "titulo": "Cuadrado y rombo",
+  "nivel": "1.º ESO · 5.2, ej. 1",
+  "descripcion": "Construye con regla y compás un cuadrado de 5,5 cm de lado y un rombo de diagonales 8 cm y 5 cm.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 30.0,
+        "y": 178.0
+      },
+      {
+        "nombre": "E",
+        "x": 150.0,
+        "y": 135.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "r",
+        "desde": "A",
+        "x2": 120.0,
+        "y2": 178.0
+      },
+      {
+        "nombre": "r2",
+        "desde": "E",
+        "x2": 265.0,
+        "y2": 135.0
+      }
+    ]
+  },
+  "textos": {
+    "r": "la recta del cuadrado",
+    "qB": "el arco con centro en B",
+    "qD": "el arco con centro en D",
+    "r2": "la recta del rombo",
+    "efm": "la mediatriz de EF",
+    "kO": "el arco con centro en O"
+  },
+  "pasos": [
+    {
+      "texto": "Cuadrado. Con el compás abierto 5,5 cm y pinchado en A, corta la recta y marca B.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "A",
+          "radio": 55,
+          "cortaA": [
+            "r"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r",
+          "distancia": {
+            "de": "A",
+            "mm": 55
+          },
+          "nombrar": "B",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Levanta con la escuadra la perpendicular a la recta en A (de al menos 6 cm).",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "A"
+        ],
+        "perpendicularA": "r",
+        "longitudMin": 60,
+        "nombrar": "pa"
+      }
+    },
+    {
+      "texto": "Marca D sobre esa perpendicular, a 5,5 cm de A (el arco de antes te sirve si lo hiciste grande).",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "sobre": "pa",
+        "cerca": {
+          "x": 30.0,
+          "y": 123.0
+        },
+        "nombrar": "D",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Con la misma abertura, traza un arco con centro en B y otro con centro en D que se corten.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "B",
+          "radio": 55,
+          "nombrar": "qB"
+        },
+        {
+          "tipo": "arco",
+          "centro": "D",
+          "radio": 55,
+          "nombrar": "qD"
+        }
+      ]
+    },
+    {
+      "texto": "Marca el vértice C, donde se cortan los arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "qB",
+          "qD"
+        ],
+        "nombrar": "C",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Dibuja los cuatro lados del cuadrado ABCD.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      }
+    },
+    {
+      "texto": "Rombo. Diagonal mayor de 8 cm: pincha el compás en E, ábrelo 8 cm, corta la recta y marca F.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "E",
+          "radio": 80,
+          "cortaA": [
+            "r2"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r2",
+          "distancia": {
+            "de": "E",
+            "mm": 80
+          },
+          "nombrar": "F",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Mediatriz de EF. Pincha el compás en E, ábrelo algo más de la mitad de EF y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "E",
+        "radio": {
+          "min": 42.0
+        },
+        "nombrar": "efk1",
+        "posteriorA": "F"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en F y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "F",
+        "radioComo": "efk1",
+        "cortaA": [
+          {
+            "elemento": "efk1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "efk2",
+        "posteriorA": "efk1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "efk1",
+          "efk2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "efD1",
+          "efD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de EF: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "efD1",
+          "efD2"
+        ],
+        "nombrar": "efm"
+      }
+    },
+    {
+      "texto": "Marca el centro O del rombo, donde la mediatriz corta a la diagonal EF.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "efm",
+          "r2"
+        ],
+        "nombrar": "O",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Diagonal menor de 5 cm: pincha en O con el compás abierto 2,5 cm (la mitad) y corta la mediatriz por arriba y por abajo.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "radio": 25,
+        "cortaA": [
+          {
+            "elemento": "efm",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "kO"
+      }
+    },
+    {
+      "texto": "Marca los dos cortes: son los vértices G y H.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "kO",
+          "efm"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "G",
+          "H"
+        ],
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Dibuja los cuatro lados del rombo: E, G, F y H.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "E",
+          "G",
+          "F",
+          "H"
+        ]
+      }
+    }
+  ],
+  "final": "¡Muy bien! En el cuadrado y en el rombo los cuatro lados son iguales; las diagonales del rombo se cortan perpendicularmente en su punto medio."
+}

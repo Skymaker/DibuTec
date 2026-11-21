@@ -1,0 +1,254 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-operaciones-segmentos",
+  "titulo": "Resta y operaciones con segmentos",
+  "nivel": "1.º ESO · 2.1, ej. 2",
+  "descripcion": "Con los segmentos m y n, construye con regla y compás la resta m − n y la operación m − 2n (comprobando por qué 2n − m no es posible).",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "m1",
+        "x": 40.0,
+        "y": 45.0,
+        "etiqueta": "m"
+      },
+      {
+        "nombre": "m2",
+        "x": 124.0,
+        "y": 45.0,
+        "etiqueta": " "
+      },
+      {
+        "nombre": "n1",
+        "x": 170.0,
+        "y": 45.0,
+        "etiqueta": "n"
+      },
+      {
+        "nombre": "n2",
+        "x": 201.0,
+        "y": 45.0,
+        "etiqueta": " "
+      },
+      {
+        "nombre": "O1",
+        "x": 40.0,
+        "y": 110.0,
+        "etiqueta": "O"
+      },
+      {
+        "nombre": "O2",
+        "x": 40.0,
+        "y": 170.0,
+        "etiqueta": "O'"
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "m",
+        "desde": "m1",
+        "hasta": "m2"
+      },
+      {
+        "nombre": "n",
+        "desde": "n1",
+        "hasta": "n2"
+      },
+      {
+        "nombre": "r1",
+        "desde": "O1",
+        "x2": 272.0,
+        "y2": 110.0
+      },
+      {
+        "nombre": "r2",
+        "desde": "O2",
+        "x2": 272.0,
+        "y2": 170.0
+      }
+    ]
+  },
+  "textos": {
+    "m": "el segmento m",
+    "n": "el segmento n",
+    "r1": "la recta r1",
+    "r2": "la recta r2",
+    "O1": "el punto O",
+    "O2": "el punto O'"
+  },
+  "pasos": [
+    {
+      "texto": "Resta m − n. Toma con el compás la medida de m, pincha en O, traza un arco que corte a r1 y marca el corte.",
+      "pista": "Los extremos del segmento atraen la punta seca y la mina.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "O1",
+          "radio": 84,
+          "cortaA": [
+            "r1"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r1",
+          "distancia": {
+            "de": "O1",
+            "mm": 84
+          },
+          "nombrar": "M1",
+          "rotular": "M"
+        }
+      ]
+    },
+    {
+      "texto": "Toma la medida de n, pincha en M y llévala hacia atrás, hacia O. Marca ese corte.",
+      "pista": "Restar es llevar el segundo segmento en sentido contrario, desde el final del primero.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "M1",
+          "radio": 31,
+          "cortaA": [
+            "r1"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r1",
+          "distancia": {
+            "de": "O1",
+            "mm": 53
+          },
+          "nombrar": "R1",
+          "rotular": "R"
+        }
+      ]
+    },
+    {
+      "texto": "Repasa con la regla el segmento OR: es la resta m − n.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "O1",
+        "hasta": "R1"
+      }
+    },
+    {
+      "texto": "Segunda operación: ¿2n − m o m − 2n? Como 2n = 6,2 cm es más corto que m = 8,4 cm, 2n − m no se puede dibujar (saldría negativa). Haremos m − 2n en la recta r2.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    },
+    {
+      "texto": "Lleva m sobre r2 desde O': pincha en O', traza el arco y marca el corte.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "O2",
+          "radio": 84,
+          "cortaA": [
+            "r2"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r2",
+          "distancia": {
+            "de": "O2",
+            "mm": 84
+          },
+          "nombrar": "M2",
+          "rotular": "M'"
+        }
+      ]
+    },
+    {
+      "texto": "Con la medida de n, pincha en M' y retrocede una vez hacia O'. Marca el corte.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "M2",
+          "radio": 31,
+          "cortaA": [
+            "r2"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r2",
+          "distancia": {
+            "de": "O2",
+            "mm": 53
+          },
+          "nombrar": "N1",
+          "rotular": "N'"
+        }
+      ]
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en N' y retrocede otra vez. Marca el corte.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "N1",
+          "radio": 31,
+          "cortaA": [
+            "r2"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r2",
+          "distancia": {
+            "de": "O2",
+            "mm": 22
+          },
+          "nombrar": "R2",
+          "rotular": "R'"
+        }
+      ]
+    },
+    {
+      "texto": "Repasa con la regla el segmento O'R': es m − 2n.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "O2",
+        "hasta": "R2"
+      }
+    }
+  ],
+  "final": "¡Muy bien! m − n = 8,4 − 3,1 = 5,3 cm y m − 2n = 8,4 − 6,2 = 2,2 cm."
+}

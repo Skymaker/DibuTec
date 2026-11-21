@@ -1,0 +1,422 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-analisis-roseton",
+  "titulo": "Análisis geométrico de un rosetón",
+  "nivel": "1.º ESO · 6.2, ej. 1",
+  "descripcion": "Analiza la geometría de un rosetón gótico: halla su centro con mediatrices, traza sus ejes de simetría y el octógono que ordena sus lóbulos.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 129.865,
+        "y": 47.453
+      },
+      {
+        "nombre": "B",
+        "x": 86.146,
+        "y": 153.0
+      },
+      {
+        "nombre": "C",
+        "x": 210.854,
+        "y": 153.0
+      }
+    ],
+    "arcos": [
+      {
+        "nombre": "ext",
+        "radio": 72,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 148.5,
+        "cy": 117.0
+      },
+      {
+        "nombre": "int",
+        "radio": 22,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 148.5,
+        "cy": 117.0
+      },
+      {
+        "nombre": "lob0",
+        "radio": 15,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 194.5,
+        "cy": 117.0
+      },
+      {
+        "nombre": "lob1",
+        "radio": 15,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 181.027,
+        "cy": 84.473
+      },
+      {
+        "nombre": "lob2",
+        "radio": 15,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 148.5,
+        "cy": 71.0
+      },
+      {
+        "nombre": "lob3",
+        "radio": 15,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 115.973,
+        "cy": 84.473
+      },
+      {
+        "nombre": "lob4",
+        "radio": 15,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 102.5,
+        "cy": 117.0
+      },
+      {
+        "nombre": "lob5",
+        "radio": 15,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 115.973,
+        "cy": 149.527
+      },
+      {
+        "nombre": "lob6",
+        "radio": 15,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 148.5,
+        "cy": 163.0
+      },
+      {
+        "nombre": "lob7",
+        "radio": 15,
+        "desde": 0,
+        "hasta": 360,
+        "cx": 181.027,
+        "cy": 149.527
+      }
+    ]
+  },
+  "textos": {
+    "ext": "el contorno del rosetón",
+    "abm": "la mediatriz de AB",
+    "bcm": "la mediatriz de BC"
+  },
+  "pasos": [
+    {
+      "texto": "Este esquema imita un rosetón gótico, como los de las catedrales de León o de Burgos. Vas a descubrir la geometría que lo ordena. Los puntos A, B y C están sobre su contorno.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    },
+    {
+      "texto": "Traza con la regla las cuerdas AB y BC.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Mediatriz de AB. Pincha el compás en A, ábrelo algo más de la mitad de AB y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "A",
+        "radio": {
+          "min": 59.1
+        },
+        "nombrar": "abk1"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en B y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "B",
+        "radioComo": "abk1",
+        "cortaA": [
+          {
+            "elemento": "abk1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "abk2",
+        "posteriorA": "abk1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "abk1",
+          "abk2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "abD1",
+          "abD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de AB: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "abD1",
+          "abD2"
+        ],
+        "nombrar": "abm"
+      }
+    },
+    {
+      "texto": "Mediatriz de BC. Pincha el compás en B, ábrelo algo más de la mitad de BC y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "B",
+        "radio": {
+          "min": 64.4
+        },
+        "nombrar": "bck1",
+        "posteriorA": "abm"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en C y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "C",
+        "radioComo": "bck1",
+        "cortaA": [
+          {
+            "elemento": "bck1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "bck2",
+        "posteriorA": "bck1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "bck1",
+          "bck2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "bcD1",
+          "bcD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de BC: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "bcD1",
+          "bcD2"
+        ],
+        "nombrar": "bcm"
+      }
+    },
+    {
+      "texto": "Marca el centro O del rosetón, donde se cortan las dos mediatrices.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "abm",
+          "bcm"
+        ],
+        "nombrar": "O",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Traza los cuatro ejes de simetría que pasan por O y por los centros de dos lóbulos opuestos.",
+      "pista": "Gira la regla alrededor de O: el canto se pega al centro de cada lóbulo.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "O",
+            {
+              "x": 194.5,
+              "y": 117.0
+            },
+            {
+              "x": 102.5,
+              "y": 117.0
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "O",
+            {
+              "x": 181.027,
+              "y": 84.473
+            },
+            {
+              "x": 115.973,
+              "y": 149.527
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "O",
+            {
+              "x": 148.5,
+              "y": 71.0
+            },
+            {
+              "x": 148.5,
+              "y": 163.0
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "O",
+            {
+              "x": 115.973,
+              "y": 84.473
+            },
+            {
+              "x": 181.027,
+              "y": 149.527
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Une los centros de los ocho lóbulos, cada uno con el siguiente: aparece el octógono regular que ordena el rosetón.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          {
+            "x": 194.5,
+            "y": 117.0
+          },
+          {
+            "x": 181.027,
+            "y": 84.473
+          },
+          {
+            "x": 148.5,
+            "y": 71.0
+          },
+          {
+            "x": 115.973,
+            "y": 84.473
+          },
+          {
+            "x": 102.5,
+            "y": 117.0
+          },
+          {
+            "x": 115.973,
+            "y": 149.527
+          },
+          {
+            "x": 148.5,
+            "y": 163.0
+          },
+          {
+            "x": 181.027,
+            "y": 149.527
+          }
+        ],
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Ahora hazlo con una obra real: busca una imagen de un rosetón gótico, un mosaico romano o una pintura renacentista, imprímela y superpón con regla y compás sus ejes de simetría, polígonos y circunferencias.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! El rosetón tiene 8 ejes de simetría (4 pasan por los lóbulos y 4 entre ellos) y se organiza sobre un octógono regular inscrito en una circunferencia."
+}

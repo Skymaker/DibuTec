@@ -1,0 +1,215 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-thales-partes-proporcionales",
+  "titulo": "Teorema de Thales: partes proporcionales",
+  "nivel": "1.º ESO · 3.2, ej. 2",
+  "descripcion": "Divide un segmento CD de 10 cm en partes proporcionales a x = 2 cm, y = 3 cm y z = 4 cm con el Teorema de Thales.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "x1",
+        "x": 200.0,
+        "y": 55.0,
+        "etiqueta": "x"
+      },
+      {
+        "nombre": "x2",
+        "x": 220.0,
+        "y": 55.0,
+        "etiqueta": " "
+      },
+      {
+        "nombre": "y1",
+        "x": 200.0,
+        "y": 80.0,
+        "etiqueta": "y"
+      },
+      {
+        "nombre": "y2",
+        "x": 230.0,
+        "y": 80.0,
+        "etiqueta": " "
+      },
+      {
+        "nombre": "z1",
+        "x": 200.0,
+        "y": 105.0,
+        "etiqueta": "z"
+      },
+      {
+        "nombre": "z2",
+        "x": 240.0,
+        "y": 105.0,
+        "etiqueta": " "
+      },
+      {
+        "nombre": "C",
+        "x": 45.0,
+        "y": 180.0
+      },
+      {
+        "nombre": "D",
+        "x": 145.0,
+        "y": 180.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "x",
+        "desde": "x1",
+        "hasta": "x2"
+      },
+      {
+        "nombre": "y",
+        "desde": "y1",
+        "hasta": "y2"
+      },
+      {
+        "nombre": "z",
+        "desde": "z1",
+        "hasta": "z2"
+      },
+      {
+        "nombre": "CD",
+        "desde": "C",
+        "hasta": "D"
+      }
+    ]
+  },
+  "textos": {
+    "x": "el segmento x",
+    "y": "el segmento y",
+    "z": "el segmento z",
+    "CD": "el segmento CD",
+    "Naux": "la recta auxiliar",
+    "Nu": "la recta que une 3 con D"
+  },
+  "pasos": [
+    {
+      "texto": "Traza desde C una recta auxiliar inclinada (que forme un ángulo agudo con CD) de al menos 11 cm.",
+      "pista": "Cualquier inclinación vale, pero que no se parezca mucho a la del segmento.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "C",
+        "longitudMin": 102,
+        "nombrar": "Naux"
+      }
+    },
+    {
+      "texto": "Lleva con el compás x, y y z, uno detrás de otro, sobre la recta auxiliar desde C. Marca los tres puntos (a 2, 5 y 9 cm de C).",
+      "pista": "Toma cada medida en su segmento y pincha en el último punto marcado para llevar la siguiente.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "sobre": "Naux",
+          "distancia": {
+            "de": "C",
+            "mm": 20
+          },
+          "nombrar": "N1",
+          "rotular": "1"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "Naux",
+          "distancia": {
+            "de": "C",
+            "mm": 50
+          },
+          "nombrar": "N2",
+          "rotular": "2"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "Naux",
+          "distancia": {
+            "de": "C",
+            "mm": 90
+          },
+          "nombrar": "N3",
+          "rotular": "3"
+        }
+      ]
+    },
+    {
+      "texto": "Une con la regla el último punto (3) con el extremo D.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "N3",
+          "D"
+        ],
+        "nombrar": "Nu"
+      }
+    },
+    {
+      "texto": "Con la escuadra y el cartabón, traza por cada uno de los otros puntos una paralela a esa recta, hasta que corte a CD.",
+      "pista": "Apoya un canto de la escuadra en la recta que acabas de trazar, fija el cartabón contra ella y desliza la escuadra hasta cada punto.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "N1"
+          ],
+          "paralelaA": "Nu",
+          "nombrar": "N1p"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "N2"
+          ],
+          "paralelaA": "Nu",
+          "nombrar": "N2p"
+        }
+      ]
+    },
+    {
+      "texto": "Marca los puntos donde las paralelas cortan a CD.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "N1p",
+            "CD"
+          ],
+          "nombrar": "N1c"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "N2p",
+            "CD"
+          ],
+          "nombrar": "N2c"
+        }
+      ]
+    }
+  ],
+  "final": "¡Muy bien! CD ha quedado dividido en partes de unos 2,2 cm, 3,3 cm y 4,4 cm: proporcionales a 2, 3 y 4."
+}

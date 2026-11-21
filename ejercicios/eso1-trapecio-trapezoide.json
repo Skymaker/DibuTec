@@ -1,0 +1,301 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-trapecio-trapezoide",
+  "titulo": "Trapecio rectángulo y trapezoide",
+  "nivel": "1.º ESO · 5.2, ej. 2",
+  "descripcion": "Construye un trapecio rectángulo (B = 7 cm, b = 4 cm, h = 4,5 cm) y un trapezoide conocidos sus cuatro lados y una diagonal.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 25.0,
+        "y": 178.0
+      },
+      {
+        "nombre": "A2",
+        "x": 160.0,
+        "y": 180.0,
+        "etiqueta": "A'"
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "r",
+        "desde": "A",
+        "x2": 115.0,
+        "y2": 178.0
+      },
+      {
+        "nombre": "r2",
+        "desde": "A2",
+        "x2": 272.0,
+        "y2": 180.0
+      }
+    ]
+  },
+  "textos": {
+    "r": "la recta del trapecio",
+    "r2": "la recta del trapezoide",
+    "A2": "el punto A'",
+    "k75": "el arco de 7,5 cm",
+    "k50": "el arco de 5 cm",
+    "k55": "el arco de 5,5 cm",
+    "k45": "el arco de 4,5 cm"
+  },
+  "pasos": [
+    {
+      "texto": "Trapecio rectángulo. Base mayor de 7 cm: pincha en A con el compás abierto 7 cm, corta la recta y marca B.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "A",
+          "radio": 70,
+          "cortaA": [
+            "r"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r",
+          "distancia": {
+            "de": "A",
+            "mm": 70
+          },
+          "nombrar": "B",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Levanta con la escuadra la perpendicular a la base en A: será el lado recto (la altura).",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "A"
+        ],
+        "perpendicularA": "r",
+        "longitudMin": 50,
+        "nombrar": "pa"
+      }
+    },
+    {
+      "texto": "Marca D sobre la perpendicular, a 4,5 cm de A (la altura).",
+      "herramientas": [
+        "regla",
+        "compas",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "sobre": "pa",
+        "cerca": {
+          "x": 25.0,
+          "y": 133.0
+        },
+        "nombrar": "D",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Traza por D la paralela a la base con la escuadra y el cartabón.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "D"
+        ],
+        "paralelaA": "r",
+        "longitudMin": 45,
+        "nombrar": "pd"
+      }
+    },
+    {
+      "texto": "Marca C sobre esa paralela, a 4 cm de D (la base menor).",
+      "herramientas": [
+        "regla",
+        "compas",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "sobre": "pd",
+        "cerca": {
+          "x": 65.0,
+          "y": 133.0
+        },
+        "nombrar": "C",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Dibuja los cuatro lados del trapecio ABCD.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      }
+    },
+    {
+      "texto": "Trapezoide. Lado A'B' = 6 cm: pincha en A' con el compás abierto 6 cm, corta la recta y marca B'.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "A2",
+          "radio": 60,
+          "cortaA": [
+            "r2"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r2",
+          "distancia": {
+            "de": "A2",
+            "mm": 60
+          },
+          "nombrar": "B2",
+          "rotular": "B'"
+        }
+      ]
+    },
+    {
+      "texto": "Vértice C': traza un arco de radio 7,5 cm (la diagonal A'C') con centro en A' y otro de 5 cm (el lado B'C') con centro en B'.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "A2",
+          "radio": 75,
+          "nombrar": "k75"
+        },
+        {
+          "tipo": "arco",
+          "centro": "B2",
+          "radio": 50,
+          "nombrar": "k50"
+        }
+      ]
+    },
+    {
+      "texto": "Marca C' en el corte de los arcos que queda por encima.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "k75",
+          "k50"
+        ],
+        "cerca": {
+          "x": 216.042,
+          "y": 130.157
+        },
+        "nombrar": "C2",
+        "rotular": "C'"
+      }
+    },
+    {
+      "texto": "Traza la diagonal A'C' con la regla.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "A2",
+          "C2"
+        ]
+      }
+    },
+    {
+      "texto": "Vértice D': traza un arco de 5,5 cm (el lado D'A') con centro en A' y otro de 4,5 cm (el lado C'D') con centro en C'.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "A2",
+          "radio": 55,
+          "nombrar": "k55"
+        },
+        {
+          "tipo": "arco",
+          "centro": "C2",
+          "radio": 45,
+          "nombrar": "k45"
+        }
+      ]
+    },
+    {
+      "texto": "Marca D' en el corte que queda al otro lado de la diagonal que B'.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "k55",
+          "k45"
+        ],
+        "cerca": {
+          "x": 171.22,
+          "y": 126.157
+        },
+        "nombrar": "D2",
+        "rotular": "D'"
+      }
+    },
+    {
+      "texto": "Dibuja los cuatro lados del trapezoide A'B'C'D'.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "A2",
+          "B2",
+          "C2",
+          "D2"
+        ]
+      }
+    }
+  ],
+  "final": "¡Muy bien! El trapecio tiene dos lados paralelos (las bases); el trapezoide no tiene ninguno. Para construirlo, la diagonal lo divide en dos triángulos."
+}

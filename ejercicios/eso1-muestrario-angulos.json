@@ -1,0 +1,207 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-muestrario-angulos",
+  "titulo": "Muestrario de ángulos con escuadra y cartabón",
+  "nivel": "1.º ESO · 1.2, ej. 1",
+  "descripcion": "Desde una misma semirrecta con origen en V, construye los ángulos de 30° a 150° combinando la escuadra y el cartabón.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "V",
+        "x": 148.5,
+        "y": 178.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "r",
+        "desde": "V",
+        "x2": 262.0,
+        "y2": 178.0
+      }
+    ],
+    "arcos": [
+      {
+        "nombre": "guia",
+        "radio": 80,
+        "desde": 0,
+        "hasta": 180,
+        "centro": "V"
+      }
+    ]
+  },
+  "textos": {
+    "r": "la semirrecta",
+    "guia": "la semicircunferencia guía"
+  },
+  "pasos": [
+    {
+      "texto": "Traza desde V la semirrecta de 30°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "El ángulo pequeño del cartabón mide 30°.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 217.782,
+          "y": 138.0
+        },
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Traza desde V la semirrecta de 45°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "Los ángulos agudos de la escuadra miden 45°.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 205.069,
+          "y": 121.431
+        },
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Traza desde V la semirrecta de 60°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "El otro ángulo agudo del cartabón mide 60°.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 188.5,
+          "y": 108.718
+        },
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Traza desde V la semirrecta de 75°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "75° = 45° + 30°: junta el ángulo de 45° de la escuadra con el de 30° del cartabón.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 169.206,
+          "y": 100.726
+        },
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Traza desde V la semirrecta de 90°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "Cualquiera de las dos plantillas tiene un ángulo recto.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 148.5,
+          "y": 98.0
+        },
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Traza desde V la semirrecta de 105°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "105° = 60° + 45°: junta el ángulo de 60° del cartabón con el de 45° de la escuadra.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 127.794,
+          "y": 100.726
+        },
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Traza desde V la semirrecta de 120°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "120° = 90° + 30°, o bien 180° − 60°.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 108.5,
+          "y": 108.718
+        },
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Traza desde V la semirrecta de 135°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "135° = 90° + 45°, o bien 180° − 45°.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 91.931,
+          "y": 121.431
+        },
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Traza desde V la semirrecta de 150°, medidos desde la semirrecta horizontal en sentido contrario a las agujas del reloj, hasta la semicircunferencia guía.",
+      "pista": "150° = 90° + 60°, o bien 180° − 30°.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "V",
+        "hasta": {
+          "x": 79.218,
+          "y": 138.0
+        },
+        "tolerancia": 1.5
+      }
+    }
+  ],
+  "final": "¡Muestrario completo! Con la escuadra (45° y 90°) y el cartabón (30°, 60° y 90°) puedes construir todos los múltiplos de 15°."
+}

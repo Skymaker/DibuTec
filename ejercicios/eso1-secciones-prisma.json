@@ -1,0 +1,369 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-secciones-prisma",
+  "titulo": "Prisma cortado por planos paralelos",
+  "nivel": "1.º ESO · 4.2, ej. 2",
+  "descripcion": "Dibuja un prisma recto de base cuadrada en perspectiva isométrica y dos planos paralelos horizontales que lo seccionan a distintas alturas.",
+  "papel": {
+    "papel": "isometrico",
+    "triangulo": 10,
+    "margen": true,
+    "hoja": "A4-h",
+    "imanCuadricula": true
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 148.564,
+        "y": 180.0
+      }
+    ]
+  },
+  "pasos": [
+    {
+      "texto": "Base del prisma: desde A, traza las dos aristas de abajo de tres triángulos cada una, por las líneas inclinadas de la cuadrícula.",
+      "pista": "Marca los extremos en los cruces de la cuadrícula y únelos con la regla.",
+      "herramientas": [
+        "lapiz",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 148.564,
+              "y": 180.0
+            },
+            {
+              "x": 174.545,
+              "y": 165.0
+            }
+          ],
+          [
+            {
+              "x": 148.564,
+              "y": 180.0
+            },
+            {
+              "x": 122.583,
+              "y": 165.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Sube las tres aristas verticales que se ven, de ocho triángulos de altura.",
+      "herramientas": [
+        "lapiz",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 148.564,
+              "y": 180.0
+            },
+            {
+              "x": 148.564,
+              "y": 100.0
+            }
+          ],
+          [
+            {
+              "x": 174.545,
+              "y": 165.0
+            },
+            {
+              "x": 174.545,
+              "y": 85.0
+            }
+          ],
+          [
+            {
+              "x": 122.583,
+              "y": 165.0
+            },
+            {
+              "x": 122.583,
+              "y": 85.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Cierra la cara de arriba con cuatro aristas: es un rombo en la cuadrícula.",
+      "herramientas": [
+        "lapiz",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 148.564,
+              "y": 100.0
+            },
+            {
+              "x": 174.545,
+              "y": 85.0
+            }
+          ],
+          [
+            {
+              "x": 174.545,
+              "y": 85.0
+            },
+            {
+              "x": 148.564,
+              "y": 70.0
+            }
+          ],
+          [
+            {
+              "x": 148.564,
+              "y": 70.0
+            },
+            {
+              "x": 122.583,
+              "y": 85.0
+            }
+          ],
+          [
+            {
+              "x": 122.583,
+              "y": 85.0
+            },
+            {
+              "x": 148.564,
+              "y": 100.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Primer plano de corte: a tres triángulos de altura, dibuja la sección, un rombo igual que la base.",
+      "herramientas": [
+        "lapiz",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 148.564,
+              "y": 150.0
+            },
+            {
+              "x": 174.545,
+              "y": 135.0
+            }
+          ],
+          [
+            {
+              "x": 174.545,
+              "y": 135.0
+            },
+            {
+              "x": 148.564,
+              "y": 120.0
+            }
+          ],
+          [
+            {
+              "x": 148.564,
+              "y": 120.0
+            },
+            {
+              "x": 122.583,
+              "y": 135.0
+            }
+          ],
+          [
+            {
+              "x": 122.583,
+              "y": 135.0
+            },
+            {
+              "x": 148.564,
+              "y": 150.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Segundo plano de corte: a seis triángulos de altura, dibuja la otra sección.",
+      "herramientas": [
+        "lapiz",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 148.564,
+              "y": 120.0
+            },
+            {
+              "x": 174.545,
+              "y": 105.0
+            }
+          ],
+          [
+            {
+              "x": 174.545,
+              "y": 105.0
+            },
+            {
+              "x": 148.564,
+              "y": 90.0
+            }
+          ],
+          [
+            {
+              "x": 148.564,
+              "y": 90.0
+            },
+            {
+              "x": 122.583,
+              "y": 105.0
+            }
+          ],
+          [
+            {
+              "x": 122.583,
+              "y": 105.0
+            },
+            {
+              "x": 148.564,
+              "y": 120.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Representa el plano α alrededor de la primera sección: un rombo mayor, de cinco triángulos de lado, con su vértice de delante un triángulo por debajo de la sección.",
+      "pista": "El plano sobresale un triángulo por cada lado de la sección.",
+      "herramientas": [
+        "lapiz",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 148.564,
+              "y": 160.0
+            },
+            {
+              "x": 191.865,
+              "y": 135.0
+            }
+          ],
+          [
+            {
+              "x": 191.865,
+              "y": 135.0
+            },
+            {
+              "x": 148.564,
+              "y": 110.0
+            }
+          ],
+          [
+            {
+              "x": 148.564,
+              "y": 110.0
+            },
+            {
+              "x": 105.263,
+              "y": 135.0
+            }
+          ],
+          [
+            {
+              "x": 105.263,
+              "y": 135.0
+            },
+            {
+              "x": 148.564,
+              "y": 160.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Haz lo mismo con el plano β alrededor de la segunda sección.",
+      "herramientas": [
+        "lapiz",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 148.564,
+              "y": 130.0
+            },
+            {
+              "x": 191.865,
+              "y": 105.0
+            }
+          ],
+          [
+            {
+              "x": 191.865,
+              "y": 105.0
+            },
+            {
+              "x": 148.564,
+              "y": 80.0
+            }
+          ],
+          [
+            {
+              "x": 148.564,
+              "y": 80.0
+            },
+            {
+              "x": 105.263,
+              "y": 105.0
+            }
+          ],
+          [
+            {
+              "x": 105.263,
+              "y": 105.0
+            },
+            {
+              "x": 148.564,
+              "y": 130.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Fíjate: los dos planos son paralelos entre sí y paralelos a la base, y por eso las dos secciones son cuadrados iguales a la base (en perspectiva isométrica se ven como rombos). Remárcalas con otro color.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! Has representado dos planos paralelos que cortan el prisma y sus secciones."
+}

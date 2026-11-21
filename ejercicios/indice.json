@@ -27,6 +27,46 @@
       "titulo": "Perspectiva",
       "abierto": false,
       "ejercicios": ["cubo-isometrico.json"]
+    },
+    {
+      "id": "curriculum-1eso",
+      "titulo": "Currículum 1º ESO",
+      "descripcion": "Dibujo técnico y geometría plana de EPVA de 1.º de ESO (Bloque C, conectado con los bloques A y B), en el orden de la guía.",
+      "ejercicios": [
+        "eso1-paralelas-escuadra-cartabon.json",
+        "eso1-malla-ortogonal.json",
+        "eso1-muestrario-angulos.json",
+        "eso1-estrella-angular.json",
+        "eso1-suma-segmentos.json",
+        "eso1-operaciones-segmentos.json",
+        "eso1-perpendicular-compas-1.json",
+        "eso1-perpendicular-compas-2.json",
+        "eso1-perpendicular-compas-3.json",
+        "eso1-paralelas-compas.json",
+        "eso1-suma-resta-angulos.json",
+        "eso1-division-angulo-cuatro.json",
+        "eso1-triseccion-angulo-recto.json",
+        "eso1-thales-partes-iguales.json",
+        "eso1-thales-partes-proporcionales.json",
+        "eso1-circunferencia-tres-puntos.json",
+        "eso1-bisectrices-dos-rectas.json",
+        "eso1-esfera.json",
+        "eso1-secciones-prisma.json",
+        "eso1-enlace-rectas-perpendiculares.json",
+        "eso1-pista-deportiva.json",
+        "eso1-construccion-triangulos.json",
+        "eso1-baricentro.json",
+        "eso1-incentro.json",
+        "eso1-circuncentro.json",
+        "eso1-cuadrado-rombo.json",
+        "eso1-trapecio-trapezoide.json",
+        "eso1-pentagono-hexagono.json",
+        "eso1-heptagono-metodo-general.json",
+        "eso1-red-modular.json",
+        "eso1-logotipo-modular.json",
+        "eso1-analisis-roseton.json",
+        "eso1-estrella-ocho-puntas.json"
+      ]
     }
   ]
 }

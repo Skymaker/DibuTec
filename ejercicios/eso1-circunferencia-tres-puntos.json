@@ -1,0 +1,229 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-circunferencia-tres-puntos",
+  "titulo": "Circunferencia que pasa por tres puntos",
+  "nivel": "1.º ESO · 4.1, ej. 1",
+  "descripcion": "Traza las mediatrices de AB y BC y usa su punto de corte como centro de la única circunferencia que pasa por A, B y C.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 95.0,
+        "y": 165.0
+      },
+      {
+        "nombre": "B",
+        "x": 150.0,
+        "y": 75.0
+      },
+      {
+        "nombre": "C",
+        "x": 220.0,
+        "y": 150.0
+      }
+    ]
+  },
+  "textos": {
+    "abm": "la mediatriz de AB",
+    "bcm": "la mediatriz de BC"
+  },
+  "pasos": [
+    {
+      "texto": "Une A con B y B con C usando la regla.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Mediatriz de AB. Pincha el compás en A, ábrelo algo más de la mitad de AB y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "A",
+        "radio": {
+          "min": 54.7
+        },
+        "nombrar": "abk1"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en B y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "B",
+        "radioComo": "abk1",
+        "cortaA": [
+          {
+            "elemento": "abk1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "abk2",
+        "posteriorA": "abk1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "abk1",
+          "abk2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "abD1",
+          "abD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de AB: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "abD1",
+          "abD2"
+        ],
+        "nombrar": "abm"
+      }
+    },
+    {
+      "texto": "Mediatriz de BC. Pincha el compás en B, ábrelo algo más de la mitad de BC y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "B",
+        "radio": {
+          "min": 53.3
+        },
+        "nombrar": "bck1",
+        "posteriorA": "abm"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en C y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "C",
+        "radioComo": "bck1",
+        "cortaA": [
+          {
+            "elemento": "bck1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "bck2",
+        "posteriorA": "bck1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "bck1",
+          "bck2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "bcD1",
+          "bcD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de BC: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "bcD1",
+          "bcD2"
+        ],
+        "nombrar": "bcm"
+      }
+    },
+    {
+      "texto": "Marca el punto O donde se cortan las dos mediatrices. Si no se cortan, alárgalas.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "abm",
+          "bcm"
+        ],
+        "nombrar": "O",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Pincha el compás en O, ábrelo hasta A y traza la circunferencia completa. Pasará también por B y por C.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "pasaPor": [
+          "A",
+          "B",
+          "C"
+        ],
+        "completo": true,
+        "tolerancia": 1.5
+      }
+    }
+  ],
+  "final": "¡Muy bien! O está a la misma distancia de A, de B y de C porque pertenece a las dos mediatrices."
+}

@@ -1,0 +1,388 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-heptagono-metodo-general",
+  "titulo": "Heptágono: método general",
+  "nivel": "1.º ESO · 5.3, ej. 2",
+  "descripcion": "Inscribe un heptágono regular en una circunferencia de 5 cm de radio con el método general (Teorema de Thales sobre el diámetro).",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "O",
+        "x": 148.5,
+        "y": 110.0
+      }
+    ]
+  },
+  "textos": {
+    "c": "la circunferencia",
+    "d": "el diámetro vertical",
+    "aux": "la recta auxiliar",
+    "u": "la recta que une 7 con B",
+    "kA": "el arco con centro en A",
+    "kB": "el arco con centro en B",
+    "pd": "la recta que une P con 2'"
+  },
+  "pasos": [
+    {
+      "texto": "Traza una circunferencia de centro O y radio 5 cm.",
+      "herramientas": [
+        "compas",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "radio": 50,
+        "completo": true,
+        "nombrar": "c"
+      }
+    },
+    {
+      "texto": "Traza por O el diámetro vertical.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          {
+            "x": 148.5,
+            "y": 60.0
+          },
+          {
+            "x": 148.5,
+            "y": 160.0
+          }
+        ],
+        "tolerancia": 1.5,
+        "nombrar": "d"
+      }
+    },
+    {
+      "texto": "Marca sus extremos: A arriba y B abajo.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cerca": {
+            "x": 148.5,
+            "y": 60.0
+          },
+          "nombrar": "A",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "cerca": {
+            "x": 148.5,
+            "y": 160.0
+          },
+          "nombrar": "B",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Divide AB en 7 partes iguales con Thales. Traza desde A una recta auxiliar inclinada hacia abajo a la derecha, de al menos 8 cm.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "A",
+        "longitudMin": 80,
+        "nombrar": "aux"
+      }
+    },
+    {
+      "texto": "Con el compás abierto 1 cm, marca siete puntos seguidos sobre la recta auxiliar desde A.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "sobre": "aux",
+          "distancia": {
+            "de": "A",
+            "mm": 10
+          },
+          "nombrar": "T1",
+          "rotular": "1"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "aux",
+          "distancia": {
+            "de": "A",
+            "mm": 20
+          },
+          "nombrar": "T2",
+          "rotular": "2"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "aux",
+          "distancia": {
+            "de": "A",
+            "mm": 30
+          },
+          "nombrar": "T3",
+          "rotular": "3"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "aux",
+          "distancia": {
+            "de": "A",
+            "mm": 40
+          },
+          "nombrar": "T4",
+          "rotular": "4"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "aux",
+          "distancia": {
+            "de": "A",
+            "mm": 50
+          },
+          "nombrar": "T5",
+          "rotular": "5"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "aux",
+          "distancia": {
+            "de": "A",
+            "mm": 60
+          },
+          "nombrar": "T6",
+          "rotular": "6"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "aux",
+          "distancia": {
+            "de": "A",
+            "mm": 70
+          },
+          "nombrar": "T7",
+          "rotular": "7"
+        }
+      ]
+    },
+    {
+      "texto": "Une el punto 7 con B.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "T7",
+          "B"
+        ],
+        "nombrar": "u"
+      }
+    },
+    {
+      "texto": "Solo hace falta la segunda división: traza por el punto 2 la paralela a esa recta, hasta el diámetro.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "T2"
+        ],
+        "paralelaA": "u",
+        "nombrar": "p2"
+      }
+    },
+    {
+      "texto": "Marca el punto 2 del diámetro, donde la paralela lo corta.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "p2",
+          "d"
+        ],
+        "nombrar": "D2",
+        "rotular": "2'"
+      }
+    },
+    {
+      "texto": "Con el compás abierto como el diámetro (10 cm), traza un arco con centro en A y otro con centro en B que se corten a la izquierda.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "A",
+          "radio": 100,
+          "nombrar": "kA"
+        },
+        {
+          "tipo": "arco",
+          "centro": "B",
+          "radio": 100,
+          "nombrar": "kB"
+        }
+      ]
+    },
+    {
+      "texto": "Marca el punto P, donde se cortan los arcos por la izquierda.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "kA",
+          "kB"
+        ],
+        "cerca": {
+          "x": 61.897,
+          "y": 110.0
+        },
+        "nombrar": "P",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Une P con el punto 2' y prolonga la recta hasta que corte a la circunferencia al otro lado.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "P",
+          "D2"
+        ],
+        "nombrar": "pd"
+      }
+    },
+    {
+      "texto": "Marca C, ese corte del otro lado. AC es el lado del heptágono.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "pd",
+          "c"
+        ],
+        "cerca": {
+          "x": 187.64,
+          "y": 78.887
+        },
+        "nombrar": "C",
+        "rotular": true,
+        "tolerancia": 1
+      }
+    },
+    {
+      "texto": "Abre el compás de A a C y llévalo sobre la circunferencia desde C, marcando los demás vértices.",
+      "pista": "Es un método aproximado: si el último salto no cae justo en A, no pasa nada.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "sobre": "c",
+          "cerca": {
+            "x": 197.211,
+            "y": 121.279
+          },
+          "nombrar": "V3",
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "punto",
+          "sobre": "c",
+          "cerca": {
+            "x": 169.982,
+            "y": 155.15
+          },
+          "nombrar": "V4",
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "punto",
+          "sobre": "c",
+          "cerca": {
+            "x": 126.524,
+            "y": 154.912
+          },
+          "nombrar": "V5",
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "punto",
+          "sobre": "c",
+          "cerca": {
+            "x": 99.668,
+            "y": 120.744
+          },
+          "nombrar": "V6",
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "punto",
+          "sobre": "c",
+          "cerca": {
+            "x": 109.703,
+            "y": 78.46
+          },
+          "nombrar": "V7",
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Une los siete vértices con la regla.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "A",
+          "C",
+          "V3",
+          "V4",
+          "V5",
+          "V6",
+          "V7"
+        ],
+        "tolerancia": 1.5
+      }
+    }
+  ],
+  "final": "¡Muy bien! El método general sirve para cualquier número de lados: divide el diámetro en tantas partes como lados y une P siempre con la segunda división."
+}

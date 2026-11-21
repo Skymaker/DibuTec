@@ -1,0 +1,334 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-incentro",
+  "titulo": "Incentro y circunferencia inscrita",
+  "nivel": "1.º ESO · 5.1, ej. 2 (2)",
+  "descripcion": "Halla el incentro de un triángulo acutángulo escaleno con dos bisectrices y traza su circunferencia inscrita.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 85.0,
+        "y": 172.0
+      },
+      {
+        "nombre": "B",
+        "x": 220.0,
+        "y": 172.0
+      },
+      {
+        "nombre": "C",
+        "x": 140.0,
+        "y": 55.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "AB",
+        "desde": "A",
+        "hasta": "B"
+      },
+      {
+        "nombre": "BC",
+        "desde": "B",
+        "hasta": "C"
+      },
+      {
+        "nombre": "AC",
+        "desde": "A",
+        "hasta": "C"
+      }
+    ]
+  },
+  "textos": {
+    "AB": "el lado AB",
+    "BC": "el lado BC",
+    "AC": "el lado AC",
+    "bpk": "el arco con centro en A",
+    "bpxa": "el arco con centro en P1",
+    "bqk": "el arco con centro en B",
+    "bqxa": "el arco con centro en Q1"
+  },
+  "pasos": [
+    {
+      "texto": "Bisectriz del ángulo A. Pincha el compás en A y traza un arco que corte a sus dos lados.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "A",
+        "radio": {
+          "min": 15,
+          "max": 50
+        },
+        "cortaA": [
+          "AB",
+          "AC"
+        ],
+        "nombrar": "bpk"
+      }
+    },
+    {
+      "texto": "Marca los dos cortes del arco con los lados.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "bpk",
+            "AB"
+          ],
+          "nombrar": "bp1",
+          "rotular": "P1"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "bpk",
+            "AC"
+          ],
+          "nombrar": "bp2",
+          "rotular": "P2"
+        }
+      ]
+    },
+    {
+      "texto": "Pincha el compás en P1 y traza un arco hacia dentro del ángulo.",
+      "pista": "Ábrelo más de la mitad de la distancia entre los dos puntos.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "bp1",
+        "radio": {
+          "min": 15
+        },
+        "nombrar": "bpxa"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en P2 y traza otro arco que corte al anterior.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "bp2",
+        "radioComo": "bpxa",
+        "cortaA": [
+          "bpxa"
+        ],
+        "nombrar": "bpxb",
+        "posteriorA": "bpxa"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "bpxa",
+          "bpxb"
+        ],
+        "nombrar": "bpxR"
+      }
+    },
+    {
+      "texto": "Une A con ese punto y alarga la recta hacia dentro del triángulo: es la bisectriz del ángulo A.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "A",
+          "bpxR"
+        ],
+        "longitudMin": 80,
+        "nombrar": "bpb"
+      }
+    },
+    {
+      "texto": "Bisectriz del ángulo B. Pincha el compás en B y traza un arco que corte a sus dos lados.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "B",
+        "radio": {
+          "min": 15,
+          "max": 50
+        },
+        "cortaA": [
+          "AB",
+          "BC"
+        ],
+        "nombrar": "bqk",
+        "posteriorA": "bpb"
+      }
+    },
+    {
+      "texto": "Marca los dos cortes del arco con los lados.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "bqk",
+            "AB"
+          ],
+          "nombrar": "bq1",
+          "rotular": "Q1"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "bqk",
+            "BC"
+          ],
+          "nombrar": "bq2",
+          "rotular": "Q2"
+        }
+      ]
+    },
+    {
+      "texto": "Pincha el compás en Q1 y traza un arco hacia dentro del ángulo.",
+      "pista": "Ábrelo más de la mitad de la distancia entre los dos puntos.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "bq1",
+        "radio": {
+          "min": 15
+        },
+        "nombrar": "bqxa"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en Q2 y traza otro arco que corte al anterior.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "bq2",
+        "radioComo": "bqxa",
+        "cortaA": [
+          "bqxa"
+        ],
+        "nombrar": "bqxb",
+        "posteriorA": "bqxa"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "bqxa",
+          "bqxb"
+        ],
+        "nombrar": "bqxR"
+      }
+    },
+    {
+      "texto": "Une B con ese punto y alarga la recta hacia dentro del triángulo: es la bisectriz del ángulo B.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "B",
+          "bqxR"
+        ],
+        "longitudMin": 80,
+        "nombrar": "bqb"
+      }
+    },
+    {
+      "texto": "Marca el incentro I, donde se cortan las dos bisectrices.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "bpb",
+          "bqb"
+        ],
+        "nombrar": "I",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Traza por I la perpendicular al lado AB con la escuadra, hasta que corte a AB.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "I"
+        ],
+        "perpendicularA": "AB",
+        "longitudMin": 15,
+        "nombrar": "pI"
+      }
+    },
+    {
+      "texto": "Marca el punto T donde esa perpendicular corta a AB.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "pI",
+          "AB"
+        ],
+        "nombrar": "T",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Pincha el compás en I, ábrelo hasta T y traza la circunferencia inscrita: toca a los tres lados.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "I",
+        "pasaPor": [
+          "T"
+        ],
+        "completo": true
+      }
+    }
+  ],
+  "final": "¡Muy bien! El incentro está a la misma distancia de los tres lados, por eso la circunferencia inscrita es tangente a todos."
+}

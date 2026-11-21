@@ -1,0 +1,204 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-esfera",
+  "titulo": "Representación plana de la esfera",
+  "nivel": "1.º ESO · 4.2, ej. 1",
+  "descripcion": "Representa una esfera de 5 cm de radio con su ecuador y un meridiano (aproximados con arcos) y prepárala para el claroscuro.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "O",
+        "x": 148.5,
+        "y": 105.0
+      },
+      {
+        "nombre": "Ce1",
+        "x": 148.5,
+        "y": 29.167,
+        "etiqueta": "C1"
+      },
+      {
+        "nombre": "Ce2",
+        "x": 148.5,
+        "y": 180.833,
+        "etiqueta": "C2"
+      },
+      {
+        "nombre": "Cm1",
+        "x": 72.667,
+        "y": 105.0,
+        "etiqueta": "C3"
+      },
+      {
+        "nombre": "Cm2",
+        "x": 224.333,
+        "y": 105.0,
+        "etiqueta": "C4"
+      }
+    ]
+  },
+  "pasos": [
+    {
+      "texto": "Con el compás, traza una circunferencia de centro O y radio 5 cm: es el contorno de la esfera.",
+      "herramientas": [
+        "compas",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "radio": 50,
+        "completo": true,
+        "nombrar": "c"
+      }
+    },
+    {
+      "texto": "Traza por O el diámetro horizontal (el eje del ecuador) y el vertical (el eje de los polos).",
+      "pista": "Coloca la regla horizontal pasando por O y fíjala; el vertical sale con la escuadra apoyada en ella.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 98.5,
+              "y": 105.0
+            },
+            {
+              "x": 198.5,
+              "y": 105.0
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 148.5,
+              "y": 55.0
+            },
+            {
+              "x": 148.5,
+              "y": 155.0
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Ecuador, parte de delante. Pincha el compás en C1, ábrelo hasta un extremo del diámetro horizontal y traza el arco que va de un extremo al otro pasando por debajo de O.",
+      "pista": "Es un arco muy abierto: así se aproxima la elipse que forma el ecuador visto un poco desde arriba.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "Ce1",
+        "pasaPor": [
+          {
+            "x": 98.5,
+            "y": 105.0
+          },
+          {
+            "x": 198.5,
+            "y": 105.0
+          },
+          {
+            "x": 148.5,
+            "y": 120.0
+          }
+        ],
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Ecuador, parte de atrás. Haz lo mismo con centro en C2: el arco pasa por encima de O.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "Ce2",
+        "pasaPor": [
+          {
+            "x": 98.5,
+            "y": 105.0
+          },
+          {
+            "x": 198.5,
+            "y": 105.0
+          },
+          {
+            "x": 148.5,
+            "y": 90.0
+          }
+        ],
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Meridiano. Con la misma abertura, traza con centro en C3 el arco que va de polo a polo por la derecha de O, y con centro en C4 el que va por la izquierda.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "Cm1",
+          "pasaPor": [
+            {
+              "x": 148.5,
+              "y": 55.0
+            },
+            {
+              "x": 148.5,
+              "y": 155.0
+            },
+            {
+              "x": 163.5,
+              "y": 105.0
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": "Cm2",
+          "pasaPor": [
+            {
+              "x": 148.5,
+              "y": 55.0
+            },
+            {
+              "x": 148.5,
+              "y": 155.0
+            },
+            {
+              "x": 133.5,
+              "y": 105.0
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Claroscuro: decide de dónde viene la luz (por ejemplo, arriba a la izquierda). Exporta o imprime la lámina y sombrea con lápiz de grafito: deja casi blanca la zona de la luz, oscurece poco a poco hacia el lado contrario y añade la sombra arrojada en el suelo.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! Con el ecuador, el meridiano y el claroscuro, la circunferencia se ve como una esfera."
+}

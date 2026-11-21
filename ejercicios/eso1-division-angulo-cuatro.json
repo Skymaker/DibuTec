@@ -1,0 +1,303 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-division-angulo-cuatro",
+  "titulo": "División de un ángulo en cuatro partes",
+  "nivel": "1.º ESO · 3.1, ej. 2 (1)",
+  "descripcion": "Divide un ángulo de 120° en cuatro ángulos iguales trazando bisectrices sucesivas con regla y compás.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "V",
+        "x": 75.0,
+        "y": 175.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "l1",
+        "desde": "V",
+        "x2": 175.0,
+        "y2": 175.0
+      },
+      {
+        "nombre": "l2",
+        "desde": "V",
+        "x2": 32.5,
+        "y2": 101.388
+      }
+    ]
+  },
+  "textos": {
+    "l1": "el lado horizontal",
+    "l2": "el lado inclinado",
+    "k1": "el primer arco",
+    "b1a": "el arco con centro en P",
+    "b1": "la primera bisectriz",
+    "b2a": "el arco con centro en P",
+    "b3a": "el arco con centro en Q"
+  },
+  "pasos": [
+    {
+      "texto": "Pincha el compás en V y traza un arco que corte a los dos lados del ángulo.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "V",
+        "radio": {
+          "min": 25,
+          "max": 60
+        },
+        "cortaA": [
+          "l1",
+          "l2"
+        ],
+        "nombrar": "k1"
+      }
+    },
+    {
+      "texto": "Marca los dos puntos donde el arco corta a los lados: P en el lado horizontal y Q en el inclinado.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "k1",
+            "l1"
+          ],
+          "nombrar": "P",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "k1",
+            "l2"
+          ],
+          "nombrar": "Q",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Pincha el compás en P y traza un arco hacia dentro del ángulo.",
+      "pista": "Ábrelo más de la mitad de la distancia entre los dos puntos.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P",
+        "radio": {
+          "min": 15
+        },
+        "nombrar": "b1a"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en Q y traza otro arco que corte al anterior.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "Q",
+        "radioComo": "b1a",
+        "cortaA": [
+          "b1a"
+        ],
+        "nombrar": "b1b",
+        "posteriorA": "b1a"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "b1a",
+          "b1b"
+        ],
+        "nombrar": "b1R"
+      }
+    },
+    {
+      "texto": "Une V con ese punto: es la bisectriz, que divide el ángulo en dos de 60°. Hazla más larga que el arco.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "V",
+          "b1R"
+        ],
+        "angulo": {
+          "con": "l1",
+          "grados": 60
+        },
+        "longitudMin": 70,
+        "nombrar": "b1"
+      }
+    },
+    {
+      "texto": "Marca el punto M donde la bisectriz corta al primer arco.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "k1",
+          "b1"
+        ],
+        "nombrar": "M",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Pincha el compás en P y traza un arco hacia dentro del ángulo.",
+      "pista": "Ábrelo más de la mitad de la distancia entre los dos puntos.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P",
+        "radio": {
+          "min": 15
+        },
+        "nombrar": "b2a",
+        "posteriorA": "M"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en M y traza otro arco que corte al anterior.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "M",
+        "radioComo": "b2a",
+        "cortaA": [
+          "b2a"
+        ],
+        "nombrar": "b2b",
+        "posteriorA": "b2a"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "b2a",
+          "b2b"
+        ],
+        "nombrar": "b2R"
+      }
+    },
+    {
+      "texto": "Une V con ese punto: es la bisectriz del ángulo de abajo (30°).",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "V",
+          "b2R"
+        ],
+        "angulo": {
+          "con": "l1",
+          "grados": 30
+        },
+        "longitudMin": 60,
+        "nombrar": "b2"
+      }
+    },
+    {
+      "texto": "Pincha el compás en Q y traza un arco hacia dentro del ángulo.",
+      "pista": "Ábrelo más de la mitad de la distancia entre los dos puntos.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "Q",
+        "radio": {
+          "min": 15
+        },
+        "nombrar": "b3a",
+        "posteriorA": "b2"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en M y traza otro arco que corte al anterior.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "M",
+        "radioComo": "b3a",
+        "cortaA": [
+          "b3a"
+        ],
+        "nombrar": "b3b",
+        "posteriorA": "b3a"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "b3a",
+          "b3b"
+        ],
+        "nombrar": "b3R"
+      }
+    },
+    {
+      "texto": "Une V con ese punto: es la bisectriz del ángulo de arriba.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "V",
+          "b3R"
+        ],
+        "angulo": {
+          "con": "l1",
+          "grados": 90
+        },
+        "longitudMin": 60
+      }
+    }
+  ],
+  "final": "¡Muy bien! El ángulo de 120° ha quedado dividido en cuatro ángulos iguales de 30°."
+}

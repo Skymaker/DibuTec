@@ -149,6 +149,8 @@ vuelve a ese paso.
 | Opción | Significado |
 |---|---|
 | `nombrar` | Pone nombre a lo que cumple el objetivo para usarlo en pasos siguientes. Una cadena o una lista (para varios puntos). |
+| `rotular` | Solo para puntos: les pone una etiqueta en la hoja. `true` usa el nombre de `nombrar`; también vale una etiqueta (`"M"`) o una lista (`["1", "2"]`). Así el texto de los pasos puede decir «pincha en M». Si otro punto tenía esa etiqueta, recibe una letra libre. |
+| `posteriorA` | Solo vale lo dibujado después de ese elemento (`"posteriorA": "M"`). Sirve para pedir un arco nuevo con centro en un punto que ya se usó antes. |
 | `tolerancia` | Margen en mm (por defecto 1). |
 | `toleranciaGrados` | Margen en grados (por defecto 1). |
 | `permitirDados` | Si es `true`, también valen los elementos del enunciado. |
@@ -186,7 +188,7 @@ Un arco o circunferencia trazado con el compás.
 |---|---|
 | `centro` | `"centro": "A"` |
 | `radio` | `"radio": 50` o `"radio": { "min": 60, "max": 140 }` |
-| `radioComo` | Mismo radio que otro arco: `"radioComo": "arcoA"` |
+| `radioComo` | Mismo radio que otro arco (`"radioComo": "arcoA"`) o abertura igual a la distancia entre dos puntos (`"radioComo": ["A1", "A2"]`, para llevar una medida con el compás). |
 | `completo` | `true` si tiene que ser una circunferencia entera. |
 | `barridoMin` | Grados mínimos del arco. |
 | `pasaPor` | Puntos por los que pasa. |

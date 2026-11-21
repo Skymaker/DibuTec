@@ -1,0 +1,183 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-suma-segmentos",
+  "titulo": "Transporte y suma de segmentos",
+  "nivel": "1.º ESO · 2.1, ej. 1",
+  "descripcion": "Lleva con el compás los segmentos a, b y c, uno detrás de otro, sobre una recta para obtener a + b + c.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "a1",
+        "x": 40.0,
+        "y": 60.0,
+        "etiqueta": "a"
+      },
+      {
+        "nombre": "a2",
+        "x": 75.0,
+        "y": 60.0,
+        "etiqueta": " "
+      },
+      {
+        "nombre": "b1",
+        "x": 115.0,
+        "y": 60.0,
+        "etiqueta": "b"
+      },
+      {
+        "nombre": "b2",
+        "x": 163.0,
+        "y": 60.0,
+        "etiqueta": " "
+      },
+      {
+        "nombre": "c1",
+        "x": 205.0,
+        "y": 60.0,
+        "etiqueta": "c"
+      },
+      {
+        "nombre": "c2",
+        "x": 227.0,
+        "y": 60.0,
+        "etiqueta": " "
+      },
+      {
+        "nombre": "O",
+        "x": 40.0,
+        "y": 140.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "a",
+        "desde": "a1",
+        "hasta": "a2"
+      },
+      {
+        "nombre": "b",
+        "desde": "b1",
+        "hasta": "b2"
+      },
+      {
+        "nombre": "c",
+        "desde": "c1",
+        "hasta": "c2"
+      },
+      {
+        "nombre": "r",
+        "desde": "O",
+        "x2": 272.0,
+        "y2": 140.0
+      }
+    ]
+  },
+  "textos": {
+    "a": "el segmento a",
+    "b": "el segmento b",
+    "c": "el segmento c",
+    "r": "la recta r"
+  },
+  "pasos": [
+    {
+      "texto": "Toma con el compás la medida del segmento a (punta seca en un extremo, mina en el otro). Sin cambiar la abertura, pincha en O, traza un arco que corte a r y marca el corte.",
+      "pista": "Los extremos del segmento atraen la punta seca y la mina.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "O",
+          "radio": 35,
+          "cortaA": [
+            "r"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r",
+          "distancia": {
+            "de": "O",
+            "mm": 35
+          },
+          "nombrar": "P1",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Toma ahora la medida de b y llévala a continuación: pincha en P1, traza un arco hacia la derecha y marca el corte con r.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "P1",
+          "radio": 48,
+          "cortaA": [
+            "r"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r",
+          "distancia": {
+            "de": "O",
+            "mm": 83
+          },
+          "nombrar": "P2",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Por último, lleva c a continuación de P2. Cuidado: el arco corta a r dos veces; marca el corte de la derecha.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "P2",
+          "radio": 22,
+          "cortaA": [
+            "r"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r",
+          "distancia": {
+            "de": "O",
+            "mm": 105
+          },
+          "nombrar": "P3",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Repasa con la regla el segmento que va de O a P3: es la suma a + b + c.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "O",
+        "hasta": "P3"
+      }
+    }
+  ],
+  "final": "¡Muy bien! El segmento OP3 mide 3,5 + 4,8 + 2,2 = 10,5 cm. Compruébalo con la regla."
+}

@@ -1,0 +1,186 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-estrella-ocho-puntas",
+  "titulo": "Lacería: estrella de ocho puntas",
+  "nivel": "1.º ESO · 6.2, ej. 2",
+  "descripcion": "Reconstruye con regla y compás la estrella de ocho puntas del arte islámico y mudéjar, inscrita en una circunferencia, y coloréala.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "O",
+        "x": 148.5,
+        "y": 108.0
+      }
+    ]
+  },
+  "textos": {
+    "c": "la circunferencia"
+  },
+  "pasos": [
+    {
+      "texto": "Traza una circunferencia de centro O y radio 6,5 cm.",
+      "herramientas": [
+        "compas",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "radio": 65,
+        "completo": true,
+        "nombrar": "c"
+      }
+    },
+    {
+      "texto": "Traza por O el diámetro horizontal y el vertical.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 213.5,
+              "y": 108.0
+            },
+            {
+              "x": 83.5,
+              "y": 108.0
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 148.5,
+              "y": 43.0
+            },
+            {
+              "x": 148.5,
+              "y": 173.0
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Traza por O los dos diámetros inclinados a 45° con la escuadra (son las bisectrices de los anteriores).",
+      "pista": "La hipotenusa de la escuadra apoyada en la regla horizontal da los 45°.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 194.462,
+              "y": 62.038
+            },
+            {
+              "x": 102.538,
+              "y": 153.962
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 102.538,
+              "y": 62.038
+            },
+            {
+              "x": 194.462,
+              "y": 153.962
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Marca los ocho puntos donde los diámetros cortan a la circunferencia.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "vertices",
+        "circunferencia": "c",
+        "desde": {
+          "x": 213.5,
+          "y": 108.0
+        },
+        "lados": 8,
+        "nombrar": [
+          "V1",
+          "V2",
+          "V3",
+          "V4",
+          "V5",
+          "V6",
+          "V7",
+          "V8"
+        ],
+        "rotular": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      }
+    },
+    {
+      "texto": "Dibuja los dos cuadrados entrelazados: uno une 1-3-5-7 y el otro, 2-4-6-8. Juntos forman la estrella de ocho puntas.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "rectas",
+          "poligono": [
+            "V1",
+            "V3",
+            "V5",
+            "V7"
+          ]
+        },
+        {
+          "tipo": "rectas",
+          "poligono": [
+            "V2",
+            "V4",
+            "V6",
+            "V8"
+          ]
+        }
+      ]
+    },
+    {
+      "texto": "Colorea la estrella: elige en la barrita del portaminas dos o tres colores y repasa las puntas alternándolos, o exporta la lámina y coloréala con lápices de colores o rotuladores.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! Esta estrella de ocho puntas aparece en alicatados, techos de lacería y celosías del arte islámico y mudéjar, como en la Alhambra."
+}

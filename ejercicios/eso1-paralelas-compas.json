@@ -1,0 +1,285 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-paralelas-compas",
+  "titulo": "Paralelas con compás",
+  "nivel": "1.º ESO · 2.2, ej. 2",
+  "descripcion": "Traza la paralela a una recta s por un punto P con el método de los arcos, y las dos paralelas a s situadas a 2,5 cm.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "P",
+        "x": 104.96,
+        "y": 97.72
+      },
+      {
+        "nombre": "A",
+        "x": 188.4,
+        "y": 133.8
+      },
+      {
+        "nombre": "B",
+        "x": 246.0,
+        "y": 117.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "s",
+        "x1": 30.0,
+        "y1": 180.0,
+        "x2": 270.0,
+        "y2": 110.0
+      }
+    ]
+  },
+  "textos": {
+    "s": "la recta s",
+    "k1": "el primer arco",
+    "k2": "el arco con centro en M",
+    "k3": "el arco con centro en M y radio NP",
+    "cA": "la circunferencia de centro A",
+    "cB": "la circunferencia de centro B"
+  },
+  "pasos": [
+    {
+      "texto": "Pincha el compás en P y traza un arco grande que corte a la recta s.",
+      "pista": "El arco tiene que llegar a s: ábrelo más de 6 cm.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P",
+        "radio": {
+          "min": 60
+        },
+        "cortaA": [
+          "s"
+        ],
+        "nombrar": "k1"
+      }
+    },
+    {
+      "texto": "Marca un punto M donde el arco corta a s.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "k1",
+          "s"
+        ],
+        "nombrar": "M",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en M y traza un arco que pase por P y corte a s.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "M",
+        "radioComo": "k1",
+        "cortaA": [
+          "s"
+        ],
+        "nombrar": "k2"
+      }
+    },
+    {
+      "texto": "Marca el punto N donde este arco corta a s (el que está más lejos de P).",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "k2",
+          "s"
+        ],
+        "nombrar": "N",
+        "rotular": true,
+        "posteriorA": "M"
+      }
+    },
+    {
+      "texto": "Toma con el compás la distancia de N a P. Con esa abertura, pincha en M y corta el primer arco.",
+      "pista": "Pincha la punta seca en N y lleva la mina hasta P; luego arrastra el compás por la punta seca hasta M.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "M",
+        "radioComo": [
+          "N",
+          "P"
+        ],
+        "cortaA": [
+          "k1"
+        ],
+        "nombrar": "k3"
+      }
+    },
+    {
+      "texto": "Marca el punto Q donde ese arco corta al primero: el corte de la izquierda, que está a la misma distancia de s que P.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "k3",
+          "k1"
+        ],
+        "nombrar": "Q",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Une P y Q con la regla: es la paralela a s que pasa por P.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "P"
+        ],
+        "paralelaA": "s",
+        "longitudMin": 60
+      }
+    },
+    {
+      "texto": "Segunda parte: las rectas a 2,5 cm de s. Traza dos circunferencias de radio 2,5 cm con centro en A y en B.",
+      "pista": "Los puntos de cada circunferencia están a 2,5 cm de su centro.",
+      "herramientas": [
+        "compas",
+        "regla"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "A",
+          "radio": 25,
+          "completo": true,
+          "nombrar": "cA"
+        },
+        {
+          "tipo": "arco",
+          "centro": "B",
+          "radio": 25,
+          "completo": true,
+          "nombrar": "cB"
+        }
+      ]
+    },
+    {
+      "texto": "Traza con la escuadra las perpendiculares a s que pasan por A y por B, que corten a las circunferencias por los dos lados.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "A"
+          ],
+          "perpendicularA": "s",
+          "longitudMin": 55,
+          "nombrar": "pa"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "B"
+          ],
+          "perpendicularA": "s",
+          "longitudMin": 55,
+          "nombrar": "pb"
+        }
+      ]
+    },
+    {
+      "texto": "Marca los cuatro puntos donde las perpendiculares cortan a las circunferencias.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "pa",
+            "cA"
+          ],
+          "cantidad": 2,
+          "nombrar": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "pb",
+            "cB"
+          ],
+          "cantidad": 2,
+          "nombrar": [
+            "T3",
+            "T4"
+          ]
+        }
+      ]
+    },
+    {
+      "texto": "Une con la regla los dos puntos de cada lado: son las dos paralelas a s situadas a 2,5 cm.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 181.4,
+              "y": 109.8
+            },
+            {
+              "x": 239.0,
+              "y": 93.0
+            }
+          ],
+          "paralelaA": "s"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 195.4,
+              "y": 157.8
+            },
+            {
+              "x": 253.0,
+              "y": 141.0
+            }
+          ],
+          "paralelaA": "s"
+        }
+      ]
+    }
+  ],
+  "final": "¡Muy bien! Las dos paralelas forman el lugar geométrico de los puntos que están a 2,5 cm de s."
+}

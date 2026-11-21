@@ -1,0 +1,265 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-thales-partes-iguales",
+  "titulo": "Teorema de Thales: partes iguales",
+  "nivel": "1.º ESO · 3.2, ej. 1",
+  "descripcion": "Divide un segmento AB de 11,3 cm en 7 partes iguales con una recta auxiliar y paralelas (Teorema de Thales).",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 45.0,
+        "y": 180.0
+      },
+      {
+        "nombre": "B",
+        "x": 155.531,
+        "y": 156.506
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "AB",
+        "desde": "A",
+        "hasta": "B"
+      }
+    ]
+  },
+  "textos": {
+    "AB": "el segmento AB",
+    "Taux": "la recta auxiliar",
+    "Tu": "la recta que une 7 con B"
+  },
+  "pasos": [
+    {
+      "texto": "Traza desde A una recta auxiliar inclinada (que forme un ángulo agudo con AB) de al menos 12 cm.",
+      "pista": "Cualquier inclinación vale, pero que no se parezca mucho a la del segmento.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "A",
+        "longitudMin": 117,
+        "nombrar": "Taux"
+      }
+    },
+    {
+      "texto": "Abre el compás 1,5 cm y llévalo siete veces seguidas sobre la recta auxiliar, empezando en A. Marca los siete puntos.",
+      "pista": "Pincha en A y corta la recta; luego pincha en cada punto nuevo y vuelve a cortar.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "sobre": "Taux",
+          "distancia": {
+            "de": "A",
+            "mm": 15
+          },
+          "nombrar": "T1",
+          "rotular": "1"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "Taux",
+          "distancia": {
+            "de": "A",
+            "mm": 30
+          },
+          "nombrar": "T2",
+          "rotular": "2"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "Taux",
+          "distancia": {
+            "de": "A",
+            "mm": 45
+          },
+          "nombrar": "T3",
+          "rotular": "3"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "Taux",
+          "distancia": {
+            "de": "A",
+            "mm": 60
+          },
+          "nombrar": "T4",
+          "rotular": "4"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "Taux",
+          "distancia": {
+            "de": "A",
+            "mm": 75
+          },
+          "nombrar": "T5",
+          "rotular": "5"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "Taux",
+          "distancia": {
+            "de": "A",
+            "mm": 90
+          },
+          "nombrar": "T6",
+          "rotular": "6"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "Taux",
+          "distancia": {
+            "de": "A",
+            "mm": 105
+          },
+          "nombrar": "T7",
+          "rotular": "7"
+        }
+      ]
+    },
+    {
+      "texto": "Une con la regla el último punto (7) con el extremo B.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "T7",
+          "B"
+        ],
+        "nombrar": "Tu"
+      }
+    },
+    {
+      "texto": "Con la escuadra y el cartabón, traza por cada uno de los otros puntos una paralela a esa recta, hasta que corte a AB.",
+      "pista": "Apoya un canto de la escuadra en la recta que acabas de trazar, fija el cartabón contra ella y desliza la escuadra hasta cada punto.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T1"
+          ],
+          "paralelaA": "Tu",
+          "nombrar": "T1p"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T2"
+          ],
+          "paralelaA": "Tu",
+          "nombrar": "T2p"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T3"
+          ],
+          "paralelaA": "Tu",
+          "nombrar": "T3p"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T4"
+          ],
+          "paralelaA": "Tu",
+          "nombrar": "T4p"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T5"
+          ],
+          "paralelaA": "Tu",
+          "nombrar": "T5p"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T6"
+          ],
+          "paralelaA": "Tu",
+          "nombrar": "T6p"
+        }
+      ]
+    },
+    {
+      "texto": "Marca los puntos donde las paralelas cortan a AB.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "T1p",
+            "AB"
+          ],
+          "nombrar": "T1c"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "T2p",
+            "AB"
+          ],
+          "nombrar": "T2c"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "T3p",
+            "AB"
+          ],
+          "nombrar": "T3c"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "T4p",
+            "AB"
+          ],
+          "nombrar": "T4c"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "T5p",
+            "AB"
+          ],
+          "nombrar": "T5c"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "T6p",
+            "AB"
+          ],
+          "nombrar": "T6c"
+        }
+      ]
+    }
+  ],
+  "final": "¡Muy bien! AB ha quedado dividido en 7 partes iguales de unos 1,6 cm (11,3 : 7). Las paralelas reparten AB igual que el compás repartió la recta auxiliar."
+}

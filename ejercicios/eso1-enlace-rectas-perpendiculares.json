@@ -1,0 +1,146 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-enlace-rectas-perpendiculares",
+  "titulo": "Enlace de dos rectas perpendiculares",
+  "nivel": "1.º ESO · 4.3, ej. 1",
+  "descripcion": "Enlaza dos rectas perpendiculares con un arco de 3 cm de radio, hallando con exactitud su centro y los puntos de tangencia T1 y T2.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "V",
+        "x": 75.0,
+        "y": 170.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "r",
+        "desde": "V",
+        "x2": 265.0,
+        "y2": 170.0
+      },
+      {
+        "nombre": "s",
+        "desde": "V",
+        "x2": 75.0,
+        "y2": 30.0
+      }
+    ]
+  },
+  "textos": {
+    "r": "la recta horizontal",
+    "s": "la recta vertical",
+    "aV": "el arco con centro en V"
+  },
+  "pasos": [
+    {
+      "texto": "Pincha el compás en V, ábrelo 3 cm y traza un arco que corte a las dos rectas.",
+      "herramientas": [
+        "compas",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "V",
+        "radio": 30,
+        "cortaA": [
+          "r",
+          "s"
+        ],
+        "nombrar": "aV"
+      }
+    },
+    {
+      "texto": "Marca los dos cortes: son los puntos de tangencia T1 (en la recta horizontal) y T2 (en la vertical).",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "aV",
+            "r"
+          ],
+          "nombrar": "T1",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "aV",
+            "s"
+          ],
+          "nombrar": "T2",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Traza con la escuadra la perpendicular a la recta horizontal por T1 y la perpendicular a la vertical por T2. Hazlas largas, que se corten.",
+      "pista": "El centro del arco tiene que estar en la perpendicular a cada recta por su punto de tangencia.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T1"
+          ],
+          "perpendicularA": "r",
+          "longitudMin": 40,
+          "nombrar": "p1"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T2"
+          ],
+          "perpendicularA": "s",
+          "longitudMin": 40,
+          "nombrar": "p2"
+        }
+      ]
+    },
+    {
+      "texto": "Marca el punto O donde se cortan las dos perpendiculares: es el centro del enlace.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "p1",
+          "p2"
+        ],
+        "nombrar": "O",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Pincha el compás en O y traza el arco de radio 3 cm que va de T1 a T2.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "radio": 30,
+        "pasaPor": [
+          "T1",
+          "T2"
+        ],
+        "barridoMin": 80
+      }
+    }
+  ],
+  "final": "¡Muy bien! El arco toca a cada recta en un solo punto (T1 y T2) y pasa de la una a la otra sin esquinas: es un enlace tangente."
+}

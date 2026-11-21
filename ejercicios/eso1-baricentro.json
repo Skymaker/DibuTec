@@ -1,0 +1,267 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-baricentro",
+  "titulo": "Baricentro de un triángulo",
+  "nivel": "1.º ESO · 5.1, ej. 2 (1)",
+  "descripcion": "Halla el baricentro de un triángulo acutángulo escaleno: el punto donde se cortan sus medianas.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 90.0,
+        "y": 172.0
+      },
+      {
+        "nombre": "B",
+        "x": 215.0,
+        "y": 172.0
+      },
+      {
+        "nombre": "C",
+        "x": 135.0,
+        "y": 60.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "AB",
+        "desde": "A",
+        "hasta": "B"
+      },
+      {
+        "nombre": "BC",
+        "desde": "B",
+        "hasta": "C"
+      },
+      {
+        "nombre": "AC",
+        "desde": "A",
+        "hasta": "C"
+      }
+    ]
+  },
+  "textos": {
+    "AB": "el lado AB",
+    "BC": "el lado BC",
+    "AC": "el lado AC",
+    "bcm": "la mediatriz de BC",
+    "acm": "la mediatriz de AC"
+  },
+  "pasos": [
+    {
+      "texto": "Mediatriz de BC. Pincha el compás en B, ábrelo algo más de la mitad de BC y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "B",
+        "radio": {
+          "min": 70.8
+        },
+        "nombrar": "bck1"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en C y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "C",
+        "radioComo": "bck1",
+        "cortaA": [
+          {
+            "elemento": "bck1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "bck2",
+        "posteriorA": "bck1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "bck1",
+          "bck2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "bcD1",
+          "bcD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de BC: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "bcD1",
+          "bcD2"
+        ],
+        "nombrar": "bcm"
+      }
+    },
+    {
+      "texto": "Marca el punto medio de BC, donde la mediatriz corta al lado.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "bcm",
+          "BC"
+        ],
+        "nombrar": "Ma",
+        "rotular": "M"
+      }
+    },
+    {
+      "texto": "Mediatriz de AC. Pincha el compás en A, ábrelo algo más de la mitad de AC y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "A",
+        "radio": {
+          "min": 62.4
+        },
+        "nombrar": "ack1",
+        "posteriorA": "Ma"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en C y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "C",
+        "radioComo": "ack1",
+        "cortaA": [
+          {
+            "elemento": "ack1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "ack2",
+        "posteriorA": "ack1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "ack1",
+          "ack2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "acD1",
+          "acD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de AC: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "acD1",
+          "acD2"
+        ],
+        "nombrar": "acm"
+      }
+    },
+    {
+      "texto": "Marca el punto medio de AC.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "acm",
+          "AC"
+        ],
+        "nombrar": "Mb",
+        "rotular": "N"
+      }
+    },
+    {
+      "texto": "Traza las medianas: une A con M (punto medio del lado de enfrente) y B con N.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "A",
+            "Ma"
+          ],
+          "nombrar": "md1"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "B",
+            "Mb"
+          ],
+          "nombrar": "md2"
+        }
+      ]
+    },
+    {
+      "texto": "Marca el baricentro G, donde se cortan las dos medianas.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "md1",
+          "md2"
+        ],
+        "nombrar": "G",
+        "rotular": true
+      }
+    }
+  ],
+  "final": "¡Muy bien! El baricentro está a 2/3 de cada mediana desde su vértice. La tercera mediana, la de C, también pasaría por G."
+}

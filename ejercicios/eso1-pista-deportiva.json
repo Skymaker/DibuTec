@@ -1,0 +1,187 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-pista-deportiva",
+  "titulo": "Trazado de una pista o circuito",
+  "nivel": "1.º ESO · 4.3, ej. 2",
+  "descripcion": "Diseña una pista con dos rectas paralelas de 8 cm separadas 5 cm y enlazadas por dos semicircunferencias tangentes.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 108.5,
+        "y": 150.0
+      }
+    ]
+  },
+  "textos": {
+    "ab": "la recta AB"
+  },
+  "pasos": [
+    {
+      "texto": "Traza desde A una recta horizontal de 8 cm. Su otro extremo es B.",
+      "pista": "Coloca la regla horizontal con el 0 en A y suelta el portaminas en el 8.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "A",
+        "hasta": {
+          "x": 188.5,
+          "y": 150.0
+        },
+        "nombrar": "ab"
+      }
+    },
+    {
+      "texto": "Traza con la escuadra las perpendiculares a AB por A y por B, hacia arriba (de al menos 5,5 cm).",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "A"
+          ],
+          "perpendicularA": "ab",
+          "longitudMin": 55,
+          "nombrar": "pa"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 188.5,
+              "y": 150.0
+            }
+          ],
+          "perpendicularA": "ab",
+          "longitudMin": 55,
+          "nombrar": "pb"
+        }
+      ]
+    },
+    {
+      "texto": "Marca sobre las perpendiculares los puntos C y D, a 5 cm por encima de A y de B.",
+      "pista": "Con el compás abierto 5 cm y pinchado en A (y luego en B), corta la perpendicular.",
+      "herramientas": [
+        "regla",
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "sobre": "pa",
+          "cerca": {
+            "x": 108.5,
+            "y": 100.0
+          },
+          "nombrar": "C",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "sobre": "pb",
+          "cerca": {
+            "x": 188.5,
+            "y": 100.0
+          },
+          "nombrar": "D",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Une C con D: es la otra recta de la pista, paralela a AB.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "desde": "C",
+        "hasta": "D"
+      }
+    },
+    {
+      "texto": "Marca los centros de las curvas: el punto medio de AC (O1) y el punto medio de BD (O2), a 2,5 cm.",
+      "pista": "Puedes hallarlos con la mediatriz de AC y de BD, o midiendo 2,5 cm con la regla.",
+      "herramientas": [
+        "regla",
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "sobre": "pa",
+          "cerca": {
+            "x": 108.5,
+            "y": 125.0
+          },
+          "nombrar": "O1",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "sobre": "pb",
+          "cerca": {
+            "x": 188.5,
+            "y": 125.0
+          },
+          "nombrar": "O2",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Traza con centro en O1 la semicircunferencia que une A con C por la izquierda, y con centro en O2 la que une B con D por la derecha.",
+      "pista": "Pincha en el centro, abre hasta A (o B) y gira media vuelta.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "O1",
+          "radio": 25,
+          "pasaPor": [
+            "A",
+            "C",
+            {
+              "x": 83.5,
+              "y": 125.0
+            }
+          ]
+        },
+        {
+          "tipo": "arco",
+          "centro": "O2",
+          "radio": 25,
+          "pasaPor": [
+            {
+              "x": 188.5,
+              "y": 150.0
+            },
+            "D",
+            {
+              "x": 213.5,
+              "y": 125.0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "final": "¡Muy bien! A, B, C y D son los puntos de tangencia: en ellos la recta pasa a curva sin esquinas, porque el radio es perpendicular a la recta."
+}

@@ -1,0 +1,305 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-paralelas-escuadra-cartabon",
+  "titulo": "Paralelas con escuadra y cartabón",
+  "nivel": "1.º ESO · 1.1, ej. 1",
+  "descripcion": "Hoja dividida en cuatro cuadrantes: en cada uno, traza paralelas separadas 1 cm (horizontales, verticales, a 45° y a 60°) deslizando la escuadra sobre el cartabón.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "q1m1",
+        "x": 79.25,
+        "y": 75.0,
+        "etiqueta": "1"
+      },
+      {
+        "nombre": "q1m2",
+        "x": 79.25,
+        "y": 65.0,
+        "etiqueta": "2"
+      },
+      {
+        "nombre": "q1m3",
+        "x": 79.25,
+        "y": 55.0,
+        "etiqueta": "3"
+      },
+      {
+        "nombre": "q2m1",
+        "x": 222.75,
+        "y": 64.0,
+        "etiqueta": "1"
+      },
+      {
+        "nombre": "q2m2",
+        "x": 212.75,
+        "y": 64.0,
+        "etiqueta": "2"
+      },
+      {
+        "nombre": "q2m3",
+        "x": 202.75,
+        "y": 64.0,
+        "etiqueta": "3"
+      },
+      {
+        "nombre": "q3m1",
+        "x": 82.786,
+        "y": 156.036,
+        "etiqueta": "1"
+      },
+      {
+        "nombre": "q3m2",
+        "x": 75.714,
+        "y": 148.964,
+        "etiqueta": "2"
+      },
+      {
+        "nombre": "q3m3",
+        "x": 68.643,
+        "y": 141.893,
+        "etiqueta": "3"
+      },
+      {
+        "nombre": "q4m1",
+        "x": 222.08,
+        "y": 155.0,
+        "etiqueta": "1"
+      },
+      {
+        "nombre": "q4m2",
+        "x": 213.42,
+        "y": 150.0,
+        "etiqueta": "2"
+      },
+      {
+        "nombre": "q4m3",
+        "x": 204.76,
+        "y": 145.0,
+        "etiqueta": "3"
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "ejeV",
+        "x1": 148.5,
+        "y1": 10.0,
+        "x2": 148.5,
+        "y2": 200.0
+      },
+      {
+        "nombre": "ejeH",
+        "x1": 10.0,
+        "y1": 105.0,
+        "x2": 287.0,
+        "y2": 105.0
+      },
+      {
+        "nombre": "b1",
+        "x1": 44.25,
+        "y1": 85.0,
+        "x2": 114.25,
+        "y2": 85.0
+      },
+      {
+        "nombre": "b2",
+        "x1": 232.75,
+        "y1": 99.0,
+        "x2": 232.75,
+        "y2": 29.0
+      },
+      {
+        "nombre": "b3",
+        "x1": 65.108,
+        "y1": 187.855,
+        "x2": 114.605,
+        "y2": 138.358
+      },
+      {
+        "nombre": "b4",
+        "x1": 213.24,
+        "y1": 190.311,
+        "x2": 248.24,
+        "y2": 129.689
+      }
+    ]
+  },
+  "textos": {
+    "b1": "la recta horizontal",
+    "b2": "la recta vertical",
+    "b3": "la recta de 45°",
+    "b4": "la recta de 60°"
+  },
+  "pasos": [
+    {
+      "texto": "Cuadrante de arriba a la izquierda. Saca la escuadra y apoya uno de sus cantos justo encima de la recta horizontal.",
+      "pista": "Gírala con un asa: el canto se pega a los extremos de la recta.",
+      "herramientas": [
+        "escuadra"
+      ],
+      "objetivo": {
+        "tipo": "instrumento",
+        "instrumento": "escuadra",
+        "cantoSobre": "b1",
+        "tolerancia": 1.5
+      }
+    },
+    {
+      "texto": "Saca el cartabón, apóyalo contra otro canto de la escuadra y fíjalo con su candado. A partir de ahora, el cartabón no se mueve.",
+      "herramientas": [
+        "cartabon"
+      ],
+      "objetivo": {
+        "tipo": "instrumento",
+        "instrumento": "cartabon",
+        "apoyadoEn": "escuadra",
+        "bloqueado": true
+      }
+    },
+    {
+      "texto": "Desliza la escuadra a lo largo del cartabón hasta cada una de las marcas 1, 2 y 3, y traza por cada una la paralela a la recta horizontal. Quedan separadas exactamente 1 cm.",
+      "pista": "Arrastra la escuadra por el cuerpo: mientras toca el cartabón, solo se desliza a lo largo de él.",
+      "herramientas": [
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q1m1"
+          ],
+          "paralelaA": "b1",
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q1m2"
+          ],
+          "paralelaA": "b1",
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q1m3"
+          ],
+          "paralelaA": "b1",
+          "longitudMin": 40
+        }
+      ]
+    },
+    {
+      "texto": "Cuadrante de arriba a la derecha. Quita el candado del cartabón y repite con la recta vertical: escuadra sobre la recta, cartabón apoyado y fijo, y una paralela por cada marca.",
+      "pista": "Si la escuadra no llega a la marca, mueve primero el cartabón (sin candado) y vuelve a fijarlo.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q2m1"
+          ],
+          "paralelaA": "b2",
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q2m2"
+          ],
+          "paralelaA": "b2",
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q2m3"
+          ],
+          "paralelaA": "b2",
+          "longitudMin": 40
+        }
+      ]
+    },
+    {
+      "texto": "Cuadrante de abajo a la izquierda. Haz lo mismo con la recta de 45°: apoya un canto de la escuadra sobre ella, fija el cartabón y desliza.",
+      "pista": "Si la escuadra no llega a la marca, mueve primero el cartabón (sin candado) y vuelve a fijarlo.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q3m1"
+          ],
+          "paralelaA": "b3",
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q3m2"
+          ],
+          "paralelaA": "b3",
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q3m3"
+          ],
+          "paralelaA": "b3",
+          "longitudMin": 40
+        }
+      ]
+    },
+    {
+      "texto": "Cuadrante de abajo a la derecha. Termina con la recta de 60°: tres paralelas, una por cada marca.",
+      "pista": "Si la escuadra no llega a la marca, mueve primero el cartabón (sin candado) y vuelve a fijarlo.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q4m1"
+          ],
+          "paralelaA": "b4",
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q4m2"
+          ],
+          "paralelaA": "b4",
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "q4m3"
+          ],
+          "paralelaA": "b4",
+          "longitudMin": 40
+        }
+      ]
+    }
+  ],
+  "final": "¡Muy bien! Has trazado cuatro series de paralelas a 1 cm sin mover el cartabón. Fíjate: en cada serie, las marcas están en una perpendicular a las rectas."
+}

@@ -1,0 +1,139 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-perpendicular-compas-1",
+  "titulo": "Perpendicular por un punto de la recta",
+  "nivel": "1.º ESO · 2.2, ej. 1 (1)",
+  "descripcion": "Con regla y compás, traza la perpendicular a una recta r por un punto P que está sobre ella.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "P",
+        "x": 148.5,
+        "y": 140.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "r",
+        "x1": 30.0,
+        "y1": 140.0,
+        "x2": 267.0,
+        "y2": 140.0
+      }
+    ]
+  },
+  "textos": {
+    "r": "la recta r",
+    "aP": "el arco con centro en P",
+    "a1": "el arco con centro en C1"
+  },
+  "pasos": [
+    {
+      "texto": "Pincha el compás en P y traza un arco (media circunferencia) que corte a r a los dos lados de P.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P",
+        "radio": {
+          "min": 15,
+          "max": 60
+        },
+        "cortaA": [
+          {
+            "elemento": "r",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "aP"
+      }
+    },
+    {
+      "texto": "Marca los dos puntos donde el arco corta a r.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "aP",
+          "r"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "C1",
+          "C2"
+        ],
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Abre el compás más que antes, pincha en C1 y traza un arco por encima de P.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "C1",
+        "radio": {
+          "min": 20
+        },
+        "nombrar": "a1"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en C2 y traza otro arco que corte al anterior.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "C2",
+        "radioComo": "a1",
+        "cortaA": [
+          "a1"
+        ],
+        "nombrar": "a2"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "a1",
+          "a2"
+        ],
+        "nombrar": "D",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Une P con D usando la regla: es la perpendicular a r por P.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "P",
+          "D"
+        ],
+        "perpendicularA": "r",
+        "longitudMin": 40
+      }
+    }
+  ],
+  "final": "¡Muy bien! La perpendicular por P es la mediatriz del segmento C1C2."
+}

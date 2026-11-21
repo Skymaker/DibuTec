@@ -1,0 +1,231 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-estrella-angular",
+  "titulo": "Estrella angular de 12 puntas",
+  "nivel": "1.º ESO · 1.2, ej. 2",
+  "descripcion": "Divide una circunferencia de 7 cm de radio en 12 sectores de 30° con la escuadra y el cartabón y une los puntos para formar una estrella.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "O",
+        "x": 148.5,
+        "y": 112.0
+      }
+    ]
+  },
+  "textos": {
+    "c": "la circunferencia"
+  },
+  "pasos": [
+    {
+      "texto": "Con el compás, traza una circunferencia de centro O y radio 7 cm.",
+      "pista": "Mide la abertura en la regla: la punta seca en el 0 y la mina en el 7.",
+      "herramientas": [
+        "compas",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "radio": 70,
+        "completo": true,
+        "nombrar": "c"
+      }
+    },
+    {
+      "texto": "Traza por O el diámetro horizontal y el vertical (con la escuadra apoyada en la regla).",
+      "pista": "Apoya la regla horizontal pasando por O y fíjala; el diámetro vertical sale con el cateto de la escuadra.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 218.5,
+              "y": 112.0
+            },
+            {
+              "x": 78.5,
+              "y": 112.0
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 148.5,
+              "y": 42.0
+            },
+            {
+              "x": 148.5,
+              "y": 182.0
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Con el cartabón apoyado en la regla, traza por O los diámetros de 30° y de 150°.",
+      "pista": "El ángulo de 30° del cartabón da las dos inclinaciones: dale la vuelta al cartabón para la otra.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 209.122,
+              "y": 77.0
+            },
+            {
+              "x": 87.878,
+              "y": 147.0
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 87.878,
+              "y": 77.0
+            },
+            {
+              "x": 209.122,
+              "y": 147.0
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Ahora, también con el cartabón, traza por O los diámetros de 60° y de 120°.",
+      "pista": "Usa el ángulo de 60° del cartabón.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 183.5,
+              "y": 51.378
+            },
+            {
+              "x": 113.5,
+              "y": 172.622
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 113.5,
+              "y": 51.378
+            },
+            {
+              "x": 183.5,
+              "y": 172.622
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Marca los 12 puntos donde los diámetros cortan a la circunferencia. Son los vértices de 12 sectores iguales de 30°.",
+      "pista": "Acerca la punta a cada cruce: se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "vertices",
+        "circunferencia": "c",
+        "desde": {
+          "x": 218.5,
+          "y": 112.0
+        },
+        "lados": 12,
+        "nombrar": [
+          "V1",
+          "V2",
+          "V3",
+          "V4",
+          "V5",
+          "V6",
+          "V7",
+          "V8",
+          "V9",
+          "V10",
+          "V11",
+          "V12"
+        ],
+        "rotular": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12"
+        ]
+      }
+    },
+    {
+      "texto": "Une los puntos saltando de cinco en cinco: 1 con 6, 6 con 11, 11 con 4… hasta volver al 1 (1-6-11-4-9-2-7-12-5-10-3-8-1).",
+      "pista": "Apoya la regla en los dos puntos: el canto se pega a ellos.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "V1",
+          "V6",
+          "V11",
+          "V4",
+          "V9",
+          "V2",
+          "V7",
+          "V12",
+          "V5",
+          "V10",
+          "V3",
+          "V8"
+        ]
+      }
+    }
+  ],
+  "final": "¡Precioso! Has dividido la circunferencia en 12 partes iguales solo con la escuadra y el cartabón y has construido una estrella de 12 puntas."
+}

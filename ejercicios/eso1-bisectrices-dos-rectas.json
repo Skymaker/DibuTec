@@ -1,0 +1,324 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-bisectrices-dos-rectas",
+  "titulo": "Bisectrices de dos rectas que se cortan",
+  "nivel": "1.º ESO · 4.1, ej. 2",
+  "descripcion": "Traza las bisectrices de los cuatro ángulos que forman dos rectas que se cortan, comprueba que son perpendiculares y traza los puntos que distan 1,5 cm de una de ellas.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "V",
+        "x": 148.5,
+        "y": 110.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "r1",
+        "x1": 45.134,
+        "y1": 147.622,
+        "x2": 251.866,
+        "y2": 72.378
+      },
+      {
+        "nombre": "r2",
+        "x1": 197.254,
+        "y1": 179.628,
+        "x2": 99.746,
+        "y2": 40.372
+      }
+    ]
+  },
+  "textos": {
+    "r1": "la recta r1",
+    "r2": "la recta r2",
+    "c": "la circunferencia",
+    "x1a": "el arco con centro en 1",
+    "b1": "la primera bisectriz",
+    "x2a": "el arco con centro en 2",
+    "px": "la perpendicular por X",
+    "aX": "el arco con centro en X"
+  },
+  "pasos": [
+    {
+      "texto": "Traza una circunferencia con centro en V que corte a las dos rectas.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "V",
+        "radio": {
+          "min": 25,
+          "max": 70
+        },
+        "completo": true,
+        "nombrar": "c"
+      }
+    },
+    {
+      "texto": "Marca los cuatro puntos donde la circunferencia corta a las rectas.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "c",
+            "r1"
+          ],
+          "cantidad": 2,
+          "nombrar": [
+            "P1",
+            "P3"
+          ],
+          "rotular": [
+            "1",
+            "3"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "c",
+            "r2"
+          ],
+          "cantidad": 2,
+          "nombrar": [
+            "P2",
+            "P4"
+          ],
+          "rotular": [
+            "2",
+            "4"
+          ]
+        }
+      ]
+    },
+    {
+      "texto": "Pincha el compás en 1 y traza un arco hacia dentro del ángulo.",
+      "pista": "Ábrelo más de la mitad de la distancia entre los dos puntos.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P1",
+        "radio": {
+          "min": 15
+        },
+        "nombrar": "x1a",
+        "posteriorA": "P4"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en 2 y traza otro arco que corte al anterior.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P2",
+        "radioComo": "x1a",
+        "cortaA": [
+          "x1a"
+        ],
+        "nombrar": "x1b",
+        "posteriorA": "x1a"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "x1a",
+          "x1b"
+        ],
+        "nombrar": "x1R"
+      }
+    },
+    {
+      "texto": "Une V con ese punto y prolonga la recta al otro lado de V: es la bisectriz de ese ángulo y también la de su opuesto por el vértice.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "V",
+          "x1R"
+        ],
+        "longitudMin": 120,
+        "nombrar": "b1"
+      }
+    },
+    {
+      "texto": "Pincha el compás en 2 y traza un arco hacia dentro del ángulo.",
+      "pista": "Ábrelo más de la mitad de la distancia entre los dos puntos.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P2",
+        "radio": {
+          "min": 15
+        },
+        "nombrar": "x2a",
+        "posteriorA": "b1"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en 3 y traza otro arco que corte al anterior.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "P3",
+        "radioComo": "x2a",
+        "cortaA": [
+          "x2a"
+        ],
+        "nombrar": "x2b",
+        "posteriorA": "x2a"
+      }
+    },
+    {
+      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "x2a",
+          "x2b"
+        ],
+        "nombrar": "x2R"
+      }
+    },
+    {
+      "texto": "Une V con este punto y prolóngala también: es la otra bisectriz. Comprueba que es perpendicular a la primera.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "V",
+          "x2R"
+        ],
+        "perpendicularA": "b1",
+        "longitudMin": 120,
+        "nombrar": "b2"
+      }
+    },
+    {
+      "texto": "Ahora, los puntos a 1,5 cm de r1. Marca un punto X sobre r1, lejos de V.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "sobre": "r1",
+        "posteriorA": "b2",
+        "nombrar": "X",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Traza por X la perpendicular a r1 con la escuadra.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "X"
+        ],
+        "perpendicularA": "r1",
+        "longitudMin": 40,
+        "nombrar": "px"
+      }
+    },
+    {
+      "texto": "Pincha el compás en X, ábrelo 1,5 cm y traza una circunferencia que corte a la perpendicular por los dos lados.",
+      "herramientas": [
+        "compas",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "X",
+        "radio": 15,
+        "cortaA": [
+          {
+            "elemento": "px",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "aX"
+      }
+    },
+    {
+      "texto": "Marca los dos cortes.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "aX",
+          "px"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "T1",
+          "T2"
+        ]
+      }
+    },
+    {
+      "texto": "Traza por cada corte la paralela a r1. Son los puntos del plano que distan 1,5 cm de r1.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T1"
+          ],
+          "paralelaA": "r1",
+          "longitudMin": 100
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "T2"
+          ],
+          "paralelaA": "r1",
+          "longitudMin": 100
+        }
+      ]
+    }
+  ],
+  "final": "¡Muy bien! Las dos bisectrices son perpendiculares, y el lugar geométrico de los puntos a 1,5 cm de una recta son dos paralelas a ella."
+}

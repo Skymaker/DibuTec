@@ -1,0 +1,260 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-logotipo-modular",
+  "titulo": "Diseño de un logotipo modular",
+  "nivel": "1.º ESO · 6.1, ej. 2",
+  "descripcion": "Construye una estructura oculta de diagonales y circunferencias tangentes dentro de un cuadrado y úsala para diseñar el isotipo de un evento del centro.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 108.5,
+        "y": 65.0
+      },
+      {
+        "nombre": "B",
+        "x": 188.5,
+        "y": 65.0
+      },
+      {
+        "nombre": "C",
+        "x": 188.5,
+        "y": 145.0
+      },
+      {
+        "nombre": "D",
+        "x": 108.5,
+        "y": 145.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "lAB",
+        "desde": "A",
+        "hasta": "B"
+      },
+      {
+        "nombre": "lBC",
+        "desde": "B",
+        "hasta": "C"
+      },
+      {
+        "nombre": "lCD",
+        "desde": "C",
+        "hasta": "D"
+      },
+      {
+        "nombre": "lDA",
+        "desde": "D",
+        "hasta": "A"
+      }
+    ]
+  },
+  "pasos": [
+    {
+      "texto": "Traza las dos diagonales del cuadrado, AC y BD.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "A",
+            "C"
+          ],
+          "nombrar": "d1"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "B",
+            "D"
+          ],
+          "nombrar": "d2"
+        }
+      ]
+    },
+    {
+      "texto": "Marca el centro O, donde se cortan las diagonales.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "d1",
+          "d2"
+        ],
+        "nombrar": "O",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Traza por O las dos medianas del cuadrado: la vertical y la horizontal, que van de un punto medio de un lado al de enfrente.",
+      "pista": "Son perpendiculares a los lados y pasan por O.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 148.5,
+              "y": 65.0
+            },
+            {
+              "x": 148.5,
+              "y": 145.0
+            }
+          ]
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 188.5,
+              "y": 105.0
+            },
+            {
+              "x": 108.5,
+              "y": 105.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "texto": "Une los puntos medios de los lados, uno con el siguiente: sale un cuadrado girado (un rombo) dentro del primero.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          {
+            "x": 148.5,
+            "y": 65.0
+          },
+          {
+            "x": 188.5,
+            "y": 105.0
+          },
+          {
+            "x": 148.5,
+            "y": 145.0
+          },
+          {
+            "x": 108.5,
+            "y": 105.0
+          }
+        ]
+      }
+    },
+    {
+      "texto": "Marca los cuatro puntos donde el cuadrado girado corta a las diagonales: son los centros de los cuatro cuadrados pequeños.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cerca": {
+            "x": 128.5,
+            "y": 85.0
+          },
+          "nombrar": "K1",
+          "rotular": "1"
+        },
+        {
+          "tipo": "punto",
+          "cerca": {
+            "x": 168.5,
+            "y": 85.0
+          },
+          "nombrar": "K2",
+          "rotular": "2"
+        },
+        {
+          "tipo": "punto",
+          "cerca": {
+            "x": 168.5,
+            "y": 125.0
+          },
+          "nombrar": "K3",
+          "rotular": "3"
+        },
+        {
+          "tipo": "punto",
+          "cerca": {
+            "x": 128.5,
+            "y": 125.0
+          },
+          "nombrar": "K4",
+          "rotular": "4"
+        }
+      ]
+    },
+    {
+      "texto": "Traza cuatro circunferencias de radio 2 cm con centro en esos puntos: cada una toca a sus vecinas y a dos lados del cuadrado.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "K1",
+          "radio": 20,
+          "completo": true
+        },
+        {
+          "tipo": "arco",
+          "centro": "K2",
+          "radio": 20,
+          "completo": true
+        },
+        {
+          "tipo": "arco",
+          "centro": "K3",
+          "radio": 20,
+          "completo": true
+        },
+        {
+          "tipo": "arco",
+          "centro": "K4",
+          "radio": 20,
+          "completo": true
+        }
+      ]
+    },
+    {
+      "texto": "Traza con centro en O la circunferencia pequeña que toca a las cuatro: ábrela hasta donde una circunferencia corta a la diagonal, cerca de O.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "radio": 8.284,
+        "completo": true
+      }
+    },
+    {
+      "texto": "Diseña ahora tu isotipo sobre esta estructura oculta: elige unos pocos arcos y rectas y repásalos con un color y un grosor mayor (la goma recorta los arcos por donde pasa). Busca una forma simple y proporcionada, y exporta la imagen al terminar.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! Las mejores marcas esconden una estructura geométrica sencilla: proporción y simplicidad."
+}

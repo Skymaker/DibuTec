@@ -1,0 +1,325 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-pentagono-hexagono",
+  "titulo": "Pentágono y hexágono inscritos",
+  "nivel": "1.º ESO · 5.3, ej. 1",
+  "descripcion": "Inscribe un pentágono regular y un hexágono regular en dos circunferencias de 4,5 cm de radio, dejando visibles las líneas auxiliares.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "O1",
+        "x": 80.0,
+        "y": 112.0,
+        "etiqueta": "O"
+      },
+      {
+        "nombre": "O2",
+        "x": 215.0,
+        "y": 112.0,
+        "etiqueta": "O'"
+      }
+    ]
+  },
+  "textos": {
+    "O1": "el centro O",
+    "O2": "el centro O'",
+    "c1": "la primera circunferencia",
+    "c2": "la segunda circunferencia",
+    "dh": "el diámetro horizontal",
+    "kA": "el arco con centro en A",
+    "kM": "el arco con centro en M"
+  },
+  "pasos": [
+    {
+      "texto": "Pentágono. Traza una circunferencia de centro O y radio 4,5 cm.",
+      "herramientas": [
+        "compas",
+        "regla"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O1",
+        "radio": 45,
+        "completo": true,
+        "nombrar": "c1"
+      }
+    },
+    {
+      "texto": "Traza por O el diámetro horizontal y el vertical.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 35.0,
+              "y": 112.0
+            },
+            {
+              "x": 125.0,
+              "y": 112.0
+            }
+          ],
+          "tolerancia": 1.5,
+          "nombrar": "dh"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            {
+              "x": 80.0,
+              "y": 67.0
+            },
+            {
+              "x": 80.0,
+              "y": 157.0
+            }
+          ],
+          "tolerancia": 1.5,
+          "nombrar": "dv"
+        }
+      ]
+    },
+    {
+      "texto": "Marca N, el extremo de arriba del diámetro vertical, y A, el extremo de la derecha del horizontal.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cerca": {
+            "x": 80.0,
+            "y": 67.0
+          },
+          "nombrar": "N",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "cerca": {
+            "x": 125.0,
+            "y": 112.0
+          },
+          "nombrar": "A",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Mediatriz del radio OA: con la misma abertura (4,5 cm), pincha en A y traza un arco que corte a la circunferencia por arriba y por abajo.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "A",
+        "radio": 45,
+        "cortaA": [
+          {
+            "elemento": "c1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "kA"
+      }
+    },
+    {
+      "texto": "Marca los dos cortes.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "kA",
+          "c1"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "K1",
+          "K2"
+        ]
+      }
+    },
+    {
+      "texto": "Únelos con la regla: esa recta es la mediatriz de OA.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "K1",
+          "K2"
+        ],
+        "nombrar": "mz"
+      }
+    },
+    {
+      "texto": "Marca M, el punto medio de OA, donde la mediatriz corta al diámetro.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "mz",
+          "dh"
+        ],
+        "nombrar": "M",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Pincha el compás en M, ábrelo hasta N y traza un arco que corte al diámetro horizontal a la izquierda de O.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "M",
+        "radioComo": [
+          "M",
+          "N"
+        ],
+        "cortaA": [
+          "dh"
+        ],
+        "nombrar": "kM"
+      }
+    },
+    {
+      "texto": "Marca P, ese corte. La distancia de N a P es el lado del pentágono.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "kM",
+          "dh"
+        ],
+        "cerca": {
+          "x": 52.188,
+          "y": 112.0
+        },
+        "nombrar": "P",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Abre el compás de N a P y, empezando en N, llévalo sobre la circunferencia para marcar los cinco vértices.",
+      "pista": "Pincha en N, corta la circunferencia, marca el punto y pincha en él para el siguiente.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "vertices",
+        "circunferencia": "c1",
+        "desde": "N",
+        "lados": 5,
+        "nombrar": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5"
+        ]
+      }
+    },
+    {
+      "texto": "Une los cinco vértices con la regla.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5"
+        ]
+      }
+    },
+    {
+      "texto": "Hexágono. Traza una circunferencia de centro O' y radio 4,5 cm.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O2",
+        "radio": 45,
+        "completo": true,
+        "nombrar": "c2"
+      }
+    },
+    {
+      "texto": "Marca un punto cualquiera sobre la circunferencia (por ejemplo, arriba).",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "sobre": "c2",
+        "nombrar": "H1"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura (el radio), pincha en ese punto, corta la circunferencia y sigue saltando desde cada punto nuevo hasta tener los seis vértices.",
+      "pista": "El lado del hexágono regular mide lo mismo que el radio.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "vertices",
+        "circunferencia": "c2",
+        "desde": "H1",
+        "lados": 6,
+        "nombrar": [
+          "W1",
+          "W2",
+          "W3",
+          "W4",
+          "W5",
+          "W6"
+        ]
+      }
+    },
+    {
+      "texto": "Une los seis vértices con la regla.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "W1",
+          "W2",
+          "W3",
+          "W4",
+          "W5",
+          "W6"
+        ]
+      }
+    }
+  ],
+  "final": "¡Muy bien! El lado del pentágono mide unos 5,3 cm (NP) y el del hexágono, 4,5 cm (el radio)."
+}

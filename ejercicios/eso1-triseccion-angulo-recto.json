@@ -1,0 +1,185 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-triseccion-angulo-recto",
+  "titulo": "Trisección del ángulo recto",
+  "nivel": "1.º ESO · 3.1, ej. 2 (2)",
+  "descripcion": "Divide un ángulo recto en tres ángulos de 30° usando solo el compás (y la regla para unir).",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "V",
+        "x": 110.0,
+        "y": 180.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "h",
+        "desde": "V",
+        "x2": 230.0,
+        "y2": 180.0
+      },
+      {
+        "nombre": "v",
+        "desde": "V",
+        "x2": 110.0,
+        "y2": 60.0
+      }
+    ]
+  },
+  "textos": {
+    "h": "el lado horizontal",
+    "v": "el lado vertical",
+    "kT": "el arco"
+  },
+  "pasos": [
+    {
+      "texto": "Pincha el compás en V y traza un arco que corte a los dos lados del ángulo recto.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "V",
+        "radio": {
+          "min": 30,
+          "max": 100
+        },
+        "cortaA": [
+          "h",
+          "v"
+        ],
+        "barridoMin": 85,
+        "nombrar": "kT"
+      }
+    },
+    {
+      "texto": "Marca los puntos donde el arco corta a los lados: A en el horizontal y B en el vertical.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "cruce": [
+            "kT",
+            "h"
+          ],
+          "nombrar": "TA",
+          "rotular": "A"
+        },
+        {
+          "tipo": "punto",
+          "cruce": [
+            "kT",
+            "v"
+          ],
+          "nombrar": "TB",
+          "rotular": "B"
+        }
+      ]
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en A y corta el arco.",
+      "pista": "El radio llevado sobre el arco avanza siempre 60°.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "TA",
+        "radioComo": "kT",
+        "cortaA": [
+          "kT"
+        ],
+        "nombrar": "g1"
+      }
+    },
+    {
+      "texto": "Marca ese corte: está a 60° del lado horizontal.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "g1",
+          "kT"
+        ],
+        "angulo": {
+          "vertice": "V",
+          "desde": "TA",
+          "grados": 60,
+          "sentido": "antihorario"
+        },
+        "nombrar": "T60"
+      }
+    },
+    {
+      "texto": "Con la misma abertura, pincha ahora en B y corta el arco.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "TB",
+        "radioComo": "kT",
+        "cortaA": [
+          "kT"
+        ],
+        "nombrar": "g2"
+      }
+    },
+    {
+      "texto": "Marca ese corte: está a 30° del lado horizontal.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "g2",
+          "kT"
+        ],
+        "angulo": {
+          "vertice": "V",
+          "desde": "TA",
+          "grados": 30,
+          "sentido": "antihorario"
+        },
+        "nombrar": "T30"
+      }
+    },
+    {
+      "texto": "Une V con los dos puntos marcados usando la regla.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "V",
+            "T30"
+          ],
+          "longitudMin": 40
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "V",
+            "T60"
+          ],
+          "longitudMin": 40
+        }
+      ]
+    }
+  ],
+  "final": "¡Muy bien! El ángulo recto ha quedado dividido en tres ángulos de 30°. Funciona porque el radio, llevado sobre el arco, marca siempre 60°."
+}

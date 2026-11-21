@@ -1,0 +1,223 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-malla-ortogonal",
+  "titulo": "Composición lineal ortogonal",
+  "nivel": "1.º ESO · 1.1, ej. 2",
+  "descripcion": "A partir de una recta inclinada r, traza cinco perpendiculares y cinco paralelas que formen una malla, y dale ritmo con distintos grosores.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "rectas": [
+      {
+        "nombre": "r",
+        "x1": 40.0,
+        "y1": 180.0,
+        "x2": 250.0,
+        "y2": 120.0
+      }
+    ]
+  },
+  "textos": {
+    "r": "la recta r",
+    "p3": "la perpendicular que pasa por P3"
+  },
+  "pasos": [
+    {
+      "texto": "Marca con el portaminas cinco puntos sobre la recta r, repartidos a lo largo de ella (unos 4 cm entre uno y otro).",
+      "pista": "Toca la recta: la punta se pega a ella.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "sobre": "r",
+        "cantidad": 5,
+        "nombrar": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5"
+        ],
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Con la regla y la escuadra (o con la escuadra y el cartabón), traza por cada punto una perpendicular a r. Hazlas de al menos 6 cm hacia arriba.",
+      "pista": "Apoya la regla sobre r y fíjala; desliza la escuadra con un cateto sobre la regla hasta cada punto.",
+      "herramientas": [
+        "regla",
+        "escuadra",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P1"
+          ],
+          "perpendicularA": "r",
+          "longitudMin": 60,
+          "nombrar": "p1"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P2"
+          ],
+          "perpendicularA": "r",
+          "longitudMin": 60,
+          "nombrar": "p2"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P3"
+          ],
+          "perpendicularA": "r",
+          "longitudMin": 60,
+          "nombrar": "p3"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P4"
+          ],
+          "perpendicularA": "r",
+          "longitudMin": 60,
+          "nombrar": "p4"
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "P5"
+          ],
+          "perpendicularA": "r",
+          "longitudMin": 60,
+          "nombrar": "p5"
+        }
+      ]
+    },
+    {
+      "texto": "Sobre la perpendicular que pasa por P3, marca cinco puntos a 1, 2, 3, 4 y 5 cm de P3, por encima de r.",
+      "pista": "Apoya la regla en la perpendicular con el 0 en P3: al tocar junto al canto se marca un punto y ves los milímetros.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "punto",
+          "sobre": "p3",
+          "distancia": {
+            "de": "P3",
+            "mm": 10
+          },
+          "nombrar": "Q1",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "sobre": "p3",
+          "distancia": {
+            "de": "P3",
+            "mm": 20
+          },
+          "nombrar": "Q2",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "sobre": "p3",
+          "distancia": {
+            "de": "P3",
+            "mm": 30
+          },
+          "nombrar": "Q3",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "sobre": "p3",
+          "distancia": {
+            "de": "P3",
+            "mm": 40
+          },
+          "nombrar": "Q4",
+          "rotular": true
+        },
+        {
+          "tipo": "punto",
+          "sobre": "p3",
+          "distancia": {
+            "de": "P3",
+            "mm": 50
+          },
+          "nombrar": "Q5",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Traza por cada uno de esos puntos una paralela a r con la escuadra y el cartabón. Hazlas largas, que corten a todas las perpendiculares.",
+      "pista": "Apoya la escuadra sobre r, fija el cartabón y desliza la escuadra hasta cada punto.",
+      "herramientas": [
+        "escuadra",
+        "cartabon",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "Q1"
+          ],
+          "paralelaA": "r",
+          "longitudMin": 160
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "Q2"
+          ],
+          "paralelaA": "r",
+          "longitudMin": 160
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "Q3"
+          ],
+          "paralelaA": "r",
+          "longitudMin": 160
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "Q4"
+          ],
+          "paralelaA": "r",
+          "longitudMin": 160
+        },
+        {
+          "tipo": "recta",
+          "pasaPor": [
+            "Q5"
+          ],
+          "paralelaA": "r",
+          "longitudMin": 160
+        }
+      ]
+    },
+    {
+      "texto": "Dale ritmo a la malla: elige un grosor mayor en la barrita del portaminas y repasa algunas líneas (por ejemplo, una de cada dos). Cuando termines, pulsa Siguiente.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! Las paralelas y las perpendiculares forman una malla de rectángulos con ángulos rectos."
+}

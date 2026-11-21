@@ -1,0 +1,219 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-construccion-triangulos",
+  "titulo": "Construcción y clasificación de triángulos",
+  "nivel": "1.º ESO · 5.1, ej. 1",
+  "descripcion": "Construye con regla y compás un triángulo de lados 7, 6 y 5 cm y un isósceles de base 5 cm y lados iguales de 7,5 cm, y clasifícalos.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "B",
+        "x": 30.0,
+        "y": 178.0
+      },
+      {
+        "nombre": "E",
+        "x": 165.0,
+        "y": 180.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "r1",
+        "desde": "B",
+        "x2": 125.0,
+        "y2": 178.0
+      },
+      {
+        "nombre": "r2",
+        "desde": "E",
+        "x2": 272.0,
+        "y2": 180.0
+      }
+    ]
+  },
+  "textos": {
+    "r1": "la recta de abajo",
+    "kc": "el arco de radio 5 cm",
+    "kb": "el arco de radio 6 cm",
+    "r2": "la otra recta",
+    "ke": "el arco con centro en E",
+    "kf": "el arco con centro en F"
+  },
+  "pasos": [
+    {
+      "texto": "Primer triángulo. Lado a = 7 cm: con el compás abierto 7 cm y pinchado en B, corta la recta y marca C.",
+      "pista": "Mide la abertura del compás sobre la regla.",
+      "herramientas": [
+        "compas",
+        "regla",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "B",
+          "radio": 70,
+          "cortaA": [
+            "r1"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r1",
+          "distancia": {
+            "de": "B",
+            "mm": 70
+          },
+          "nombrar": "C",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Traza un arco de radio c = 5 cm con centro en B y otro de radio b = 6 cm con centro en C, que se corten por encima.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "B",
+          "radio": 50,
+          "nombrar": "kc"
+        },
+        {
+          "tipo": "arco",
+          "centro": "C",
+          "radio": 60,
+          "nombrar": "kb"
+        }
+      ]
+    },
+    {
+      "texto": "Marca el vértice A, donde se cortan los arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "kc",
+          "kb"
+        ],
+        "nombrar": "A",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Dibuja los tres lados del triángulo ABC con la regla.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "A",
+          "B",
+          "C"
+        ]
+      }
+    },
+    {
+      "texto": "Clasifícalo. Según sus lados: los tres son distintos, así que es escaleno. Según sus ángulos: mide con el transportador el ángulo mayor, el de A (enfrente del lado mayor): unos 78°. Los tres son agudos, así que es acutángulo.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    },
+    {
+      "texto": "Triángulo isósceles. Base de 5 cm: pincha en E con el compás abierto 5 cm, corta la recta y marca F.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "E",
+          "radio": 50,
+          "cortaA": [
+            "r2"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "r2",
+          "distancia": {
+            "de": "E",
+            "mm": 50
+          },
+          "nombrar": "F",
+          "rotular": true
+        }
+      ]
+    },
+    {
+      "texto": "Abre el compás 7,5 cm y traza un arco con centro en E y otro con centro en F, que se corten por encima.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "E",
+          "radio": 75,
+          "nombrar": "ke"
+        },
+        {
+          "tipo": "arco",
+          "centro": "F",
+          "radio": 75,
+          "nombrar": "kf"
+        }
+      ]
+    },
+    {
+      "texto": "Marca el vértice D, donde se cortan los arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "ke",
+          "kf"
+        ],
+        "nombrar": "D",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Dibuja los tres lados del triángulo DEF.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          "D",
+          "E",
+          "F"
+        ]
+      }
+    },
+    {
+      "texto": "Clasifícalo: tiene dos lados iguales, así que es isósceles. Sus ángulos miden unos 39° (en D) y 70,5° (en E y en F): todos agudos, así que también es acutángulo.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! ABC es escaleno y acutángulo; DEF es isósceles y acutángulo."
+}

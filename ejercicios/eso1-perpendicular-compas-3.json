@@ -1,0 +1,168 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-perpendicular-compas-3",
+  "titulo": "Perpendicular en el extremo de un segmento",
+  "nivel": "1.º ESO · 2.2, ej. 1 (3)",
+  "descripcion": "Levanta con el compás la perpendicular en el extremo A de un segmento AB sin prolongarlo, llevando el radio sobre un arco.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 100.0,
+        "y": 165.0
+      },
+      {
+        "nombre": "B",
+        "x": 230.0,
+        "y": 165.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "AB",
+        "desde": "A",
+        "hasta": "B"
+      }
+    ]
+  },
+  "textos": {
+    "AB": "el segmento AB",
+    "aA": "el arco con centro en A",
+    "k4": "el arco con centro en 2"
+  },
+  "pasos": [
+    {
+      "texto": "Pincha el compás en A, ábrelo 3 cm y traza un arco grande por encima de AB, desde el segmento hacia la izquierda (media circunferencia). Marca el punto 1, donde el arco corta a AB.",
+      "pista": "La punta seca se pega a A. Mide la abertura en la regla.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "A",
+          "radio": 30,
+          "cortaA": [
+            "AB"
+          ],
+          "barridoMin": 150,
+          "nombrar": "aA"
+        },
+        {
+          "tipo": "punto",
+          "sobre": "AB",
+          "distancia": {
+            "de": "A",
+            "mm": 30
+          },
+          "nombrar": "m1",
+          "rotular": "1"
+        }
+      ]
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en 1 y corta el arco: marca ahí el punto 2.",
+      "pista": "El radio cabe seis veces en la circunferencia: cada salto avanza 60°.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "m1",
+          "radio": 30,
+          "cortaA": [
+            "aA"
+          ]
+        },
+        {
+          "tipo": "punto",
+          "sobre": "aA",
+          "distancia": {
+            "de": "m1",
+            "mm": 30
+          },
+          "nombrar": "m2",
+          "rotular": "2"
+        }
+      ]
+    },
+    {
+      "texto": "Pincha ahora en 2 y vuelve a cortar el arco, más a la izquierda: marca el punto 3.",
+      "herramientas": [
+        "compas",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "sobre": "aA",
+        "distancia": {
+          "de": "m1",
+          "mm": 51.96
+        },
+        "nombrar": "m3",
+        "rotular": "3"
+      }
+    },
+    {
+      "texto": "Con la misma abertura, traza un arco con centro en 2 y otro con centro en 3 que se corten por encima del arco grande.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": "m2",
+          "radio": 30,
+          "posteriorA": "m3",
+          "nombrar": "k4"
+        },
+        {
+          "tipo": "arco",
+          "centro": "m3",
+          "radio": 30,
+          "nombrar": "k5"
+        }
+      ]
+    },
+    {
+      "texto": "Marca el punto 4, donde se cortan esos dos arcos.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "k4",
+          "k5"
+        ],
+        "nombrar": "m4",
+        "rotular": "4"
+      }
+    },
+    {
+      "texto": "Une A con el punto 4 usando la regla: es la perpendicular a AB en su extremo A.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "A",
+          "m4"
+        ],
+        "perpendicularA": "AB",
+        "longitudMin": 50
+      }
+    }
+  ],
+  "final": "¡Muy bien! Has levantado la perpendicular en A sin prolongar el segmento: 2 y 3 están a 60° y a 120°, y el punto 4 marca los 90°."
+}

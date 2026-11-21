@@ -1,0 +1,229 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-circuncentro",
+  "titulo": "Circuncentro y circunferencia circunscrita",
+  "nivel": "1.º ESO · 5.1, ej. 2 (3)",
+  "descripcion": "Halla el circuncentro de un triángulo acutángulo escaleno con dos mediatrices y traza su circunferencia circunscrita.",
+  "papel": {
+    "papel": "blanco",
+    "hoja": "A4-h"
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "A",
+        "x": 95.0,
+        "y": 155.0
+      },
+      {
+        "nombre": "B",
+        "x": 205.0,
+        "y": 155.0
+      },
+      {
+        "nombre": "C",
+        "x": 125.0,
+        "y": 55.0
+      }
+    ],
+    "rectas": [
+      {
+        "nombre": "AB",
+        "desde": "A",
+        "hasta": "B"
+      },
+      {
+        "nombre": "BC",
+        "desde": "B",
+        "hasta": "C"
+      },
+      {
+        "nombre": "AC",
+        "desde": "A",
+        "hasta": "C"
+      }
+    ]
+  },
+  "textos": {
+    "AB": "el lado AB",
+    "BC": "el lado BC",
+    "AC": "el lado AC",
+    "abm": "la mediatriz de AB",
+    "bcm": "la mediatriz de BC"
+  },
+  "pasos": [
+    {
+      "texto": "Mediatriz de AB. Pincha el compás en A, ábrelo algo más de la mitad de AB y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "A",
+        "radio": {
+          "min": 57.0
+        },
+        "nombrar": "abk1"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en B y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "B",
+        "radioComo": "abk1",
+        "cortaA": [
+          {
+            "elemento": "abk1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "abk2",
+        "posteriorA": "abk1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "abk1",
+          "abk2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "abD1",
+          "abD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de AB: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "abD1",
+          "abD2"
+        ],
+        "nombrar": "abm"
+      }
+    },
+    {
+      "texto": "Mediatriz de BC. Pincha el compás en B, ábrelo algo más de la mitad de BC y traza un arco grande por encima y por debajo.",
+      "pista": "Arrastra la mina para abrir el compás y gira el asa para trazar.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "B",
+        "radio": {
+          "min": 66.0
+        },
+        "nombrar": "bck1",
+        "posteriorA": "abm"
+      }
+    },
+    {
+      "texto": "Sin cambiar la abertura, pincha en C y traza otro arco que corte al anterior por los dos lados.",
+      "pista": "Arrastra el compás por la punta seca: así se mueve sin cambiar la abertura.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "C",
+        "radioComo": "bck1",
+        "cortaA": [
+          {
+            "elemento": "bck1",
+            "cortes": 2
+          }
+        ],
+        "nombrar": "bck2",
+        "posteriorA": "bck1"
+      }
+    },
+    {
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "pista": "Al acercar la punta al cruce, se pega sola.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "bck1",
+          "bck2"
+        ],
+        "cantidad": 2,
+        "nombrar": [
+          "bcD1",
+          "bcD2"
+        ]
+      }
+    },
+    {
+      "texto": "Une los dos cortes con la regla. Es la mediatriz de BC: hazla larga, que sobresalga por los dos lados.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "recta",
+        "pasaPor": [
+          "bcD1",
+          "bcD2"
+        ],
+        "nombrar": "bcm"
+      }
+    },
+    {
+      "texto": "Marca el circuncentro O, donde se cortan las dos mediatrices.",
+      "herramientas": [
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "punto",
+        "cruce": [
+          "abm",
+          "bcm"
+        ],
+        "nombrar": "O",
+        "rotular": true
+      }
+    },
+    {
+      "texto": "Pincha el compás en O, ábrelo hasta un vértice y traza la circunferencia circunscrita: pasa por A, B y C.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivo": {
+        "tipo": "arco",
+        "centro": "O",
+        "pasaPor": [
+          "A",
+          "B",
+          "C"
+        ],
+        "completo": true,
+        "tolerancia": 1.5
+      }
+    }
+  ],
+  "final": "¡Muy bien! En un triángulo acutángulo, el circuncentro queda dentro del triángulo."
+}

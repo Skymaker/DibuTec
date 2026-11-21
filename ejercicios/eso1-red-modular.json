@@ -1,0 +1,364 @@
+{
+  "formato": "dibutec-ejercicio",
+  "version": 1,
+  "id": "eso1-red-modular",
+  "titulo": "Red modular cuadrada",
+  "nivel": "1.º ESO · 6.1, ej. 1",
+  "descripcion": "Dibuja una red de cuadrados de 3 cm que cubre un rectángulo de 18 × 12 cm, crea un módulo con el compás y repítelo con ritmo.",
+  "papel": {
+    "papel": "cuadriculado",
+    "cuadro": 10,
+    "margen": true,
+    "hoja": "A4-h",
+    "imanCuadricula": true
+  },
+  "inicial": {
+    "puntos": [
+      {
+        "nombre": "E",
+        "x": 60.0,
+        "y": 40.0
+      }
+    ]
+  },
+  "pasos": [
+    {
+      "texto": "Dibuja el rectángulo de 18 × 12 cm. Su esquina de arriba a la izquierda es E.",
+      "pista": "Cuenta cuadros de la cuadrícula: cada uno mide 1 cm. Los cruces atraen la punta del portaminas.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "poligono": [
+          {
+            "x": 60.0,
+            "y": 40.0
+          },
+          {
+            "x": 240.0,
+            "y": 40.0
+          },
+          {
+            "x": 240.0,
+            "y": 160.0
+          },
+          {
+            "x": 60.0,
+            "y": 160.0
+          }
+        ]
+      }
+    },
+    {
+      "texto": "Divide el rectángulo con rectas verticales cada 3 cm.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 90.0,
+              "y": 40.0
+            },
+            {
+              "x": 90.0,
+              "y": 160.0
+            }
+          ],
+          [
+            {
+              "x": 120.0,
+              "y": 40.0
+            },
+            {
+              "x": 120.0,
+              "y": 160.0
+            }
+          ],
+          [
+            {
+              "x": 150.0,
+              "y": 40.0
+            },
+            {
+              "x": 150.0,
+              "y": 160.0
+            }
+          ],
+          [
+            {
+              "x": 180.0,
+              "y": 40.0
+            },
+            {
+              "x": 180.0,
+              "y": 160.0
+            }
+          ],
+          [
+            {
+              "x": 210.0,
+              "y": 40.0
+            },
+            {
+              "x": 210.0,
+              "y": 160.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Y ahora con rectas horizontales cada 3 cm: ya tienes la red de 6 × 4 módulos.",
+      "herramientas": [
+        "regla",
+        "lapiz"
+      ],
+      "objetivo": {
+        "tipo": "rectas",
+        "segmentos": [
+          [
+            {
+              "x": 60.0,
+              "y": 70.0
+            },
+            {
+              "x": 240.0,
+              "y": 70.0
+            }
+          ],
+          [
+            {
+              "x": 60.0,
+              "y": 100.0
+            },
+            {
+              "x": 240.0,
+              "y": 100.0
+            }
+          ],
+          [
+            {
+              "x": 60.0,
+              "y": 130.0
+            },
+            {
+              "x": 240.0,
+              "y": 130.0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "texto": "Módulo: en el primer cuadrado (arriba a la izquierda), traza con el compás abierto 1,5 cm un cuarto de circunferencia con centro en su esquina de arriba a la izquierda y otro con centro en su esquina de abajo a la derecha.",
+      "pista": "Las esquinas de la red atraen la punta seca del compás.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 60.0,
+            "y": 40.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 70.607,
+              "y": 50.607
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 90.0,
+            "y": 70.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 79.393,
+              "y": 59.393
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Repite el módulo en los otros cinco cuadrados de la primera fila, girándolo un cuarto de vuelta en uno sí y otro no: en el segundo, los arcos tienen el centro en las esquinas de arriba a la derecha y de abajo a la izquierda.",
+      "pista": "Al alternar el giro, los arcos de un módulo continúan en el siguiente: así se crea el ritmo.",
+      "herramientas": [
+        "compas"
+      ],
+      "objetivos": [
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 120.0,
+            "y": 40.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 109.393,
+              "y": 50.607
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 90.0,
+            "y": 70.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 100.607,
+              "y": 59.393
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 120.0,
+            "y": 40.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 130.607,
+              "y": 50.607
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 150.0,
+            "y": 70.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 139.393,
+              "y": 59.393
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 180.0,
+            "y": 40.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 169.393,
+              "y": 50.607
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 150.0,
+            "y": 70.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 160.607,
+              "y": 59.393
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 180.0,
+            "y": 40.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 190.607,
+              "y": 50.607
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 210.0,
+            "y": 70.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 199.393,
+              "y": 59.393
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 240.0,
+            "y": 40.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 229.393,
+              "y": 50.607
+            }
+          ],
+          "tolerancia": 1.5
+        },
+        {
+          "tipo": "arco",
+          "centro": {
+            "x": 210.0,
+            "y": 70.0
+          },
+          "radio": 15,
+          "pasaPor": [
+            {
+              "x": 220.607,
+              "y": 59.393
+            }
+          ],
+          "tolerancia": 1.5
+        }
+      ]
+    },
+    {
+      "texto": "Completa las demás filas como prefieras (repitiendo o girando el módulo) y busca el equilibrio cromático: elige colores en la barrita del portaminas y repasa los arcos alternando dos o tres colores. Pulsa Siguiente cuando termines.",
+      "objetivo": {
+        "tipo": "continuar"
+      }
+    }
+  ],
+  "final": "¡Muy bien! Has creado una composición modular: un mismo módulo repetido sobre una red, con ritmo y color."
+}
