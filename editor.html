@@ -1760,7 +1760,7 @@ const Editor = {
       s += `<path d="M${o.x} ${o.y}L${b.x} ${b.y}L${mi.x} ${mi.y}" fill="none" stroke="${borde}" stroke-width="${(marcado ? 4 : 3) * k}" stroke-linecap="round" stroke-linejoin="round" ${dash}/>`;
       s += `<circle cx="${b.x}" cy="${b.y}" r="${6 * k}" fill="#8a8d9e" stroke="${borde}" stroke-width="${1.5 * k}"/>`;
       s += `<circle cx="${o.x}" cy="${o.y}" r="${3.5 * k}" fill="${borde}"/>`;
-      s += `<circle cx="${mi.x}" cy="${mi.y}" r="${3.5 * k}" fill="#3b3b40"/>`;
+      s += `<circle cx="${mi.x}" cy="${mi.y}" r="${3.5 * k}" fill="#757575"/>`;
       s += `<circle cx="${o.x}" cy="${o.y}" r="${L.r}" fill="none" stroke="rgba(8,92,34,.35)" stroke-width="${k}" stroke-dasharray="${3 * k} ${4 * k}"/>`;
     } else {
       const pts = L.poli.map(v => m(...v)).map(p => `${p.x},${p.y}`).join(' ');
