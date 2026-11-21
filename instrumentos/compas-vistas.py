@@ -77,25 +77,34 @@ class Montaje:
         self.varilla(vista, [u[0], u[1], w[0], w[1], ql[0] - u[0] * 4, ql[1] - u[1] * 4], dl + 8)
         self.pieza(vista, 'taco', [-u[0], -u[1], w[0], w[1], ql[0], ql[1]], 'taco-aguja')
         self.pieza(vista, 'taco', [u[0], u[1], w[0], w[1], qr[0], qr[1]], 'taco-mina')
-        if dl > 6:
-            self.pieza(vista, 'rueda-ajuste', [u[0], u[1], w[0], w[1], (ql[0] + qr[0]) / 2, (ql[1] + qr[1]) / 2], 'rueda-ajuste')
+        self.pieza(vista, 'rueda-ajuste', [u[0], u[1], w[0], w[1], (ql[0] + qr[0]) / 2, (ql[1] + qr[1]) / 2], 'rueda-ajuste')
 
 
 def tumbado(r=ABERTURA):
     M, V = Montaje(), 'tumbado'
-    altura = math.sqrt(max(PIERNA ** 2 - (r / 2) ** 2, (PIERNA * 0.18) ** 2))
-    b = (r / 2, -altura)
+    # Cada pata gira en su tornillo de la cabeza (marcas «eje-aguja» y «eje-mina»)
+    ejes = {'pata-aguja': (marca(V, 'cabeza', 'eje-aguja', 'x', -2.5), marca(V, 'cabeza', 'eje-aguja', 'y', 7.3)),
+            'pata-mina': (marca(V, 'cabeza', 'eje-mina', 'x', 2.5), marca(V, 'cabeza', 'eje-mina', 'y', 7.3))}
+    largo = {n: marca(V, n, 'punta', 'y', PIERNA) - marca(V, n, 'eje', 'y', 7.7) for n in ejes}
+    ex = (ejes['pata-mina'][0] - ejes['pata-aguja'][0]) / 2
+    ey = (ejes['pata-mina'][1] + ejes['pata-aguja'][1]) / 2
+    L = (largo['pata-aguja'] + largo['pata-mina']) / 2
+    h = max(0, r / 2 - ex)
+    b = (r / 2, -(ey + math.sqrt(max(L * L - h * h, (L * 0.18) ** 2))))
     q = {}
     for nombre, t, otra in (('pata-aguja', (0, 0), (r, 0)), ('pata-mina', (r, 0), (0, 0))):
-        L = math.dist(b, t)
-        v = ((t[0] - b[0]) / L, (t[1] - b[1]) / L)
+        S = (b[0] + ejes[nombre][0], b[1] + ejes[nombre][1])
+        Ls = math.dist(S, t)
+        v = ((t[0] - S[0]) / Ls, (t[1] - S[1]) / Ls)
         n = (-v[1], v[0])
         if (otra[0] - t[0]) * n[0] + (otra[1] - t[1]) * n[1] > 0:
             n = (-n[0], -n[1])
-        e = L / marca(V, nombre, 'punta', 'y', PIERNA)
-        M.pieza(V, nombre, [n[0], n[1], v[0] * e, v[1] * e, b[0], b[1]], nombre)
+        e = Ls / largo[nombre]
+        eje = marca(V, nombre, 'eje', 'y', 7.7)
+        O = (S[0] - v[0] * eje * e, S[1] - v[1] * eje * e)
+        M.pieza(V, nombre, [n[0], n[1], v[0] * e, v[1] * e, O[0], O[1]], nombre)
         d = marca(V, nombre, 'ajuste', 'y', 24) * e
-        q[nombre] = (b[0] + v[0] * d, b[1] + v[1] * d)
+        q[nombre] = (O[0] + v[0] * d, O[1] + v[1] * d)
     M.ajuste(V, q['pata-aguja'], q['pata-mina'])
     cx, cy, cw, ch = caja_cabeza(V)
     arriba = b[1] + cy
@@ -110,12 +119,14 @@ def de_pie(r=ABERTURA):
     b = (r / 2, 0)
     q = {}
     for nombre, t in (('pata-aguja', (0, 0)), ('pata-mina', (r, 0))):
-        L = math.dist(b, t)
-        v = ((t[0] - b[0]) / L, (t[1] - b[1]) / L)
-        e = L / marca(V, nombre, 'punta', 'y', 25)
-        M.pieza(V, nombre, [0, -1, v[0] * e, v[1] * e, b[0], b[1]], nombre)   # +x de la pieza: hacia arriba
+        L0 = math.dist(b, t)
+        v = ((t[0] - b[0]) / L0, (t[1] - b[1]) / L0)
+        eje, punta = marca(V, nombre, 'eje', 'y', 2.5), marca(V, nombre, 'punta', 'y', 25)
+        e = (L0 - eje) / (punta - eje)                 # desde arriba, la pata va de su tornillo a la punta
+        O = (b[0] + v[0] * eje * (1 - e), b[1] + v[1] * eje * (1 - e))
+        M.pieza(V, nombre, [0, -1, v[0] * e, v[1] * e, O[0], O[1]], nombre)   # +x de la pieza: hacia arriba
         d = marca(V, nombre, 'ajuste', 'y', 8) * e
-        q[nombre] = (b[0] + v[0] * d, b[1] + v[1] * d)
+        q[nombre] = (O[0] + v[0] * d, O[1] + v[1] * d)
     M.ajuste(V, q['pata-aguja'], q['pata-mina'])
     M.pieza(V, 'cabeza', [1, 0, 0, 1, b[0], b[1]], 'cabeza')
     return M, (-6, -8, r + 12, 16)

@@ -34,14 +34,15 @@ Si falta una pieza en una carpeta, DibuTec no la dibuja en esa vista.
   importa.
 - **El anclaje manda.** Cada pieza se coloca por su punto (0, 0); si mueves
   todo el dibujo, la pieza se moverá en el compás.
-- **Patas tumbadas:** la bisagra en (0, 0) y la punta hacia abajo (+y). Hacia
-  **+x** queda el lado de **fuera** del compás (la ruedecita va por fuera).
-  DibuTec gira cada pata según la abertura y la estira a lo largo hasta la
-  punta.
-- **Patas de pie:** también la bisagra en (0, 0) y la punta hacia +y, pero
-  hacia **+x** queda el lado que en la pantalla está **por encima** de la
-  línea de las puntas. DibuTec las encoge a lo largo: de pie, vistas desde
-  arriba, miden la mitad de la abertura.
+- **Patas tumbadas:** el eje de la pata baja desde (0, 0) hacia +y, hasta la
+  punta. Hacia **+x** queda el lado de **fuera** del compás (la ruedecita va
+  por fuera). Cada pata **gira en su tornillo** de la cabeza: la marca `eje`
+  de la pata se coloca sobre la marca `eje-aguja` o `eje-mina` de la cabeza, y
+  la pata llega hasta la punta.
+- **Patas de pie:** también bajan desde (0, 0) hacia +y, pero hacia **+x**
+  queda el lado que en la pantalla está **por encima** de la línea de las
+  puntas. Desde arriba, cada pata va de su tornillo (marca `eje`, a un lado
+  del centro) a la punta, así que DibuTec la encoge según la abertura.
 - **Pinzas, rueda y varilla:** la varilla va en horizontal (+x, de la pata de
   la aguja a la de la mina); en las pinzas, +x es el lado de fuera (la misma
   pieza, en espejo, sirve para las dos patas).
@@ -49,6 +50,8 @@ Si falta una pieza en una carpeta, DibuTec no la dibuja en esa vista.
   - `punta` en las patas: dónde está la punta. Fija el largo de la pata.
   - `ajuste` en las patas: a qué distancia de la bisagra va el tornillo de
     ajuste.
+  - `eje` en las patas y `eje-aguja` / `eje-mina` en la cabeza tumbada: el
+    tornillo en el que gira cada pata.
   - `asa` en el mango: dónde termina; ahí va el asa para girar.
 - **La mina:** la forma con `id="mina"` (o `class="mina"`, o lo que haya dentro
   de un grupo así) se pinta del color elegido para el portaminas y se aclara
@@ -66,6 +69,14 @@ imágenes.
 
 Los botones del compás (el asa para girar y el botón rojo de la mina) no son
 piezas: los dibuja DibuTec encima.
+
+## Abertura mínima y máxima
+
+El compás se abre entre **12 y 110 mm de radio** (`rMin` y `rMax` en la clase
+`Compas` de `index.html`). Por debajo de 12 mm, las pinzas del tornillo de
+ajuste chocarían con la rueda; por encima de 110 mm, el compás estaría
+demasiado abierto. Si cambias las piezas (sobre todo las pinzas, la rueda o
+la separación de los tornillos), revisa el mínimo.
 
 ## Vistas completas
 

@@ -13,8 +13,8 @@
     "puntos": [
       {
         "nombre": "P",
-        "x": 104.96,
-        "y": 97.72
+        "x": 110.0,
+        "y": 115.0
       },
       {
         "nombre": "A",
@@ -48,7 +48,7 @@
   "pasos": [
     {
       "texto": "Pincha el compás en P y traza un arco grande que corte a la recta s.",
-      "pista": "El arco tiene que llegar a s: ábrelo más de 6 cm.",
+      "pista": "El arco tiene que llegar a s: ábrelo unos 5 cm.",
       "herramientas": [
         "compas"
       ],
@@ -56,7 +56,7 @@
         "tipo": "arco",
         "centro": "P",
         "radio": {
-          "min": 60
+          "min": 45
         },
         "cortaA": [
           "s"
@@ -106,8 +106,8 @@
           "s"
         ],
         "corte": {
-          "x": 238.848,
-          "y": 119.086
+          "x": 198.0,
+          "y": 131.0
         },
         "nombrar": "N"
       }
@@ -143,8 +143,8 @@
           "c1"
         ],
         "corte": {
-          "x": 32.96,
-          "y": 118.72
+          "x": 62.0,
+          "y": 129.0
         },
         "nombrar": "Q"
       }

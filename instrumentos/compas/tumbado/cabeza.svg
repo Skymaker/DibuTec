@@ -3,6 +3,7 @@
     DibuTec · compás · cabeza (tumbado)
     Unidades: milímetros. La bisagra de las patas está en (0, 0).
     El mango sale del borde de arriba de la cabeza; su contorno es la zona para agarrar el compás.
+    Las marcas «eje-aguja» y «eje-mina» son los tornillos en los que giran las patas.
   -->
   <defs>
     <linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(183.333333,0,0,183.333333,1158.333333,470.93633)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
@@ -10,6 +11,8 @@
     <radialGradient id="_Radial4" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(47.5,0,0,47.5,1133.75,729.894663)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
     <radialGradient id="_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(47.5,0,0,47.5,1350.416667,729.894663)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
   </defs>
+  <circle id="eje-aguja" cx="-2.4964" cy="7.3149" r="0.2" fill="none"/>
+  <circle id="eje-mina" cx="2.5035" cy="7.3149" r="0.2" fill="none"/>
   <g id="dibujo" transform="matrix(0.023 0 0 0.023 -28.7977 -9.77)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
     <path d="M1158.333,541.77c0,-58.333 25,-70.833 91.667,-70.833c66.667,0 91.667,12.5 91.667,70.833l-183.333,0Z" style="fill:url(#_Linear2);fill-rule:nonzero;"/>
     <path d="M1058.333,554.27c0,-13.889 8.333,-20.833 25,-20.833l333.333,0c16.667,0 25,6.944 25,20.833l0,458.333c0,47.222 -26.389,98.611 -79.167,154.167l-225,0c-52.778,-55.556 -79.167,-106.944 -79.167,-154.167l0,-458.333Z" style="fill:url(#_Linear3);fill-rule:nonzero;stroke:#121315;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>

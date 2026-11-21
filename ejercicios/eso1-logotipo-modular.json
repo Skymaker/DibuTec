@@ -13,23 +13,23 @@
     "puntos": [
       {
         "nombre": "A",
-        "x": 108.5,
-        "y": 65.0
+        "x": 88.5,
+        "y": 45.0
       },
       {
         "nombre": "B",
-        "x": 188.5,
-        "y": 65.0
+        "x": 208.5,
+        "y": 45.0
       },
       {
         "nombre": "C",
-        "x": 188.5,
-        "y": 145.0
+        "x": 208.5,
+        "y": 165.0
       },
       {
         "nombre": "D",
-        "x": 108.5,
-        "y": 145.0
+        "x": 88.5,
+        "y": 165.0
       }
     ],
     "rectas": [
@@ -109,11 +109,11 @@
           "pasaPor": [
             {
               "x": 148.5,
-              "y": 65.0
+              "y": 45.0
             },
             {
               "x": 148.5,
-              "y": 145.0
+              "y": 165.0
             }
           ]
         },
@@ -121,11 +121,11 @@
           "tipo": "recta",
           "pasaPor": [
             {
-              "x": 188.5,
+              "x": 208.5,
               "y": 105.0
             },
             {
-              "x": 108.5,
+              "x": 88.5,
               "y": 105.0
             }
           ]
@@ -143,18 +143,18 @@
         "poligono": [
           {
             "x": 148.5,
-            "y": 65.0
+            "y": 45.0
           },
           {
-            "x": 188.5,
+            "x": 208.5,
             "y": 105.0
           },
           {
             "x": 148.5,
-            "y": 145.0
+            "y": 165.0
           },
           {
-            "x": 108.5,
+            "x": 88.5,
             "y": 105.0
           }
         ]
@@ -169,39 +169,39 @@
         {
           "tipo": "punto",
           "cerca": {
-            "x": 128.5,
-            "y": 85.0
+            "x": 118.5,
+            "y": 75.0
           },
           "nombrar": "1"
         },
         {
           "tipo": "punto",
           "cerca": {
-            "x": 168.5,
-            "y": 85.0
+            "x": 178.5,
+            "y": 75.0
           },
           "nombrar": "2"
         },
         {
           "tipo": "punto",
           "cerca": {
-            "x": 168.5,
-            "y": 125.0
+            "x": 178.5,
+            "y": 135.0
           },
           "nombrar": "3"
         },
         {
           "tipo": "punto",
           "cerca": {
-            "x": 128.5,
-            "y": 125.0
+            "x": 118.5,
+            "y": 135.0
           },
           "nombrar": "4"
         }
       ]
     },
     {
-      "texto": "Traza cuatro circunferencias de radio 2 cm con centro en esos puntos: cada una toca a sus vecinas y a dos lados del cuadrado.",
+      "texto": "Traza cuatro circunferencias de radio 3 cm con centro en esos puntos: cada una toca a sus vecinas y a dos lados del cuadrado.",
       "herramientas": [
         "compas"
       ],
@@ -209,25 +209,25 @@
         {
           "tipo": "arco",
           "centro": "1",
-          "radio": 20,
+          "radio": 30,
           "completo": true
         },
         {
           "tipo": "arco",
           "centro": "2",
-          "radio": 20,
+          "radio": 30,
           "completo": true
         },
         {
           "tipo": "arco",
           "centro": "3",
-          "radio": 20,
+          "radio": 30,
           "completo": true
         },
         {
           "tipo": "arco",
           "centro": "4",
-          "radio": 20,
+          "radio": 30,
           "completo": true
         }
       ]
@@ -240,7 +240,7 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "O",
-        "radio": 8.284,
+        "radio": 12.426,
         "completo": true
       }
     },
