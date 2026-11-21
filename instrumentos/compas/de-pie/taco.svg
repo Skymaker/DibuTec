@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12mm" height="9mm" viewBox="-3.75 -4.5 12 9">
+  <!--
+    DibuTec · compás DE PIE (visto desde arriba) · taco
+    Es la pieza tumbada (taco.svg) con la deformación que le aplica DibuTec al ponerse de pie:
+    1,5 veces más grande.
+    Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
+    La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,
+    en Inkscape: selecciona el grupo y Objeto › Desagrupar (Mayús+Ctrl+G); la transformación pasa a los trazados.
+  -->
+  <g id="de-pie" transform="scale(1.5 1.5)">
+  <rect id="taco" x="-1.86" y="-2.3" width="6.92" height="4.6" rx="1.15" fill="#1b1d22"/>
+  </g>
+</svg>

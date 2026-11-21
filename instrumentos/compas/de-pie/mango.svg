@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="9mm" height="15.5mm" viewBox="-4.5 -14.5 9 15.5">
+  <!--
+    DibuTec · compás DE PIE (visto desde arriba) · mango
+    Es la pieza tumbada (mango.svg) con la deformación que le aplica DibuTec al ponerse de pie:
+    1,5 veces más ancho. El largo lo ajusta DibuTec hasta el asa (de pie, el mango apenas asoma: unos 1 mm).
+    Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
+    La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,
+    en Inkscape: selecciona el grupo y Objeto › Desagrupar (Mayús+Ctrl+G); la transformación pasa a los trazados.
+  -->
+  <g id="de-pie" transform="scale(1.5 1)">
+  <circle id="asa" cx="0" cy="-13" r="0.3" fill="none"/>
+  <rect id="cuerpo" x="-2.3" y="-13.92" width="4.6" height="14.5" rx="2" fill="#1b1d22"/>
+  <path id="estrias" d="M -1.38 -12.6 L -1.38 -0.6 M -0.46 -12.6 L -0.46 -0.6 M 0.46 -12.6 L 0.46 -0.6 M 1.38 -12.6 L 1.38 -0.6" stroke="#3f424b" stroke-width="0.15" fill="none"/>
+  </g>
+</svg>

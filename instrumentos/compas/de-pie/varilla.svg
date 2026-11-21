@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="0.7mm" height="1.8mm" viewBox="0 -0.9 0.7 1.8">
+  <!--
+    DibuTec · compás DE PIE (visto desde arriba) · varilla
+    Es la pieza tumbada (varilla.svg) con la deformación que le aplica DibuTec al ponerse de pie:
+    1,5 veces más gruesa; el paso de la rosca (el ancho) no cambia.
+    Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
+    La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,
+    en Inkscape: selecciona el grupo y Objeto › Desagrupar (Mayús+Ctrl+G); la transformación pasa a los trazados.
+  -->
+  <g id="de-pie" transform="scale(1 1.5)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+  </g>
+</svg>

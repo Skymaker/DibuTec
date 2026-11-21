@@ -47,6 +47,25 @@ Tampoco se usan máscaras, recortes, filtros ni imágenes.
 Los botones del compás (el asa para girar y el botón rojo de la mina) no son
 piezas: los dibuja DibuTec encima.
 
+## El compás de pie (visto desde arriba)
+
+Al trazar, el compás se pone de pie y DibuTec lo dibuja visto desde arriba
+deformando las mismas piezas: las patas y la cabeza, 1,5 veces más anchas (están
+más cerca de quien mira); la cabeza, además, aplastada a 0,3 de su altura; las
+patas, tan cortas como lo abierto que esté el compás; y el mango, que apunta
+hacia quien mira, apenas asoma.
+
+En `compas/de-pie/` están esas piezas ya deformadas, con el mismo anclaje, las
+mismas marcas y los mismos nombres que las tumbadas, y `vista-de-pie.svg`, el
+compás completo de pie tal como lo pinta DibuTec (abierto 50 mm). **De momento
+son solo de referencia: DibuTec no las lee**, sigue deformando las tumbadas.
+El largo de las patas y del mango no va en ellas, porque depende de la abertura
+y del zoom. Si retocas las piezas tumbadas, vuelve a generarlas con:
+
+```bash
+python3 instrumentos/compas-de-pie.py
+```
+
 ## Después de retocar una pieza
 
 - **Desde un servidor web** (GitHub Pages o `python3 -m http.server`): DibuTec
