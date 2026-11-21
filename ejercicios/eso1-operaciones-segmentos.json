@@ -105,8 +105,7 @@
             "de": "O1",
             "mm": 84
           },
-          "nombrar": "M1",
-          "rotular": "M"
+          "nombrar": "M"
         }
       ]
     },
@@ -120,7 +119,7 @@
       "objetivos": [
         {
           "tipo": "arco",
-          "centro": "M1",
+          "centro": "M",
           "radio": 31,
           "cortaA": [
             "r1"
@@ -133,8 +132,7 @@
             "de": "O1",
             "mm": 53
           },
-          "nombrar": "R1",
-          "rotular": "R"
+          "nombrar": "R"
         }
       ]
     },
@@ -147,7 +145,7 @@
       "objetivo": {
         "tipo": "recta",
         "desde": "O1",
-        "hasta": "R1"
+        "hasta": "R"
       }
     },
     {
@@ -178,8 +176,7 @@
             "de": "O2",
             "mm": 84
           },
-          "nombrar": "M2",
-          "rotular": "M'"
+          "nombrar": "M'"
         }
       ]
     },
@@ -192,7 +189,7 @@
       "objetivos": [
         {
           "tipo": "arco",
-          "centro": "M2",
+          "centro": "M'",
           "radio": 31,
           "cortaA": [
             "r2"
@@ -205,8 +202,7 @@
             "de": "O2",
             "mm": 53
           },
-          "nombrar": "N1",
-          "rotular": "N'"
+          "nombrar": "N'"
         }
       ]
     },
@@ -219,7 +215,7 @@
       "objetivos": [
         {
           "tipo": "arco",
-          "centro": "N1",
+          "centro": "N'",
           "radio": 31,
           "cortaA": [
             "r2"
@@ -232,8 +228,7 @@
             "de": "O2",
             "mm": 22
           },
-          "nombrar": "R2",
-          "rotular": "R'"
+          "nombrar": "R'"
         }
       ]
     },
@@ -246,7 +241,7 @@
       "objetivo": {
         "tipo": "recta",
         "desde": "O2",
-        "hasta": "R2"
+        "hasta": "R'"
       }
     }
   ],

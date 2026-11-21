@@ -32,8 +32,8 @@
   },
   "textos": {
     "AB": "el segmento AB",
-    "aA": "el arco con centro en A",
-    "k4": "el arco con centro en 2"
+    "c1": "el arco con centro en A",
+    "c2": "el arco con centro en 2"
   },
   "pasos": [
     {
@@ -52,7 +52,7 @@
             "AB"
           ],
           "barridoMin": 150,
-          "nombrar": "aA"
+          "nombrar": "c1"
         },
         {
           "tipo": "punto",
@@ -61,8 +61,7 @@
             "de": "A",
             "mm": 30
           },
-          "nombrar": "m1",
-          "rotular": "1"
+          "nombrar": "1"
         }
       ]
     },
@@ -76,21 +75,20 @@
       "objetivos": [
         {
           "tipo": "arco",
-          "centro": "m1",
+          "centro": "1",
           "radio": 30,
           "cortaA": [
-            "aA"
+            "c1"
           ]
         },
         {
           "tipo": "punto",
-          "sobre": "aA",
+          "sobre": "c1",
           "distancia": {
-            "de": "m1",
+            "de": "1",
             "mm": 30
           },
-          "nombrar": "m2",
-          "rotular": "2"
+          "nombrar": "2"
         }
       ]
     },
@@ -102,13 +100,12 @@
       ],
       "objetivo": {
         "tipo": "punto",
-        "sobre": "aA",
+        "sobre": "c1",
         "distancia": {
-          "de": "m1",
+          "de": "1",
           "mm": 51.96
         },
-        "nombrar": "m3",
-        "rotular": "3"
+        "nombrar": "3"
       }
     },
     {
@@ -119,16 +116,16 @@
       "objetivos": [
         {
           "tipo": "arco",
-          "centro": "m2",
+          "centro": "2",
           "radio": 30,
-          "posteriorA": "m3",
-          "nombrar": "k4"
+          "posteriorA": "3",
+          "nombrar": "c2"
         },
         {
           "tipo": "arco",
-          "centro": "m3",
+          "centro": "3",
           "radio": 30,
-          "nombrar": "k5"
+          "nombrar": "c3"
         }
       ]
     },
@@ -140,11 +137,11 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "k4",
-          "k5"
+          "c2",
+          "c3"
         ],
-        "nombrar": "m4",
-        "rotular": "4"
+        "corte": false,
+        "nombrar": "4"
       }
     },
     {
@@ -157,7 +154,7 @@
         "tipo": "recta",
         "pasaPor": [
           "A",
-          "m4"
+          "4"
         ],
         "perpendicularA": "AB",
         "longitudMin": 50

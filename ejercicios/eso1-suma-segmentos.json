@@ -107,8 +107,7 @@
             "de": "O",
             "mm": 35
           },
-          "nombrar": "P1",
-          "rotular": true
+          "nombrar": "P1"
         }
       ]
     },
@@ -134,8 +133,7 @@
             "de": "O",
             "mm": 83
           },
-          "nombrar": "P2",
-          "rotular": true
+          "nombrar": "P2"
         }
       ]
     },
@@ -161,8 +159,7 @@
             "de": "O",
             "mm": 105
           },
-          "nombrar": "P3",
-          "rotular": true
+          "nombrar": "P3"
         }
       ]
     },

@@ -49,8 +49,8 @@
     "AB": "el lado AB",
     "BC": "el lado BC",
     "AC": "el lado AC",
-    "bcm": "la mediatriz de BC",
-    "acm": "la mediatriz de AC"
+    "m1": "la mediatriz de BC",
+    "m2": "la mediatriz de AC"
   },
   "pasos": [
     {
@@ -65,7 +65,7 @@
         "radio": {
           "min": 70.8
         },
-        "nombrar": "bck1"
+        "nombrar": "c1"
       }
     },
     {
@@ -77,19 +77,19 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "C",
-        "radioComo": "bck1",
+        "radioComo": "c1",
         "cortaA": [
           {
-            "elemento": "bck1",
+            "elemento": "c1",
             "cortes": 2
           }
         ],
-        "nombrar": "bck2",
-        "posteriorA": "bck1"
+        "nombrar": "c2",
+        "posteriorA": "c1"
       }
     },
     {
-      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos: D y E.",
       "pista": "Al acercar la punta al cruce, se pega sola.",
       "herramientas": [
         "lapiz"
@@ -97,18 +97,18 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "bck1",
-          "bck2"
+          "c1",
+          "c2"
         ],
         "cantidad": 2,
         "nombrar": [
-          "bcD1",
-          "bcD2"
+          "D",
+          "E"
         ]
       }
     },
     {
-      "texto": "Une los dos cortes con la regla. Es la mediatriz de BC: hazla larga, que sobresalga por los dos lados.",
+      "texto": "Une D y E con la regla. Es la mediatriz de BC (m1): hazla larga, que sobresalga por los dos lados.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -116,10 +116,10 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "bcD1",
-          "bcD2"
+          "D",
+          "E"
         ],
-        "nombrar": "bcm"
+        "nombrar": "m1"
       }
     },
     {
@@ -130,11 +130,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "bcm",
+          "m1",
           "BC"
         ],
-        "nombrar": "Ma",
-        "rotular": "M"
+        "nombrar": "M"
       }
     },
     {
@@ -149,8 +148,8 @@
         "radio": {
           "min": 62.4
         },
-        "nombrar": "ack1",
-        "posteriorA": "Ma"
+        "nombrar": "c3",
+        "posteriorA": "M"
       }
     },
     {
@@ -162,19 +161,19 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "C",
-        "radioComo": "ack1",
+        "radioComo": "c3",
         "cortaA": [
           {
-            "elemento": "ack1",
+            "elemento": "c3",
             "cortes": 2
           }
         ],
-        "nombrar": "ack2",
-        "posteriorA": "ack1"
+        "nombrar": "c4",
+        "posteriorA": "c3"
       }
     },
     {
-      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos: F y J.",
       "pista": "Al acercar la punta al cruce, se pega sola.",
       "herramientas": [
         "lapiz"
@@ -182,18 +181,18 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "ack1",
-          "ack2"
+          "c3",
+          "c4"
         ],
         "cantidad": 2,
         "nombrar": [
-          "acD1",
-          "acD2"
+          "F",
+          "J"
         ]
       }
     },
     {
-      "texto": "Une los dos cortes con la regla. Es la mediatriz de AC: hazla larga, que sobresalga por los dos lados.",
+      "texto": "Une F y J con la regla. Es la mediatriz de AC (m2): hazla larga, que sobresalga por los dos lados.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -201,10 +200,10 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "acD1",
-          "acD2"
+          "F",
+          "J"
         ],
-        "nombrar": "acm"
+        "nombrar": "m2"
       }
     },
     {
@@ -215,11 +214,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "acm",
+          "m2",
           "AC"
         ],
-        "nombrar": "Mb",
-        "rotular": "N"
+        "nombrar": "N"
       }
     },
     {
@@ -233,17 +231,17 @@
           "tipo": "recta",
           "pasaPor": [
             "A",
-            "Ma"
+            "M"
           ],
-          "nombrar": "md1"
+          "nombrar": "ma"
         },
         {
           "tipo": "recta",
           "pasaPor": [
             "B",
-            "Mb"
+            "N"
           ],
-          "nombrar": "md2"
+          "nombrar": "mb"
         }
       ]
     },
@@ -255,11 +253,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "md1",
-          "md2"
+          "ma",
+          "mb"
         ],
-        "nombrar": "G",
-        "rotular": true
+        "nombrar": "G"
       }
     }
   ],

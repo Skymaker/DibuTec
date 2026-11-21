@@ -86,12 +86,12 @@
     "y": "el segmento y",
     "z": "el segmento z",
     "CD": "el segmento CD",
-    "Naux": "la recta auxiliar",
-    "Nu": "la recta que une 3 con D"
+    "r": "la recta auxiliar r",
+    "s": "la recta s, que une 3 con D"
   },
   "pasos": [
     {
-      "texto": "Traza desde C una recta auxiliar inclinada (que forme un ángulo agudo con CD) de al menos 11 cm.",
+      "texto": "Traza desde C una recta auxiliar r inclinada (que forme un ángulo agudo con CD) de al menos 11 cm.",
       "pista": "Cualquier inclinación vale, pero que no se parezca mucho a la del segmento.",
       "herramientas": [
         "regla",
@@ -101,7 +101,7 @@
         "tipo": "recta",
         "desde": "C",
         "longitudMin": 102,
-        "nombrar": "Naux"
+        "nombrar": "r"
       }
     },
     {
@@ -114,38 +114,35 @@
       "objetivos": [
         {
           "tipo": "punto",
-          "sobre": "Naux",
+          "sobre": "r",
           "distancia": {
             "de": "C",
             "mm": 20
           },
-          "nombrar": "N1",
-          "rotular": "1"
+          "nombrar": "1"
         },
         {
           "tipo": "punto",
-          "sobre": "Naux",
+          "sobre": "r",
           "distancia": {
             "de": "C",
             "mm": 50
           },
-          "nombrar": "N2",
-          "rotular": "2"
+          "nombrar": "2"
         },
         {
           "tipo": "punto",
-          "sobre": "Naux",
+          "sobre": "r",
           "distancia": {
             "de": "C",
             "mm": 90
           },
-          "nombrar": "N3",
-          "rotular": "3"
+          "nombrar": "3"
         }
       ]
     },
     {
-      "texto": "Une con la regla el último punto (3) con el extremo D.",
+      "texto": "Une con la regla el último punto (3) con el extremo D: es la recta s.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -153,14 +150,14 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "N3",
+          "3",
           "D"
         ],
-        "nombrar": "Nu"
+        "nombrar": "s"
       }
     },
     {
-      "texto": "Con la escuadra y el cartabón, traza por cada uno de los otros puntos una paralela a esa recta, hasta que corte a CD.",
+      "texto": "Con la escuadra y el cartabón, traza por cada uno de los otros puntos una paralela a s, hasta que corte a CD.",
       "pista": "Apoya un canto de la escuadra en la recta que acabas de trazar, fija el cartabón contra ella y desliza la escuadra hasta cada punto.",
       "herramientas": [
         "escuadra",
@@ -171,23 +168,23 @@
         {
           "tipo": "recta",
           "pasaPor": [
-            "N1"
+            "1"
           ],
-          "paralelaA": "Nu",
-          "nombrar": "N1p"
+          "paralelaA": "s",
+          "nombrar": "s1"
         },
         {
           "tipo": "recta",
           "pasaPor": [
-            "N2"
+            "2"
           ],
-          "paralelaA": "Nu",
-          "nombrar": "N2p"
+          "paralelaA": "s",
+          "nombrar": "s2"
         }
       ]
     },
     {
-      "texto": "Marca los puntos donde las paralelas cortan a CD.",
+      "texto": "Marca los puntos donde las paralelas cortan a CD (1', 2'…).",
       "herramientas": [
         "lapiz"
       ],
@@ -195,18 +192,18 @@
         {
           "tipo": "punto",
           "cruce": [
-            "N1p",
+            "s1",
             "CD"
           ],
-          "nombrar": "N1c"
+          "nombrar": "1'"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "N2p",
+            "s2",
             "CD"
           ],
-          "nombrar": "N2c"
+          "nombrar": "2'"
         }
       ]
     }

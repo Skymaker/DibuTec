@@ -255,6 +255,8 @@
   .te-progreso i { flex: 1; height: 6px; border-radius: 3px; background: #e6e1d6; }
   .te-progreso i.hecho { background: #3bb273; }
   .te-progreso i.actual { background: var(--activo); }
+  .te-progreso i.omitido { background: repeating-linear-gradient(45deg, #3bb273 0 3px, #bfe6cf 3px 6px); }
+  .te-optativo { margin: 4px 0 0; font-size: 13px; color: var(--texto-suave); font-style: italic; }
   .te-boton {
     min-height: 36px; padding: 0 14px; border: 1px solid var(--borde); border-radius: 10px;
     background: #fff; color: var(--texto); font: inherit; font-size: 14px; cursor: pointer; touch-action: manipulation;
@@ -298,6 +300,25 @@
     box-shadow: 0 10px 30px rgba(30, 32, 50, .25); font-size: 14px;
   }
   #selector-lapiz[hidden] { display: none; }
+  /* Ventana para escribir el nombre de un punto o una línea */
+  #caja-nombre {
+    position: absolute; z-index: 5; width: min(320px, calc(100% - 16px)); margin: 0;
+    padding: 12px; background: #fff; border: 1px solid var(--borde); border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(30, 32, 50, .25); font-size: 14px;
+  }
+  #caja-nombre[hidden] { display: none; }
+  #caja-nombre label { display: block; margin-bottom: 8px; font-weight: 600; }
+  #caja-nombre .cn-fila { display: flex; gap: 8px; }
+  #caja-nombre input {
+    flex: 1; min-width: 0; min-height: 36px; padding: 0 10px; border: 1px solid var(--borde); border-radius: 10px;
+    font: inherit; font-size: 16px; font-weight: 600;
+  }
+  @media (pointer: coarse) { #caja-nombre input { min-height: 44px; } }
+  #caja-nombre input:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+  #caja-nombre input.mal { border-color: #c0392b; background: #fdf0ee; }
+  #caja-nombre .te-boton:disabled { opacity: .45; cursor: default; }
+  #nombre-nota { margin: 8px 0 0; font-size: 13px; color: var(--texto-suave); }
+  #nombre-nota.mal { color: #b03a2e; }
   #selector-lapiz h4 { margin: 0 0 10px; font-size: 13px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; }
   .sl-rejilla { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .sl-color, .sl-grosor {
@@ -332,6 +353,30 @@
   .panel-cuerpo h3 { font-size: 15px; margin: 18px 0 6px; color: var(--activo); text-transform: uppercase; letter-spacing: .04em; }
   .panel-cuerpo h3:first-child { margin-top: 10px; }
   .fila { margin: 14px 0; }
+  .cartela-editor .fila-interruptor { margin: 6px 0 10px; }
+  .cartela-campos { display: flex; flex-direction: column; gap: 10px; }
+  .cartela-campos[hidden] { display: none; }
+  .cartela-logo { display: flex; align-items: center; gap: 12px; }
+  .cl-vista { width: 64px; height: 64px; flex: none; border: 1px dashed var(--borde); border-radius: 10px; display: grid; place-items: center; font-size: 11px; color: var(--texto-suave); text-align: center; background: #fff; overflow: hidden; }
+  .cl-vista img { max-width: 56px; max-height: 56px; object-fit: contain; }
+  .cl-botones { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .cl-botones .btn-texto { margin: 0; }
+  .cl-botones .btn-texto[hidden] { display: none; }
+  .cartela-texto { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--texto-suave); }
+  .cartela-texto input { height: var(--ctl); padding: 0 10px; border: 1px solid var(--borde); border-radius: 10px; font: inherit; font-size: 15px; color: var(--texto); }
+  .cartela-texto input:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+  .paleta-editor { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
+  .pe-fila { display: flex; align-items: center; gap: 8px; }
+  .pe-fila input[type=color] { width: var(--ctl); height: var(--ctl); padding: 2px; border: 1px solid var(--borde); border-radius: 10px; background: #fff; cursor: pointer; flex: none; }
+  .pe-fila input[type=text] { flex: 1; min-width: 0; height: var(--ctl); padding: 0 10px; border: 1px solid var(--borde); border-radius: 10px; font: inherit; font-size: 15px; }
+  .pe-fila input:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+  .pe-quitar { width: var(--ctl); height: var(--ctl); flex: none; border: 1px solid var(--borde); border-radius: 10px; background: #fff; cursor: pointer; color: #b23a2e; display: grid; place-items: center; }
+  .pe-quitar:disabled { opacity: .35; cursor: default; }
+  .pe-quitar svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pe-quitar svg .a { fill: #f6d4cf; }
+  .pe-acciones { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pe-acciones .btn-texto { margin: 0; }
+  .pe-acciones .btn-texto:disabled { opacity: .45; cursor: default; }
   .fila[hidden] { display: none; }
   .etq { display: block; font-size: 14px; color: var(--texto-suave); margin-bottom: 6px; }
   .nota { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
@@ -384,7 +429,7 @@
     display: flex; align-items: center; justify-content: center; gap: 8px;
     width: 100%; min-height: var(--ctl); margin-top: 26px;
     border: 1px solid var(--borde); border-radius: 12px; background: #fff;
-    color: var(--texto); font: inherit; font-size: 15px; cursor: pointer; touch-action: manipulation;
+    color: var(--texto); font: inherit; font-size: 15px; cursor: pointer; touch-action: manipulation; text-decoration: none;
   }
   .btn-texto svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .btn-texto svg .a { fill: var(--acento); }
@@ -413,6 +458,15 @@
     <div id="opciones-goma" class="opciones" role="toolbar" aria-label="Opciones de la goma" hidden></div>
     <div id="opciones-lapiz" class="opciones" role="toolbar" aria-label="Opciones del portaminas" hidden></div>
     <div id="selector-lapiz" role="dialog" aria-modal="false" hidden></div>
+    <form id="caja-nombre" role="dialog" aria-modal="false" aria-labelledby="nombre-titulo" hidden>
+      <label id="nombre-titulo" for="nombre-entrada">Nombre</label>
+      <div class="cn-fila">
+        <input id="nombre-entrada" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="nombre-nota">
+        <button type="submit" class="te-boton principal">Aceptar</button>
+        <button type="button" class="te-boton" data-cancelar>Cancelar</button>
+      </div>
+      <p id="nombre-nota"></p>
+    </form>
   </main>
   <footer id="estado">
     <span id="mensaje" aria-live="polite"></span>
@@ -505,6 +559,7 @@ const Iconos = (() => {
     exportar: `<rect x="3" y="3" width="18" height="18" rx="2"/><circle class="a" cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>`,
     papelera: `<path d="M3 6h18M8 6V4h8v2"/><path class="a" d="M6 6l1 15h10l1-15Z"/><path d="M10 11v6M14 11v6"/>`,
     cerrar:   `<path d="M6 6l12 12M18 6 6 18"/>`,
+    nombrar:  `<path class="a" d="M2.5 12.6V3.5a1 1 0 0 1 1-1h9.1l9 9a1.4 1.4 0 0 1 0 2l-7.1 7.1a1.4 1.4 0 0 1-2 0Z"/><circle cx="7.5" cy="7.5" r="1.6"/>`,
     ejercicios: `<rect class="a" x="4.5" y="4" width="15" height="17.5" rx="2"/><path d="M9 4V2.5h6V4"/><path d="m8.5 13 2.5 2.5 4.5-5"/>`,
     contraer: `<path d="m6 15 6-6 6 6"/>`,
     expandir: `<path d="m6 9 6 6 6-6"/>`,
@@ -538,7 +593,7 @@ const Config = {
     imanMarcas:     { def: true,     ops: [true, false] },
     imanInstrumentos: { def: true,   ops: [true, false] },
     // Portaminas: color y grosor de los trazos nuevos
-    colorLapiz:     { def: 'grafito', ops: ['grafito', 'negro', 'azul', 'rojo', 'verde', 'naranja', 'morado', 'marron', 'rosa'] },
+    colorLapiz:     { def: 'grafito', ops: () => Paleta.lista().map(e => e.id) },   // colores de la paleta (personalizable)
     grosorLapiz:    { def: 0.5, min: 0.5, max: 1.5, paso: 0.1 },   // mm
     etiquetas:      { def: true,     ops: [true, false] },
     iman:           { def: 'medio',  ops: ['debil', 'medio', 'fuerte'] },
@@ -566,6 +621,7 @@ const Config = {
       const v = this.valido(k, guardado[k]);
       this.valores[k] = v === undefined ? this.esquema[k].def : v;
     }
+    if (!this.valido('colorLapiz', this.valores.colorLapiz)) this.valores.colorLapiz = Paleta.lista()[0].id;
     // Configuraciones antiguas: color del grafito y grosor de la mina
     if (guardado.colorLapiz === undefined && guardado.grafito) {
       const c = guardado.grafito === 'gris' ? 'grafito' : guardado.grafito;
@@ -577,7 +633,7 @@ const Config = {
   valido(k, v) {
     const e = this.esquema[k];
     if (!e) return undefined;
-    if (e.ops) return e.ops.includes(v) ? v : undefined;
+    if (e.ops) return (typeof e.ops === 'function' ? e.ops() : e.ops).includes(v) ? v : undefined;
     if (typeof v !== 'number' || !Number.isFinite(v)) return undefined;
     const paso = e.paso || 1;
     return Number((Math.round(Math.min(e.max, Math.max(e.min, v)) / paso) * paso).toFixed(6));
@@ -595,6 +651,7 @@ const Config = {
   },
   restaurar() {
     for (const k in this.esquema) this.valores[k] = this.esquema[k].def;
+    if (!this.valido('colorLapiz', this.valores.colorLapiz)) this.valores.colorLapiz = Paleta.lista()[0].id;
     this.guardar();
     this.oyentes.forEach(f => f('*'));
   },
@@ -604,13 +661,50 @@ const Config = {
 const Paleta = {
   papel:   { blanco: '#ffffff', crema: '#fbf5e3' },
   lineas:  { azul: '70, 125, 200', gris: '110, 112, 122', verde: '45, 145, 95' }, // rgb
-  // Biblioteca de colores del portaminas: [color, nombre]
+  // Colores de fábrica del portaminas (y de la mina del compás): [color, nombre]
   lapiz: {
     grafito: ['#3b3b40', 'Grafito'], negro: ['#141416', 'Negro'],   azul:   ['#2a4d8f', 'Azul'],
     rojo:    ['#c0392b', 'Rojo'],    verde: ['#24814f', 'Verde'],   naranja: ['#e07b12', 'Naranja'],
     morado:  ['#7b3fa0', 'Morado'],  marron: ['#7a4a22', 'Marrón'], rosa:   ['#d13a7c', 'Rosa'],
   },
-  colorLapiz(c) { return (this.lapiz[c] || this.lapiz.grafito)[0]; },
+  // La paleta que se ve al elegir el color: personalizable en Configuración (color y nombre de cada uno)
+  clavePaleta: 'dibutec.paleta',
+  MAX_COLORES: 12,
+  _lista: null,
+  hex: v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v),
+  deFabrica() { return Object.entries(this.lapiz).map(([id, [color, nombre]]) => ({ id, color, nombre })); },
+  lista() {
+    if (this._lista) return this._lista;
+    let l = null;
+    try { l = JSON.parse(localStorage.getItem(this.clavePaleta)); } catch (_) { l = null; }
+    const vistos = new Set();
+    l = Array.isArray(l) ? l.filter(e => e && typeof e.id === 'string' && /^[a-z0-9]{1,20}$/.test(e.id) && !vistos.has(e.id) && vistos.add(e.id) && this.hex(e.color))
+      .map(e => ({ id: e.id, color: e.color.toLowerCase(), nombre: typeof e.nombre === 'string' ? e.nombre.slice(0, 20) : '' })).slice(0, this.MAX_COLORES) : [];
+    return (this._lista = l.length ? l : this.deFabrica());
+  },
+  guardarLista(l) {
+    this._lista = l;
+    try { localStorage.setItem(this.clavePaleta, JSON.stringify(l)); } catch (_) { /* sin almacenamiento */ }
+    // Si se ha quitado el color que se estaba usando, se pasa al primero
+    if (!l.some(e => e.id === Config.get('colorLapiz'))) { Config.valores.colorLapiz = l[0].id; Config.guardar(); }
+    UI.actualizarOpcionesLapiz();
+    SelectorLapiz.cerrar();
+    Render.pedir('instrumentos');
+  },
+  restaurarLista() {
+    this._lista = null;
+    try { localStorage.removeItem(this.clavePaleta); } catch (_) { /* */ }
+    this.guardarLista(this.lista());
+  },
+  // Nombre que se muestra: el puesto o, si no tiene, su código hexadecimal
+  nombre(e) { return (e.nombre || '').trim() || e.color.toUpperCase(); },
+  info(id) { return this.lista().find(e => e.id === id) || this.lista()[0]; },
+  // Color de un trazo: los nuevos guardan el color (#rrggbb); los antiguos, el nombre del color
+  colorLapiz(c) {
+    if (this.hex(c)) return c;
+    const e = this.lista().find(x => x.id === c);
+    return e ? e.color : (this.lapiz[c] || this.lapiz.grafito)[0];
+  },
   lapizActual() { return this.colorLapiz(Config.get('colorLapiz')); },
   // Plástico de los instrumentos: relleno translúcido, borde, tinta de las escalas y color de la muestra
   instrumentos: {
@@ -765,6 +859,164 @@ const Hoja = {
     const [l, c] = this.tamanos[fmt] || this.tamanos.A4;
     this.ancho = ori === 'v' ? c : l;
     this.alto  = ori === 'v' ? l : c;
+  },
+};
+
+/* =====================================================================
+   Zona de dibujo: la hoja o, si hay marco, dentro del marco; nunca sobre la cartela
+   ===================================================================== */
+const Zona = {
+  marco() { const mg = Config.get('margen') ? Hoja.margen : 0; return { x0: mg, y0: mg, x1: Hoja.ancho - mg, y1: Hoja.alto - mg }; },
+  dentro(x, y) {
+    const m = this.marco();
+    if (x < m.x0 - 1e-6 || y < m.y0 - 1e-6 || x > m.x1 + 1e-6 || y > m.y1 + 1e-6) return false;
+    const c = Cartela.caja();
+    return !(c && x > c.x0 && y > c.y0 && x < c.x1 && y < c.y1);
+  },
+  aviso() {
+    const sitio = Config.get('margen') ? 'dentro del marco' : 'dentro de la hoja';
+    return `Solo se puede dibujar ${sitio}${Cartela.caja() ? ', fuera de la cartela' : ''}.`;
+  },
+  // Tramos [t0, t1] de un recorrido punto(t), t ∈ [0, 1], que quedan dentro (muestreo y bisección)
+  tramos(punto, largo) {
+    const n = Math.max(16, Math.min(4000, Math.ceil(largo / 0.4)));
+    const dentro = t => { const q = punto(t); return this.dentro(q.x, q.y); };
+    const borde = (tIn, tOut) => { for (let i = 0; i < 40; i++) { const m = (tIn + tOut) / 2; if (dentro(m)) tIn = m; else tOut = m; } return tIn; };
+    const out = [];
+    let ini = dentro(0) ? 0 : null, prev = 0;
+    for (let k = 1; k <= n; k++) {
+      const t = k / n, d = dentro(t);
+      if (d && ini === null) ini = borde(t, prev);
+      else if (!d && ini !== null) { out.push([ini, borde(prev, t)]); ini = null; }
+      prev = t;
+    }
+    if (ini !== null) out.push([ini, 1]);
+    return out.filter(([a, b]) => (b - a) * largo > 0.3);
+  },
+  recta(x1, y1, x2, y2) {
+    const P = t => ({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t });
+    return this.tramos(P, Math.hypot(x2 - x1, y2 - y1)).map(([a, b]) => [P(a), P(b)]);
+  },
+  // Trozos [a0, a1] de un arco que quedan dentro
+  arco(cx, cy, r, a0, a1) {
+    const ang = t => a0 + (a1 - a0) * t;
+    const l = this.tramos(t => ({ x: cx + r * Math.cos(ang(t)), y: cy + r * Math.sin(ang(t)) }), Math.abs(a1 - a0) * r);
+    // En una circunferencia, el trozo del final y el del principio son el mismo
+    if (l.length > 1 && Math.abs(Math.abs(a1 - a0) - Geom.DOS_PI) < 1e-6 && l[0][0] === 0 && l[l.length - 1][1] === 1) {
+      const u = l.pop(); l[0] = [u[0], l[0][1] + 1];
+    }
+    return l.map(([a, b]) => [ang(a), ang(b)]);
+  },
+  // Recorta lo que se pinta en ctx a la zona de dibujo
+  recortar(ctx) {
+    const m = this.marco(), c = Cartela.caja();
+    ctx.beginPath();
+    ctx.rect(m.x0, m.y0, m.x1 - m.x0, m.y1 - m.y0);
+    if (c) ctx.rect(c.x0, c.y0, c.x1 - c.x0, c.y1 - c.y0);
+    ctx.clip('evenodd');
+  },
+};
+
+/* =====================================================================
+   Cartela: logotipo y nombre del colegio, nombre del alumno, nivel y clase
+   ===================================================================== */
+const Cartela = {
+  clave: 'dibutec.cartela',
+  datos: { activa: false, logo: '', colegio: '', alumno: '', nivel: '' },
+  img: null,
+  cargar() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(this.clave)); } catch (_) { d = null; }
+    if (d && typeof d === 'object') for (const k in this.datos) if (typeof d[k] === typeof this.datos[k]) this.datos[k] = d[k];
+    if (this.datos.logo && !/^data:image\/(png|jpeg);base64,/.test(this.datos.logo)) this.datos.logo = '';
+    this.prepararLogo();
+  },
+  guardar() {
+    try { localStorage.setItem(this.clave, JSON.stringify(this.datos)); }
+    catch (_) { UI.aviso('No se ha podido guardar la cartela en este navegador.'); }
+    Render.pedir('papel', 'dibujo', 'instrumentos');
+  },
+  prepararLogo() {
+    this.img = null;
+    if (!this.datos.logo) return;
+    const im = new Image();
+    im.onload = () => { this.img = im; Render.pedir('papel'); };
+    im.src = this.datos.logo;
+  },
+  // Logotipo PNG o JPEG, reducido para que quepa en el almacenamiento del navegador
+  leerLogo(archivo, alTerminar) {
+    if (!archivo) return;
+    if (!/^image\/(png|jpeg)$/.test(archivo.type)) { UI.aviso('El logotipo tiene que ser una imagen PNG o JPEG.'); return; }
+    if (archivo.size > 15e6) { UI.aviso('Esa imagen es demasiado grande.'); return; }
+    const url = URL.createObjectURL(archivo), im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 480 / Math.max(im.width, im.height));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k));
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      this.datos.logo = c.toDataURL(archivo.type, 0.9);
+      this.prepararLogo();
+      this.guardar();
+      if (alTerminar) alTerminar();
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); UI.aviso('No se ha podido leer la imagen.'); };
+    im.src = url;
+  },
+  // Rectángulo de la cartela (mm): abajo a la derecha, apoyada en el marco
+  caja() {
+    if (!this.datos.activa) return null;
+    const mg = Hoja.margen, w = Math.min(120, Hoja.ancho * 0.45), h = 30;
+    return { x0: Hoja.ancho - mg - w, y0: Hoja.alto - mg - h, x1: Hoja.ancho - mg, y1: Hoja.alto - mg };
+  },
+  dibujar(ctx) {
+    const c = this.caja();
+    if (!c) return;
+    const w = c.x1 - c.x0, h = c.y1 - c.y0, L = h;   // L: lado de la casilla del logotipo
+    const fuente = getComputedStyle(document.body).fontFamily, tinta = '#1f2433', suave = '#6a6f80';
+    ctx.save();
+    ctx.fillStyle = Paleta.papel[Config.get('colorPapel')] || '#fff';
+    ctx.fillRect(c.x0, c.y0, w, h);
+    ctx.strokeStyle = tinta;
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(c.x0, c.y0, w, h);
+    ctx.lineWidth = 0.25;
+    ctx.beginPath();
+    ctx.moveTo(c.x0 + L, c.y0); ctx.lineTo(c.x0 + L, c.y1);
+    const f1 = c.y0 + h * 0.4, f2 = c.y0 + h * 0.7;
+    ctx.moveTo(c.x0 + L, f1); ctx.lineTo(c.x1, f1);
+    ctx.moveTo(c.x0 + L, f2); ctx.lineTo(c.x1, f2);
+    ctx.stroke();
+    // Logotipo, entero dentro de su casilla
+    if (this.img) {
+      const pad = 2, s = Math.min((L - 2 * pad) / this.img.width, (L - 2 * pad) / this.img.height);
+      const iw = this.img.width * s, ih = this.img.height * s;
+      ctx.drawImage(this.img, c.x0 + (L - iw) / 2, c.y0 + (L - ih) / 2, iw, ih);
+    } else {
+      ctx.fillStyle = '#b9bccb';
+      ctx.font = `500 3px ${fuente}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('Logotipo', c.x0 + L / 2, c.y0 + L / 2);
+    }
+    // Texto que cabe en su casilla (se reduce si es largo)
+    const ancho = w - L - 4, x = c.x0 + L + 2;
+    const escribir = (t, y, tam, peso, color) => {
+      if (!t) return;
+      ctx.font = `${peso} ${tam}px ${fuente}`;
+      const m = ctx.measureText(t).width;
+      if (m > ancho) ctx.font = `${peso} ${tam * ancho / m}px ${fuente}`;
+      ctx.fillStyle = color;
+      ctx.fillText(t, x, y);
+    };
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    escribir(this.datos.colegio.trim() || 'Nombre del colegio', c.y0 + h * 0.2, 4.6, 700, this.datos.colegio.trim() ? tinta : '#b9bccb');
+    ctx.textBaseline = 'top';
+    escribir('Alumno/a', f1 + 0.8, 2.2, 500, suave);
+    escribir('Nivel y clase', f2 + 0.8, 2.2, 500, suave);
+    ctx.textBaseline = 'alphabetic';
+    escribir(this.datos.alumno.trim(), f2 - 1.4, 4, 600, tinta);
+    escribir(this.datos.nivel.trim(), c.y1 - 1.4, 4, 600, tinta);
+    ctx.restore();
   },
 };
 
@@ -1009,7 +1261,7 @@ const Capas = {
    Render: repintado bajo demanda con requestAnimationFrame
    ===================================================================== */
 const Render = {
-  pendiente: { papel: false, dibujo: false, instrumentos: false },
+  pendiente: { papel: false, dibujo: false, instrumentos: false, animacion: false },
   programado: false,
   pedir(...capas) {
     for (const c of capas) this.pendiente[c] = true;
@@ -1023,13 +1275,15 @@ const Render = {
     UI.actualizarZoom();
   },
   pintar() {
-    this.programado = false;
     const p = this.pendiente;
-    if (p.papel) this.papel();
-    if (p.dibujo) this.dibujo();
-    if (p.instrumentos) this.instrumentos();
+    // Primero se comprueba el ejercicio: puede poner nombres, y tienen que verse en este mismo repintado
     if (p.dibujo || p.instrumentos) { Guardado.programar(); Ejercicio.comprobar(); }
-    p.papel = p.dibujo = p.instrumentos = false;
+    this.programado = false;
+    const q = { papel: p.papel, dibujo: p.dibujo, instrumentos: p.instrumentos || p.animacion };
+    p.papel = p.dibujo = p.instrumentos = p.animacion = false;   // «animacion»: solo repintar, sin comprobar el ejercicio
+    if (q.papel) this.papel();
+    if (q.dibujo) this.dibujo();
+    if (q.instrumentos) this.instrumentos();
     Lupa.pintar();
   },
 
@@ -1052,6 +1306,7 @@ const Render = {
     const v0 = Vista.aMundo(0, 0), v1 = Vista.aMundo(Capas.w, Capas.h);
     Papel.dibujar(m, { x0: v0.x, y0: v0.y, x1: v1.x, y1: v1.y });
     this.margen(m);
+    Cartela.dibujar(m);
   },
   margen(m) {
     if (!Config.get('margen')) return;
@@ -1077,7 +1332,12 @@ const Render = {
     for (const r of Escena.rectas) { ctx.strokeStyle = color(r); ctx.lineWidth = grosor(r); Dibujo.trazo(ctx, 'recta', r); }
     for (const a of Escena.arcos) { ctx.strokeStyle = color(a); ctx.lineWidth = grosor(a); Dibujo.trazo(ctx, 'arco', a); }
     for (const p of Escena.puntos) Dibujo.cruz(ctx, p.x, p.y, color(p), grosor(p));
-    if (Config.get('etiquetas') || Ejercicio.def) for (const p of Escena.puntos) Dibujo.etiqueta(ctx, p, color(p));
+    const letras = Config.get('etiquetas') || Ejercicio.def;
+    Dibujo.etiquetas(ctx, [
+      ...Escena.puntos.filter(p => p.etiqueta && (letras || p.manual)).map(o => ({ tipo: 'punto', o, texto: o.etiqueta, color: color(o) })),
+      ...Escena.rectas.filter(r => r.nombre).map(o => ({ tipo: 'recta', o, texto: o.nombre, color: color(o) })),
+      ...Escena.arcos.filter(a => a.nombre).map(o => ({ tipo: 'arco', o, texto: o.nombre, color: color(o) })),
+    ]);
     ctx.globalAlpha = 1;
   },
 
@@ -1137,13 +1397,15 @@ const Escena = {
     const fin = Number.isFinite, lista = v => Array.isArray(v) ? v : [];
     d = d && typeof d === 'object' ? d : {};
     // Color y grosor de cada trazo (los dibujos antiguos no los tienen)
-    const trazo = o => ({ c: Config.valido('colorLapiz', o.c) || 'grafito', g: Config.valido('grosorLapiz', o.g) || 0.5 });
+    const trazo = o => ({ c: Paleta.hex(o.c) ? o.c.toLowerCase() : typeof o.c === 'string' && (Paleta.lapiz[o.c] || Paleta.lista().some(e => e.id === o.c)) ? o.c : 'grafito',
+      g: Config.valido('grosorLapiz', o.g) || 0.5 });
+    const nombre = o => (o.nombre ? { nombre: String(o.nombre).slice(0, 12) } : {});
     const puntos = lista(d.puntos).filter(p => p && fin(p.x) && fin(p.y))
-      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 6), dado: !!p.dado, ...trazo(p) }));
+      .map(p => ({ id: fin(p.id) ? p.id : 0, x: p.x, y: p.y, etiqueta: String(p.etiqueta || '').slice(0, 12), dado: !!p.dado, ...(p.manual ? { manual: true } : {}), ...trazo(p) }));
     const rectas = lista(d.rectas).filter(r => r && [r.x1, r.y1, r.x2, r.y2].every(fin))
-      .map(r => ({ id: fin(r.id) ? r.id : 0, x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2, dado: !!r.dado, ...trazo(r) }));
+      .map(r => ({ id: fin(r.id) ? r.id : 0, x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2, dado: !!r.dado, ...nombre(r), ...trazo(r) }));
     const arcos = lista(d.arcos).filter(a => a && [a.cx, a.cy, a.r, a.a0, a.a1].every(fin) && a.r > 0)
-      .map(a => ({ id: fin(a.id) ? a.id : 0, cx: a.cx, cy: a.cy, r: a.r, a0: a.a0, a1: a.a1, dado: !!a.dado, ...trazo(a) }));
+      .map(a => ({ id: fin(a.id) ? a.id : 0, cx: a.cx, cy: a.cy, r: a.r, a0: a.a0, a1: a.a1, dado: !!a.dado, ...nombre(a), ...trazo(a) }));
     let sigId = fin(d.sigId) ? d.sigId : 1;
     for (const o of [...puntos, ...rectas, ...arcos]) { if (!o.id) o.id = sigId++; sigId = Math.max(sigId, o.id + 1); }
     return { puntos, rectas, arcos, sigId, instrumentos: lista(d.instrumentos) };
@@ -1163,7 +1425,7 @@ const Escena = {
   },
 
   // Color y grosor del portaminas con los que se guarda cada trazo nuevo
-  trazoActual() { return { c: Config.get('colorLapiz'), g: Config.get('grosorLapiz') }; },
+  trazoActual() { return { c: Paleta.lapizActual(), g: Config.get('grosorLapiz') }; },   // el color exacto: no cambia si se edita la paleta
   agregarPunto(x, y) {
     const p = Object.assign({ id: this.sigId++, x, y, etiqueta: this.siguienteEtiqueta() }, this.trazoActual());
     this.puntos.push(p);
@@ -1446,10 +1708,13 @@ const Lapiz = {
     if (a.modo === 'canto') {
       const len = Geom.dist(a.ini.x, a.ini.y, a.x, a.y);
       if (len * Vista.escala >= 4) {
+        const trozos = Zona.recta(a.ini.x, a.ini.y, a.x, a.y);
+        if (!trozos.length) { UI.mensaje(Zona.aviso()); return; }
         Historial.registrar();
-        Escena.agregarRecta(a.ini.x, a.ini.y, a.x, a.y);
+        for (const [p, q] of trozos) Escena.agregarRecta(p.x, p.y, q.x, q.y);
         Sonido.tocar('punto');
-        UI.mensaje(`Recta trazada: ${this.mmTexto(len)}.`);
+        const dentro = trozos.reduce((s, [p, q]) => s + Geom.dist(p.x, p.y, q.x, q.y), 0);
+        UI.mensaje(`Recta trazada: ${this.mmTexto(dentro)}.` + (len - dentro > 0.05 ? ' ' + Zona.aviso().replace('Solo se puede dibujar', 'Se ha cortado: solo se dibuja') : ''));
         return;
       }
       // Toque corto junto al canto: marca un punto sobre el canto
@@ -1459,8 +1724,8 @@ const Lapiz = {
   },
   gradosTexto(g) { return `Ángulo: ${g}° (escala interior: ${180 - g}°)`; },
   marcarPunto(a) {
-    if (a.x < 0 || a.y < 0 || a.x > Hoja.ancho || a.y > Hoja.alto) {
-      UI.mensaje('Los puntos se marcan dentro de la hoja.');
+    if (!Zona.dentro(a.x, a.y)) {
+      UI.mensaje(Zona.aviso());
       return;
     }
     const existente = Escena.puntos.find(p => Geom.dist(p.x, p.y, a.x, a.y) < 0.05);
@@ -1511,13 +1776,15 @@ const Lapiz = {
     }
     if (this.activo && e.modo === 'canto') {
       if (e.ini.snap) Dibujo.halo(ctx, e.ini.x, e.ini.y);
+      ctx.save();
+      Zona.recortar(ctx);   // lo que quede fuera no se dibuja
       ctx.strokeStyle = color;
       ctx.globalAlpha = 0.85;
       ctx.lineWidth = Dibujo.grosor();
       ctx.beginPath();
       ctx.moveTo(e.ini.x, e.ini.y); ctx.lineTo(e.x, e.y);
       ctx.stroke();
-      ctx.globalAlpha = 1;
+      ctx.restore();
       // Longitud junto al final, por fuera del instrumento
       const len = Geom.dist(e.ini.x, e.ini.y, e.x, e.y);
       if (len * Vista.escala > 20) {
@@ -1652,9 +1919,126 @@ const Goma = {
   },
 };
 
+/* =====================================================================
+   Nombrar: cambiar el nombre de los puntos y poner nombre a las líneas
+   ===================================================================== */
+const Nombrar = {
+  hover: null,      // elemento bajo el puntero
+  pulsado: null,    // elemento tocado al bajar
+  editando: null,   // elemento cuyo nombre se está escribiendo
+  MAX: 6,
+
+  radio(tipo) { return (tipo === 'touch' ? 14 : 8) / Vista.escala; },
+  buscar(info) { return Escena.buscarElemento(info.x, info.y, this.radio(info.tipo), true); },
+  abajo(info) {
+    this.cerrar();
+    this.pulsado = this.hover = this.buscar(info);
+    Render.pedir('instrumentos');
+  },
+  mover(info) { this.hover = this.buscar(info); Render.pedir('instrumentos'); },
+  arriba() {
+    const el = this.pulsado;
+    this.pulsado = null;
+    if (el && this.hover && el.obj === this.hover.obj) this.abrir(el);
+    else if (!el) UI.mensaje(Ejercicio.def ? 'Toca un punto o una línea tuyos para ponerles nombre (lo del enunciado no se puede cambiar).' : 'Toca un punto o una línea para ponerles nombre.');
+    Render.pedir('instrumentos');
+  },
+  pasar(info) { this.hover = this.buscar(info); Render.pedir('instrumentos'); },
+  salir() { this.hover = null; Render.pedir('instrumentos'); },
+  cancelar() { this.pulsado = null; this.hover = null; this.cerrar(); Render.pedir('instrumentos'); },
+  overlay(ctx) {
+    if (this.editando) Dibujo.resaltar(ctx, this.editando, 'rgba(47, 111, 208, .75)');
+    if (this.hover && (!this.editando || this.hover.obj !== this.editando.obj)) Dibujo.resaltar(ctx, this.hover, 'rgba(47, 111, 208, .45)');
+  },
+
+  actual(el) { return el.tipo === 'punto' ? el.obj.etiqueta : el.obj.nombre || ''; },
+  que(el) { return el.tipo === 'punto' ? 'el punto' : el.tipo === 'recta' ? 'la recta' : Geom.esCircunferencia(el.obj) ? 'la circunferencia' : 'el arco'; },
+  // ¿Lo lleva ya otro punto u otra línea (o un elemento del ejercicio)?
+  usado(n, el) {
+    if (Escena.puntos.some(p => p !== el.obj && p.etiqueta === n)) return true;
+    if (Escena.rectas.some(r => r !== el.obj && r.nombre === n) || Escena.arcos.some(a => a !== el.obj && a.nombre === n)) return true;
+    const e = Ejercicio.def && Ejercicio.nombres[n];
+    return !!(e && e.id !== el.obj.id);
+  },
+
+  construir() {
+    const f = this.caja = document.getElementById('caja-nombre');
+    this.entrada = document.getElementById('nombre-entrada');
+    this.titulo = document.getElementById('nombre-titulo');
+    this.nota = document.getElementById('nombre-nota');
+    f.addEventListener('submit', e => { e.preventDefault(); this.confirmar(); });
+    f.querySelector('[data-cancelar]').addEventListener('click', () => this.cerrar());
+    f.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); this.cerrar(); } });
+    this.entrada.addEventListener('input', () => this.validar());
+    for (const t of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'dblclick'])
+      f.addEventListener(t, e => e.stopPropagation(), { passive: true });
+  },
+  abrir(el) {
+    this.editando = el;
+    const linea = el.tipo !== 'punto';
+    this.titulo.textContent = el.tipo === 'punto' ? `Nombre del punto ${el.obj.etiqueta}` : `Nombre de ${this.que(el)}`;
+    this.entrada.value = this.actual(el);
+    this.entrada.maxLength = this.MAX;
+    this.entrada.placeholder = linea ? 'r, s, c1…' : 'A, B, P1…';
+    this.validar();
+    const f = this.caja;
+    f.hidden = false;
+    // Junto al elemento, sin salirse de la hoja de dibujo
+    const c = el.tipo === 'punto' ? el.obj : Dibujo.centroLinea(el.tipo, el.obj);
+    const s = Vista.aPantalla(c.x, c.y), w = f.offsetWidth, h = f.offsetHeight;
+    let top = s.y + 22;
+    if (top + h > Capas.h - 8) top = s.y - h - 22;
+    f.style.left = Geom.clamp(s.x - w / 2, 8, Math.max(8, Capas.w - w - 8)) + 'px';
+    f.style.top = Geom.clamp(top, 8, Math.max(8, Capas.h - h - 8)) + 'px';
+    this.entrada.focus();
+    this.entrada.select();
+    Render.pedir('instrumentos');
+  },
+  // Devuelve el motivo si el nombre no vale
+  problema(n, el) {
+    if (!n) return el.tipo === 'punto' ? 'Un punto necesita un nombre.' : null;
+    if (/\s/.test(n)) return 'El nombre no puede llevar espacios.';
+    if (this.usado(n, el)) return `Ya hay otro elemento que se llama «${n}».`;
+    return null;
+  },
+  validar() {
+    const el = this.editando;
+    if (!el) return;
+    const m = this.problema(this.entrada.value.trim(), el);
+    this.entrada.classList.toggle('mal', !!m);
+    this.entrada.setAttribute('aria-invalid', String(!!m));
+    this.nota.textContent = m || (el.tipo === 'punto' ? 'Hasta 6 letras o números.' : 'Hasta 6 letras o números. Déjalo vacío para quitar el nombre. Se escribe en el centro de la línea.');
+    this.nota.classList.toggle('mal', !!m);
+    this.caja.querySelector('[type="submit"]').disabled = !!m;
+  },
+  confirmar() {
+    const el = this.editando;
+    if (!el) return;
+    const n = this.entrada.value.trim().slice(0, this.MAX);
+    const m = this.problema(n, el);
+    if (m) { this.validar(); this.entrada.focus(); return; }
+    if (n === this.actual(el)) { this.cerrar(); return; }
+    Historial.registrar();
+    if (el.tipo === 'punto') { el.obj.etiqueta = n; el.obj.manual = true; }
+    else if (n) el.obj.nombre = n;
+    else delete el.obj.nombre;
+    Sonido.tocar('punto');
+    UI.mensaje(n ? `${this.que(el)[0].toUpperCase() + this.que(el).slice(1)} se llama ahora ${n}.` : `Has quitado el nombre de ${this.que(el)}.`);
+    this.cerrar();
+    Render.pedir('dibujo');
+  },
+  cerrar() {
+    if (!this.editando && (!this.caja || this.caja.hidden)) return;
+    this.editando = null;
+    if (this.caja) this.caja.hidden = true;
+    Render.pedir('instrumentos');
+  },
+};
+
 const Acciones = {
   lapiz: Lapiz,
   goma: Goma,
+  nombrar: Nombrar,
   actual() { return this[App.herramienta] || null; },
   cancelarActual() {
     const a = this.actual();
@@ -1679,12 +2063,87 @@ const Dibujo = {
     ctx.moveTo(x - brazo, y + brazo); ctx.lineTo(x + brazo, y - brazo);
     ctx.stroke();
   },
-  etiqueta(ctx, p, color) {
-    const tam = Math.max(4, 12 / Vista.escala);
-    ctx.fillStyle = color;
+
+  // Punto central de una línea y dirección hacia la que se aparta su nombre
+  centroLinea(tipo, o) {
+    if (tipo === 'recta') {
+      const dx = o.x2 - o.x1, dy = o.y2 - o.y1, l = Math.hypot(dx, dy) || 1;
+      let nx = dy / l, ny = -dx / l;
+      if (ny > 0 || (ny === 0 && nx < 0)) { nx = -nx; ny = -ny; }   // hacia arriba de la hoja
+      return { x: (o.x1 + o.x2) / 2, y: (o.y1 + o.y2) / 2, nx, ny };
+    }
+    const t = Geom.esCircunferencia(o) ? -Math.PI / 2 : (o.a0 + o.a1) / 2;
+    const nx = Math.cos(t), ny = Math.sin(t);
+    return { x: o.cx + o.r * nx, y: o.cy + o.r * ny, nx, ny };
+  },
+  // Nombres de puntos y líneas, cada uno en el sitio libre más cercano a su lugar preferido:
+  // no se montan unos sobre otros ni sobre las cruces de los puntos
+  etiquetas(ctx, lista) {
+    if (!lista.length) return;
+    const tam = Math.max(4, 12 / Vista.escala), brazo = Math.max(1.2, 4 / Vista.escala);
+    ctx.save();
     ctx.font = `600 ${tam}px ${getComputedStyle(document.body).fontFamily}`;
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(p.etiqueta, p.x + tam * 0.4, p.y - tam * 0.35);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
+    const cruces = Escena.puntos.map(p => ({ x0: p.x - brazo, y0: p.y - brazo, x1: p.x + brazo, y1: p.y + brazo }));
+    const solape = (a, b) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+    // Muestras de los trazos, para no escribir encima de las líneas
+    const paso = tam / 3, trazos = [];
+    for (const r of Escena.rectas) {
+      const n = Math.min(400, Math.ceil(Math.hypot(r.x2 - r.x1, r.y2 - r.y1) / paso));
+      for (let k = 0; k <= n; k++) trazos.push([r.x1 + (r.x2 - r.x1) * k / n, r.y1 + (r.y2 - r.y1) * k / n]);
+    }
+    for (const a of Escena.arcos) {
+      const b0 = Geom.esCircunferencia(a) ? 0 : a.a0, b1 = Geom.esCircunferencia(a) ? Geom.DOS_PI : a.a1;
+      const n = Math.min(400, Math.ceil(Math.abs(b1 - b0) * a.r / paso));
+      for (let k = 0; k <= n; k++) { const t = b0 + (b1 - b0) * k / n; trazos.push([a.cx + a.r * Math.cos(t), a.cy + a.r * Math.sin(t)]); }
+    }
+    const tapa = c => { let m = 0; for (const [x, y] of trazos) if (x > c.x0 && x < c.x1 && y > c.y0 && y < c.y1) m++; return m; };
+    const puestas = [];
+    for (const e of lista) {
+      const hw = ctx.measureText(e.texto).width / 2 + tam * 0.12, hh = tam * 0.42;
+      let mejor = null;
+      this.sitiosEtiqueta(e, hw, hh, tam, brazo).forEach((c, i) => {
+        const caja = { x0: c.x - hw, y0: c.y - hh, x1: c.x + hw, y1: c.y + hh };
+        let coste = i * 0.04 * tam * tam;                              // se prefieren los primeros sitios
+        for (const k of puestas) coste += solape(caja, k) * 12;
+        for (const k of cruces) coste += solape(caja, k) * 6;
+        coste += tapa(caja) * tam * tam * 0.15;
+        if (!mejor || coste < mejor.coste) mejor = { coste, c, caja };
+      });
+      puestas.push(mejor.caja);
+      ctx.strokeStyle = 'rgba(255, 255, 255, .85)';
+      ctx.lineWidth = tam * 0.28;
+      ctx.strokeText(e.texto, mejor.c.x, mejor.c.y);
+      ctx.fillStyle = e.color;
+      ctx.fillText(e.texto, mejor.c.x, mejor.c.y);
+    }
+    ctx.restore();
+  },
+  // Centros posibles del nombre, del preferido al último
+  sitiosEtiqueta(e, hw, hh, tam, brazo) {
+    const o = e.o, g = tam * 0.3, out = [];
+    if (e.tipo === 'punto') {
+      for (const [dx, dy] of [[1, -1], [-1, -1], [1, 1], [-1, 1], [0, -1], [0, 1], [1, 0], [-1, 0]])
+        out.push({ x: o.x + dx * (brazo + g + hw), y: o.y + dy * (brazo + g + hh) });
+      return out;
+    }
+    if (e.tipo === 'recta') {
+      const c = this.centroLinea('recta', o);
+      for (const f of [.5, .4, .6, .3, .7, .2, .8, .1, .9]) for (const lado of [1, -1]) {
+        const d = lado * (g + Math.abs(c.nx) * hw + Math.abs(c.ny) * hh);
+        out.push({ x: o.x1 + (o.x2 - o.x1) * f + c.nx * d, y: o.y1 + (o.y2 - o.y1) * f + c.ny * d });
+      }
+      return out;
+    }
+    const angs = Geom.esCircunferencia(o) ? [-90, -45, -135, 0, 180, -22, -158, 45, 135, 90].map(a => a * Math.PI / 180)
+      : [.5, .35, .65, .2, .8, .08, .92].map(f => o.a0 + (o.a1 - o.a0) * f);
+    for (const t of angs) for (const lado of [1, -1]) {
+      const ux = Math.cos(t), uy = Math.sin(t), d = o.r + lado * (g + Math.abs(ux) * hw + Math.abs(uy) * hh);
+      if (d > 0) out.push({ x: o.cx + ux * d, y: o.cy + uy * d });
+    }
+    return out;
   },
   trazo(ctx, tipo, o) {
     ctx.beginPath();
@@ -2113,14 +2572,34 @@ class Compas extends Instrumento {
     this.rMax = 2 * this.pierna * 0.98;
     this.origenIman = [0, 0];    // la punta seca se pega a los puntos
     this.levantada = false;      // mina levantada: el compás gira sin pintar
+    this.autoLevantada = false;  // se levantó sola al terminar un trazo: se apoya sola al empezar el siguiente
+    this.alzado = 0;             // 0: tumbado (visto desde arriba); 1: de pie, perpendicular al papel, al trazar
     this.ayuda = 'Compás: arrastra la punta seca hasta un punto, abre el compás moviendo la mina y gira el asa de arriba. El botón de la mina decide si pinta (apoyada) o solo gira (levantada).';
   }
   altura() {
     const m = this.r / 2;
     return Math.sqrt(Math.max(this.pierna ** 2 - m * m, (this.pierna * 0.18) ** 2));
   }
-  bisagra() { return [this.r / 2, -this.altura()]; }
-  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(12, 32 / Vista.escala)]; }
+  // De pie, visto desde arriba, la bisagra queda sobre el centro de las patas
+  bisagra() { return [this.r / 2, -this.altura() * (1 - this.alzado)]; }
+  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(12, 32 / Vista.escala) * (1 - this.alzado * 0.85)]; }
+  // Animación al ponerse de pie (1) o tumbarse (0)
+  animarAlzado(objetivo, ms = 420) {
+    let quieto = false;
+    try { quieto = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { /* */ }
+    if (quieto) { this.alzado = objetivo; Render.pedir('instrumentos'); return; }
+    const desde = this.alzado, t0 = performance.now();
+    this._anim = t0;
+    const paso = ahora => {
+      if (this._anim !== t0) return;                     // otra animación la ha sustituido
+      // Curva suave (seno) al empezar y al terminar
+      const k = Math.min(1, (ahora - t0) / ms), e = (1 - Math.cos(Math.PI * k)) / 2;
+      this.alzado = desde + (objetivo - desde) * e;
+      Render.pedir('animacion');
+      if (k < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
+  }
   centroLocal() { return [this.r / 2, -this.altura() / 2]; }
   cantosMundo() { return []; }
   radioPunta() { return Math.max(3, 12 / Vista.escala); }
@@ -2130,6 +2609,7 @@ class Compas extends Instrumento {
   radioBotonMina() { return Math.max(4, 12 / Vista.escala); }
   alternarMina() {
     this.levantada = !this.levantada;
+    this.autoLevantada = false;
     Sonido.tocar('iman');
     UI.mensaje(this.levantada
       ? 'Mina levantada: el compás gira sin pintar.'
@@ -2195,23 +2675,26 @@ class Compas extends Instrumento {
     return fin;
   }
   dibujar(ctx) {
-    const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala;
+    const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala, a = this.alzado;
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
     ctx.save();
-    ctx.shadowColor = 'rgba(30, 40, 60, .25)';
-    ctx.shadowBlur = 8 * Capas.dpr;
-    ctx.shadowOffsetY = 3 * Capas.dpr;
+    // De pie, la cabeza está más cerca: sombra más lejana y difusa
+    ctx.shadowColor = `rgba(30, 40, 60, ${.25 - a * .07})`;
+    ctx.shadowBlur = (8 + a * 14) * Capas.dpr;
+    ctx.shadowOffsetY = (3 + a * 9) * Capas.dpr;
+    ctx.shadowOffsetX = a * 5 * Capas.dpr;
     // Vástago hasta el asa
     ctx.strokeStyle = '#6b7383';
     ctx.lineWidth = Math.max(1.6, 4 * px);
     ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(k[0], k[1]); ctx.stroke();
     // Patas: metálica (punta seca) y de color (mina)
-    this.pata(ctx, b, [0, 0], 5, 1.6, 'rgba(150, 160, 175, .92)', '#4b5363');
+    const w0 = 5 * (1 + a * 0.6);   // de pie, la parte de arriba de las patas se ve más ancha (más cerca)
+    this.pata(ctx, b, [0, 0], w0, 1.6, 'rgba(150, 160, 175, .92)', '#4b5363');
     const e = Paleta.instrumento();   // la pata de la mina es del color del juego (roja con el plástico transparente)
-    const finMina = this.pata(ctx, b, [this.r, 0], 5, 2.4, e.inversa ? 'rgba(232, 93, 80, .92)' : e.muestra, e.inversa ? '#9c3a30' : e.borde);
+    const finMina = this.pata(ctx, b, [this.r, 0], w0, 2.4, e.inversa ? 'rgba(232, 93, 80, .92)' : e.muestra, e.inversa ? '#9c3a30' : e.borde);
     ctx.restore();
     // Mina de grafito (más clara si está levantada)
     ctx.fillStyle = Paleta.lapizActual();
@@ -2237,13 +2720,13 @@ class Compas extends Instrumento {
     ctx.arc(0, 0, Math.max(0.5, 2 * px), 0, Geom.DOS_PI);
     ctx.fillStyle = '#2b2f3a';
     ctx.fill();
-    // Bisagra
+    // Bisagra (más grande de pie: está más cerca de quien mira)
     ctx.beginPath();
-    ctx.arc(b[0], b[1], 4.5, 0, Geom.DOS_PI);
+    ctx.arc(b[0], b[1], 4.5 * (1 + a * 0.5), 0, Geom.DOS_PI);
     ctx.fillStyle = '#5b6270';
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(b[0], b[1], 1.6, 0, Geom.DOS_PI);
+    ctx.arc(b[0], b[1], 1.6 * (1 + a * 0.5), 0, Geom.DOS_PI);
     ctx.fillStyle = '#c9ced8';
     ctx.fill();
     // Asa para girar y trazar
@@ -2701,6 +3184,10 @@ const Manip = {
     } else if (hit.modo === 'abrir') {
       this.estado = { inst, modo: 'abrir', id: info.id, tipo: info.tipo };
     } else if (hit.modo === 'trazar') {
+      // Si la mina se levantó sola tras el trazo anterior, se apoya otra vez; el compás se pone de pie
+      if (inst.autoLevantada && inst.levantada) inst.levantada = false;
+      inst.autoLevantada = false;
+      inst.animarAlzado(1);
       // tramos: arcos ya pintados en este giro; tramo: el que se está pintando ahora
       this.estado = { inst, modo: 'trazar', id: info.id, tipo: info.tipo, tramos: [], tramo: null,
                       angPrev: Math.atan2(info.y - inst.y, info.x - inst.x) };
@@ -2875,15 +3362,20 @@ const Manip = {
     if (s && s.modo === 'trazar' && confirmar) {
       this.cerrarTramo(s);
       const inst = s.inst;
-      const arcos = s.tramos.map(t => Escena.agregarArco(inst.x, inst.y, inst.r, t.a0, t.a0 + t.barrido));
+      const arcos = s.tramos.flatMap(t => Zona.arco(inst.x, inst.y, inst.r, t.a0, t.a0 + t.barrido).map(([a0, a1]) => Escena.agregarArco(inst.x, inst.y, inst.r, a0, a1)));
+      if (s.tramos.length && !arcos.length) UI.mensaje(Zona.aviso());
       if (arcos.length) {
         Sonido.tocar('punto');
         const a = arcos[arcos.length - 1];
-        UI.mensaje(arcos.length > 1 ? `${arcos.length} arcos trazados (radio ${Lapiz.mmTexto(a.r)}).`
+        // Al terminar, la mina se levanta sola (se vuelve a apoyar al empezar el siguiente trazo)
+        inst.levantada = true;
+        inst.autoLevantada = true;
+        UI.mensaje((arcos.length > 1 ? `${arcos.length} arcos trazados (radio ${Lapiz.mmTexto(a.r)}).`
           : Geom.esCircunferencia(a) ? `Circunferencia trazada (radio ${Lapiz.mmTexto(a.r)}).`
-          : `Arco trazado: ${Math.round(Math.abs(a.a1 - a.a0) * 180 / Math.PI)}°, radio ${Lapiz.mmTexto(a.r)}.`);
+          : `Arco trazado: ${Math.round(Math.abs(a.a1 - a.a0) * 180 / Math.PI)}°, radio ${Lapiz.mmTexto(a.r)}.`) + ' La mina se ha levantado.');
       }
     }
+    if (s && s.modo === 'trazar') s.inst.animarAlzado(0);   // vuelve a quedar tumbado
     if (s && s.antes && Escena.datos() !== s.antes) Historial.empujar(s.antes);
     this.estado = null;
     this.halo = null;
@@ -2914,13 +3406,15 @@ const Manip = {
         ctx.beginPath(); ctx.arc(inst.x, inst.y, inst.r, 0, Geom.DOS_PI); ctx.stroke();
         ctx.restore();
       }
+      ctx.save();
+      Zona.recortar(ctx);   // fuera de la zona de dibujo no pinta
       ctx.strokeStyle = Paleta.lapizActual();
       ctx.globalAlpha = 0.85;
       ctx.lineWidth = Dibujo.grosor();
       ctx.lineCap = 'round';
       for (const t of s.tramos.concat(s.tramo ? [s.tramo] : []))
         if (t.barrido) Dibujo.trazo(ctx, 'arco', { cx: inst.x, cy: inst.y, r: inst.r, a0: t.a0, a1: t.a0 + t.barrido });
-      ctx.globalAlpha = 1;
+      ctx.restore();
     }
     if (s && s.guia) {
       // Canto de apoyo en verde
@@ -2965,10 +3459,13 @@ const Herramientas = [
   { id: 'compas',        nombre: 'Compás',         tecla: 'C', icono: 'compas',        instrumento: true,   fase: 5 },
   { id: 'transportador', nombre: 'Transportador',  tecla: 'A', icono: 'transportador', instrumento: true,   fase: 6 },
   { id: 'goma',          nombre: 'Goma',           tecla: 'B', icono: 'goma',          cursor: 'precision', fase: 2 },
+  { id: 'nombrar',       nombre: 'Nombrar puntos y líneas', tecla: 'N', icono: 'nombrar', cursor: 'precision', fase: 2 },
 ];
 
 const App = {
   herramienta: 'lapiz',
+  // La goma y Nombrar trabajan por debajo de los instrumentos
+  debajo() { return this.herramienta === 'goma' || this.herramienta === 'nombrar'; },
   seleccionar(id) {
     const h = Herramientas.find(t => t.id === id);
     if (!h) return;
@@ -2990,6 +3487,7 @@ const App = {
     mover: 'Arrastra para mover la hoja. Usa la rueda o dos dedos para acercar y alejar.',
     lapiz: 'Toca o haz clic para marcar un punto. Mantén pulsado y arrastra para colocarlo con precisión.',
     goma: 'Goma: elige abajo si borra a trozos o líneas enteras y su tamaño. Pulsa otra vez la goma (o B) para cambiar de modo.',
+    nombrar: 'Nombrar: toca un punto para cambiarle el nombre o una línea para ponerle uno.',
   },
 };
 
@@ -3069,7 +3567,7 @@ const Entrada = {
 
     // Instrumentos: asas de giro y cuerpo (la goma trabaja por debajo de ellos)
     const info = this.info(e, p);
-    if (e.button === 0 && !this.accion && !this.espacio && App.herramienta !== 'goma') {
+    if (e.button === 0 && !this.accion && !this.espacio && !App.debajo()) {
       const hit = Instrumentos.tocar(info, App.herramienta === 'lapiz');
       if (hit && hit.modo === 'mina') {
         e.preventDefault();
@@ -3142,7 +3640,7 @@ const Entrada = {
       // Ratón o lápiz sin pulsar: vista previa de la herramienta o del instrumento
       if (e.pointerType === 'touch' || this.arrastre || this.espacio) return;
       const info = this.info(e, p);
-      const hit = App.herramienta !== 'goma' && Instrumentos.tocar(info, App.herramienta === 'lapiz');
+      const hit = !App.debajo() && Instrumentos.tocar(info, App.herramienta === 'lapiz');
       this.cursorInstrumento(hit);
       const acc = Acciones.actual();
       if (acc) { if (hit) acc.salir(); else acc.pasar(info); }
@@ -3381,7 +3879,7 @@ const UI = {
   actualizarOpcionesLapiz() {
     if (!this.btnColorLapiz) return;
     const c = Config.get('colorLapiz'), g = Config.get('grosorLapiz');
-    const nombre = Paleta.lapiz[c][1];
+    const nombre = Paleta.nombre(Paleta.info(c));
     this.btnColorLapiz.innerHTML = `<span class="pinta" style="background:${Paleta.colorLapiz(c)}"></span><span>${nombre}</span><span class="flecha"></span>`;
     this.btnColorLapiz.setAttribute('aria-label', `Color del portaminas: ${nombre}. Pulsa para cambiarlo`);
     this.btnGrosorLapiz.innerHTML = `<span style="color:${Paleta.colorLapiz(c)};display:contents">${SelectorLapiz.muestraGrosor(g)}</span><span>${SelectorLapiz.mm(g)}</span><span class="flecha"></span>`;
@@ -3391,6 +3889,7 @@ const UI = {
   marcarHerramienta(id) {
     document.getElementById('opciones-goma').hidden = id !== 'goma';
     document.getElementById('opciones-lapiz').hidden = id !== 'lapiz';
+    if (id !== 'nombrar') Nombrar.cerrar();
     if (id !== 'lapiz') SelectorLapiz.cerrar();
     document.querySelectorAll('#barra .btn[data-id]:not([data-instrumento])').forEach(b =>
       b.setAttribute('aria-pressed', String(b.dataset.id === id)));
@@ -3458,6 +3957,7 @@ const UI = {
     Catalogo.construir();
     this.construirOpcionesGoma();
     this.construirOpcionesLapiz();
+    Nombrar.construir();
     // La tarjeta del ejercicio está sobre el lienzo: sus toques no deben dibujar ni mover la hoja
     const tarjeta = document.getElementById('tarjeta-ejercicio');
     for (const t of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'dblclick'])
@@ -3552,9 +4052,12 @@ const SelectorLapiz = {
     if (this.abierto === 'color') {
       h.textContent = 'Color';
       g.setAttribute('aria-label', 'Color del portaminas');
-      for (const [k, [col, nombre]] of Object.entries(Paleta.lapiz))
-        opcion('sl-color', `<span class="pinta" style="background:${col}"></span><span>${nombre}</span>`, nombre,
-          () => Config.set('colorLapiz', k)).dataset.valor = k;
+      for (const e of Paleta.lista()) {
+        const nombre = Paleta.nombre(e);
+        const b = opcion('sl-color', `<span class="pinta" style="background:${e.color}"></span><span></span>`, nombre, () => Config.set('colorLapiz', e.id));
+        b.lastChild.textContent = nombre;   // el nombre lo escribe el usuario: como texto
+        b.dataset.valor = e.id;
+      }
     } else {
       h.textContent = 'Grosor de la mina';
       g.setAttribute('aria-label', 'Grosor de la mina');
@@ -3603,7 +4106,10 @@ const Panel = {
     ]));
     this.fila(c, 'Hoja', this.segmentado('hoja', [['A4-h', 'A4 ▭'], ['A4-v', 'A4 ▯'], ['A3-h', 'A3 ▭'], ['A3-v', 'A3 ▯']],
       { 'A4-h': 'A4 horizontal', 'A4-v': 'A4 vertical', 'A3-h': 'A3 horizontal', 'A3-v': 'A3 vertical' }));
-    this.interruptor(c, 'margen', 'Margen');
+    this.interruptor(c, 'margen', 'Margen', 'Con margen, solo se puede dibujar dentro del marco.');
+
+    titulo('Cartela');
+    c.appendChild(this.editorCartela());
 
     titulo('Dibujo');
     this.interruptor(c, 'etiquetas', 'Poner letras a los puntos (A, B, C…)');
@@ -3611,6 +4117,9 @@ const Panel = {
     nd.className = 'nota';
     nd.textContent = 'El color y el grosor del portaminas, y el modo y el tamaño de la goma, se eligen en la barrita que aparece abajo al seleccionarlos.';
     c.lastChild.appendChild(nd);
+
+    titulo('Colores del portaminas y del compás');
+    c.appendChild(this.editorPaleta());
 
     titulo('Imán');
     this.fila(c, 'Fuerza del imán', this.segmentado('iman', [['debil', 'Débil'], ['medio', 'Media'], ['fuerte', 'Fuerte']]));
@@ -3652,6 +4161,121 @@ const Panel = {
     this.actualizar();
   },
 
+  // Cartela: interruptor, logotipo (PNG o JPEG) y textos
+  editorCartela() {
+    const d = Cartela.datos, caja = document.createElement('div');
+    caja.className = 'cartela-editor';
+    const fi = document.createElement('div');
+    fi.className = 'fila-interruptor';
+    const etq = document.createElement('label');
+    etq.className = 'etq'; etq.id = 'etq-cartela'; etq.textContent = 'Incluir una cartela en la hoja';
+    const sw = document.createElement('button');
+    sw.type = 'button'; sw.className = 'interruptor';
+    sw.setAttribute('role', 'switch'); sw.setAttribute('aria-labelledby', 'etq-cartela');
+    const campos = document.createElement('div');
+    campos.className = 'cartela-campos';
+    const reflejar = () => { sw.setAttribute('aria-checked', String(d.activa)); campos.hidden = !d.activa; };
+    sw.addEventListener('click', () => { d.activa = !d.activa; reflejar(); Cartela.guardar(); });
+    etq.addEventListener('click', () => sw.click());
+    fi.append(etq, sw);
+    // Logotipo
+    const logo = document.createElement('div');
+    logo.className = 'cartela-logo';
+    const vista = document.createElement('div');
+    vista.className = 'cl-vista';
+    const archivo = document.createElement('input');
+    archivo.type = 'file'; archivo.accept = 'image/png,image/jpeg'; archivo.hidden = true;
+    const cargar = document.createElement('button');
+    cargar.type = 'button'; cargar.className = 'btn-texto';
+    const quitar = document.createElement('button');
+    quitar.type = 'button'; quitar.className = 'btn-texto'; quitar.textContent = 'Quitar';
+    const pintarLogo = () => {
+      vista.innerHTML = '';
+      if (d.logo) { const im = document.createElement('img'); im.src = d.logo; im.alt = 'Logotipo del colegio'; vista.appendChild(im); }
+      else vista.textContent = 'Sin logotipo';
+      cargar.textContent = d.logo ? 'Cambiar el logotipo' : 'Cargar el logotipo (PNG o JPEG)';
+      quitar.hidden = !d.logo;
+    };
+    cargar.addEventListener('click', () => archivo.click());
+    archivo.addEventListener('change', () => { Cartela.leerLogo(archivo.files[0], pintarLogo); archivo.value = ''; });
+    quitar.addEventListener('click', () => { d.logo = ''; Cartela.prepararLogo(); Cartela.guardar(); pintarLogo(); });
+    const botones = document.createElement('div');
+    botones.className = 'cl-botones';
+    botones.append(cargar, quitar);
+    logo.append(vista, botones, archivo);
+    pintarLogo();
+    // Textos
+    const texto = (k, etiqueta, ph) => {
+      const f = document.createElement('label');
+      f.className = 'cartela-texto';
+      const t = document.createElement('span'); t.textContent = etiqueta;
+      const i = document.createElement('input');
+      i.type = 'text'; i.maxLength = 60; i.value = d[k]; i.placeholder = ph;
+      i.addEventListener('input', () => { d[k] = i.value; Cartela.guardar(); });
+      f.append(t, i);
+      return f;
+    };
+    campos.append(logo, texto('colegio', 'Nombre del colegio', 'IES …'), texto('alumno', 'Nombre del alumno o alumna', 'Nombre y apellidos'),
+      texto('nivel', 'Nivel y clase', '2.º ESO B'));
+    const nota = document.createElement('div');
+    nota.className = 'nota';
+    nota.textContent = 'La cartela va abajo a la derecha, apoyada en el marco, y sale también en la imagen exportada. No se puede dibujar encima de ella. Se guarda en este navegador.';
+    campos.appendChild(nota);
+    caja.append(fi, campos);
+    reflejar();
+    return caja;
+  },
+  // Lista editable de colores: muestra, nombre (si se deja vacío, se ve el código) y quitar
+  editorPaleta() {
+    const caja = document.createElement('div');
+    caja.className = 'paleta-editor';
+    const pintar = () => {
+      caja.textContent = '';
+      const l = Paleta.lista().map(e => Object.assign({}, e));
+      const guardar = () => Paleta.guardarLista(l.map(e => Object.assign({}, e)));
+      l.forEach((e, i) => {
+        const fila = document.createElement('div');
+        fila.className = 'pe-fila';
+        const col = document.createElement('input');
+        col.type = 'color'; col.value = e.color;
+        col.setAttribute('aria-label', `Color ${i + 1}`);
+        const nom = document.createElement('input');
+        nom.type = 'text'; nom.maxLength = 20; nom.value = e.nombre; nom.placeholder = e.color.toUpperCase();
+        nom.setAttribute('aria-label', `Nombre del color ${i + 1} (vacío: su código)`);
+        col.addEventListener('input', () => { e.color = col.value.toLowerCase(); nom.placeholder = e.color.toUpperCase(); guardar(); });
+        nom.addEventListener('input', () => { e.nombre = nom.value; guardar(); });
+        const quitar = document.createElement('button');
+        quitar.type = 'button'; quitar.className = 'pe-quitar'; quitar.innerHTML = Iconos.papelera;
+        quitar.setAttribute('aria-label', `Quitar el color ${Paleta.nombre(e)}`); quitar.title = 'Quitar este color';
+        quitar.disabled = l.length <= 1;
+        quitar.addEventListener('click', () => { l.splice(i, 1); guardar(); pintar(); });
+        fila.append(col, nom, quitar);
+        caja.appendChild(fila);
+      });
+      const acciones = document.createElement('div');
+      acciones.className = 'pe-acciones';
+      const mas = document.createElement('button');
+      mas.type = 'button'; mas.className = 'btn-texto'; mas.textContent = '+ Añadir un color';
+      mas.disabled = l.length >= Paleta.MAX_COLORES;
+      mas.addEventListener('click', () => {
+        let n = 1; while (l.some(e => e.id === 'c' + n)) n++;
+        l.push({ id: 'c' + n, color: '#2a9d8f', nombre: '' });
+        guardar(); pintar();
+        const ult = caja.querySelectorAll('.pe-fila input[type=text]');
+        if (ult.length) ult[ult.length - 1].focus();
+      });
+      const rest = document.createElement('button');
+      rest.type = 'button'; rest.className = 'btn-texto'; rest.textContent = 'Colores de fábrica';
+      rest.addEventListener('click', () => { Paleta.restaurarLista(); pintar(); UI.aviso('Colores restaurados'); });
+      acciones.append(mas, rest);
+      const nota = document.createElement('div');
+      nota.className = 'nota';
+      nota.textContent = `Son los colores que aparecen al elegir el color del portaminas (el compás pinta con el mismo). Si un color no tiene nombre, se muestra su código. Hasta ${Paleta.MAX_COLORES} colores. Lo ya dibujado no cambia.`;
+      caja.append(acciones, nota);
+    };
+    pintar();
+    return caja;
+  },
   fila(c, etiqueta, control, condicion) {
     const f = document.createElement('div');
     f.className = 'fila';
@@ -3915,6 +4539,7 @@ const Archivo = {
         Papel.dibujar(ctx, { x0: 0, y0: 0, x1: Hoja.ancho, y1: Hoja.alto });
         Render.margen(ctx);
       }
+      Cartela.dibujar(ctx);
       Render.pintarEscena(ctx);
     } finally {
       Object.assign(Vista, vista);
@@ -3989,9 +4614,10 @@ const Ayuda = {
       b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta. En la barrita de abajo eliges el color y el grosor de la mina; el compás pinta con ellos. En Configuración › Imán decides qué atrae a la punta.'),
       b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos. La escuadra y el cartabón tienen además un botón con dos medios triángulos que les da la vuelta, como al girar el plástico: los números y el nombre se ven al revés.'),
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
-      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
+      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar: el compás se pone de pie mientras gira y, al soltarlo, se tumba con la mina levantada (se apoya sola al volver a trazar). El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
       b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
       b('goma', 'Goma', 'Tiene dos modos, en la barrita que aparece abajo a la izquierda: «A trozos» borra solo lo que pisa (para recortar poco a poco los extremos de las líneas y los arcos) y «Enteras» borra la línea, el arco o el punto que toques. Pulsa otra vez la goma para cambiar de modo. El deslizador elige su tamaño.'),
+      b('nombrar', 'Nombrar', 'Toca un punto para cambiarle el nombre o una línea (recta, arco o circunferencia) para ponerle uno; el nombre de una línea se escribe en su centro. No puede haber dos elementos con el mismo nombre. Si dejas vacío el nombre de una línea, se le quita.'),
       b('deshacer', 'Deshacer', 'Deshace puntos, líneas y también los movimientos de los instrumentos.'),
       b('mover', 'Mover y acercar la hoja', '<span class="solo-raton">Rueda del ratón para acercar; botón central, la barra espaciadora o la herramienta mover para desplazar la hoja.</span><span class="solo-tactil">Dos dedos sobre la hoja para acercar y moverla. Dos dedos sobre un instrumento lo mueven y lo giran.</span>'),
       b('guardar', 'Tu dibujo', 'Se guarda solo en este navegador. Desde el botón del disquete puedes empezar una hoja nueva, guardarlo en un archivo, abrirlo o exportarlo como imagen.'),
@@ -4005,7 +4631,7 @@ const Ayuda = {
         <tr><td><kbd>Mayús</kbd> Girar de 15° en 15°</td><td><kbd>Alt</kbd> Separar / girar sin trazar</td></tr>
         <tr><td><kbd>Espacio</kbd> Mover la hoja</td><td><kbd>?</kbd> Esta ayuda</td></tr>
         <tr><td><kbd>L</kbd> Levantar o apoyar la mina del compás</td><td><kbd>B</kbd> otra vez: modo de la goma</td></tr>
-        <tr><td><kbd>[</kbd> <kbd>]</kbd> Tamaño de la goma</td><td></td></tr>
+        <tr><td><kbd>[</kbd> <kbd>]</kbd> Tamaño de la goma</td><td><kbd>N</kbd> Nombrar puntos y líneas</td></tr>
       </table></div>`,
     ].join('');
   },
@@ -4061,7 +4687,7 @@ const Ejercicio = {
     for (const k of this.CLAVES_PAPEL) this.configPrevia[k] = Config.get(k);
     const papel = def.papel && typeof def.papel === 'object' ? def.papel : {};
     for (const k of this.CLAVES_PAPEL) if (k in papel) Config.set(k, papel[k]);
-    Object.assign(this, { def, paso: 0, nombres: {}, asignados: [], completado: false, minimizado: false, verPista: false });
+    Object.assign(this, { def, paso: 0, nombres: {}, asignados: [], omitidos: [], completado: false, minimizado: false, verPista: false });
     Escena.vaciar();
     this.crearInicial(def.inicial || {});
     this.colocarInstrumentos(def.instrumentos);
@@ -4077,7 +4703,7 @@ const Ejercicio = {
   salir(aviso = true) {
     if (!this.def) return;
     if (this.configPrevia) for (const k in this.configPrevia) Config.set(k, this.configPrevia[k]);
-    Object.assign(this, { def: null, paso: 0, nombres: {}, asignados: [], iniciales: [], completado: false, configPrevia: null });
+    Object.assign(this, { def: null, paso: 0, nombres: {}, asignados: [], omitidos: [], iniciales: [], completado: false, configPrevia: null });
     this.guardar();
     this.pintarTarjeta();
     this.marcarSugeridos();
@@ -4092,7 +4718,7 @@ const Ejercicio = {
       const q = Escena.agregarPunto(p.x, p.y);
       q.dado = true;
       const et = p.etiqueta || p.nombre;
-      if (et) q.etiqueta = String(et).slice(0, 6);
+      if (et) q.etiqueta = String(et).slice(0, 12);
       nombrar(p.nombre || q.etiqueta, 'punto', q.id);
     }
     const coord = (ref, x, y) => this.punto(ref) || (fin(x) && fin(y) ? { x, y } : null);
@@ -4180,12 +4806,22 @@ const Ejercicio = {
     const A = this.linea(par[0]), B = this.linea(par[1]);
     return A && B ? Geom.intersecciones(A, B) : [];
   },
+  // Índice del cruce donde está p (−1 si no está en ninguno). Si el ejercicio elige uno de
+  // los cortes («corte»: {x, y} aproximado), solo vale el corte más cercano a ese sitio.
   indiceCruce(p, o, tol) {
+    const cs = this.cruces(o);
+    let validos = cs.map((c, i) => i);
+    const ref = o.corte && typeof o.corte === 'object' ? this.punto(o.corte) : null;
+    if (ref && cs.length > 1) {
+      let k = 0;
+      cs.forEach((c, i) => { if (Geom.dist(c.x, c.y, ref.x, ref.y) < Geom.dist(cs[k].x, cs[k].y, ref.x, ref.y)) k = i; });
+      validos = [k];
+    }
     let mejor = -1, dm = Infinity;
-    this.cruces(o).forEach((c, i) => {
-      const d = Geom.dist(p.x, p.y, c.x, c.y);
+    for (const i of validos) {
+      const d = Geom.dist(p.x, p.y, cs[i].x, cs[i].y);
       if (d <= tol && d < dm) { dm = d; mejor = i; }
-    });
+    }
     return mejor;
   },
 
@@ -4199,7 +4835,10 @@ const Ejercicio = {
       const L = this.linea(o.sobre);
       if (!L || this.distLinea(p, L) > tol) return `El punto tiene que estar sobre ${this.nombreDe(o.sobre)}.`;
     }
-    if (o.cruce !== undefined && this.indiceCruce(p, o, tol) < 0) return 'Marca el punto justo donde se cortan las líneas.';
+    if (o.cruce !== undefined && this.indiceCruce(p, o, tol) < 0)
+      return o.corte && typeof o.corte === 'object' && this.cruces(o).length > 1 && this.cruces(o).some(c => Geom.dist(p.x, p.y, c.x, c.y) <= tol)
+        ? 'Ese no es el corte que buscamos: las líneas se cortan en otro punto.'
+        : 'Marca el punto justo donde se cortan las líneas.';
     if (o.angulo) {
       const a = o.angulo, V = this.punto(a.vertice), H = this.punto(a.desde);
       if (!V || !H) return 'Falta el ángulo de referencia.';
@@ -4281,6 +4920,17 @@ const Ejercicio = {
       const ref = typeof c === 'string' ? c : c && c.elemento, n = (c && c.cortes) || 1;
       const L = this.linea(ref), k = L ? Geom.intersecciones({ tipo: 'arco', o: a }, L).length : 0;
       if (k < n) return n > 1 ? `El arco tiene que cortar a ${this.nombreDe(ref)} en ${n} puntos.` : `El arco tiene que cortar a ${this.nombreDe(ref)}.`;
+      // Con un corte elegido («corte»: {x, y}), el arco tiene que cortar por ese lado: de los dos
+      // sitios donde su circunferencia corta a la línea, el más cercano al elegido
+      // Vale el corte más cercano al sitio elegido. Si los dos quedan casi igual de cerca (el sitio no
+      // distingue, o el alumno ha inclinado mucho la línea), no se exige ningún lado.
+      const elegido = n === 1 && c && c.corte && typeof c.corte === 'object' ? this.punto(c.corte) : null;
+      if (elegido) {
+        const todos = Geom.intersecciones({ tipo: 'arco', o: Object.assign({}, a, { a0: 0, a1: Geom.DOS_PI }) }, L)
+          .map(t => ({ t, d: Geom.dist(t.x, t.y, elegido.x, elegido.y) })).sort((p, q) => p.d - q.d);
+        if (todos.length > 1 && todos[1].d - todos[0].d >= Math.max(3, a.r / 4) && Geom.distArco(todos[0].t.x, todos[0].t.y, a) > tol)
+          return `El arco tiene que cortar a ${this.nombreDe(ref)} por el otro lado.`;
+      }
     }
     return null;
   },
@@ -4342,9 +4992,6 @@ const Ejercicio = {
     const tol = Number.isFinite(o.tolerancia) ? o.tolerancia : 1;
     const tolA = Number.isFinite(o.toleranciaGrados) ? o.toleranciaGrados : 1;
     const nombrar = o.nombrar === undefined ? [] : [].concat(o.nombrar);
-    // rotular: los puntos encontrados toman su nombre como etiqueta (true) o las etiquetas de la lista
-    const rotulo = i => o.rotular === true ? nombrar[i] : Array.isArray(o.rotular) ? o.rotular[i] : typeof o.rotular === 'string' && i === 0 ? o.rotular : undefined;
-    const conRotulo = (a, i) => { const r = rotulo(i); return typeof r === 'string' && r ? { ...a, rotulo: r.slice(0, 6) } : a; };
     // posteriorA: solo vale lo dibujado después de ese elemento (para no reutilizar un arco o un punto anterior)
     let desde = -Infinity;
     if (o.posteriorA !== undefined) {
@@ -4353,10 +5000,13 @@ const Ejercicio = {
       desde = e.o.id;
     }
     const propios = l => l.filter(e => (o.permitirDados || !e.dado) && e.id > desde);
+    // Un objetivo que pone nombre necesita un elemento nuevo: no vale uno que ya tenga otro nombre del ejercicio
+    const conNombre = new Set(Object.values(this.nombres).map(n => n.tipo + ':' + n.id));
+    const libres = (l, tipo) => (nombrar.length ? l.filter(e => !conNombre.has(tipo + ':' + e.id)) : l);
     const nuevos = l => l.filter(e => e.id >= this.ultimoId);   // para explicar qué falla
     const fallo = motivo => ({ ok: false, motivo });
     const elegirUno = (lista, cond, tipo) => {
-      const orden = propios(lista).sort((a, b) => b.id - a.id);    // lo más reciente primero
+      const orden = libres(propios(lista), tipo).sort((a, b) => b.id - a.id);    // lo más reciente primero
       const bueno = orden.find(e => !cond(e));
       if (bueno) return { ok: true, asignar: nombrar.slice(0, 1).map(n => ({ nombre: n, tipo, id: bueno.id })) };
       const nuevo = nuevos(orden)[0];
@@ -4368,7 +5018,7 @@ const Ejercicio = {
       case 'punto': {
         const n = Number.isInteger(o.cantidad) && o.cantidad > 0 ? o.cantidad : 1;
         const elegidos = [], usados = new Set();
-        for (const p of propios(Escena.puntos)) {
+        for (const p of libres(propios(Escena.puntos), 'punto')) {
           if (this.condPunto(p, o, tol, tolA)) continue;
           if (o.cruce !== undefined) {
             const i = this.indiceCruce(p, o, tol);
@@ -4383,7 +5033,7 @@ const Ejercicio = {
           const m = nuevo && this.condPunto(nuevo, o, tol, tolA);
           return fallo(m || (elegidos.length && n > 1 ? `Llevas ${elegidos.length} de ${n} puntos.` : null));
         }
-        return { ok: true, asignar: nombrar.map((nm, i) => elegidos[i] && conRotulo({ nombre: nm, tipo: 'punto', id: elegidos[i].id }, i)).filter(Boolean) };
+        return { ok: true, asignar: nombrar.map((nm, i) => elegidos[i] && { nombre: nm, tipo: 'punto', id: elegidos[i].id }).filter(Boolean) };
       }
       case 'recta': return elegirUno(Escena.rectas, r => this.condRecta(r, o, tol, tolA), 'recta');
       case 'arco': return elegirUno(Escena.arcos, a => this.condArco(a, o, tol), 'arco');
@@ -4411,7 +5061,7 @@ const Ejercicio = {
         }
         const bien = hallados.filter(Boolean).length;
         if (bien < n) return fallo(nuevos(Escena.puntos).length ? `Llevas ${bien} de ${n} vértices.` : null);
-        return { ok: true, asignar: nombrar.map((nm, i) => hallados[i] && conRotulo({ nombre: nm, tipo: 'punto', id: hallados[i].id }, i)).filter(Boolean) };
+        return { ok: true, asignar: nombrar.map((nm, i) => hallados[i] && { nombre: nm, tipo: 'punto', id: hallados[i].id }).filter(Boolean) };
       }
       case 'instrumento': {
         const m = this.condInstrumento(o, tol, tolA);
@@ -4420,14 +5070,37 @@ const Ejercicio = {
     }
     return fallo(null);
   },
-  evaluarPaso(p) {
+  // sinOptativos: sin las condiciones marcadas como optativas (y nada si el paso entero lo es)
+  evaluarPaso(p, sinOptativos = false) {
+    if (sinOptativos && p.optativo === true) return { ok: true, asignar: [] };
     const asignar = [];
     for (const o of this.objetivosDe(p)) {
-      const r = this.evaluar(o);
+      const r = this.evaluar(sinOptativos ? this.reducido(o) : o);
       if (!r.ok) return r;
       asignar.push(...r.asignar);
     }
     return { ok: true, asignar };
+  },
+  // El objetivo sin sus condiciones optativas
+  reducido(o) {
+    const q = Object.assign({}, o);
+    for (const k of [].concat(o.opcionales || [])) if (k !== 'tipo') delete q[k];
+    delete q.opcionales;
+    return q;
+  },
+  tieneOptativos(p) { return p.optativo === true || this.objetivosDe(p).some(o => Array.isArray(o.opcionales) && o.opcionales.length > 0); },
+  // Un paso con algo optativo se da por bueno sin eso si el alumno ya ha hecho bien el paso siguiente
+  // (o los siguientes, si también tienen algo optativo). Devuelve el resultado reducido o null.
+  saltarOptativo(i, prof = 0) {
+    const pasos = this.def.pasos, p = pasos[i];
+    if (!p || !this.tieneOptativos(p) || i + 1 >= pasos.length || prof > 6) return null;
+    const r = this.evaluarPaso(p, true);
+    if (!r.ok) return null;
+    const antes = Object.assign({}, this.nombres);
+    for (const a of r.asignar) this.nombres[a.nombre] = { tipo: a.tipo, id: a.id };
+    const sigue = this.evaluarPaso(pasos[i + 1]).ok || !!this.saltarOptativo(i + 1, prof + 1);
+    this.nombres = antes;
+    return sigue ? r : null;
   },
 
   // ---------- Comprobación tras cada cambio ----------
@@ -4443,22 +5116,33 @@ const Ejercicio = {
     let retrocede = false;
     for (let i = 0; i < this.paso; i++) {
       if ((this.asignados[i] || []).some(n => !this.elemento(n))) {
-        for (let j = i; j < this.paso; j++) for (const n of this.asignados[j] || []) delete this.nombres[n];
+        for (let j = i; j < this.paso; j++) for (const n of this.asignados[j] || []) { this.desetiquetar(n); delete this.nombres[n]; }
         this.asignados.length = i;
+        this.omitidos = (this.omitidos || []).filter(k => k < i);
         this.paso = i;
         retrocede = true;
         break;
       }
     }
-    let avanza = 0, motivo = null;
+    let avanza = 0, motivo = null, saltados = 0;
     const hayNuevo = Escena.sigId > this.ultimoId;
+    if (!this.omitidos) this.omitidos = [];
     while (this.paso < this.def.pasos.length) {
-      const r = this.evaluarPaso(this.def.pasos[this.paso]);
-      if (!r.ok) { motivo = r.motivo; break; }
-      for (const a of r.asignar) {
-        this.nombres[a.nombre] = { tipo: a.tipo, id: a.id };
-        if (a.rotulo) this.rotular(a.id, a.rotulo);
+      let r = this.evaluarPaso(this.def.pasos[this.paso]);
+      if (!r.ok) {
+        // Lo optativo no hace falta si el alumno ya ha seguido bien con el paso siguiente
+        const s = this.saltarOptativo(this.paso);
+        if (!s) {
+          motivo = r.motivo;
+          if (motivo && this.tieneOptativos(this.def.pasos[this.paso]) && this.evaluarPaso(this.def.pasos[this.paso], true).ok)
+            motivo += ' (Es optativo: también puedes seguir con el paso siguiente.)';
+          break;
+        }
+        r = s;
+        this.omitidos.push(this.paso);
+        saltados++;
       }
+      for (const a of r.asignar) { this.nombres[a.nombre] = { tipo: a.tipo, id: a.id }; this.etiquetar(a); }
       this.asignados[this.paso] = r.asignar.map(a => a.nombre);
       this.paso++;
       avanza++;
@@ -4474,7 +5158,7 @@ const Ejercicio = {
     } else if (avanza) {
       Sonido.tocar('bien');
       UI.aviso('¡Bien hecho!');
-      UI.mensaje(`Paso ${this.paso + 1}: ${this.def.pasos[this.paso].texto}`);
+      UI.mensaje(`Paso ${this.paso + 1}: ${this.def.pasos[this.paso].texto}` + (saltados ? ' (Te has saltado algo optativo.)' : ''));
     } else if (retrocede) {
       UI.mensaje('Has quitado algo que hacía falta: vuelve a hacer este paso.');
     } else if (hayNuevo && motivo) {
@@ -4486,12 +5170,36 @@ const Ejercicio = {
       this.marcarSugeridos();
     }
   },
-  // Pone una etiqueta a un punto; si otro punto la tenía, ese recibe una letra libre
-  rotular(id, et) {
-    const p = this.buscarId('punto', id);
-    if (!p || p.etiqueta === et) return;
-    p.etiqueta = et;
-    for (const q of Escena.puntos) if (q !== p && q.etiqueta === et) q.etiqueta = Escena.siguienteEtiqueta();
+  // El elemento conseguido lleva en el dibujo el nombre que le da el ejercicio
+  etiquetar(a) {
+    const el = this.buscarId(a.tipo, a.id);
+    if (!el || el.dado) return;
+    const n = String(a.nombre).slice(0, 12);
+    if (a.tipo === 'punto') {
+      if (el.etiqueta === n) return;
+      // Si otro punto ya se llamaba así, recibe la primera letra libre
+      for (const q of Escena.puntos) if (q !== el && q.etiqueta === n) { q.etiqueta = ''; q.etiqueta = Escena.siguienteEtiqueta(); }
+      if (el.etiquetaPrevia === undefined) el.etiquetaPrevia = el.etiqueta;
+      el.etiqueta = n;
+    } else {
+      for (const q of [...Escena.rectas, ...Escena.arcos]) if (q !== el && q.nombre === n) delete q.nombre;
+      if (!('nombrePrevio' in el)) el.nombrePrevio = el.nombre;
+      el.nombre = n;
+    }
+    Render.pedir('dibujo');
+  },
+  desetiquetar(n) {
+    const e = this.nombres[n], el = e && this.buscarId(e.tipo, e.id);
+    if (!el || el.dado) return;
+    if (e.tipo === 'punto' && el.etiqueta === n) {
+      el.etiqueta = '';
+      const previa = el.etiquetaPrevia;
+      el.etiqueta = previa && !Escena.puntos.some(q => q !== el && q.etiqueta === previa) ? previa : Escena.siguienteEtiqueta();
+      delete el.etiquetaPrevia;
+    } else if (e.tipo !== 'punto' && el.nombre === n) {
+      if (el.nombrePrevio) el.nombre = el.nombrePrevio; else delete el.nombre;
+      delete el.nombrePrevio;
+    }
     Render.pedir('dibujo');
   },
   pulsarSiguiente() { this.siguiente = true; this.comprobar(); this.siguiente = false; },
@@ -4500,7 +5208,7 @@ const Ejercicio = {
   guardar() {
     try {
       if (this.def) localStorage.setItem(this.clave, JSON.stringify({
-        def: this.def, paso: this.paso, nombres: this.nombres, asignados: this.asignados,
+        def: this.def, paso: this.paso, nombres: this.nombres, asignados: this.asignados, omitidos: this.omitidos || [],
         iniciales: this.iniciales, completado: this.completado, configPrevia: this.configPrevia }));
       else localStorage.removeItem(this.clave);
     } catch (_) { /* sin almacenamiento */ }
@@ -4515,6 +5223,7 @@ const Ejercicio = {
       paso: Number.isInteger(d.paso) ? Geom.clamp(d.paso, 0, d.def.pasos.length) : 0,
       nombres: d.nombres && typeof d.nombres === 'object' ? d.nombres : {},
       asignados: Array.isArray(d.asignados) ? d.asignados : [],
+      omitidos: Array.isArray(d.omitidos) ? d.omitidos.filter(Number.isInteger) : [],
       iniciales: Array.isArray(d.iniciales) ? d.iniciales : [],
       completado: !!d.completado,
       configPrevia: d.configPrevia || null,
@@ -4552,7 +5261,12 @@ const Ejercicio = {
     const cuerpo = crear('div', 'te-cuerpo');
     const pie = crear('div', 'te-pie');
     const progreso = crear('div', 'te-progreso');
-    for (let i = 0; i < N; i++) progreso.append(crear('i', i < this.paso || this.completado ? 'hecho' : i === this.paso ? 'actual' : ''));
+    const omitidos = new Set(this.omitidos || []);
+    for (let i = 0; i < N; i++) {
+      const t = crear('i', omitidos.has(i) && (i < this.paso || this.completado) ? 'hecho omitido' : i < this.paso || this.completado ? 'hecho' : i === this.paso ? 'actual' : '');
+      if (omitidos.has(i)) t.title = `Paso ${i + 1}: te has saltado lo optativo`;
+      progreso.append(t);
+    }
     pie.append(progreso);
     const boton = (texto, accion, principal) => {
       const b = crear('button', 'te-boton' + (principal ? ' principal' : ''), texto);
@@ -4567,6 +5281,9 @@ const Ejercicio = {
     } else {
       const p = this.def.pasos[this.paso];
       cuerpo.append(crear('p', 'te-texto', p.texto));
+      if (this.tieneOptativos(p)) cuerpo.append(crear('p', 'te-optativo', p.optativo === true
+        ? 'Paso optativo: si quieres, puedes saltártelo y seguir con el siguiente.'
+        : 'Una parte de este paso es optativa: si sigues bien con el siguiente paso, vale igual.'));
       if (this.verPista && typeof p.pista === 'string') cuerpo.append(crear('p', 'te-pista', p.pista));
       if (typeof p.pista === 'string') boton(this.verPista ? 'Ocultar pista' : 'Pista', () => { this.verPista = !this.verPista; this.pintarTarjeta(); });
       if (this.objetivosDe(p).some(o => o.tipo === 'continuar')) boton('Siguiente', () => this.pulsarSiguiente(), true);
@@ -4753,6 +5470,14 @@ const Catalogo = {
     b.innerHTML = Iconos.abrir + '<span>Cargar un ejercicio (.json)</span>';
     b.addEventListener('click', () => document.getElementById('abrir-ejercicio').click());
     c.appendChild(b);
+    titulo('Crear ejercicios');
+    const ed = document.createElement('a');
+    ed.className = 'btn-texto primero';
+    ed.href = 'editor.html';
+    ed.target = '_blank';
+    ed.rel = 'noopener';
+    ed.innerHTML = Iconos.ejercicios + '<span>Abrir el editor de ejercicios</span>';
+    c.appendChild(ed);
     const n = document.createElement('p');
     n.className = 'nota-final';
     n.textContent = 'También puedes arrastrar un archivo de ejercicio sobre la hoja. Para añadir ejercicios a la lista, ' +
@@ -4802,6 +5527,7 @@ function aplicarConfig(clave) {
    ===================================================================== */
 function iniciar() {
   Config.cargar();
+  Cartela.cargar();
   Hoja.actualizar();
   Capas.iniciar();
   UI.iniciar();
@@ -4838,6 +5564,14 @@ function iniciar() {
   if (ruta && /^[\w./-]+\.json$/.test(ruta) && !ruta.includes('..') && !ruta.startsWith('/')) {
     fetch(ruta, { cache: 'no-cache' }).then(r => r.json()).then(d => Ejercicio.iniciar(d))
       .catch(() => UI.aviso('No se ha podido abrir el ejercicio indicado en la dirección.'));
+  }
+
+  // Probar un ejercicio desde el editor (editor.html): lo deja en localStorage y abre index.html?prueba=editor
+  if (new URLSearchParams(location.search).get('prueba') === 'editor') {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem('dibutec.editor.prueba')); } catch (_) { d = null; }
+    if (d && d.formato === 'dibutec-ejercicio') Ejercicio.iniciar(d);
+    else UI.aviso('No hay ningún ejercicio del editor para probar.');
   }
 
   // Arrastrar un archivo sobre la hoja: ejercicio o dibujo guardado

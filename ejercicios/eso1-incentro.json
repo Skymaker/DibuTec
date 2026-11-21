@@ -49,10 +49,10 @@
     "AB": "el lado AB",
     "BC": "el lado BC",
     "AC": "el lado AC",
-    "bpk": "el arco con centro en A",
-    "bpxa": "el arco con centro en P1",
-    "bqk": "el arco con centro en B",
-    "bqxa": "el arco con centro en Q1"
+    "c1": "el arco con centro en A",
+    "c2": "el arco con centro en P1",
+    "c4": "el arco con centro en B",
+    "c5": "el arco con centro en Q1"
   },
   "pasos": [
     {
@@ -71,7 +71,7 @@
           "AB",
           "AC"
         ],
-        "nombrar": "bpk"
+        "nombrar": "c1"
       }
     },
     {
@@ -83,20 +83,18 @@
         {
           "tipo": "punto",
           "cruce": [
-            "bpk",
+            "c1",
             "AB"
           ],
-          "nombrar": "bp1",
-          "rotular": "P1"
+          "nombrar": "P1"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "bpk",
+            "c1",
             "AC"
           ],
-          "nombrar": "bp2",
-          "rotular": "P2"
+          "nombrar": "P2"
         }
       ]
     },
@@ -108,11 +106,11 @@
       ],
       "objetivo": {
         "tipo": "arco",
-        "centro": "bp1",
+        "centro": "P1",
         "radio": {
           "min": 15
         },
-        "nombrar": "bpxa"
+        "nombrar": "c2"
       }
     },
     {
@@ -122,31 +120,32 @@
       ],
       "objetivo": {
         "tipo": "arco",
-        "centro": "bp2",
-        "radioComo": "bpxa",
+        "centro": "P2",
+        "radioComo": "c2",
         "cortaA": [
-          "bpxa"
+          "c2"
         ],
-        "nombrar": "bpxb",
-        "posteriorA": "bpxa"
+        "nombrar": "c3",
+        "posteriorA": "c2"
       }
     },
     {
-      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "texto": "Marca el punto D, donde se cortan los dos arcos.",
       "herramientas": [
         "lapiz"
       ],
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "bpxa",
-          "bpxb"
+          "c2",
+          "c3"
         ],
-        "nombrar": "bpxR"
+        "corte": false,
+        "nombrar": "D"
       }
     },
     {
-      "texto": "Une A con ese punto y alarga la recta hacia dentro del triángulo: es la bisectriz del ángulo A.",
+      "texto": "Une A con D y alarga la recta hacia dentro del triángulo: es la bisectriz del ángulo A.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -155,10 +154,10 @@
         "tipo": "recta",
         "pasaPor": [
           "A",
-          "bpxR"
+          "D"
         ],
         "longitudMin": 80,
-        "nombrar": "bpb"
+        "nombrar": "bA"
       }
     },
     {
@@ -177,8 +176,8 @@
           "AB",
           "BC"
         ],
-        "nombrar": "bqk",
-        "posteriorA": "bpb"
+        "nombrar": "c4",
+        "posteriorA": "bA"
       }
     },
     {
@@ -190,20 +189,18 @@
         {
           "tipo": "punto",
           "cruce": [
-            "bqk",
+            "c4",
             "AB"
           ],
-          "nombrar": "bq1",
-          "rotular": "Q1"
+          "nombrar": "Q1"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "bqk",
+            "c4",
             "BC"
           ],
-          "nombrar": "bq2",
-          "rotular": "Q2"
+          "nombrar": "Q2"
         }
       ]
     },
@@ -215,11 +212,11 @@
       ],
       "objetivo": {
         "tipo": "arco",
-        "centro": "bq1",
+        "centro": "Q1",
         "radio": {
           "min": 15
         },
-        "nombrar": "bqxa"
+        "nombrar": "c5"
       }
     },
     {
@@ -229,31 +226,32 @@
       ],
       "objetivo": {
         "tipo": "arco",
-        "centro": "bq2",
-        "radioComo": "bqxa",
+        "centro": "Q2",
+        "radioComo": "c5",
         "cortaA": [
-          "bqxa"
+          "c5"
         ],
-        "nombrar": "bqxb",
-        "posteriorA": "bqxa"
+        "nombrar": "c6",
+        "posteriorA": "c5"
       }
     },
     {
-      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "texto": "Marca el punto E, donde se cortan los dos arcos.",
       "herramientas": [
         "lapiz"
       ],
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "bqxa",
-          "bqxb"
+          "c5",
+          "c6"
         ],
-        "nombrar": "bqxR"
+        "corte": false,
+        "nombrar": "E"
       }
     },
     {
-      "texto": "Une B con ese punto y alarga la recta hacia dentro del triángulo: es la bisectriz del ángulo B.",
+      "texto": "Une B con E y alarga la recta hacia dentro del triángulo: es la bisectriz del ángulo B.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -262,10 +260,10 @@
         "tipo": "recta",
         "pasaPor": [
           "B",
-          "bqxR"
+          "E"
         ],
         "longitudMin": 80,
-        "nombrar": "bqb"
+        "nombrar": "bB"
       }
     },
     {
@@ -276,11 +274,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "bpb",
-          "bqb"
+          "bA",
+          "bB"
         ],
-        "nombrar": "I",
-        "rotular": true
+        "nombrar": "I"
       }
     },
     {
@@ -297,7 +294,7 @@
         ],
         "perpendicularA": "AB",
         "longitudMin": 15,
-        "nombrar": "pI"
+        "nombrar": "p"
       }
     },
     {
@@ -308,11 +305,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "pI",
+          "p",
           "AB"
         ],
-        "nombrar": "T",
-        "rotular": true
+        "nombrar": "T"
       }
     },
     {

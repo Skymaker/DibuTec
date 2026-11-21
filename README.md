@@ -19,6 +19,7 @@ Pruébalo: https://skymaker.github.io/DibuTec/
 | Archivo | Contenido |
 |---|---|
 | `index.html` | La aplicación completa (HTML, CSS y JavaScript en un único archivo). |
+| `editor.html` | Editor gráfico de ejercicios guiados (también en un único archivo). |
 | `ejercicios/` | Ejercicios guiados, uno por archivo JSON. |
 | `ejercicios/indice.json` | Temas y ejercicios que aparecen en la aplicación, en orden. |
 | `ejercicios/LEEME.md` | Formato de los ejercicios y cómo añadir otros nuevos. |
@@ -28,5 +29,11 @@ Pruébalo: https://skymaker.github.io/DibuTec/
 
 ## Añadir ejercicios
 
-Copia el archivo `.json` del ejercicio en `ejercicios/` y añade su nombre a
+La forma más cómoda es el **editor de ejercicios** (`editor.html`, también desde
+el panel «Ejercicios guiados» de la aplicación): se dibuja el enunciado sobre la
+hoja, se escriben los pasos con sus objetivos, se ve la construcción esperada de
+cada paso, se revisan los errores y se prueba en DibuTec con un botón. «Guardar»
+descarga el `.json`.
+
+A mano: Copia el archivo `.json` del ejercicio en `ejercicios/` y añade su nombre a
 uno de los temas de `ejercicios/indice.json`. El formato está explicado en `ejercicios/LEEME.md`.

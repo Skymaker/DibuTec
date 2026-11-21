@@ -29,8 +29,8 @@
   },
   "textos": {
     "r": "la recta r",
-    "aP": "el arco con centro en P",
-    "a1": "el arco con centro en C1"
+    "c1": "el arco con centro en P",
+    "c2": "el arco con centro en C1"
   },
   "pasos": [
     {
@@ -52,7 +52,7 @@
             "cortes": 2
           }
         ],
-        "nombrar": "aP"
+        "nombrar": "c1"
       }
     },
     {
@@ -63,15 +63,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "aP",
+          "c1",
           "r"
         ],
         "cantidad": 2,
         "nombrar": [
           "C1",
           "C2"
-        ],
-        "rotular": true
+        ]
       }
     },
     {
@@ -85,7 +84,7 @@
         "radio": {
           "min": 20
         },
-        "nombrar": "a1"
+        "nombrar": "c2"
       }
     },
     {
@@ -96,11 +95,11 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "C2",
-        "radioComo": "a1",
+        "radioComo": "c2",
         "cortaA": [
-          "a1"
+          "c2"
         ],
-        "nombrar": "a2"
+        "nombrar": "c3"
       }
     },
     {
@@ -111,11 +110,11 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "a1",
-          "a2"
+          "c2",
+          "c3"
         ],
-        "nombrar": "D",
-        "rotular": true
+        "corte": false,
+        "nombrar": "D"
       }
     },
     {

@@ -35,11 +35,11 @@
   "textos": {
     "l1": "el lado horizontal",
     "l2": "el lado inclinado",
-    "k1": "el primer arco",
-    "b1a": "el arco con centro en P",
+    "c1": "el primer arco",
+    "c2": "el arco con centro en P",
     "b1": "la primera bisectriz",
-    "b2a": "el arco con centro en P",
-    "b3a": "el arco con centro en Q"
+    "c4": "el arco con centro en P",
+    "c6": "el arco con centro en Q"
   },
   "pasos": [
     {
@@ -58,7 +58,7 @@
           "l1",
           "l2"
         ],
-        "nombrar": "k1"
+        "nombrar": "c1"
       }
     },
     {
@@ -70,20 +70,18 @@
         {
           "tipo": "punto",
           "cruce": [
-            "k1",
+            "c1",
             "l1"
           ],
-          "nombrar": "P",
-          "rotular": true
+          "nombrar": "P"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "k1",
+            "c1",
             "l2"
           ],
-          "nombrar": "Q",
-          "rotular": true
+          "nombrar": "Q"
         }
       ]
     },
@@ -99,7 +97,7 @@
         "radio": {
           "min": 15
         },
-        "nombrar": "b1a"
+        "nombrar": "c2"
       }
     },
     {
@@ -110,30 +108,31 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "Q",
-        "radioComo": "b1a",
+        "radioComo": "c2",
         "cortaA": [
-          "b1a"
+          "c2"
         ],
-        "nombrar": "b1b",
-        "posteriorA": "b1a"
+        "nombrar": "c3",
+        "posteriorA": "c2"
       }
     },
     {
-      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "texto": "Marca el punto D, donde se cortan los dos arcos.",
       "herramientas": [
         "lapiz"
       ],
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "b1a",
-          "b1b"
+          "c2",
+          "c3"
         ],
-        "nombrar": "b1R"
+        "corte": false,
+        "nombrar": "D"
       }
     },
     {
-      "texto": "Une V con ese punto: es la bisectriz, que divide el ángulo en dos de 60°. Hazla más larga que el arco.",
+      "texto": "Une V con D: es la bisectriz b1, que divide el ángulo en dos de 60°. Hazla más larga que el arco.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -142,7 +141,7 @@
         "tipo": "recta",
         "pasaPor": [
           "V",
-          "b1R"
+          "D"
         ],
         "angulo": {
           "con": "l1",
@@ -160,11 +159,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "k1",
+          "c1",
           "b1"
         ],
-        "nombrar": "M",
-        "rotular": true
+        "corte": {
+          "x": 97.5,
+          "y": 136.029
+        },
+        "nombrar": "M"
       }
     },
     {
@@ -179,7 +181,7 @@
         "radio": {
           "min": 15
         },
-        "nombrar": "b2a",
+        "nombrar": "c4",
         "posteriorA": "M"
       }
     },
@@ -191,30 +193,31 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "M",
-        "radioComo": "b2a",
+        "radioComo": "c4",
         "cortaA": [
-          "b2a"
+          "c4"
         ],
-        "nombrar": "b2b",
-        "posteriorA": "b2a"
+        "nombrar": "c5",
+        "posteriorA": "c4"
       }
     },
     {
-      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "texto": "Marca el punto E, donde se cortan los dos arcos.",
       "herramientas": [
         "lapiz"
       ],
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "b2a",
-          "b2b"
+          "c4",
+          "c5"
         ],
-        "nombrar": "b2R"
+        "corte": false,
+        "nombrar": "E"
       }
     },
     {
-      "texto": "Une V con ese punto: es la bisectriz del ángulo de abajo (30°).",
+      "texto": "Une V con E: es la bisectriz b2 del ángulo de abajo (30°).",
       "herramientas": [
         "regla",
         "lapiz"
@@ -223,7 +226,7 @@
         "tipo": "recta",
         "pasaPor": [
           "V",
-          "b2R"
+          "E"
         ],
         "angulo": {
           "con": "l1",
@@ -245,7 +248,7 @@
         "radio": {
           "min": 15
         },
-        "nombrar": "b3a",
+        "nombrar": "c6",
         "posteriorA": "b2"
       }
     },
@@ -257,30 +260,31 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "M",
-        "radioComo": "b3a",
+        "radioComo": "c6",
         "cortaA": [
-          "b3a"
+          "c6"
         ],
-        "nombrar": "b3b",
-        "posteriorA": "b3a"
+        "nombrar": "c7",
+        "posteriorA": "c6"
       }
     },
     {
-      "texto": "Marca el punto donde se cortan los dos arcos.",
+      "texto": "Marca el punto F, donde se cortan los dos arcos.",
       "herramientas": [
         "lapiz"
       ],
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "b3a",
-          "b3b"
+          "c6",
+          "c7"
         ],
-        "nombrar": "b3R"
+        "corte": false,
+        "nombrar": "F"
       }
     },
     {
-      "texto": "Une V con ese punto: es la bisectriz del ángulo de arriba.",
+      "texto": "Une V con F: es la bisectriz b3 del ángulo de arriba.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -289,13 +293,14 @@
         "tipo": "recta",
         "pasaPor": [
           "V",
-          "b3R"
+          "F"
         ],
         "angulo": {
           "con": "l1",
           "grados": 90
         },
-        "longitudMin": 60
+        "longitudMin": 60,
+        "nombrar": "b3"
       }
     }
   ],

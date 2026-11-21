@@ -35,7 +35,7 @@
   "textos": {
     "r": "la recta horizontal",
     "s": "la recta vertical",
-    "aV": "el arco con centro en V"
+    "c1": "el arco con centro en V"
   },
   "pasos": [
     {
@@ -52,7 +52,7 @@
           "r",
           "s"
         ],
-        "nombrar": "aV"
+        "nombrar": "c1"
       }
     },
     {
@@ -64,20 +64,18 @@
         {
           "tipo": "punto",
           "cruce": [
-            "aV",
+            "c1",
             "r"
           ],
-          "nombrar": "T1",
-          "rotular": true
+          "nombrar": "T1"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "aV",
+            "c1",
             "s"
           ],
-          "nombrar": "T2",
-          "rotular": true
+          "nombrar": "T2"
         }
       ]
     },
@@ -121,8 +119,7 @@
           "p1",
           "p2"
         ],
-        "nombrar": "O",
-        "rotular": true
+        "nombrar": "O"
       }
     },
     {

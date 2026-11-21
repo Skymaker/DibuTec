@@ -41,8 +41,7 @@
           "P3",
           "P4",
           "P5"
-        ],
-        "rotular": true
+        ]
       }
     },
     {
@@ -116,8 +115,7 @@
             "de": "P3",
             "mm": 10
           },
-          "nombrar": "Q1",
-          "rotular": true
+          "nombrar": "Q1"
         },
         {
           "tipo": "punto",
@@ -126,8 +124,7 @@
             "de": "P3",
             "mm": 20
           },
-          "nombrar": "Q2",
-          "rotular": true
+          "nombrar": "Q2"
         },
         {
           "tipo": "punto",
@@ -136,8 +133,7 @@
             "de": "P3",
             "mm": 30
           },
-          "nombrar": "Q3",
-          "rotular": true
+          "nombrar": "Q3"
         },
         {
           "tipo": "punto",
@@ -146,8 +142,7 @@
             "de": "P3",
             "mm": 40
           },
-          "nombrar": "Q4",
-          "rotular": true
+          "nombrar": "Q4"
         },
         {
           "tipo": "punto",
@@ -156,8 +151,7 @@
             "de": "P3",
             "mm": 50
           },
-          "nombrar": "Q5",
-          "rotular": true
+          "nombrar": "Q5"
         }
       ]
     },

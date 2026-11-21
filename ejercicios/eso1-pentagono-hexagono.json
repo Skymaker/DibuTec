@@ -29,10 +29,10 @@
     "O1": "el centro O",
     "O2": "el centro O'",
     "c1": "la primera circunferencia",
-    "c2": "la segunda circunferencia",
-    "dh": "el diámetro horizontal",
-    "kA": "el arco con centro en A",
-    "kM": "el arco con centro en M"
+    "c4": "la segunda circunferencia",
+    "h": "el diámetro horizontal",
+    "c2": "el arco con centro en A",
+    "c3": "el arco con centro en M"
   },
   "pasos": [
     {
@@ -70,7 +70,7 @@
             }
           ],
           "tolerancia": 1.5,
-          "nombrar": "dh"
+          "nombrar": "h"
         },
         {
           "tipo": "recta",
@@ -85,7 +85,7 @@
             }
           ],
           "tolerancia": 1.5,
-          "nombrar": "dv"
+          "nombrar": "v"
         }
       ]
     },
@@ -101,8 +101,7 @@
             "x": 80.0,
             "y": 67.0
           },
-          "nombrar": "N",
-          "rotular": true
+          "nombrar": "N"
         },
         {
           "tipo": "punto",
@@ -110,8 +109,7 @@
             "x": 125.0,
             "y": 112.0
           },
-          "nombrar": "A",
-          "rotular": true
+          "nombrar": "A"
         }
       ]
     },
@@ -130,7 +128,7 @@
             "cortes": 2
           }
         ],
-        "nombrar": "kA"
+        "nombrar": "c2"
       }
     },
     {
@@ -141,7 +139,7 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "kA",
+          "c2",
           "c1"
         ],
         "cantidad": 2,
@@ -163,7 +161,7 @@
           "K1",
           "K2"
         ],
-        "nombrar": "mz"
+        "nombrar": "m"
       }
     },
     {
@@ -174,11 +172,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "mz",
-          "dh"
+          "m",
+          "h"
         ],
-        "nombrar": "M",
-        "rotular": true
+        "nombrar": "M"
       }
     },
     {
@@ -194,9 +191,9 @@
           "N"
         ],
         "cortaA": [
-          "dh"
+          "h"
         ],
-        "nombrar": "kM"
+        "nombrar": "c3"
       }
     },
     {
@@ -207,15 +204,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "kM",
-          "dh"
+          "c3",
+          "h"
         ],
         "cerca": {
           "x": 52.188,
           "y": 112.0
         },
-        "nombrar": "P",
-        "rotular": true
+        "nombrar": "P"
       }
     },
     {
@@ -229,14 +225,7 @@
         "tipo": "vertices",
         "circunferencia": "c1",
         "desde": "N",
-        "lados": 5,
-        "nombrar": [
-          "P1",
-          "P2",
-          "P3",
-          "P4",
-          "P5"
-        ]
+        "lados": 5
       }
     },
     {
@@ -248,11 +237,26 @@
       "objetivo": {
         "tipo": "rectas",
         "poligono": [
-          "P1",
-          "P2",
-          "P3",
-          "P4",
-          "P5"
+          {
+            "x": 80.0,
+            "y": 67.0
+          },
+          {
+            "x": 122.798,
+            "y": 98.094
+          },
+          {
+            "x": 106.45,
+            "y": 148.406
+          },
+          {
+            "x": 53.55,
+            "y": 148.406
+          },
+          {
+            "x": 37.202,
+            "y": 98.094
+          }
         ]
       }
     },
@@ -266,22 +270,33 @@
         "centro": "O2",
         "radio": 45,
         "completo": true,
-        "nombrar": "c2"
+        "nombrar": "c4"
       }
     },
     {
-      "texto": "Marca un punto cualquiera sobre la circunferencia (por ejemplo, arriba).",
+      "texto": "Traza por O' el diámetro horizontal.",
       "herramientas": [
+        "regla",
+        "escuadra",
         "lapiz"
       ],
       "objetivo": {
-        "tipo": "punto",
-        "sobre": "c2",
-        "nombrar": "H1"
+        "tipo": "recta",
+        "pasaPor": [
+          {
+            "x": 170.0,
+            "y": 112.0
+          },
+          {
+            "x": 260.0,
+            "y": 112.0
+          }
+        ],
+        "tolerancia": 1.5
       }
     },
     {
-      "texto": "Sin cambiar la abertura (el radio), pincha en ese punto, corta la circunferencia y sigue saltando desde cada punto nuevo hasta tener los seis vértices.",
+      "texto": "Sin cambiar la abertura (el radio), marca el extremo derecho del diámetro, pincha en él, corta la circunferencia y sigue saltando desde cada punto nuevo hasta tener los seis vértices.",
       "pista": "El lado del hexágono regular mide lo mismo que el radio.",
       "herramientas": [
         "compas",
@@ -289,8 +304,11 @@
       ],
       "objetivo": {
         "tipo": "vertices",
-        "circunferencia": "c2",
-        "desde": "H1",
+        "circunferencia": "c4",
+        "desde": {
+          "x": 260.0,
+          "y": 112.0
+        },
         "lados": 6,
         "nombrar": [
           "W1",

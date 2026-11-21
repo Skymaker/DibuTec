@@ -32,12 +32,12 @@
   },
   "textos": {
     "AB": "el segmento AB",
-    "Taux": "la recta auxiliar",
-    "Tu": "la recta que une 7 con B"
+    "r": "la recta auxiliar r",
+    "s": "la recta s, que une 7 con B"
   },
   "pasos": [
     {
-      "texto": "Traza desde A una recta auxiliar inclinada (que forme un ángulo agudo con AB) de al menos 12 cm.",
+      "texto": "Traza desde A una recta auxiliar r inclinada (que forme un ángulo agudo con AB) de al menos 12 cm.",
       "pista": "Cualquier inclinación vale, pero que no se parezca mucho a la del segmento.",
       "herramientas": [
         "regla",
@@ -47,7 +47,7 @@
         "tipo": "recta",
         "desde": "A",
         "longitudMin": 117,
-        "nombrar": "Taux"
+        "nombrar": "r"
       }
     },
     {
@@ -60,78 +60,71 @@
       "objetivos": [
         {
           "tipo": "punto",
-          "sobre": "Taux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 15
           },
-          "nombrar": "T1",
-          "rotular": "1"
+          "nombrar": "1"
         },
         {
           "tipo": "punto",
-          "sobre": "Taux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 30
           },
-          "nombrar": "T2",
-          "rotular": "2"
+          "nombrar": "2"
         },
         {
           "tipo": "punto",
-          "sobre": "Taux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 45
           },
-          "nombrar": "T3",
-          "rotular": "3"
+          "nombrar": "3"
         },
         {
           "tipo": "punto",
-          "sobre": "Taux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 60
           },
-          "nombrar": "T4",
-          "rotular": "4"
+          "nombrar": "4"
         },
         {
           "tipo": "punto",
-          "sobre": "Taux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 75
           },
-          "nombrar": "T5",
-          "rotular": "5"
+          "nombrar": "5"
         },
         {
           "tipo": "punto",
-          "sobre": "Taux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 90
           },
-          "nombrar": "T6",
-          "rotular": "6"
+          "nombrar": "6"
         },
         {
           "tipo": "punto",
-          "sobre": "Taux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 105
           },
-          "nombrar": "T7",
-          "rotular": "7"
+          "nombrar": "7"
         }
       ]
     },
     {
-      "texto": "Une con la regla el último punto (7) con el extremo B.",
+      "texto": "Une con la regla el último punto (7) con el extremo B: es la recta s.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -139,14 +132,14 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "T7",
+          "7",
           "B"
         ],
-        "nombrar": "Tu"
+        "nombrar": "s"
       }
     },
     {
-      "texto": "Con la escuadra y el cartabón, traza por cada uno de los otros puntos una paralela a esa recta, hasta que corte a AB.",
+      "texto": "Con la escuadra y el cartabón, traza por cada uno de los otros puntos una paralela a s, hasta que corte a AB.",
       "pista": "Apoya un canto de la escuadra en la recta que acabas de trazar, fija el cartabón contra ella y desliza la escuadra hasta cada punto.",
       "herramientas": [
         "escuadra",
@@ -157,55 +150,55 @@
         {
           "tipo": "recta",
           "pasaPor": [
-            "T1"
+            "1"
           ],
-          "paralelaA": "Tu",
-          "nombrar": "T1p"
+          "paralelaA": "s",
+          "nombrar": "s1"
         },
         {
           "tipo": "recta",
           "pasaPor": [
-            "T2"
+            "2"
           ],
-          "paralelaA": "Tu",
-          "nombrar": "T2p"
+          "paralelaA": "s",
+          "nombrar": "s2"
         },
         {
           "tipo": "recta",
           "pasaPor": [
-            "T3"
+            "3"
           ],
-          "paralelaA": "Tu",
-          "nombrar": "T3p"
+          "paralelaA": "s",
+          "nombrar": "s3"
         },
         {
           "tipo": "recta",
           "pasaPor": [
-            "T4"
+            "4"
           ],
-          "paralelaA": "Tu",
-          "nombrar": "T4p"
+          "paralelaA": "s",
+          "nombrar": "s4"
         },
         {
           "tipo": "recta",
           "pasaPor": [
-            "T5"
+            "5"
           ],
-          "paralelaA": "Tu",
-          "nombrar": "T5p"
+          "paralelaA": "s",
+          "nombrar": "s5"
         },
         {
           "tipo": "recta",
           "pasaPor": [
-            "T6"
+            "6"
           ],
-          "paralelaA": "Tu",
-          "nombrar": "T6p"
+          "paralelaA": "s",
+          "nombrar": "s6"
         }
       ]
     },
     {
-      "texto": "Marca los puntos donde las paralelas cortan a AB.",
+      "texto": "Marca los puntos donde las paralelas cortan a AB (1', 2'…).",
       "herramientas": [
         "lapiz"
       ],
@@ -213,50 +206,50 @@
         {
           "tipo": "punto",
           "cruce": [
-            "T1p",
+            "s1",
             "AB"
           ],
-          "nombrar": "T1c"
+          "nombrar": "1'"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "T2p",
+            "s2",
             "AB"
           ],
-          "nombrar": "T2c"
+          "nombrar": "2'"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "T3p",
+            "s3",
             "AB"
           ],
-          "nombrar": "T3c"
+          "nombrar": "3'"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "T4p",
+            "s4",
             "AB"
           ],
-          "nombrar": "T4c"
+          "nombrar": "4'"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "T5p",
+            "s5",
             "AB"
           ],
-          "nombrar": "T5c"
+          "nombrar": "5'"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "T6p",
+            "s6",
             "AB"
           ],
-          "nombrar": "T6c"
+          "nombrar": "6'"
         }
       ]
     }

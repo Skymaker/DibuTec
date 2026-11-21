@@ -35,7 +35,7 @@
   "textos": {
     "h": "el lado horizontal",
     "v": "el lado vertical",
-    "kT": "el arco"
+    "c1": "el arco"
   },
   "pasos": [
     {
@@ -55,7 +55,7 @@
           "v"
         ],
         "barridoMin": 85,
-        "nombrar": "kT"
+        "nombrar": "c1"
       }
     },
     {
@@ -67,20 +67,18 @@
         {
           "tipo": "punto",
           "cruce": [
-            "kT",
+            "c1",
             "h"
           ],
-          "nombrar": "TA",
-          "rotular": "A"
+          "nombrar": "A"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "kT",
+            "c1",
             "v"
           ],
-          "nombrar": "TB",
-          "rotular": "B"
+          "nombrar": "B"
         }
       ]
     },
@@ -92,32 +90,32 @@
       ],
       "objetivo": {
         "tipo": "arco",
-        "centro": "TA",
-        "radioComo": "kT",
+        "centro": "A",
+        "radioComo": "c1",
         "cortaA": [
-          "kT"
+          "c1"
         ],
-        "nombrar": "g1"
+        "nombrar": "c2"
       }
     },
     {
-      "texto": "Marca ese corte: está a 60° del lado horizontal.",
+      "texto": "Marca ese corte, C: está a 60° del lado horizontal.",
       "herramientas": [
         "lapiz"
       ],
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "g1",
-          "kT"
+          "c2",
+          "c1"
         ],
         "angulo": {
           "vertice": "V",
-          "desde": "TA",
+          "desde": "A",
           "grados": 60,
           "sentido": "antihorario"
         },
-        "nombrar": "T60"
+        "nombrar": "C"
       }
     },
     {
@@ -127,36 +125,36 @@
       ],
       "objetivo": {
         "tipo": "arco",
-        "centro": "TB",
-        "radioComo": "kT",
+        "centro": "B",
+        "radioComo": "c1",
         "cortaA": [
-          "kT"
+          "c1"
         ],
-        "nombrar": "g2"
+        "nombrar": "c3"
       }
     },
     {
-      "texto": "Marca ese corte: está a 30° del lado horizontal.",
+      "texto": "Marca ese corte, D: está a 30° del lado horizontal.",
       "herramientas": [
         "lapiz"
       ],
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "g2",
-          "kT"
+          "c3",
+          "c1"
         ],
         "angulo": {
           "vertice": "V",
-          "desde": "TA",
+          "desde": "A",
           "grados": 30,
           "sentido": "antihorario"
         },
-        "nombrar": "T30"
+        "nombrar": "D"
       }
     },
     {
-      "texto": "Une V con los dos puntos marcados usando la regla.",
+      "texto": "Une V con C y con D usando la regla.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -166,7 +164,7 @@
           "tipo": "recta",
           "pasaPor": [
             "V",
-            "T30"
+            "D"
           ],
           "longitudMin": 40
         },
@@ -174,7 +172,7 @@
           "tipo": "recta",
           "pasaPor": [
             "V",
-            "T60"
+            "C"
           ],
           "longitudMin": 40
         }

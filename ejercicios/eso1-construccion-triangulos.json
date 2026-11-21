@@ -39,11 +39,11 @@
   },
   "textos": {
     "r1": "la recta de abajo",
-    "kc": "el arco de radio 5 cm",
-    "kb": "el arco de radio 6 cm",
+    "c1": "el arco de radio 5 cm",
+    "c2": "el arco de radio 6 cm",
     "r2": "la otra recta",
-    "ke": "el arco con centro en E",
-    "kf": "el arco con centro en F"
+    "c3": "el arco con centro en E",
+    "c4": "el arco con centro en F"
   },
   "pasos": [
     {
@@ -70,8 +70,7 @@
             "de": "B",
             "mm": 70
           },
-          "nombrar": "C",
-          "rotular": true
+          "nombrar": "C"
         }
       ]
     },
@@ -85,13 +84,13 @@
           "tipo": "arco",
           "centro": "B",
           "radio": 50,
-          "nombrar": "kc"
+          "nombrar": "c1"
         },
         {
           "tipo": "arco",
           "centro": "C",
           "radio": 60,
-          "nombrar": "kb"
+          "nombrar": "c2"
         }
       ]
     },
@@ -103,11 +102,11 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "kc",
-          "kb"
+          "c1",
+          "c2"
         ],
-        "nombrar": "A",
-        "rotular": true
+        "corte": false,
+        "nombrar": "A"
       }
     },
     {
@@ -153,8 +152,7 @@
             "de": "E",
             "mm": 50
           },
-          "nombrar": "F",
-          "rotular": true
+          "nombrar": "F"
         }
       ]
     },
@@ -168,13 +166,13 @@
           "tipo": "arco",
           "centro": "E",
           "radio": 75,
-          "nombrar": "ke"
+          "nombrar": "c3"
         },
         {
           "tipo": "arco",
           "centro": "F",
           "radio": 75,
-          "nombrar": "kf"
+          "nombrar": "c4"
         }
       ]
     },
@@ -186,11 +184,11 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "ke",
-          "kf"
+          "c3",
+          "c4"
         ],
-        "nombrar": "D",
-        "rotular": true
+        "corte": false,
+        "nombrar": "D"
       }
     },
     {

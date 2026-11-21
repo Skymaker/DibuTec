@@ -19,13 +19,13 @@
     ]
   },
   "textos": {
-    "c": "la circunferencia",
+    "c1": "la circunferencia",
     "d": "el diámetro vertical",
-    "aux": "la recta auxiliar",
-    "u": "la recta que une 7 con B",
-    "kA": "el arco con centro en A",
-    "kB": "el arco con centro en B",
-    "pd": "la recta que une P con 2'"
+    "r": "la recta auxiliar",
+    "s": "la recta que une 7 con B",
+    "c2": "el arco con centro en A",
+    "c3": "el arco con centro en B",
+    "q": "la recta que une P con 2'"
   },
   "pasos": [
     {
@@ -39,7 +39,7 @@
         "centro": "O",
         "radio": 50,
         "completo": true,
-        "nombrar": "c"
+        "nombrar": "c1"
       }
     },
     {
@@ -77,8 +77,7 @@
             "x": 148.5,
             "y": 60.0
           },
-          "nombrar": "A",
-          "rotular": true
+          "nombrar": "A"
         },
         {
           "tipo": "punto",
@@ -86,8 +85,7 @@
             "x": 148.5,
             "y": 160.0
           },
-          "nombrar": "B",
-          "rotular": true
+          "nombrar": "B"
         }
       ]
     },
@@ -101,7 +99,7 @@
         "tipo": "recta",
         "desde": "A",
         "longitudMin": 80,
-        "nombrar": "aux"
+        "nombrar": "r"
       }
     },
     {
@@ -113,73 +111,66 @@
       "objetivos": [
         {
           "tipo": "punto",
-          "sobre": "aux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 10
           },
-          "nombrar": "T1",
-          "rotular": "1"
+          "nombrar": "1"
         },
         {
           "tipo": "punto",
-          "sobre": "aux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 20
           },
-          "nombrar": "T2",
-          "rotular": "2"
+          "nombrar": "2"
         },
         {
           "tipo": "punto",
-          "sobre": "aux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 30
           },
-          "nombrar": "T3",
-          "rotular": "3"
+          "nombrar": "3"
         },
         {
           "tipo": "punto",
-          "sobre": "aux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 40
           },
-          "nombrar": "T4",
-          "rotular": "4"
+          "nombrar": "4"
         },
         {
           "tipo": "punto",
-          "sobre": "aux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 50
           },
-          "nombrar": "T5",
-          "rotular": "5"
+          "nombrar": "5"
         },
         {
           "tipo": "punto",
-          "sobre": "aux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 60
           },
-          "nombrar": "T6",
-          "rotular": "6"
+          "nombrar": "6"
         },
         {
           "tipo": "punto",
-          "sobre": "aux",
+          "sobre": "r",
           "distancia": {
             "de": "A",
             "mm": 70
           },
-          "nombrar": "T7",
-          "rotular": "7"
+          "nombrar": "7"
         }
       ]
     },
@@ -192,10 +183,10 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "T7",
+          "7",
           "B"
         ],
-        "nombrar": "u"
+        "nombrar": "s"
       }
     },
     {
@@ -208,10 +199,10 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "T2"
+          "2"
         ],
-        "paralelaA": "u",
-        "nombrar": "p2"
+        "paralelaA": "s",
+        "nombrar": "t"
       }
     },
     {
@@ -222,11 +213,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "p2",
+          "t",
           "d"
         ],
-        "nombrar": "D2",
-        "rotular": "2'"
+        "nombrar": "2'"
       }
     },
     {
@@ -239,13 +229,13 @@
           "tipo": "arco",
           "centro": "A",
           "radio": 100,
-          "nombrar": "kA"
+          "nombrar": "c2"
         },
         {
           "tipo": "arco",
           "centro": "B",
           "radio": 100,
-          "nombrar": "kB"
+          "nombrar": "c3"
         }
       ]
     },
@@ -257,15 +247,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "kA",
-          "kB"
+          "c2",
+          "c3"
         ],
         "cerca": {
           "x": 61.897,
           "y": 110.0
         },
-        "nombrar": "P",
-        "rotular": true
+        "nombrar": "P"
       }
     },
     {
@@ -278,9 +267,9 @@
         "tipo": "recta",
         "pasaPor": [
           "P",
-          "D2"
+          "2'"
         ],
-        "nombrar": "pd"
+        "nombrar": "q"
       }
     },
     {
@@ -291,15 +280,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "pd",
-          "c"
+          "q",
+          "c1"
         ],
         "cerca": {
           "x": 187.64,
           "y": 78.887
         },
         "nombrar": "C",
-        "rotular": true,
         "tolerancia": 1
       }
     },
@@ -313,7 +301,7 @@
       "objetivos": [
         {
           "tipo": "punto",
-          "sobre": "c",
+          "sobre": "c1",
           "cerca": {
             "x": 197.211,
             "y": 121.279
@@ -323,7 +311,7 @@
         },
         {
           "tipo": "punto",
-          "sobre": "c",
+          "sobre": "c1",
           "cerca": {
             "x": 169.982,
             "y": 155.15
@@ -333,7 +321,7 @@
         },
         {
           "tipo": "punto",
-          "sobre": "c",
+          "sobre": "c1",
           "cerca": {
             "x": 126.524,
             "y": 154.912
@@ -343,7 +331,7 @@
         },
         {
           "tipo": "punto",
-          "sobre": "c",
+          "sobre": "c1",
           "cerca": {
             "x": 99.668,
             "y": 120.744
@@ -353,7 +341,7 @@
         },
         {
           "tipo": "punto",
-          "sobre": "c",
+          "sobre": "c1",
           "cerca": {
             "x": 109.703,
             "y": 78.46

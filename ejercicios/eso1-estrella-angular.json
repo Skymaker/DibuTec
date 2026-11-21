@@ -19,7 +19,7 @@
     ]
   },
   "textos": {
-    "c": "la circunferencia"
+    "c1": "la circunferencia"
   },
   "pasos": [
     {
@@ -34,7 +34,7 @@
         "centro": "O",
         "radio": 70,
         "completo": true,
-        "nombrar": "c"
+        "nombrar": "c1"
       }
     },
     {
@@ -165,27 +165,13 @@
       ],
       "objetivo": {
         "tipo": "vertices",
-        "circunferencia": "c",
+        "circunferencia": "c1",
         "desde": {
           "x": 218.5,
           "y": 112.0
         },
         "lados": 12,
         "nombrar": [
-          "V1",
-          "V2",
-          "V3",
-          "V4",
-          "V5",
-          "V6",
-          "V7",
-          "V8",
-          "V9",
-          "V10",
-          "V11",
-          "V12"
-        ],
-        "rotular": [
           "1",
           "2",
           "3",
@@ -211,18 +197,18 @@
       "objetivo": {
         "tipo": "rectas",
         "poligono": [
-          "V1",
-          "V6",
-          "V11",
-          "V4",
-          "V9",
-          "V2",
-          "V7",
-          "V12",
-          "V5",
-          "V10",
-          "V3",
-          "V8"
+          "1",
+          "6",
+          "11",
+          "4",
+          "9",
+          "2",
+          "7",
+          "12",
+          "5",
+          "10",
+          "3",
+          "8"
         ]
       }
     }

@@ -92,8 +92,7 @@
           "d1",
           "d2"
         ],
-        "nombrar": "O",
-        "rotular": true
+        "nombrar": "O"
       }
     },
     {
@@ -173,8 +172,7 @@
             "x": 128.5,
             "y": 85.0
           },
-          "nombrar": "K1",
-          "rotular": "1"
+          "nombrar": "1"
         },
         {
           "tipo": "punto",
@@ -182,8 +180,7 @@
             "x": 168.5,
             "y": 85.0
           },
-          "nombrar": "K2",
-          "rotular": "2"
+          "nombrar": "2"
         },
         {
           "tipo": "punto",
@@ -191,8 +188,7 @@
             "x": 168.5,
             "y": 125.0
           },
-          "nombrar": "K3",
-          "rotular": "3"
+          "nombrar": "3"
         },
         {
           "tipo": "punto",
@@ -200,8 +196,7 @@
             "x": 128.5,
             "y": 125.0
           },
-          "nombrar": "K4",
-          "rotular": "4"
+          "nombrar": "4"
         }
       ]
     },
@@ -213,25 +208,25 @@
       "objetivos": [
         {
           "tipo": "arco",
-          "centro": "K1",
+          "centro": "1",
           "radio": 20,
           "completo": true
         },
         {
           "tipo": "arco",
-          "centro": "K2",
+          "centro": "2",
           "radio": 20,
           "completo": true
         },
         {
           "tipo": "arco",
-          "centro": "K3",
+          "centro": "3",
           "radio": 20,
           "completo": true
         },
         {
           "tipo": "arco",
-          "centro": "K4",
+          "centro": "4",
           "radio": 20,
           "completo": true
         }

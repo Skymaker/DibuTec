@@ -39,11 +39,11 @@
   },
   "textos": {
     "r": "la recta del cuadrado",
-    "qB": "el arco con centro en B",
-    "qD": "el arco con centro en D",
+    "c1": "el arco con centro en B",
+    "c2": "el arco con centro en D",
     "r2": "la recta del rombo",
-    "efm": "la mediatriz de EF",
-    "kO": "el arco con centro en O"
+    "m": "la mediatriz de EF",
+    "c5": "el arco con centro en O"
   },
   "pasos": [
     {
@@ -68,8 +68,7 @@
             "de": "A",
             "mm": 55
           },
-          "nombrar": "B",
-          "rotular": true
+          "nombrar": "B"
         }
       ]
     },
@@ -87,7 +86,7 @@
         ],
         "perpendicularA": "r",
         "longitudMin": 60,
-        "nombrar": "pa"
+        "nombrar": "p"
       }
     },
     {
@@ -98,13 +97,12 @@
       ],
       "objetivo": {
         "tipo": "punto",
-        "sobre": "pa",
+        "sobre": "p",
         "cerca": {
           "x": 30.0,
           "y": 123.0
         },
-        "nombrar": "D",
-        "rotular": true
+        "nombrar": "D"
       }
     },
     {
@@ -117,13 +115,13 @@
           "tipo": "arco",
           "centro": "B",
           "radio": 55,
-          "nombrar": "qB"
+          "nombrar": "c1"
         },
         {
           "tipo": "arco",
           "centro": "D",
           "radio": 55,
-          "nombrar": "qD"
+          "nombrar": "c2"
         }
       ]
     },
@@ -135,11 +133,11 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "qB",
-          "qD"
+          "c1",
+          "c2"
         ],
-        "nombrar": "C",
-        "rotular": true
+        "corte": false,
+        "nombrar": "C"
       }
     },
     {
@@ -180,8 +178,7 @@
             "de": "E",
             "mm": 80
           },
-          "nombrar": "F",
-          "rotular": true
+          "nombrar": "F"
         }
       ]
     },
@@ -197,7 +194,7 @@
         "radio": {
           "min": 42.0
         },
-        "nombrar": "efk1",
+        "nombrar": "c3",
         "posteriorA": "F"
       }
     },
@@ -210,19 +207,19 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "F",
-        "radioComo": "efk1",
+        "radioComo": "c3",
         "cortaA": [
           {
-            "elemento": "efk1",
+            "elemento": "c3",
             "cortes": 2
           }
         ],
-        "nombrar": "efk2",
-        "posteriorA": "efk1"
+        "nombrar": "c4",
+        "posteriorA": "c3"
       }
     },
     {
-      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos: J y K.",
       "pista": "Al acercar la punta al cruce, se pega sola.",
       "herramientas": [
         "lapiz"
@@ -230,18 +227,18 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "efk1",
-          "efk2"
+          "c3",
+          "c4"
         ],
         "cantidad": 2,
         "nombrar": [
-          "efD1",
-          "efD2"
+          "J",
+          "K"
         ]
       }
     },
     {
-      "texto": "Une los dos cortes con la regla. Es la mediatriz de EF: hazla larga, que sobresalga por los dos lados.",
+      "texto": "Une J y K con la regla. Es la mediatriz de EF (m): hazla larga, que sobresalga por los dos lados.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -249,10 +246,10 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "efD1",
-          "efD2"
+          "J",
+          "K"
         ],
-        "nombrar": "efm"
+        "nombrar": "m"
       }
     },
     {
@@ -263,11 +260,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "efm",
+          "m",
           "r2"
         ],
-        "nombrar": "O",
-        "rotular": true
+        "nombrar": "O"
       }
     },
     {
@@ -281,11 +277,11 @@
         "radio": 25,
         "cortaA": [
           {
-            "elemento": "efm",
+            "elemento": "m",
             "cortes": 2
           }
         ],
-        "nombrar": "kO"
+        "nombrar": "c5"
       }
     },
     {
@@ -296,15 +292,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "kO",
-          "efm"
+          "c5",
+          "m"
         ],
         "cantidad": 2,
         "nombrar": [
           "G",
           "H"
-        ],
-        "rotular": true
+        ]
       }
     },
     {

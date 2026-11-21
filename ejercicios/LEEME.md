@@ -4,6 +4,52 @@ Cada ejercicio es **un archivo JSON** en esta carpeta. DibuTec lee
 `indice.json` y carga cada ejercicio de su propio archivo, así que un archivo
 con errores no impide usar los demás.
 
+## Editor de ejercicios
+
+`editor.html` (en la raíz) crea y modifica ejercicios sin escribir JSON:
+
+- **Hoja interactiva**: el enunciado se dibuja con las herramientas Punto, Recta
+  y Arco (con imán a puntos, cruces y cuadrícula) y los instrumentos se colocan
+  y giran arrastrándolos.
+- **Pasos**: instrucción, pista, herramientas resaltadas y objetivos con todas
+  las condiciones de este documento. Los puntos y líneas de cada condición se
+  pueden escribir o **elegir tocando la hoja**.
+- **Construcción esperada**: la hoja dibuja lo que se espera en el paso
+  seleccionado (naranja) y en los anteriores (gris).
+- **Revisión**: el botón **Comprobar** (F7) la fuerza y prueba a abrir el
+  archivo como DibuTec. Además se repite tras cada cambio, también mientras se escribe (botón
+  de la barra inferior, marcas del esquema, lista «Revisión» de lo
+  seleccionado y campos en rojo). Avisa de nombres que no existen o que aún no se han creado,
+  nombres repetidos, tipos equivocados y campos que faltan. También avisa
+  cuando un punto marcado en un paso anterior ya cumple el objetivo de un
+  punto (DibuTec lo daría por bueno sin marcar nada nuevo).
+- **Optativo**: casilla «Paso optativo» en cada paso y botón «Optativa» en
+  cada condición (por ejemplo, el candado). Se guardan como `optativo` y
+  `opcionales`.
+- **Cortes**: si las dos líneas de «En el cruce de» se cortan en dos puntos,
+  se elige cuál es el bueno con sus botones o tocando en la hoja el otro corte
+  (círculo gris). Se guarda como `corte`.
+- **Nombres**: al cambiar un nombre (en «Nombrar lo conseguido» o en el
+  enunciado), se cambia en todos los pasos que lo usan. No se puede poner un
+  nombre que ya existe.
+- **Solución final**: muestra la construcción completa, sus márgenes en la
+  hoja y botones para centrarla en horizontal, en vertical o en los dos
+  sentidos (se mueve todo: enunciado, sitios de los objetivos e instrumentos).
+  Con **Mover libremente** se coloca a mano: arrastrando en la hoja, con las
+  flechas (Mayús: 10 mm) o escribiendo los milímetros.
+- Al cambiar el **centro** de un arco, el sitio elegido en «Corta a» se mueve
+  con él (así una copia de un paso conserva el lado del arco).
+- **Series**: al duplicar un paso (Ctrl+D) o un objetivo, la copia recibe el
+  siguiente nombre de la serie (c1 → c2, P1 → P2). Los nombres de «Nombres que
+  se pueden usar aquí» se pueden tocar para ponerlos en el último campo tocado.
+- **Probar en DibuTec** abre el ejercicio en la aplicación
+  (`index.html?prueba=editor`); **Guardar** descarga el `.json` con el mismo
+  estilo que los de esta carpeta. **De la lista** abre los ejercicios del índice
+  (solo desde un servidor web). También se puede abrir uno con
+  `editor.html?ejercicio=ejercicios/mediatriz.json`.
+
+El trabajo se guarda solo en el navegador mientras se edita.
+
 ## Añadir un ejercicio
 
 1. Crea `mi-ejercicio.json` en esta carpeta (puedes copiar uno existente).
@@ -138,6 +184,9 @@ indica siempre con su nombre.
   `mover`, `goma`, `regla`, `escuadra`, `cartabon`, `compas`, `transportador`.
 - `objetivo` u `objetivos` (lista): lo que hay que conseguir. El paso se
   completa solo cuando se cumplen todos.
+- `optativo` (opcional): con `true`, el alumno puede saltarse el paso: si no
+  lo hace pero cumple el paso siguiente, continúa. No sirve para el último
+  paso ni para pasos cuyos nombres se usan después.
 
 DibuTec comprueba los objetivos cada vez que algo cambia. Si lo último que se
 dibujó no cumple el objetivo, explica el motivo en la barra de estado. Si se
@@ -148,12 +197,12 @@ vuelve a ese paso.
 
 | Opción | Significado |
 |---|---|
-| `nombrar` | Pone nombre a lo que cumple el objetivo para usarlo en pasos siguientes. Una cadena o una lista (para varios puntos). |
-| `rotular` | Solo para puntos: les pone una etiqueta en la hoja. `true` usa el nombre de `nombrar`; también vale una etiqueta (`"M"`) o una lista (`["1", "2"]`). Así el texto de los pasos puede decir «pincha en M». Si otro punto tenía esa etiqueta, recibe una letra libre. |
+| `nombrar` | Pone nombre a lo que cumple el objetivo para usarlo en pasos siguientes. Una cadena o una lista (para varios puntos). En DibuTec, el elemento conseguido muestra ese nombre en el dibujo (las líneas, en su centro), y un elemento que ya tiene otro nombre del ejercicio no vale para este objetivo. |
 | `posteriorA` | Solo vale lo dibujado después de ese elemento (`"posteriorA": "M"`). Sirve para pedir un arco nuevo con centro en un punto que ya se usó antes. |
 | `tolerancia` | Margen en mm (por defecto 1). |
 | `toleranciaGrados` | Margen en grados (por defecto 1). |
 | `permitirDados` | Si es `true`, también valen los elementos del enunciado. |
+| `opcionales` | Condiciones optativas del objetivo, por su clave: `"opcionales": ["bloqueado"]`. DibuTec las pide, pero si el alumno no las cumple y hace bien el paso siguiente, continúa (la barra de progreso marca ese paso rayado). |
 
 ### `punto`
 
@@ -164,6 +213,7 @@ Un punto marcado con el portaminas.
 | `cerca` | `"cerca": { "x": 100, "y": 50 }` |
 | `sobre` | `"sobre": "c"` (sobre una recta o arco) |
 | `cruce` | `"cruce": ["arcoA", "arcoB"]` (donde se cortan dos líneas) |
+| `corte` | Junto con `cruce`, cuando las líneas se cortan en dos puntos: `"corte": { "x": 120, "y": 80 }` (sitio aproximado del corte bueno). Solo vale el corte más cercano a ese sitio (si los dos quedan casi igual de cerca, no se exige ninguno y el editor avisa). Con `"corte": false` vale cualquiera de los dos a propósito (sin `corte` también, pero el editor avisa). |
 | `angulo` | `"angulo": { "vertice": "V", "desde": "B", "grados": 60 }`; con `"sentido": "antihorario"` u `"horario"` solo vale un lado |
 | `distancia` | `"distancia": { "de": "A", "mm": 35 }` |
 | `cantidad` | Número de puntos distintos que hacen falta (en un `cruce`, cada uno en un corte distinto). |
@@ -192,7 +242,7 @@ Un arco o circunferencia trazado con el compás.
 | `completo` | `true` si tiene que ser una circunferencia entera. |
 | `barridoMin` | Grados mínimos del arco. |
 | `pasaPor` | Puntos por los que pasa. |
-| `cortaA` | `["r"]` o `[{ "elemento": "arcoA", "cortes": 2 }]` |
+| `cortaA` | `["r"]` o `[{ "elemento": "arcoA", "cortes": 2 }]`. Si con un corte la circunferencia podría cortar a la línea en dos sitios, `[{ "elemento": "r", "corte": { "x": 95, "y": 130 } }]` indica cuál vale: el arco tiene que cortar por el lado más cercano a ese sitio. |
 
 ### `rectas`
 

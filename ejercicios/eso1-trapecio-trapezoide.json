@@ -42,10 +42,10 @@
     "r": "la recta del trapecio",
     "r2": "la recta del trapezoide",
     "A2": "el punto A'",
-    "k75": "el arco de 7,5 cm",
-    "k50": "el arco de 5 cm",
-    "k55": "el arco de 5,5 cm",
-    "k45": "el arco de 4,5 cm"
+    "c1": "el arco de 7,5 cm",
+    "c2": "el arco de 5 cm",
+    "c3": "el arco de 5,5 cm",
+    "c4": "el arco de 4,5 cm"
   },
   "pasos": [
     {
@@ -70,8 +70,7 @@
             "de": "A",
             "mm": 70
           },
-          "nombrar": "B",
-          "rotular": true
+          "nombrar": "B"
         }
       ]
     },
@@ -89,7 +88,7 @@
         ],
         "perpendicularA": "r",
         "longitudMin": 50,
-        "nombrar": "pa"
+        "nombrar": "p1"
       }
     },
     {
@@ -101,13 +100,12 @@
       ],
       "objetivo": {
         "tipo": "punto",
-        "sobre": "pa",
+        "sobre": "p1",
         "cerca": {
           "x": 25.0,
           "y": 133.0
         },
-        "nombrar": "D",
-        "rotular": true
+        "nombrar": "D"
       }
     },
     {
@@ -124,7 +122,7 @@
         ],
         "paralelaA": "r",
         "longitudMin": 45,
-        "nombrar": "pd"
+        "nombrar": "p2"
       }
     },
     {
@@ -136,13 +134,12 @@
       ],
       "objetivo": {
         "tipo": "punto",
-        "sobre": "pd",
+        "sobre": "p2",
         "cerca": {
           "x": 65.0,
           "y": 133.0
         },
-        "nombrar": "C",
-        "rotular": true
+        "nombrar": "C"
       }
     },
     {
@@ -183,8 +180,7 @@
             "de": "A2",
             "mm": 60
           },
-          "nombrar": "B2",
-          "rotular": "B'"
+          "nombrar": "B'"
         }
       ]
     },
@@ -198,13 +194,13 @@
           "tipo": "arco",
           "centro": "A2",
           "radio": 75,
-          "nombrar": "k75"
+          "nombrar": "c1"
         },
         {
           "tipo": "arco",
-          "centro": "B2",
+          "centro": "B'",
           "radio": 50,
-          "nombrar": "k50"
+          "nombrar": "c2"
         }
       ]
     },
@@ -216,15 +212,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "k75",
-          "k50"
+          "c1",
+          "c2"
         ],
         "cerca": {
           "x": 216.042,
           "y": 130.157
         },
-        "nombrar": "C2",
-        "rotular": "C'"
+        "nombrar": "C'"
       }
     },
     {
@@ -237,7 +232,7 @@
         "tipo": "recta",
         "pasaPor": [
           "A2",
-          "C2"
+          "C'"
         ]
       }
     },
@@ -251,13 +246,13 @@
           "tipo": "arco",
           "centro": "A2",
           "radio": 55,
-          "nombrar": "k55"
+          "nombrar": "c3"
         },
         {
           "tipo": "arco",
-          "centro": "C2",
+          "centro": "C'",
           "radio": 45,
-          "nombrar": "k45"
+          "nombrar": "c4"
         }
       ]
     },
@@ -269,15 +264,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "k55",
-          "k45"
+          "c3",
+          "c4"
         ],
         "cerca": {
           "x": 171.22,
           "y": 126.157
         },
-        "nombrar": "D2",
-        "rotular": "D'"
+        "nombrar": "D'"
       }
     },
     {
@@ -290,9 +284,9 @@
         "tipo": "rectas",
         "poligono": [
           "A2",
-          "B2",
-          "C2",
-          "D2"
+          "B'",
+          "C'",
+          "D'"
         ]
       }
     }

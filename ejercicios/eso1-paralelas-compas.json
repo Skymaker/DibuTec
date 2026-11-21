@@ -39,11 +39,11 @@
   },
   "textos": {
     "s": "la recta s",
-    "k1": "el primer arco",
-    "k2": "el arco con centro en M",
-    "k3": "el arco con centro en M y radio NP",
-    "cA": "la circunferencia de centro A",
-    "cB": "la circunferencia de centro B"
+    "c1": "el primer arco",
+    "c2": "el arco con centro en M",
+    "c3": "el arco con centro en M y radio NP",
+    "c4": "la circunferencia de centro A",
+    "c5": "la circunferencia de centro B"
   },
   "pasos": [
     {
@@ -61,7 +61,7 @@
         "cortaA": [
           "s"
         ],
-        "nombrar": "k1"
+        "nombrar": "c1"
       }
     },
     {
@@ -72,11 +72,11 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "k1",
+          "c1",
           "s"
         ],
-        "nombrar": "M",
-        "rotular": true
+        "corte": false,
+        "nombrar": "M"
       }
     },
     {
@@ -87,11 +87,11 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "M",
-        "radioComo": "k1",
+        "radioComo": "c1",
         "cortaA": [
           "s"
         ],
-        "nombrar": "k2"
+        "nombrar": "c2"
       }
     },
     {
@@ -102,12 +102,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "k2",
+          "c2",
           "s"
         ],
-        "nombrar": "N",
-        "rotular": true,
-        "posteriorA": "M"
+        "corte": {
+          "x": 238.848,
+          "y": 119.086
+        },
+        "nombrar": "N"
       }
     },
     {
@@ -124,9 +126,9 @@
           "P"
         ],
         "cortaA": [
-          "k1"
+          "c1"
         ],
-        "nombrar": "k3"
+        "nombrar": "c3"
       }
     },
     {
@@ -137,11 +139,14 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "k3",
-          "k1"
+          "c3",
+          "c1"
         ],
-        "nombrar": "Q",
-        "rotular": true
+        "corte": {
+          "x": 32.96,
+          "y": 118.72
+        },
+        "nombrar": "Q"
       }
     },
     {
@@ -172,14 +177,14 @@
           "centro": "A",
           "radio": 25,
           "completo": true,
-          "nombrar": "cA"
+          "nombrar": "c4"
         },
         {
           "tipo": "arco",
           "centro": "B",
           "radio": 25,
           "completo": true,
-          "nombrar": "cB"
+          "nombrar": "c5"
         }
       ]
     },
@@ -198,7 +203,7 @@
           ],
           "perpendicularA": "s",
           "longitudMin": 55,
-          "nombrar": "pa"
+          "nombrar": "p1"
         },
         {
           "tipo": "recta",
@@ -207,7 +212,7 @@
           ],
           "perpendicularA": "s",
           "longitudMin": 55,
-          "nombrar": "pb"
+          "nombrar": "p2"
         }
       ]
     },
@@ -220,8 +225,8 @@
         {
           "tipo": "punto",
           "cruce": [
-            "pa",
-            "cA"
+            "p1",
+            "c4"
           ],
           "cantidad": 2,
           "nombrar": [
@@ -232,8 +237,8 @@
         {
           "tipo": "punto",
           "cruce": [
-            "pb",
-            "cB"
+            "p2",
+            "c5"
           ],
           "cantidad": 2,
           "nombrar": [

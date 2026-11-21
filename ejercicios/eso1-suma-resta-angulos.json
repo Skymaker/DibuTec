@@ -82,9 +82,9 @@
     "lb2": "el lado inclinado de β",
     "s1": "la semirrecta de O",
     "s2": "la semirrecta de O'",
-    "kA": "el arco de α",
-    "Sk": "el arco grande de O",
-    "Dk": "el arco grande de O'"
+    "c1": "el arco de α",
+    "c3": "el arco grande de O",
+    "c6": "el arco grande de O'"
   },
   "pasos": [
     {
@@ -109,7 +109,7 @@
           "la1",
           "la2"
         ],
-        "nombrar": "kA"
+        "nombrar": "c1"
       }
     },
     {
@@ -121,20 +121,18 @@
         {
           "tipo": "punto",
           "cruce": [
-            "kA",
+            "c1",
             "la1"
           ],
-          "nombrar": "A1",
-          "rotular": true
+          "nombrar": "A1"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "kA",
+            "c1",
             "la2"
           ],
-          "nombrar": "A2",
-          "rotular": true
+          "nombrar": "A2"
         }
       ]
     },
@@ -146,12 +144,12 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "Vb",
-        "radioComo": "kA",
+        "radioComo": "c1",
         "cortaA": [
           "lb1",
           "lb2"
         ],
-        "nombrar": "kB"
+        "nombrar": "c2"
       }
     },
     {
@@ -163,20 +161,18 @@
         {
           "tipo": "punto",
           "cruce": [
-            "kB",
+            "c2",
             "lb1"
           ],
-          "nombrar": "B1",
-          "rotular": true
+          "nombrar": "B1"
         },
         {
           "tipo": "punto",
           "cruce": [
-            "kB",
+            "c2",
             "lb2"
           ],
-          "nombrar": "B2",
-          "rotular": true
+          "nombrar": "B2"
         }
       ]
     },
@@ -188,12 +184,12 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "O1",
-        "radioComo": "kA",
+        "radioComo": "c1",
         "cortaA": [
           "s1"
         ],
         "barridoMin": 165,
-        "nombrar": "Sk"
+        "nombrar": "c3"
       }
     },
     {
@@ -204,11 +200,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "Sk",
+          "c3",
           "s1"
         ],
-        "nombrar": "S0",
-        "rotular": "S0"
+        "nombrar": "S0"
       }
     },
     {
@@ -225,9 +220,9 @@
           "A2"
         ],
         "cortaA": [
-          "Sk"
+          "c3"
         ],
-        "nombrar": "Sk1"
+        "nombrar": "c4"
       }
     },
     {
@@ -238,8 +233,8 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "Sk1",
-          "Sk"
+          "c4",
+          "c3"
         ],
         "angulo": {
           "vertice": "O1",
@@ -250,8 +245,7 @@
           "grados": 40,
           "sentido": "antihorario"
         },
-        "nombrar": "S1",
-        "rotular": "S1"
+        "nombrar": "S1"
       }
     },
     {
@@ -267,9 +261,9 @@
           "B2"
         ],
         "cortaA": [
-          "Sk"
+          "c3"
         ],
-        "nombrar": "Sk2"
+        "nombrar": "c5"
       }
     },
     {
@@ -280,8 +274,8 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "Sk2",
-          "Sk"
+          "c5",
+          "c3"
         ],
         "angulo": {
           "vertice": "O1",
@@ -292,8 +286,7 @@
           "grados": 155,
           "sentido": "antihorario"
         },
-        "nombrar": "S2",
-        "rotular": "S2"
+        "nombrar": "S2"
       }
     },
     {
@@ -319,12 +312,12 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "O2",
-        "radioComo": "kA",
+        "radioComo": "c1",
         "cortaA": [
           "s2"
         ],
         "barridoMin": 125,
-        "nombrar": "Dk"
+        "nombrar": "c6"
       }
     },
     {
@@ -335,11 +328,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "Dk",
+          "c6",
           "s2"
         ],
-        "nombrar": "D0",
-        "rotular": "D0"
+        "nombrar": "D0"
       }
     },
     {
@@ -356,9 +348,9 @@
           "B2"
         ],
         "cortaA": [
-          "Dk"
+          "c6"
         ],
-        "nombrar": "Dk1"
+        "nombrar": "c7"
       }
     },
     {
@@ -369,8 +361,8 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "Dk1",
-          "Dk"
+          "c7",
+          "c6"
         ],
         "angulo": {
           "vertice": "O2",
@@ -381,8 +373,7 @@
           "grados": 115,
           "sentido": "antihorario"
         },
-        "nombrar": "D1",
-        "rotular": "D1"
+        "nombrar": "D1"
       }
     },
     {
@@ -398,9 +389,9 @@
           "A2"
         ],
         "cortaA": [
-          "Dk"
+          "c6"
         ],
-        "nombrar": "Dk2"
+        "nombrar": "c8"
       }
     },
     {
@@ -411,8 +402,8 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "Dk2",
-          "Dk"
+          "c8",
+          "c6"
         ],
         "angulo": {
           "vertice": "O2",
@@ -423,8 +414,7 @@
           "grados": 75,
           "sentido": "antihorario"
         },
-        "nombrar": "D2",
-        "rotular": "D2"
+        "nombrar": "D2"
       }
     },
     {

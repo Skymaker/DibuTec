@@ -29,8 +29,8 @@
     ]
   },
   "textos": {
-    "abm": "la mediatriz de AB",
-    "bcm": "la mediatriz de BC"
+    "m1": "la mediatriz de AB",
+    "m2": "la mediatriz de BC"
   },
   "pasos": [
     {
@@ -65,7 +65,7 @@
         "radio": {
           "min": 54.7
         },
-        "nombrar": "abk1"
+        "nombrar": "c1"
       }
     },
     {
@@ -77,19 +77,19 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "B",
-        "radioComo": "abk1",
+        "radioComo": "c1",
         "cortaA": [
           {
-            "elemento": "abk1",
+            "elemento": "c1",
             "cortes": 2
           }
         ],
-        "nombrar": "abk2",
-        "posteriorA": "abk1"
+        "nombrar": "c2",
+        "posteriorA": "c1"
       }
     },
     {
-      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos: D y E.",
       "pista": "Al acercar la punta al cruce, se pega sola.",
       "herramientas": [
         "lapiz"
@@ -97,18 +97,18 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "abk1",
-          "abk2"
+          "c1",
+          "c2"
         ],
         "cantidad": 2,
         "nombrar": [
-          "abD1",
-          "abD2"
+          "D",
+          "E"
         ]
       }
     },
     {
-      "texto": "Une los dos cortes con la regla. Es la mediatriz de AB: hazla larga, que sobresalga por los dos lados.",
+      "texto": "Une D y E con la regla. Es la mediatriz de AB (m1): hazla larga, que sobresalga por los dos lados.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -116,10 +116,10 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "abD1",
-          "abD2"
+          "D",
+          "E"
         ],
-        "nombrar": "abm"
+        "nombrar": "m1"
       }
     },
     {
@@ -134,8 +134,8 @@
         "radio": {
           "min": 53.3
         },
-        "nombrar": "bck1",
-        "posteriorA": "abm"
+        "nombrar": "c3",
+        "posteriorA": "m1"
       }
     },
     {
@@ -147,19 +147,19 @@
       "objetivo": {
         "tipo": "arco",
         "centro": "C",
-        "radioComo": "bck1",
+        "radioComo": "c3",
         "cortaA": [
           {
-            "elemento": "bck1",
+            "elemento": "c3",
             "cortes": 2
           }
         ],
-        "nombrar": "bck2",
-        "posteriorA": "bck1"
+        "nombrar": "c4",
+        "posteriorA": "c3"
       }
     },
     {
-      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos.",
+      "texto": "Marca con el portaminas los dos puntos donde se cortan los arcos: F y J.",
       "pista": "Al acercar la punta al cruce, se pega sola.",
       "herramientas": [
         "lapiz"
@@ -167,18 +167,18 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "bck1",
-          "bck2"
+          "c3",
+          "c4"
         ],
         "cantidad": 2,
         "nombrar": [
-          "bcD1",
-          "bcD2"
+          "F",
+          "J"
         ]
       }
     },
     {
-      "texto": "Une los dos cortes con la regla. Es la mediatriz de BC: hazla larga, que sobresalga por los dos lados.",
+      "texto": "Une F y J con la regla. Es la mediatriz de BC (m2): hazla larga, que sobresalga por los dos lados.",
       "herramientas": [
         "regla",
         "lapiz"
@@ -186,10 +186,10 @@
       "objetivo": {
         "tipo": "recta",
         "pasaPor": [
-          "bcD1",
-          "bcD2"
+          "F",
+          "J"
         ],
-        "nombrar": "bcm"
+        "nombrar": "m2"
       }
     },
     {
@@ -200,11 +200,10 @@
       "objetivo": {
         "tipo": "punto",
         "cruce": [
-          "abm",
-          "bcm"
+          "m1",
+          "m2"
         ],
-        "nombrar": "O",
-        "rotular": true
+        "nombrar": "O"
       }
     },
     {

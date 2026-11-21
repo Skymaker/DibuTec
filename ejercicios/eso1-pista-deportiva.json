@@ -19,7 +19,7 @@
     ]
   },
   "textos": {
-    "ab": "la recta AB"
+    "AB": "la recta AB"
   },
   "pasos": [
     {
@@ -36,7 +36,7 @@
           "x": 188.5,
           "y": 150.0
         },
-        "nombrar": "ab"
+        "nombrar": "AB"
       }
     },
     {
@@ -52,9 +52,9 @@
           "pasaPor": [
             "A"
           ],
-          "perpendicularA": "ab",
+          "perpendicularA": "AB",
           "longitudMin": 55,
-          "nombrar": "pa"
+          "nombrar": "p1"
         },
         {
           "tipo": "recta",
@@ -64,9 +64,9 @@
               "y": 150.0
             }
           ],
-          "perpendicularA": "ab",
+          "perpendicularA": "AB",
           "longitudMin": 55,
-          "nombrar": "pb"
+          "nombrar": "p2"
         }
       ]
     },
@@ -81,23 +81,21 @@
       "objetivos": [
         {
           "tipo": "punto",
-          "sobre": "pa",
+          "sobre": "p1",
           "cerca": {
             "x": 108.5,
             "y": 100.0
           },
-          "nombrar": "C",
-          "rotular": true
+          "nombrar": "C"
         },
         {
           "tipo": "punto",
-          "sobre": "pb",
+          "sobre": "p2",
           "cerca": {
             "x": 188.5,
             "y": 100.0
           },
-          "nombrar": "D",
-          "rotular": true
+          "nombrar": "D"
         }
       ]
     },
@@ -124,23 +122,21 @@
       "objetivos": [
         {
           "tipo": "punto",
-          "sobre": "pa",
+          "sobre": "p1",
           "cerca": {
             "x": 108.5,
             "y": 125.0
           },
-          "nombrar": "O1",
-          "rotular": true
+          "nombrar": "O1"
         },
         {
           "tipo": "punto",
-          "sobre": "pb",
+          "sobre": "p2",
           "cerca": {
             "x": 188.5,
             "y": 125.0
           },
-          "nombrar": "O2",
-          "rotular": true
+          "nombrar": "O2"
         }
       ]
     },
