@@ -22,8 +22,11 @@ FIN = '/* PIEZAS-SVG:FIN */'
 
 def main():
     piezas = {}
-    for f in sorted(AQUI.glob('*/*.svg')):
-        piezas[f'{f.parent.name}/{f.stem}'] = f.read_text(encoding='utf-8')
+    # Las piezas que usa DibuTec son las de <instrumento>/tumbado/ (las vistas completas son de referencia)
+    for f in sorted(AQUI.glob('*/tumbado/*.svg')):
+        if f.stem.startswith('vista-'):
+            continue
+        piezas[f'{f.parent.parent.name}/{f.stem}'] = f.read_text(encoding='utf-8')
     if not piezas:
         sys.exit('No hay piezas SVG en ' + str(AQUI))
     lineas = ['  incrustadas: {']

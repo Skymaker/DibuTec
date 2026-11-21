@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="21mm" height="6.45mm" viewBox="-10.5 -2.25 21 6.45">
   <!--
     DibuTec · compás DE PIE (visto desde arriba) · cabeza
-    Es la pieza tumbada (cabeza.svg) con la deformación que le aplica DibuTec al ponerse de pie:
+    Es la pieza tumbada (../tumbado/cabeza.svg) con la deformación que le aplica DibuTec al ponerse de pie:
     1,5 veces más ancha (está más cerca de quien mira) y aplastada a 0,3 de su altura (se ve por arriba).
     Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
     La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,

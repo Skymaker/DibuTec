@@ -1,19 +1,23 @@
 # Piezas de los instrumentos
 
-El aspecto del **compás** sale de las piezas SVG de `compas/`. DibuTec las lee,
+El aspecto del **compás** sale de las piezas SVG de `compas/tumbado/`. DibuTec las lee,
 las convierte en trazados del canvas y las coloca, gira y estira según lo
 abierto que esté el compás y según se ponga de pie al trazar. Se pueden
 retocar con Inkscape, Illustrator o cualquier editor de SVG.
 
 | Pieza | Qué es | Punto de anclaje (0, 0) |
 |---|---|---|
-| `compas/pata-aguja.svg` | Pata de la punta seca: brazo metálico, pieza negra, tornillo, ruedecita y aguja. | La bisagra. La punta está hacia abajo. |
-| `compas/pata-mina.svg` | Pata de la mina, igual pero con dos ruedecitas y la mina. | La bisagra. La punta está hacia abajo. |
-| `compas/cabeza.svg` | Cabeza negra con los tornillos de las patas. | La bisagra. |
-| `compas/mango.svg` | Mango estriado entre la cabeza y el asa. | Su base, sobre la cabeza. |
-| `compas/taco.svg` | Taco del tornillo de ajuste (hay uno en cada pata). | El eje de la pata; la varilla va en horizontal. |
-| `compas/rueda-ajuste.svg` | Rueda del centro del tornillo de ajuste. | Su centro; la varilla va en horizontal. |
-| `compas/varilla.svg` | Trozo de varilla roscada que se repite a lo largo. | Su borde izquierdo; la varilla va en horizontal. |
+| `compas/tumbado/pata-aguja.svg` | Pata de la punta seca: brazo metálico, pieza negra, tornillo, ruedecita y aguja. | La bisagra. La punta está hacia abajo. |
+| `compas/tumbado/pata-mina.svg` | Pata de la mina, igual pero con dos ruedecitas y la mina. | La bisagra. La punta está hacia abajo. |
+| `compas/tumbado/cabeza.svg` | Cabeza negra con los tornillos de las patas. | La bisagra. |
+| `compas/tumbado/mango.svg` | Mango estriado entre la cabeza y el asa. | Su base, sobre la cabeza. |
+| `compas/tumbado/taco.svg` | Taco del tornillo de ajuste (hay uno en cada pata). | El eje de la pata; la varilla va en horizontal. |
+| `compas/tumbado/rueda-ajuste.svg` | Rueda del centro del tornillo de ajuste. | Su centro; la varilla va en horizontal. |
+| `compas/tumbado/varilla.svg` | Trozo de varilla roscada que se repite a lo largo. | Su borde izquierdo; la varilla va en horizontal. |
+
+`compas/tumbado/vista-tumbado.svg` es el compás completo tumbado, montado con
+estas piezas como lo pinta DibuTec (abierto 50 mm). Es solo de referencia:
+DibuTec no lo lee.
 
 ## Reglas
 
@@ -60,10 +64,11 @@ mismas marcas y los mismos nombres que las tumbadas, y `vista-de-pie.svg`, el
 compás completo de pie tal como lo pinta DibuTec (abierto 50 mm). **De momento
 son solo de referencia: DibuTec no las lee**, sigue deformando las tumbadas.
 El largo de las patas y del mango no va en ellas, porque depende de la abertura
-y del zoom. Si retocas las piezas tumbadas, vuelve a generarlas con:
+y del zoom. Si retocas las piezas tumbadas, vuelve a generarlas (junto con las
+dos vistas completas) con:
 
 ```bash
-python3 instrumentos/compas-de-pie.py
+python3 instrumentos/compas-vistas.py
 ```
 
 ## Después de retocar una pieza

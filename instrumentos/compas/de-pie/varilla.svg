@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="0.7mm" height="1.8mm" viewBox="0 -0.9 0.7 1.8">
   <!--
     DibuTec · compás DE PIE (visto desde arriba) · varilla
-    Es la pieza tumbada (varilla.svg) con la deformación que le aplica DibuTec al ponerse de pie:
+    Es la pieza tumbada (../tumbado/varilla.svg) con la deformación que le aplica DibuTec al ponerse de pie:
     1,5 veces más gruesa; el paso de la rosca (el ancho) no cambia.
     Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
     La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,

@@ -2593,7 +2593,9 @@ const PiezasSVG = {
     let cambio = false;
     await Promise.all(Object.keys(this.incrustadas).map(async nombre => {
       try {
-        const r = await fetch(`instrumentos/${nombre}.svg`, { cache: 'no-cache' });
+        // «compas/cabeza» está en instrumentos/compas/tumbado/cabeza.svg
+        const [instr, pieza] = nombre.split('/');
+        const r = await fetch(`instrumentos/${instr}/tumbado/${pieza}.svg`, { cache: 'no-cache' });
         if (!r.ok) return;
         const t = await r.text();
         if (t === this.incrustadas[nombre] && this.piezas[nombre]) return;
@@ -2894,7 +2896,7 @@ class Compas extends Instrumento {
     if ((otra[0] - t[0]) * n[0] + (otra[1] - t[1]) * n[1] > 0) n = [-n[0], -n[1]];
     return { L, v, n };
   }
-  // Dibujado con las piezas SVG de instrumentos/compas (ver instrumentos/LEEME.md)
+  // Dibujado con las piezas SVG de instrumentos/compas/tumbado (ver instrumentos/LEEME.md)
   dibujar(ctx) {
     const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala, a = this.alzado;
     const cab = this.cabezal(), s = cab.s, punta = [0, 0], mina = [this.r, 0], P = PiezasSVG;

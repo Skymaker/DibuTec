@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="62mm" height="105.7107mm" viewBox="-6 -97.7107 62 105.7107">
+  <!--
+    DibuTec · compás completo TUMBADO, como lo pinta DibuTec
+    (abierto 50 mm: la punta seca en (0, 0) y la mina en (50, 0); zoom normal).
+    Montado con las piezas de compas/tumbado y la misma geometría que usa DibuTec. Solo de referencia:
+    DibuTec no lee este archivo. Se rehace con instrumentos/compas-vistas.py.
+    No incluye el asa ni el botón de la mina, que dibuja DibuTec encima.
+  -->
+  <g id="pata-aguja" transform="matrix(-0.9428 -0.3333 -0.3333 0.9428 25 -70.7107)">
+  <defs>
+    <linearGradient id="pata-aguja-metal" gradientUnits="userSpaceOnUse" x1="2.1" y1="0" x2="-2.1" y2="0">
+      <stop offset="0" stop-color="#eceef1"/>
+      <stop offset="0.45" stop-color="#c3c7ce"/>
+      <stop offset="1" stop-color="#9ea3ac"/>
+    </linearGradient>
+  </defs>
+  <circle id="pata-aguja-punta" cx="0" cy="75" r="0.3" fill="none"/>
+  <circle id="pata-aguja-ajuste" cx="0" cy="20.8" r="0.3" fill="none"/>
+  <path id="pata-aguja-brazo" d="M 2.1 0 L 1.68 49.5 L -1.68 49.5 L -2.1 0 Z" fill="url(#pata-aguja-metal)" stroke="#7d828c" stroke-width="0.25"/>
+  <path id="pata-aguja-pieza-negra" d="M 2.2 47.5 L 1.41 70 L -1.41 70 L -2.2 47.5 Z" fill="#1b1d22"/>
+  <path id="pata-aguja-estrias" d="M 0.79 52.5 L 0.79 61.9 M 0 52.5 L 0 61.9 M -0.79 52.5 L -0.79 61.9" stroke="#3d4049" stroke-width="0.15" fill="none"/>
+  <g id="pata-aguja-tornillo">
+    <circle cx="0" cy="50.7" r="1.1" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
+    <path d="M -0.681 50.234 L 0.681 51.166" stroke="#4a4f59" stroke-width="0.308"/>
+  </g>
+  <g id="pata-aguja-rueda1">
+    <circle cx="2.075" cy="67" r="1.425" fill="#c9ccd3"/>
+    <circle cx="2.6" cy="67" r="1.5" fill="#16181c"/>
+    <path d="M 3.425 67.000 L 4.025 67.000 M 3.267 67.485 L 3.753 67.838 M 2.855 67.785 L 3.040 68.355 M 2.345 67.785 L 2.160 68.355 M 1.933 67.485 L 1.447 67.838 M 1.775 67.000 L 1.175 67.000 M 1.933 66.515 L 1.447 66.162 M 2.345 66.215 L 2.160 65.645 M 2.855 66.215 L 3.040 65.645 M 3.267 66.515 L 3.753 66.162" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
+  </g>
+  <path id="pata-aguja-aguja" d="M 0.5 69.5 L 0 75 L -0.5 69.5 Z" fill="#9aa0aa"/>
+  </g>
+  <g id="pata-mina" transform="matrix(0.9428 -0.3333 0.3333 0.9428 25 -70.7107)">
+  <defs>
+    <linearGradient id="pata-mina-metal" gradientUnits="userSpaceOnUse" x1="2.1" y1="0" x2="-2.1" y2="0">
+      <stop offset="0" stop-color="#eceef1"/>
+      <stop offset="0.45" stop-color="#c3c7ce"/>
+      <stop offset="1" stop-color="#9ea3ac"/>
+    </linearGradient>
+  </defs>
+  <circle id="pata-mina-punta" cx="0" cy="75" r="0.3" fill="none"/>
+  <circle id="pata-mina-ajuste" cx="0" cy="20.8" r="0.3" fill="none"/>
+  <path id="pata-mina-brazo" d="M 2.1 0 L 1.68 49.5 L -1.68 49.5 L -2.1 0 Z" fill="url(#pata-mina-metal)" stroke="#7d828c" stroke-width="0.25"/>
+  <path id="pata-mina-pieza-negra" d="M 2.2 47.5 L 1.41 70 L -1.41 70 L -2.2 47.5 Z" fill="#1b1d22"/>
+  <path id="pata-mina-estrias" d="M 0.79 52.5 L 0.79 61.9 M 0 52.5 L 0 61.9 M -0.79 52.5 L -0.79 61.9" stroke="#3d4049" stroke-width="0.15" fill="none"/>
+  <g id="pata-mina-tornillo">
+    <circle cx="0" cy="50.7" r="1.1" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
+    <path d="M -0.681 50.234 L 0.681 51.166" stroke="#4a4f59" stroke-width="0.308"/>
+  </g>
+  <g id="pata-mina-rueda1">
+    <circle cx="2.075" cy="53.5" r="1.425" fill="#c9ccd3"/>
+    <circle cx="2.6" cy="53.5" r="1.5" fill="#16181c"/>
+    <path d="M 3.425 53.500 L 4.025 53.500 M 3.267 53.985 L 3.753 54.338 M 2.855 54.285 L 3.040 54.855 M 2.345 54.285 L 2.160 54.855 M 1.933 53.985 L 1.447 54.338 M 1.775 53.500 L 1.175 53.500 M 1.933 53.015 L 1.447 52.662 M 2.345 52.715 L 2.160 52.145 M 2.855 52.715 L 3.040 52.145 M 3.267 53.015 L 3.753 52.662" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
+  </g>
+  <g id="pata-mina-rueda2">
+    <circle cx="2.075" cy="67" r="1.425" fill="#c9ccd3"/>
+    <circle cx="2.6" cy="67" r="1.5" fill="#16181c"/>
+    <path d="M 3.425 67.000 L 4.025 67.000 M 3.267 67.485 L 3.753 67.838 M 2.855 67.785 L 3.040 68.355 M 2.345 67.785 L 2.160 68.355 M 1.933 67.485 L 1.447 67.838 M 1.775 67.000 L 1.175 67.000 M 1.933 66.515 L 1.447 66.162 M 2.345 66.215 L 2.160 65.645 M 2.855 66.215 L 3.040 65.645 M 3.267 66.515 L 3.753 66.162" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
+  </g>
+  <!-- id="pata-mina-mina": DibuTec la pinta del color del portaminas (y más clara si está levantada) -->
+  <path id="pata-mina-mina" d="M 0.95 69.5 L 0 75 L -0.95 69.5 Z" fill="#757575"/>
+  </g>
+  <clipPath id="corte-varilla"><rect x="0" y="-0.6" width="21.8667" height="1.2"/></clipPath>
+  <g id="varilla" transform="matrix(1 0 -0 1 14.0667 -51.1003)" clip-path="url(#corte-varilla)">
+    <g transform="translate(0 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(0.7 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(1.4 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(2.1 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(2.8 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(3.5 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(4.2 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(4.9 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(5.6 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(6.3 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(7 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(7.7 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(8.4 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(9.1 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(9.8 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(10.5 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(11.2 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(11.9 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(12.6 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(13.3 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(14 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(14.7 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(15.4 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(16.1 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(16.8 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(17.5 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(18.2 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(18.9 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(19.6 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(20.3 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(21 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+    <g transform="translate(21.7 0)">
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+    </g>
+  </g>
+  <g id="taco-aguja" transform="matrix(-1 -0 -0 1 18.0667 -51.1003)">
+  <rect id="taco-aguja-taco" x="-1.86" y="-2.3" width="6.92" height="4.6" rx="1.15" fill="#1b1d22"/>
+  </g>
+  <g id="taco-mina" transform="matrix(1 0 -0 1 31.9333 -51.1003)">
+  <rect id="taco-mina-taco" x="-1.86" y="-2.3" width="6.92" height="4.6" rx="1.15" fill="#1b1d22"/>
+  </g>
+  <g id="rueda-ajuste" transform="matrix(1 0 -0 1 25 -51.1003)">
+  <rect id="rueda-ajuste-rueda" x="-1.08" y="-2.7" width="2.16" height="5.4" rx="1.35" fill="#1b1d22"/>
+  <path id="rueda-ajuste-estrias" d="M -1.08 -1.8 L 1.08 -1.8 M -1.08 -0.6 L 1.08 -0.6 M -1.08 0.6 L 1.08 0.6 M -1.08 1.8 L 1.08 1.8" stroke="#41444d" stroke-width="0.15" fill="none"/>
+  </g>
+  <g id="mango" transform="matrix(1 0 0 1.0385 25 -77.2107)">
+  <circle id="mango-asa" cx="0" cy="-13" r="0.3" fill="none"/>
+  <rect id="mango-cuerpo" x="-2.3" y="-13.92" width="4.6" height="14.5" rx="2" fill="#1b1d22"/>
+  <path id="mango-estrias" d="M -1.38 -12.6 L -1.38 -0.6 M -0.46 -12.6 L -0.46 -0.6 M 0.46 -12.6 L 0.46 -0.6 M 1.38 -12.6 L 1.38 -0.6" stroke="#3f424b" stroke-width="0.15" fill="none"/>
+  </g>
+  <g id="cabeza" transform="matrix(1 0 0 1 25 -70.7107)">
+  <path id="cabeza-cuerpo" d="M -4.5 -6.5 L 4.5 -6.5 Q 6 -6.5 6 -5 L 6 8 L 3.6 13 L -3.6 13 L -6 8 L -6 -5 Q -6 -6.5 -4.5 -6.5 Z" fill="#17191d"/>
+  <path id="cabeza-brillos" d="M -4.32 -5.5 L -4.32 -3.5 M 4.32 -5.5 L 4.32 -3.5" stroke="#ffffff" stroke-opacity="0.13" stroke-width="0.6" fill="none"/>
+  <g id="cabeza-tornillo-izquierdo">
+    <circle cx="-2.8" cy="0" r="1.3" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
+    <path d="M -3.406 -0.764 L -2.194 0.764" stroke="#4a4f59" stroke-width="0.364"/>
+  </g>
+  <g id="cabeza-tornillo-derecho">
+    <circle cx="2.8" cy="0" r="1.3" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
+    <path d="M 3.374 -0.788 L 2.226 0.788" stroke="#4a4f59" stroke-width="0.364"/>
+  </g>
+  </g>
+</svg>

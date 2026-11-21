@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="18mm" height="78mm" viewBox="-9 -1 18 78">
   <!--
     DibuTec · compás DE PIE (visto desde arriba) · pata-mina
-    Es la pieza tumbada (pata-mina.svg) con la deformación que le aplica DibuTec al ponerse de pie:
+    Es la pieza tumbada (../tumbado/pata-mina.svg) con la deformación que le aplica DibuTec al ponerse de pie:
     1,5 veces más ancha. El largo no cambia aquí: DibuTec lo acorta según lo abierto que esté el compás, igual que en la vista tumbada.
     Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
     La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,

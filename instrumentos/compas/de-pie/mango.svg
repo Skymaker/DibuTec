@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="9mm" height="15.5mm" viewBox="-4.5 -14.5 9 15.5">
   <!--
     DibuTec · compás DE PIE (visto desde arriba) · mango
-    Es la pieza tumbada (mango.svg) con la deformación que le aplica DibuTec al ponerse de pie:
+    Es la pieza tumbada (../tumbado/mango.svg) con la deformación que le aplica DibuTec al ponerse de pie:
     1,5 veces más ancho. El largo lo ajusta DibuTec hasta el asa (de pie, el mango apenas asoma: unos 1 mm).
     Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
     La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,

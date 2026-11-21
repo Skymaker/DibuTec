@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="6mm" height="10.5mm" viewBox="-3 -5.25 6 10.5">
   <!--
     DibuTec · compás DE PIE (visto desde arriba) · rueda-ajuste
-    Es la pieza tumbada (rueda-ajuste.svg) con la deformación que le aplica DibuTec al ponerse de pie:
+    Es la pieza tumbada (../tumbado/rueda-ajuste.svg) con la deformación que le aplica DibuTec al ponerse de pie:
     1,5 veces más grande.
     Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
     La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,
