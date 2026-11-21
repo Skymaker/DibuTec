@@ -2581,7 +2581,7 @@ class Compas extends Instrumento {
   }
   // De pie, visto desde arriba, la bisagra queda sobre el centro de las patas
   bisagra() { return [this.r / 2, -this.altura() * (1 - this.alzado)]; }
-  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(36, 40 / Vista.escala) * (1 - this.alzado * 0.85)]; }
+  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(20, 26 / Vista.escala) * (1 - this.alzado * 0.85)]; }
   // Animación al ponerse de pie (1) o tumbarse (0)
   animarAlzado(objetivo, ms = 420) {
     let quieto = false;
@@ -2658,7 +2658,7 @@ class Compas extends Instrumento {
   cabezal() {
     // De pie, la cabeza se ve desde arriba: más ancha pero aplastada en altura
     const b = this.bisagra(), s = 1 + this.alzado * 0.5, f = 1 - this.alzado * 0.8;
-    return { s, f, x: b[0], arriba: b[1] - 25 * s * f, abajo: b[1] + 6 * s * f, ancho: 13 * s };
+    return { s, f, x: b[0], arriba: b[1] - 6.5 * s * f, abajo: b[1] + 13 * s * f, ancho: 12 * s };
   }
   // Pieza recta con los extremos redondeados, de p a q y de ancho w
   barra(ctx, p, q, w, relleno, borde) {
@@ -2798,7 +2798,7 @@ class Compas extends Instrumento {
     ladoRueda(pd, pd.corte + 4 * s, 1.5 * s);
     ladoRueda(pd, pd.fin - 3 * s, 1.5 * s);
     // Tornillo de ajuste entre las patas: varilla roscada, dos tacos negros y la rueda del centro
-    const tq = Math.min(pi.corte, pd.corte) * 0.36, ql = pi.en(tq), qr = pd.en(tq);
+    const tq = Math.min(pi.corte, pd.corte) * 0.42, ql = pi.en(tq), qr = pd.en(tq);
     const dl = Math.hypot(qr[0] - ql[0], qr[1] - ql[1]) || 1, u = [(qr[0] - ql[0]) / dl, (qr[1] - ql[1]) / dl];
     const e0 = [ql[0] - u[0] * 4 * s, ql[1] - u[1] * 4 * s], e1 = [qr[0] + u[0] * 4 * s, qr[1] + u[1] * 4 * s];
     this.barra(ctx, e0, e1, 0.9 * s, '#8d929b');
@@ -2840,13 +2840,13 @@ class Compas extends Instrumento {
       for (const f of [-0.3, -0.1, 0.1, 0.3]) { ctx.moveTo(k[0] + wm * f, k[1] + wm * 0.3); ctx.lineTo(k[0] + wm * f, cab.arriba - 0.6 * s); }
       ctx.stroke();
     }
-    // Cabeza negra: rectángulo que se estrecha abajo, con dos tornillos y la marca impresa en blanco
+    // Cabeza negra: rectángulo que se estrecha abajo, con los dos tornillos de las patas
     const W = cab.ancho, x = cab.x;
     ctx.save();
     ctx.translate(0, b[1]);
     ctx.scale(1, cab.f);
     ctx.translate(0, -b[1]);
-    const y0 = b[1] - 25 * s, y1 = b[1] + 6 * s;
+    const y0 = b[1] - 6.5 * s, y1 = b[1] + 13 * s;
     ctx.save();
     ctx.shadowColor = 'rgba(30, 40, 60, .25)';
     ctx.shadowBlur = (6 + a * 10) * Capas.dpr;
@@ -2855,10 +2855,10 @@ class Compas extends Instrumento {
     ctx.moveTo(x - W / 2 + 1.5 * s, y0);
     ctx.lineTo(x + W / 2 - 1.5 * s, y0);
     ctx.quadraticCurveTo(x + W / 2, y0, x + W / 2, y0 + 1.5 * s);
-    ctx.lineTo(x + W / 2, y1 - 6 * s);
-    ctx.lineTo(x + W * 0.28, y1);
-    ctx.lineTo(x - W * 0.28, y1);
-    ctx.lineTo(x - W / 2, y1 - 6 * s);
+    ctx.lineTo(x + W / 2, y1 - 5 * s);
+    ctx.lineTo(x + W * 0.3, y1);
+    ctx.lineTo(x - W * 0.3, y1);
+    ctx.lineTo(x - W / 2, y1 - 5 * s);
     ctx.lineTo(x - W / 2, y0 + 1.5 * s);
     ctx.quadraticCurveTo(x - W / 2, y0, x - W / 2 + 1.5 * s, y0);
     ctx.closePath();
@@ -2869,27 +2869,11 @@ class Compas extends Instrumento {
     ctx.strokeStyle = 'rgba(255, 255, 255, .13)';
     ctx.lineWidth = 0.6 * s;
     ctx.beginPath();
-    for (const f of [-0.36, 0.36]) { ctx.moveTo(x + W * f, y0 + 1.2 * s); ctx.lineTo(x + W * f, y0 + 4 * s); }
+    for (const f of [-0.36, 0.36]) { ctx.moveTo(x + W * f, y0 + 1 * s); ctx.lineTo(x + W * f, y0 + 3 * s); }
     ctx.stroke();
-    this.tornillo(ctx, x - 3.3 * s, y0 + 5.5 * s, 1.35 * s, 0.9);
-    this.tornillo(ctx, x + 3.3 * s, y0 + 5.5 * s, 1.35 * s, 2.2);
-    // Marca: como en las demás plantillas (logotipo y nombre), en vertical sobre la cabeza
-    if (Vista.escala >= 1 && a < 0.3) {
-      // Se lee de arriba abajo, como en el modelo; el grupo logotipo + nombre va centrado en la cabeza
-      const tam = 3.1 * s, fuente = getComputedStyle(document.body).fontFamily;
-      ctx.save();
-      ctx.font = `italic 800 ${tam}px ${fuente}`;
-      const ancho = ctx.measureText('DibuTec').width, logo = tam * 1.05 * 1.1;
-      ctx.translate(x + 0.4 * s, (y0 + 8 * s + y1 - 6 * s) / 2);
-      ctx.rotate(Math.PI / 2);
-      ctx.translate(logo / 2, 0);
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#f2f3f5';
-      this.logo(ctx, tam, ancho);
-      ctx.fillText('DibuTec', 0, 0);
-      ctx.restore();
-    }
+    // Los tornillos son los ejes de las patas: a la altura de la bisagra
+    this.tornillo(ctx, x - 2.8 * s, b[1], 1.3 * s, 0.9);
+    this.tornillo(ctx, x + 2.8 * s, b[1], 1.3 * s, 2.2);
     ctx.restore();
     // Punta seca
     ctx.beginPath();
