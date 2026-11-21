@@ -2581,7 +2581,7 @@ class Compas extends Instrumento {
   }
   // De pie, visto desde arriba, la bisagra queda sobre el centro de las patas
   bisagra() { return [this.r / 2, -this.altura() * (1 - this.alzado)]; }
-  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(12, 32 / Vista.escala) * (1 - this.alzado * 0.85)]; }
+  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(36, 40 / Vista.escala) * (1 - this.alzado * 0.85)]; }
   // Animación al ponerse de pie (1) o tumbarse (0)
   animarAlzado(objetivo, ms = 420) {
     let quieto = false;
@@ -2623,7 +2623,8 @@ class Compas extends Instrumento {
     if (d([0, 0]) <= this.radioPunta() + extra) return { inst: this, modo: 'mover' };
     const ancho = Math.max(2.5, 9 / Vista.escala) + extra;
     const seg = (q) => Geom.distSegmento(p.x, p.y, b[0], b[1], q[0], q[1]) <= ancho;
-    if (seg([0, 0]) || seg([this.r, 0]) || seg(k) || d(b) <= 5 + extra) return { inst: this, modo: 'mover' };
+    const c = this.cabezal(), enCabeza = Math.abs(p.x - c.x) <= c.ancho / 2 + extra && p.y >= c.arriba - extra && p.y <= c.abajo + extra;
+    if (seg([0, 0]) || seg([this.r, 0]) || seg(k) || d(b) <= 5 + extra || enCabeza) return { inst: this, modo: 'mover' };
     return null;
   }
   dibujarBotonMina(ctx) {
@@ -2653,27 +2654,109 @@ class Compas extends Instrumento {
     ctx.stroke();
     ctx.setLineDash([]);
   }
-  // Pata con forma de cuña desde la bisagra hasta la punta
-  pata(ctx, b, t, w0, w1, relleno, borde) {
-    const L = Math.hypot(t[0] - b[0], t[1] - b[1]) || 1;
-    const v = [(t[0] - b[0]) / L, (t[1] - b[1]) / L], n = [-v[1], v[0]];
-    const fin = [t[0] - v[0] * Math.min(6, L * 0.15), t[1] - v[1] * Math.min(6, L * 0.15)];
+  // Medidas del cabezal (mm locales): de pie se ve más grande, porque está más cerca de quien mira
+  cabezal() {
+    // De pie, la cabeza se ve desde arriba: más ancha pero aplastada en altura
+    const b = this.bisagra(), s = 1 + this.alzado * 0.5, f = 1 - this.alzado * 0.8;
+    return { s, f, x: b[0], arriba: b[1] - 25 * s * f, abajo: b[1] + 6 * s * f, ancho: 13 * s };
+  }
+  // Pieza recta con los extremos redondeados, de p a q y de ancho w
+  barra(ctx, p, q, w, relleno, borde) {
+    const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1, ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
+    ctx.save();
+    ctx.translate(p[0], p[1]);
+    ctx.rotate(ang);
     ctx.beginPath();
-    ctx.moveTo(b[0] + n[0] * w0 / 2, b[1] + n[1] * w0 / 2);
-    ctx.lineTo(fin[0] + n[0] * w1 / 2, fin[1] + n[1] * w1 / 2);
-    ctx.lineTo(t[0], t[1]);
-    ctx.lineTo(fin[0] - n[0] * w1 / 2, fin[1] - n[1] * w1 / 2);
-    ctx.lineTo(b[0] - n[0] * w0 / 2, b[1] - n[1] * w0 / 2);
-    ctx.closePath();
+    ctx.roundRect(-w * 0.1, -w / 2, L + w * 0.2, w, w * 0.25);
     ctx.fillStyle = relleno;
     ctx.fill();
-    ctx.strokeStyle = borde;
-    ctx.lineWidth = 1 / Vista.escala;
+    if (borde) { ctx.strokeStyle = borde; ctx.lineWidth = 0.7 / Vista.escala; ctx.stroke(); }
+    ctx.restore();
+  }
+  // Tornillo plateado con su ranura
+  tornillo(ctx, x, y, r, ang = 0.6) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Geom.DOS_PI);
+    ctx.fillStyle = '#d9dce2';
+    ctx.fill();
+    ctx.strokeStyle = '#6e737d';
+    ctx.lineWidth = Math.max(0.12, 0.6 / Vista.escala);
     ctx.stroke();
-    return fin;
+    ctx.beginPath();
+    ctx.moveTo(x - Math.cos(ang) * r * 0.75, y - Math.sin(ang) * r * 0.75);
+    ctx.lineTo(x + Math.cos(ang) * r * 0.75, y + Math.sin(ang) * r * 0.75);
+    ctx.strokeStyle = '#4a4f59';
+    ctx.lineWidth = r * 0.28;
+    ctx.stroke();
+  }
+  // Ruedecita negra con arandela clara, sobresaliendo de la pieza negra de la pata
+  rueda(ctx, x, y, r, n) {
+    ctx.beginPath();
+    ctx.arc(x - n[0] * r * 0.35, y - n[1] * r * 0.35, r * 0.95, 0, Geom.DOS_PI);
+    ctx.fillStyle = '#c9ccd3';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Geom.DOS_PI);
+    ctx.fillStyle = '#16181c';
+    ctx.fill();
+    ctx.strokeStyle = '#3c3f47';
+    ctx.lineWidth = Math.max(0.12, 0.6 / Vista.escala);
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {   // estrías del borde
+      const t = i * Math.PI / 5;
+      ctx.moveTo(x + Math.cos(t) * r * 0.55, y + Math.sin(t) * r * 0.55);
+      ctx.lineTo(x + Math.cos(t) * r * 0.95, y + Math.sin(t) * r * 0.95);
+    }
+    ctx.stroke();
+  }
+  // Pata: brazo metálico plateado y, abajo, la pieza negra que sujeta la aguja o la mina
+  pata(ctx, b, t, otra, s) {
+    const L = Math.hypot(t[0] - b[0], t[1] - b[1]) || 1;
+    const v = [(t[0] - b[0]) / L, (t[1] - b[1]) / L];
+    let n = [-v[1], v[0]];
+    if ((otra[0] - t[0]) * n[0] + (otra[1] - t[1]) * n[1] > 0) n = [-n[0], -n[1]];   // n: hacia fuera
+    const en = d => [b[0] + v[0] * d, b[1] + v[1] * d];
+    const punta = Math.min(5, L * 0.09), corte = L * 0.66, fin = L - punta;
+    // Brazo metálico (de la bisagra a la pieza negra)
+    const w = 4.2 * s;
+    ctx.beginPath();
+    ctx.moveTo(b[0] + n[0] * w / 2, b[1] + n[1] * w / 2);
+    ctx.lineTo(en(corte)[0] + n[0] * w * 0.4, en(corte)[1] + n[1] * w * 0.4);
+    ctx.lineTo(en(corte)[0] - n[0] * w * 0.4, en(corte)[1] - n[1] * w * 0.4);
+    ctx.lineTo(b[0] - n[0] * w / 2, b[1] - n[1] * w / 2);
+    ctx.closePath();
+    const g = ctx.createLinearGradient(b[0] + n[0] * w / 2, b[1] + n[1] * w / 2, b[0] - n[0] * w / 2, b[1] - n[1] * w / 2);
+    g.addColorStop(0, '#eceef1'); g.addColorStop(0.45, '#c3c7ce'); g.addColorStop(1, '#9ea3ac');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = '#7d828c';
+    ctx.lineWidth = 0.7 / Vista.escala;
+    ctx.stroke();
+    // Pieza negra de abajo, algo más ancha
+    const a0 = en(corte - 2), a1 = en(fin), wn = 4.4 * s;
+    ctx.beginPath();
+    ctx.moveTo(a0[0] + n[0] * wn / 2, a0[1] + n[1] * wn / 2);
+    ctx.lineTo(a1[0] + n[0] * wn * 0.32, a1[1] + n[1] * wn * 0.32);
+    ctx.lineTo(a1[0] - n[0] * wn * 0.32, a1[1] - n[1] * wn * 0.32);
+    ctx.lineTo(a0[0] - n[0] * wn / 2, a0[1] - n[1] * wn / 2);
+    ctx.closePath();
+    ctx.fillStyle = '#1b1d22';
+    ctx.fill();
+    // Estrías de la pieza negra
+    ctx.strokeStyle = '#3d4049';
+    ctx.lineWidth = Math.max(0.1, 0.5 / Vista.escala);
+    ctx.beginPath();
+    for (const f of [-0.18, 0, 0.18]) {
+      const p0 = en(corte + 3), p1 = en(corte + (fin - corte) * 0.55);
+      ctx.moveTo(p0[0] + n[0] * wn * f, p0[1] + n[1] * wn * f);
+      ctx.lineTo(p1[0] + n[0] * wn * f, p1[1] + n[1] * wn * f);
+    }
+    ctx.stroke();
+    return { v, n, en, corte, fin, s };
   }
   dibujar(ctx) {
     const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala, a = this.alzado;
+    const cab = this.cabezal(), s = cab.s, punta = [0, 0], mina = [this.r, 0];
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
@@ -2683,28 +2766,23 @@ class Compas extends Instrumento {
     ctx.shadowBlur = (8 + a * 14) * Capas.dpr;
     ctx.shadowOffsetY = (3 + a * 9) * Capas.dpr;
     ctx.shadowOffsetX = a * 5 * Capas.dpr;
-    // Vástago hasta el asa
-    ctx.strokeStyle = '#6b7383';
-    ctx.lineWidth = Math.max(1.6, 4 * px);
-    ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(k[0], k[1]); ctx.stroke();
-    // Patas: metálica (punta seca) y de color (mina)
-    const w0 = 5 * (1 + a * 0.6);   // de pie, la parte de arriba de las patas se ve más ancha (más cerca)
-    this.pata(ctx, b, [0, 0], w0, 1.6, 'rgba(150, 160, 175, .92)', '#4b5363');
-    const e = Paleta.instrumento();   // la pata de la mina es del color del juego (roja con el plástico transparente)
-    const finMina = this.pata(ctx, b, [this.r, 0], w0, 2.4, e.inversa ? 'rgba(232, 93, 80, .92)' : e.muestra, e.inversa ? '#9c3a30' : e.borde);
+    const pi = this.pata(ctx, b, punta, mina, s);
+    const pd = this.pata(ctx, b, mina, punta, s);
     ctx.restore();
-    // Mina de grafito (más clara si está levantada)
-    ctx.fillStyle = Paleta.lapizActual();
-    ctx.globalAlpha = this.levantada ? 0.35 : 1;
-    ctx.beginPath();
-    const v = [this.r - finMina[0], -finMina[1]], L = Math.hypot(v[0], v[1]) || 1, n = [-v[1] / L, v[0] / L];
-    ctx.moveTo(finMina[0] + n[0] * 0.9, finMina[1] + n[1] * 0.9);
-    ctx.lineTo(this.r, 0);
-    ctx.lineTo(finMina[0] - n[0] * 0.9, finMina[1] - n[1] * 0.9);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    // Aguja de la punta seca y mina de grafito (más clara si está levantada)
+    const aguja = (q, t, w, color, alfa) => {
+      ctx.beginPath();
+      ctx.moveTo(q[0] + pi.n[0] * 0 + (t === punta ? pi : pd).n[0] * w, q[1] + (t === punta ? pi : pd).n[1] * w);
+      ctx.lineTo(t[0], t[1]);
+      ctx.lineTo(q[0] - (t === punta ? pi : pd).n[0] * w, q[1] - (t === punta ? pi : pd).n[1] * w);
+      ctx.closePath();
+      ctx.globalAlpha = alfa;
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    };
+    aguja(pi.en(pi.fin - 0.5), punta, 0.5, '#9aa0aa', 1);
+    aguja(pd.en(pd.fin - 0.5), mina, 0.95, Paleta.lapizActual(), this.levantada ? 0.35 : 1);
     if (this.levantada) {
       // Sombra de la punta: la mina no toca el papel
       ctx.beginPath();
@@ -2713,19 +2791,110 @@ class Compas extends Instrumento {
       ctx.lineWidth = px;
       ctx.stroke();
     }
+    // Tornillos de las piezas negras y ruedecitas (una en la pata de la aguja, dos en la de la mina)
+    const ladoRueda = (p, d, r) => { const q = p.en(d); this.rueda(ctx, q[0] + p.n[0] * 2.6 * s, q[1] + p.n[1] * 2.6 * s, r, p.n); };
+    for (const p of [pi, pd]) { const q = p.en(p.corte + 1.2 * s); this.tornillo(ctx, q[0], q[1], 1.1 * s); }
+    ladoRueda(pi, pi.fin - 3 * s, 1.5 * s);
+    ladoRueda(pd, pd.corte + 4 * s, 1.5 * s);
+    ladoRueda(pd, pd.fin - 3 * s, 1.5 * s);
+    // Tornillo de ajuste entre las patas: varilla roscada, dos tacos negros y la rueda del centro
+    const tq = Math.min(pi.corte, pd.corte) * 0.36, ql = pi.en(tq), qr = pd.en(tq);
+    const dl = Math.hypot(qr[0] - ql[0], qr[1] - ql[1]) || 1, u = [(qr[0] - ql[0]) / dl, (qr[1] - ql[1]) / dl];
+    const e0 = [ql[0] - u[0] * 4 * s, ql[1] - u[1] * 4 * s], e1 = [qr[0] + u[0] * 4 * s, qr[1] + u[1] * 4 * s];
+    this.barra(ctx, e0, e1, 0.9 * s, '#8d929b');
+    ctx.strokeStyle = '#5d626c';
+    ctx.lineWidth = Math.max(0.08, 0.35 * px);
+    ctx.beginPath();
+    const largo = dl + 8 * s;
+    for (let d = 0.6; d < largo; d += 0.7) {   // rosca
+      const c = [e0[0] + u[0] * d, e0[1] + u[1] * d];
+      ctx.moveTo(c[0] - u[1] * 0.45 * s - u[0] * 0.2, c[1] + u[0] * 0.45 * s - u[1] * 0.2);
+      ctx.lineTo(c[0] + u[1] * 0.45 * s + u[0] * 0.2, c[1] - u[0] * 0.45 * s + u[1] * 0.2);
+    }
+    ctx.stroke();
+    for (const [q, sg] of [[ql, -1], [qr, 1]]) {
+      this.barra(ctx, [q[0] - u[0] * (sg < 0 ? 4.6 : 1.4) * s, q[1] - u[1] * (sg < 0 ? 4.6 : 1.4) * s],
+                      [q[0] + u[0] * (sg < 0 ? 1.4 : 4.6) * s, q[1] + u[1] * (sg < 0 ? 1.4 : 4.6) * s], 4.6 * s, '#1b1d22');
+    }
+    const m = [(ql[0] + qr[0]) / 2, (ql[1] + qr[1]) / 2], hw = Math.min(0.9 * s, dl * 0.12);
+    if (dl > 6 * s) {
+      this.barra(ctx, [m[0] - u[0] * hw, m[1] - u[1] * hw], [m[0] + u[0] * hw, m[1] + u[1] * hw], 5.4 * s, '#1b1d22');
+      ctx.strokeStyle = '#41444d';
+      ctx.beginPath();
+      for (const f of [-1.8, -0.6, 0.6, 1.8]) {
+        ctx.moveTo(m[0] - u[0] * hw + u[1] * f * s, m[1] - u[1] * hw - u[0] * f * s);
+        ctx.lineTo(m[0] + u[0] * hw + u[1] * f * s, m[1] + u[1] * hw - u[0] * f * s);
+      }
+      ctx.stroke();
+    }
+    // Mango estriado, de la cabeza al asa
+    if (k[1] < cab.arriba - 1) {
+      const wm = 4.6 * s;
+      ctx.beginPath();
+      ctx.roundRect(k[0] - wm / 2, k[1] - wm * 0.2, wm, cab.arriba - k[1] + wm * 0.2, [wm * 0.45, wm * 0.45, 0, 0]);
+      ctx.fillStyle = '#1b1d22';
+      ctx.fill();
+      ctx.strokeStyle = '#3f424b';
+      ctx.lineWidth = Math.max(0.1, 0.5 * px);
+      ctx.beginPath();
+      for (const f of [-0.3, -0.1, 0.1, 0.3]) { ctx.moveTo(k[0] + wm * f, k[1] + wm * 0.3); ctx.lineTo(k[0] + wm * f, cab.arriba - 0.6 * s); }
+      ctx.stroke();
+    }
+    // Cabeza negra: rectángulo que se estrecha abajo, con dos tornillos y la marca impresa en blanco
+    const W = cab.ancho, x = cab.x;
+    ctx.save();
+    ctx.translate(0, b[1]);
+    ctx.scale(1, cab.f);
+    ctx.translate(0, -b[1]);
+    const y0 = b[1] - 25 * s, y1 = b[1] + 6 * s;
+    ctx.save();
+    ctx.shadowColor = 'rgba(30, 40, 60, .25)';
+    ctx.shadowBlur = (6 + a * 10) * Capas.dpr;
+    ctx.shadowOffsetY = (2 + a * 7) * Capas.dpr;
+    ctx.beginPath();
+    ctx.moveTo(x - W / 2 + 1.5 * s, y0);
+    ctx.lineTo(x + W / 2 - 1.5 * s, y0);
+    ctx.quadraticCurveTo(x + W / 2, y0, x + W / 2, y0 + 1.5 * s);
+    ctx.lineTo(x + W / 2, y1 - 6 * s);
+    ctx.lineTo(x + W * 0.28, y1);
+    ctx.lineTo(x - W * 0.28, y1);
+    ctx.lineTo(x - W / 2, y1 - 6 * s);
+    ctx.lineTo(x - W / 2, y0 + 1.5 * s);
+    ctx.quadraticCurveTo(x - W / 2, y0, x - W / 2 + 1.5 * s, y0);
+    ctx.closePath();
+    ctx.fillStyle = '#17191d';
+    ctx.fill();
+    ctx.restore();
+    // Brillos verticales del plástico
+    ctx.strokeStyle = 'rgba(255, 255, 255, .13)';
+    ctx.lineWidth = 0.6 * s;
+    ctx.beginPath();
+    for (const f of [-0.36, 0.36]) { ctx.moveTo(x + W * f, y0 + 1.2 * s); ctx.lineTo(x + W * f, y0 + 4 * s); }
+    ctx.stroke();
+    this.tornillo(ctx, x - 3.3 * s, y0 + 5.5 * s, 1.35 * s, 0.9);
+    this.tornillo(ctx, x + 3.3 * s, y0 + 5.5 * s, 1.35 * s, 2.2);
+    // Marca: como en las demás plantillas (logotipo y nombre), en vertical sobre la cabeza
+    if (Vista.escala >= 1 && a < 0.3) {
+      // Se lee de arriba abajo, como en el modelo; el grupo logotipo + nombre va centrado en la cabeza
+      const tam = 3.1 * s, fuente = getComputedStyle(document.body).fontFamily;
+      ctx.save();
+      ctx.font = `italic 800 ${tam}px ${fuente}`;
+      const ancho = ctx.measureText('DibuTec').width, logo = tam * 1.05 * 1.1;
+      ctx.translate(x + 0.4 * s, (y0 + 8 * s + y1 - 6 * s) / 2);
+      ctx.rotate(Math.PI / 2);
+      ctx.translate(logo / 2, 0);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#f2f3f5';
+      this.logo(ctx, tam, ancho);
+      ctx.fillText('DibuTec', 0, 0);
+      ctx.restore();
+    }
+    ctx.restore();
     // Punta seca
     ctx.beginPath();
     ctx.arc(0, 0, Math.max(0.5, 2 * px), 0, Geom.DOS_PI);
     ctx.fillStyle = '#2b2f3a';
-    ctx.fill();
-    // Bisagra (más grande de pie: está más cerca de quien mira)
-    ctx.beginPath();
-    ctx.arc(b[0], b[1], 4.5 * (1 + a * 0.5), 0, Geom.DOS_PI);
-    ctx.fillStyle = '#5b6270';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(b[0], b[1], 1.6 * (1 + a * 0.5), 0, Geom.DOS_PI);
-    ctx.fillStyle = '#c9ced8';
     ctx.fill();
     // Asa para girar y trazar
     this.dibujarAsa(ctx, { x: k[0], y: k[1] });
