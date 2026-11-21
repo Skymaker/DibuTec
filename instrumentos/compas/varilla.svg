@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="0.7mm" height="1.2mm" viewBox="0 -0.6 0.7 1.2">
+  <!--
+    DibuTec · compás · varilla roscada del tornillo de ajuste
+    Es un TROZO que se repite a lo largo de la varilla: su ancho (el del viewBox, 0,7 mm) es el paso de la rosca.
+    La varilla va en horizontal, centrada en y = 0.
+  -->
+  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
+  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+</svg>

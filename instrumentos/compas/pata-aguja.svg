@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12mm" height="78mm" viewBox="-6 -1 12 78">
+  <!--
+    DibuTec · compás · pata de la punta seca (aguja)
+    Unidades: milímetros. La bisagra está en (0, 0) y la punta en (0, 75), hacia abajo.
+    Hacia +x queda el lado de FUERA del compás (la otra pata está hacia −x).
+    Marcas (no se dibujan): «punta» fija el largo de la pata; «ajuste», dónde va el tornillo de ajuste.
+  -->
+  <defs>
+    <linearGradient id="metal" gradientUnits="userSpaceOnUse" x1="2.1" y1="0" x2="-2.1" y2="0">
+      <stop offset="0" stop-color="#eceef1"/>
+      <stop offset="0.45" stop-color="#c3c7ce"/>
+      <stop offset="1" stop-color="#9ea3ac"/>
+    </linearGradient>
+  </defs>
+  <circle id="punta" cx="0" cy="75" r="0.3" fill="none"/>
+  <circle id="ajuste" cx="0" cy="20.8" r="0.3" fill="none"/>
+  <path id="brazo" d="M 2.1 0 L 1.68 49.5 L -1.68 49.5 L -2.1 0 Z" fill="url(#metal)" stroke="#7d828c" stroke-width="0.25"/>
+  <path id="pieza-negra" d="M 2.2 47.5 L 1.41 70 L -1.41 70 L -2.2 47.5 Z" fill="#1b1d22"/>
+  <path id="estrias" d="M 0.79 52.5 L 0.79 61.9 M 0 52.5 L 0 61.9 M -0.79 52.5 L -0.79 61.9" stroke="#3d4049" stroke-width="0.15" fill="none"/>
+  <g id="tornillo">
+    <circle cx="0" cy="50.7" r="1.1" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
+    <path d="M -0.681 50.234 L 0.681 51.166" stroke="#4a4f59" stroke-width="0.308"/>
+  </g>
+  <g id="rueda1">
+    <circle cx="2.075" cy="67" r="1.425" fill="#c9ccd3"/>
+    <circle cx="2.6" cy="67" r="1.5" fill="#16181c"/>
+    <path d="M 3.425 67.000 L 4.025 67.000 M 3.267 67.485 L 3.753 67.838 M 2.855 67.785 L 3.040 68.355 M 2.345 67.785 L 2.160 68.355 M 1.933 67.485 L 1.447 67.838 M 1.775 67.000 L 1.175 67.000 M 1.933 66.515 L 1.447 66.162 M 2.345 66.215 L 2.160 65.645 M 2.855 66.215 L 3.040 65.645 M 3.267 66.515 L 3.753 66.162" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
+  </g>
+  <path id="aguja" d="M 0.5 69.5 L 0 75 L -0.5 69.5 Z" fill="#9aa0aa"/>
+</svg>

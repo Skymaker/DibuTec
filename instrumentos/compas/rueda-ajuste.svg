@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4mm" height="7mm" viewBox="-2 -3.5 4 7">
+  <!--
+    DibuTec · compás · rueda del tornillo de ajuste
+    Unidades: milímetros. Centrada en (0, 0), en medio de la varilla, que va en horizontal.
+    No se dibuja si el compás está casi cerrado.
+  -->
+  <rect id="rueda" x="-1.08" y="-2.7" width="2.16" height="5.4" rx="1.35" fill="#1b1d22"/>
+  <path id="estrias" d="M -1.08 -1.8 L 1.08 -1.8 M -1.08 -0.6 L 1.08 -0.6 M -1.08 0.6 L 1.08 0.6 M -1.08 1.8 L 1.08 1.8" stroke="#41444d" stroke-width="0.15" fill="none"/>
+</svg>

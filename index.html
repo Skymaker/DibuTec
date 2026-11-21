@@ -2564,6 +2564,229 @@ class Cartabon extends Instrumento {
 }
 
 // Compás: el origen local es la punta seca; la mina está en (r, 0); rot = dirección de la mina
+/* =====================================================================
+   Piezas SVG de los instrumentos (instrumentos/…): se dibujan en el canvas
+   Cada pieza se lee una vez: sus formas pasan a Path2D, con su relleno, borde,
+   degradados y transformaciones. Las piezas van incrustadas abajo (las copia
+   instrumentos/incrustar.py) y, desde un servidor web, se leen de sus archivos.
+   ===================================================================== */
+const PiezasSVG = {
+  /* PIEZAS-SVG:INICIO (lo escribe instrumentos/incrustar.py; no editar a mano) */
+  incrustadas: {
+    "compas/cabeza": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14mm\" height=\"21.5mm\" viewBox=\"-7 -7.5 14 21.5\">\n  <!--\n    DibuTec · compás · cabeza\n    Unidades: milímetros. La bisagra de las patas está en (0, 0).\n    El mango sale del borde de arriba de la cabeza; la zona para mover el compás es el contorno de la pieza.\n  -->\n  <path id=\"cuerpo\" d=\"M -4.5 -6.5 L 4.5 -6.5 Q 6 -6.5 6 -5 L 6 8 L 3.6 13 L -3.6 13 L -6 8 L -6 -5 Q -6 -6.5 -4.5 -6.5 Z\" fill=\"#17191d\"/>\n  <path id=\"brillos\" d=\"M -4.32 -5.5 L -4.32 -3.5 M 4.32 -5.5 L 4.32 -3.5\" stroke=\"#ffffff\" stroke-opacity=\"0.13\" stroke-width=\"0.6\" fill=\"none\"/>\n  <g id=\"tornillo-izquierdo\">\n    <circle cx=\"-2.8\" cy=\"0\" r=\"1.3\" fill=\"#d9dce2\" stroke=\"#6e737d\" stroke-width=\"0.2\"/>\n    <path d=\"M -3.406 -0.764 L -2.194 0.764\" stroke=\"#4a4f59\" stroke-width=\"0.364\"/>\n  <\/g>\n  <g id=\"tornillo-derecho\">\n    <circle cx=\"2.8\" cy=\"0\" r=\"1.3\" fill=\"#d9dce2\" stroke=\"#6e737d\" stroke-width=\"0.2\"/>\n    <path d=\"M 3.374 -0.788 L 2.226 0.788\" stroke=\"#4a4f59\" stroke-width=\"0.364\"/>\n  <\/g>\n<\/svg>\n",
+    "compas/mango": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"6mm\" height=\"15.5mm\" viewBox=\"-3 -14.5 6 15.5\">\n  <!--\n    DibuTec · compás · mango\n    Unidades: milímetros. Abajo, en (0, 0), se apoya en la cabeza; arriba, en la marca «asa» (0, −13), va el asa para girar.\n    DibuTec lo estira o lo encoge en vertical para que llegue al asa.\n  -->\n  <circle id=\"asa\" cx=\"0\" cy=\"-13\" r=\"0.3\" fill=\"none\"/>\n  <rect id=\"cuerpo\" x=\"-2.3\" y=\"-13.92\" width=\"4.6\" height=\"14.5\" rx=\"2\" fill=\"#1b1d22\"/>\n  <path id=\"estrias\" d=\"M -1.38 -12.6 L -1.38 -0.6 M -0.46 -12.6 L -0.46 -0.6 M 0.46 -12.6 L 0.46 -0.6 M 1.38 -12.6 L 1.38 -0.6\" stroke=\"#3f424b\" stroke-width=\"0.15\" fill=\"none\"/>\n<\/svg>\n",
+    "compas/pata-aguja": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12mm\" height=\"78mm\" viewBox=\"-6 -1 12 78\">\n  <!--\n    DibuTec · compás · pata de la punta seca (aguja)\n    Unidades: milímetros. La bisagra está en (0, 0) y la punta en (0, 75), hacia abajo.\n    Hacia +x queda el lado de FUERA del compás (la otra pata está hacia −x).\n    Marcas (no se dibujan): «punta» fija el largo de la pata; «ajuste», dónde va el tornillo de ajuste.\n  -->\n  <defs>\n    <linearGradient id=\"metal\" gradientUnits=\"userSpaceOnUse\" x1=\"2.1\" y1=\"0\" x2=\"-2.1\" y2=\"0\">\n      <stop offset=\"0\" stop-color=\"#eceef1\"/>\n      <stop offset=\"0.45\" stop-color=\"#c3c7ce\"/>\n      <stop offset=\"1\" stop-color=\"#9ea3ac\"/>\n    <\/linearGradient>\n  <\/defs>\n  <circle id=\"punta\" cx=\"0\" cy=\"75\" r=\"0.3\" fill=\"none\"/>\n  <circle id=\"ajuste\" cx=\"0\" cy=\"20.8\" r=\"0.3\" fill=\"none\"/>\n  <path id=\"brazo\" d=\"M 2.1 0 L 1.68 49.5 L -1.68 49.5 L -2.1 0 Z\" fill=\"url(#metal)\" stroke=\"#7d828c\" stroke-width=\"0.25\"/>\n  <path id=\"pieza-negra\" d=\"M 2.2 47.5 L 1.41 70 L -1.41 70 L -2.2 47.5 Z\" fill=\"#1b1d22\"/>\n  <path id=\"estrias\" d=\"M 0.79 52.5 L 0.79 61.9 M 0 52.5 L 0 61.9 M -0.79 52.5 L -0.79 61.9\" stroke=\"#3d4049\" stroke-width=\"0.15\" fill=\"none\"/>\n  <g id=\"tornillo\">\n    <circle cx=\"0\" cy=\"50.7\" r=\"1.1\" fill=\"#d9dce2\" stroke=\"#6e737d\" stroke-width=\"0.2\"/>\n    <path d=\"M -0.681 50.234 L 0.681 51.166\" stroke=\"#4a4f59\" stroke-width=\"0.308\"/>\n  <\/g>\n  <g id=\"rueda1\">\n    <circle cx=\"2.075\" cy=\"67\" r=\"1.425\" fill=\"#c9ccd3\"/>\n    <circle cx=\"2.6\" cy=\"67\" r=\"1.5\" fill=\"#16181c\"/>\n    <path d=\"M 3.425 67.000 L 4.025 67.000 M 3.267 67.485 L 3.753 67.838 M 2.855 67.785 L 3.040 68.355 M 2.345 67.785 L 2.160 68.355 M 1.933 67.485 L 1.447 67.838 M 1.775 67.000 L 1.175 67.000 M 1.933 66.515 L 1.447 66.162 M 2.345 66.215 L 2.160 65.645 M 2.855 66.215 L 3.040 65.645 M 3.267 66.515 L 3.753 66.162\" stroke=\"#3c3f47\" stroke-width=\"0.18\" fill=\"none\"/>\n  <\/g>\n  <path id=\"aguja\" d=\"M 0.5 69.5 L 0 75 L -0.5 69.5 Z\" fill=\"#9aa0aa\"/>\n<\/svg>\n",
+    "compas/pata-mina": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12mm\" height=\"78mm\" viewBox=\"-6 -1 12 78\">\n  <!--\n    DibuTec · compás · pata de la mina\n    Unidades: milímetros. La bisagra está en (0, 0) y la punta en (0, 75), hacia abajo.\n    Hacia +x queda el lado de FUERA del compás (la otra pata está hacia −x).\n    Marcas (no se dibujan): «punta» fija el largo de la pata; «ajuste», dónde va el tornillo de ajuste.\n  -->\n  <defs>\n    <linearGradient id=\"metal\" gradientUnits=\"userSpaceOnUse\" x1=\"2.1\" y1=\"0\" x2=\"-2.1\" y2=\"0\">\n      <stop offset=\"0\" stop-color=\"#eceef1\"/>\n      <stop offset=\"0.45\" stop-color=\"#c3c7ce\"/>\n      <stop offset=\"1\" stop-color=\"#9ea3ac\"/>\n    <\/linearGradient>\n  <\/defs>\n  <circle id=\"punta\" cx=\"0\" cy=\"75\" r=\"0.3\" fill=\"none\"/>\n  <circle id=\"ajuste\" cx=\"0\" cy=\"20.8\" r=\"0.3\" fill=\"none\"/>\n  <path id=\"brazo\" d=\"M 2.1 0 L 1.68 49.5 L -1.68 49.5 L -2.1 0 Z\" fill=\"url(#metal)\" stroke=\"#7d828c\" stroke-width=\"0.25\"/>\n  <path id=\"pieza-negra\" d=\"M 2.2 47.5 L 1.41 70 L -1.41 70 L -2.2 47.5 Z\" fill=\"#1b1d22\"/>\n  <path id=\"estrias\" d=\"M 0.79 52.5 L 0.79 61.9 M 0 52.5 L 0 61.9 M -0.79 52.5 L -0.79 61.9\" stroke=\"#3d4049\" stroke-width=\"0.15\" fill=\"none\"/>\n  <g id=\"tornillo\">\n    <circle cx=\"0\" cy=\"50.7\" r=\"1.1\" fill=\"#d9dce2\" stroke=\"#6e737d\" stroke-width=\"0.2\"/>\n    <path d=\"M -0.681 50.234 L 0.681 51.166\" stroke=\"#4a4f59\" stroke-width=\"0.308\"/>\n  <\/g>\n  <g id=\"rueda1\">\n    <circle cx=\"2.075\" cy=\"53.5\" r=\"1.425\" fill=\"#c9ccd3\"/>\n    <circle cx=\"2.6\" cy=\"53.5\" r=\"1.5\" fill=\"#16181c\"/>\n    <path d=\"M 3.425 53.500 L 4.025 53.500 M 3.267 53.985 L 3.753 54.338 M 2.855 54.285 L 3.040 54.855 M 2.345 54.285 L 2.160 54.855 M 1.933 53.985 L 1.447 54.338 M 1.775 53.500 L 1.175 53.500 M 1.933 53.015 L 1.447 52.662 M 2.345 52.715 L 2.160 52.145 M 2.855 52.715 L 3.040 52.145 M 3.267 53.015 L 3.753 52.662\" stroke=\"#3c3f47\" stroke-width=\"0.18\" fill=\"none\"/>\n  <\/g>\n  <g id=\"rueda2\">\n    <circle cx=\"2.075\" cy=\"67\" r=\"1.425\" fill=\"#c9ccd3\"/>\n    <circle cx=\"2.6\" cy=\"67\" r=\"1.5\" fill=\"#16181c\"/>\n    <path d=\"M 3.425 67.000 L 4.025 67.000 M 3.267 67.485 L 3.753 67.838 M 2.855 67.785 L 3.040 68.355 M 2.345 67.785 L 2.160 68.355 M 1.933 67.485 L 1.447 67.838 M 1.775 67.000 L 1.175 67.000 M 1.933 66.515 L 1.447 66.162 M 2.345 66.215 L 2.160 65.645 M 2.855 66.215 L 3.040 65.645 M 3.267 66.515 L 3.753 66.162\" stroke=\"#3c3f47\" stroke-width=\"0.18\" fill=\"none\"/>\n  <\/g>\n  <!-- id=\"mina\": DibuTec la pinta del color del portaminas (y más clara si está levantada) -->\n  <path id=\"mina\" d=\"M 0.95 69.5 L 0 75 L -0.95 69.5 Z\" fill=\"#757575\"/>\n<\/svg>\n",
+    "compas/rueda-ajuste": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"4mm\" height=\"7mm\" viewBox=\"-2 -3.5 4 7\">\n  <!--\n    DibuTec · compás · rueda del tornillo de ajuste\n    Unidades: milímetros. Centrada en (0, 0), en medio de la varilla, que va en horizontal.\n    No se dibuja si el compás está casi cerrado.\n  -->\n  <rect id=\"rueda\" x=\"-1.08\" y=\"-2.7\" width=\"2.16\" height=\"5.4\" rx=\"1.35\" fill=\"#1b1d22\"/>\n  <path id=\"estrias\" d=\"M -1.08 -1.8 L 1.08 -1.8 M -1.08 -0.6 L 1.08 -0.6 M -1.08 0.6 L 1.08 0.6 M -1.08 1.8 L 1.08 1.8\" stroke=\"#41444d\" stroke-width=\"0.15\" fill=\"none\"/>\n<\/svg>\n",
+    "compas/taco": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8mm\" height=\"6mm\" viewBox=\"-2.5 -3 8 6\">\n  <!--\n    DibuTec · compás · taco del tornillo de ajuste (uno en cada pata)\n    Unidades: milímetros. (0, 0) es el eje de la pata; la varilla va en horizontal y hacia +x queda el lado de FUERA.\n  -->\n  <rect id=\"taco\" x=\"-1.86\" y=\"-2.3\" width=\"6.92\" height=\"4.6\" rx=\"1.15\" fill=\"#1b1d22\"/>\n<\/svg>\n",
+    "compas/varilla": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"0.7mm\" height=\"1.2mm\" viewBox=\"0 -0.6 0.7 1.2\">\n  <!--\n    DibuTec · compás · varilla roscada del tornillo de ajuste\n    Es un TROZO que se repite a lo largo de la varilla: su ancho (el del viewBox, 0,7 mm) es el paso de la rosca.\n    La varilla va en horizontal, centrada en y = 0.\n  -->\n  <rect id=\"varilla\" x=\"0\" y=\"-0.45\" width=\"0.7\" height=\"0.9\" fill=\"#8d929b\"/>\n  <path id=\"rosca\" d=\"M 0.15 0.45 L 0.55 -0.45\" stroke=\"#5d626c\" stroke-width=\"0.12\" fill=\"none\"/>\n<\/svg>\n",
+  },
+  /* PIEZAS-SVG:FIN */
+  piezas: {},
+  pieza(nombre) {
+    if (!this.piezas[nombre] && this.incrustadas[nombre]) this.piezas[nombre] = this.leer(this.incrustadas[nombre], nombre);
+    return this.piezas[nombre] || null;
+  },
+  // Desde un servidor web, los archivos de instrumentos/ mandan sobre las copias incrustadas
+  async cargar() {
+    if (location.protocol === 'file:') return;
+    let cambio = false;
+    await Promise.all(Object.keys(this.incrustadas).map(async nombre => {
+      try {
+        const r = await fetch(`instrumentos/${nombre}.svg`, { cache: 'no-cache' });
+        if (!r.ok) return;
+        const t = await r.text();
+        if (t === this.incrustadas[nombre] && this.piezas[nombre]) return;
+        const pz = this.leer(t, nombre);
+        if (pz) { this.piezas[nombre] = pz; cambio = true; }
+      } catch (_) { /* se queda la copia incrustada */ }
+    }));
+    if (cambio) Render.pedir('instrumentos');
+  },
+  // Convierte el SVG en una lista de formas. Se mete un momento en la página para que el navegador
+  // resuelva estilos (también clases y <style>), transformaciones y cajas.
+  leer(texto, nombre) {
+    const doc = new DOMParser().parseFromString(texto, 'image/svg+xml');
+    const svg0 = doc.documentElement;
+    if (!svg0 || svg0.nodeName !== 'svg' || doc.querySelector('parsererror')) { console.warn(`Pieza ${nombre}: el SVG no es válido.`); return null; }
+    const caja = document.createElement('div');
+    caja.style.cssText = 'position:absolute;left:-10000px;top:0;width:10px;height:10px;overflow:hidden;visibility:hidden';
+    const svg = document.importNode(svg0, true);
+    const vb = svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width ? { x: svg.viewBox.baseVal.x, y: svg.viewBox.baseVal.y, w: svg.viewBox.baseVal.width, h: svg.viewBox.baseVal.height } : null;
+    // Sin viewBox ni tamaño, las unidades del SVG son las de la pieza (mm) y la matriz de la raíz es la identidad
+    for (const a of ['viewBox', 'width', 'height', 'x', 'y', 'transform']) svg.removeAttribute(a);
+    svg.setAttribute('width', '10'); svg.setAttribute('height', '10'); svg.style.overflow = 'visible';
+    caja.appendChild(svg);
+    document.body.appendChild(caja);
+    const formas = [], marcas = {};
+    let total = null;   // caja de lo que se dibuja (sin marcas ni textos)
+    const sumar = (m, bb) => {
+      if (!bb) return;
+      for (const [x, y] of [[bb.x, bb.y], [bb.x + bb.w, bb.y], [bb.x, bb.y + bb.h], [bb.x + bb.w, bb.y + bb.h]]) {
+        const q = m.transformPoint({ x, y });
+        if (!total) total = { x0: q.x, y0: q.y, x1: q.x, y1: q.y };
+        total = { x0: Math.min(total.x0, q.x), y0: Math.min(total.y0, q.y), x1: Math.max(total.x1, q.x), y1: Math.max(total.y1, q.y) };
+      }
+    };
+    try {
+      const raiz = svg.getScreenCTM().inverse();
+      const matriz = el => { const m = raiz.multiply(el.getScreenCTM()); return new DOMMatrix([m.a, m.b, m.c, m.d, m.e, m.f]); };
+      const oculto = el => { for (let e = el; e && e !== svg; e = e.parentNode) if (e.nodeType === 1 && getComputedStyle(e).display === 'none') return true; return false; };
+      const opacidad = el => { let o = 1; for (let e = el; e && e !== caja; e = e.parentNode) if (e.nodeType === 1) o *= parseFloat(getComputedStyle(e).opacity) || 0; return o; };
+      for (const el of svg.querySelectorAll('path, rect, circle, ellipse, line, polyline, polygon, text')) {
+        if (el.closest('defs, clipPath, mask, pattern, symbol, marker')) continue;
+        const id = el.id || '';
+        if (el.nodeName === 'text') { console.warn(`Pieza ${nombre}: los textos no se dibujan; conviértelos en trazados.`); continue; }
+        const local = this.trazado(el);
+        if (!local) continue;
+        const m = matriz(el), path = new Path2D();
+        path.addPath(local, m);
+        let bb = null;
+        try { const b = el.getBBox(); bb = { x: b.x, y: b.y, w: b.width, h: b.height }; } catch (_) { /* */ }
+        if (id && bb) {
+          const c = m.transformPoint({ x: bb.x + bb.w / 2, y: bb.y + bb.h / 2 });
+          marcas[id] = { x: c.x, y: c.y };
+        }
+        if (oculto(el)) continue;
+        const cs = getComputedStyle(el);
+        const pintura = (v, op) => {
+          if (!v || v === 'none') return null;
+          const url = /url\(["']?#([^"')]+)["']?\)/.exec(v);
+          if (url) return this.degradado(svg, url[1], m, bb, op);
+          return { color: v, alfa: op };
+        };
+        const fill = pintura(cs.fill, parseFloat(cs.fillOpacity));
+        const stroke = pintura(cs.stroke, parseFloat(cs.strokeOpacity));
+        if (!fill && !stroke) continue;   // formas sin relleno ni borde: solo marcas
+        const escala = Math.sqrt(Math.abs(m.a * m.d - m.b * m.c)) || 1;
+        sumar(m, bb);
+        formas.push({
+          id, clases: el.classList ? [...el.classList] : [], path, fill, stroke, opacidad: opacidad(el),
+          regla: cs.fillRule === 'evenodd' ? 'evenodd' : 'nonzero',
+          grosor: (parseFloat(cs.strokeWidth) || 1) * escala, extremo: cs.strokeLinecap || 'butt', union: cs.strokeLinejoin || 'miter',
+          // La mina se pinta del color del portaminas
+          mina: id === 'mina' || (el.classList && el.classList.contains('mina')) || !!el.closest('#mina, .mina'),
+        });
+      }
+      const cajaTotal = total && { x: total.x0, y: total.y0, w: total.x1 - total.x0, h: total.y1 - total.y0 };
+      return { formas, marcas, caja: cajaTotal, viewBox: vb };
+    } finally {
+      caja.remove();
+    }
+  },
+  trazado(el) {
+    const p = new Path2D(), n = k => (el[k] && el[k].baseVal ? el[k].baseVal.value : parseFloat(el.getAttribute(k)) || 0);
+    switch (el.nodeName) {
+      case 'path': { const d = el.getAttribute('d'); return d ? new Path2D(d) : null; }
+      case 'rect': {
+        const x = n('x'), y = n('y'), w = n('width'), h = n('height');
+        let rx = el.hasAttribute('rx') ? n('rx') : n('ry'), ry = el.hasAttribute('ry') ? n('ry') : rx;
+        rx = Math.min(rx, w / 2); ry = Math.min(ry, h / 2);
+        if (rx > 0 || ry > 0) p.roundRect(x, y, w, h, [{ x: rx, y: ry }]); else p.rect(x, y, w, h);
+        return p;
+      }
+      case 'circle': p.arc(n('cx'), n('cy'), n('r'), 0, Geom.DOS_PI); return p;
+      case 'ellipse': p.ellipse(n('cx'), n('cy'), n('rx'), n('ry'), 0, 0, Geom.DOS_PI); return p;
+      case 'line': p.moveTo(n('x1'), n('y1')); p.lineTo(n('x2'), n('y2')); return p;
+      case 'polyline': case 'polygon': {
+        const pts = [...el.points];
+        if (!pts.length) return null;
+        pts.forEach((q, i) => (i ? p.lineTo(q.x, q.y) : p.moveTo(q.x, q.y)));
+        if (el.nodeName === 'polygon') p.closePath();
+        return p;
+      }
+    }
+    return null;
+  },
+  // Degradado lineal o radial (con sus enlaces href, como los que hace Inkscape)
+  degradado(svg, id, m, bb, op) {
+    const buscar = i => svg.querySelector('#' + CSS.escape(i));
+    let g = buscar(id);
+    if (!g || !/Gradient$/.test(g.nodeName)) return null;
+    const cadena = [];
+    for (let e = g; e && cadena.length < 8; ) {
+      cadena.push(e);
+      const h = e.getAttribute('href') || e.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
+      e = h && h[0] === '#' ? buscar(h.slice(1)) : null;
+    }
+    const attr = (k, def) => { for (const e of cadena) if (e.hasAttribute(k)) return e.getAttribute(k); return def; };
+    const num = (k, def) => { const v = attr(k, def); return /%$/.test(v) ? parseFloat(v) / 100 : parseFloat(v); };
+    const stops = (cadena.find(e => e.querySelector('stop')) || g).querySelectorAll('stop');
+    let M = m;
+    if (attr('gradientUnits', 'objectBoundingBox') !== 'userSpaceOnUse' && bb) M = M.multiply(new DOMMatrix([bb.w, 0, 0, bb.h, bb.x, bb.y]));
+    const gt = cadena.find(e => e.hasAttribute('gradientTransform'));
+    if (gt && gt.gradientTransform) { const t = gt.gradientTransform.baseVal.consolidate(); if (t) M = M.multiply(new DOMMatrix([t.matrix.a, t.matrix.b, t.matrix.c, t.matrix.d, t.matrix.e, t.matrix.f])); }
+    let cg;
+    // Un degradado de canvas sirve en cualquier lienzo: se crea con uno auxiliar
+    const ctx = this._ctx || (this._ctx = document.createElement('canvas').getContext('2d'));
+    if (g.nodeName === 'radialGradient') {
+      const cx = num('cx', '50%'), cy = num('cy', '50%'), r = num('r', '50%');
+      const c = M.transformPoint({ x: cx, y: cy }), f = M.transformPoint({ x: num('fx', String(cx)), y: num('fy', String(cy)) });
+      const R = r * Math.sqrt(Math.abs(M.a * M.d - M.b * M.c));
+      cg = ctx.createRadialGradient(f.x, f.y, 0, c.x, c.y, R);
+    } else {
+      const a = M.transformPoint({ x: num('x1', '0%'), y: num('y1', '0%') }), b = M.transformPoint({ x: num('x2', '100%'), y: num('y2', '0%') });
+      cg = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+    }
+    for (const st of stops) {
+      const cs = getComputedStyle(st), o = st.getAttribute('offset') || '0';
+      const off = Geom.clamp(/%$/.test(o) ? parseFloat(o) / 100 : parseFloat(o), 0, 1);
+      cg.addColorStop(off, this.conAlfa(cs.stopColor, parseFloat(cs.stopOpacity)));
+    }
+    return { color: cg, alfa: op };
+  },
+  conAlfa(color, a) {
+    const m = /rgba?\(([^)]+)\)/.exec(color);
+    if (!m) return color;
+    const [r, g, b, a0 = 1] = m[1].split(/[ ,/]+/).filter(Boolean).map(Number);
+    return `rgba(${r}, ${g}, ${b}, ${a0 * (Number.isFinite(a) ? a : 1)})`;
+  },
+  // Dibuja la pieza con la matriz [a, b, c, d, e, f] (de milímetros de la pieza a los del instrumento)
+  dibujar(ctx, nombre, mat, op = {}) {
+    const pz = this.pieza(nombre);
+    if (!pz) return;
+    ctx.save();
+    ctx.transform(...mat);
+    for (const f of pz.formas) this.forma(ctx, f, op);
+    ctx.restore();
+  },
+  forma(ctx, f, op) {
+    const antes = ctx.globalAlpha, alfa0 = antes * f.opacidad * (f.mina && op.minaLevantada ? 0.35 : 1);
+    if (f.fill) {
+      ctx.globalAlpha = alfa0 * (Number.isFinite(f.fill.alfa) ? f.fill.alfa : 1);
+      ctx.fillStyle = f.mina && op.colorMina ? op.colorMina : f.fill.color;
+      ctx.fill(f.path, f.regla);
+    }
+    if (f.stroke) {
+      ctx.globalAlpha = alfa0 * (Number.isFinite(f.stroke.alfa) ? f.stroke.alfa : 1);
+      ctx.strokeStyle = f.mina && op.colorMina ? op.colorMina : f.stroke.color;
+      ctx.lineWidth = f.grosor; ctx.lineCap = f.extremo; ctx.lineJoin = f.union;
+      ctx.stroke(f.path);
+    }
+    ctx.globalAlpha = antes;
+  },
+  // Repite la pieza a lo largo de x, de 0 a «largo» (el paso es el ancho de su viewBox)
+  repetir(ctx, nombre, mat, largo) {
+    const pz = this.pieza(nombre);
+    if (!pz) return;
+    const vb = pz.viewBox || { x: 0, y: -1, w: 1, h: 2 };
+    ctx.save();
+    ctx.transform(...mat);
+    ctx.beginPath();
+    ctx.rect(0, vb.y, largo, vb.h);
+    ctx.clip();
+    for (let x = 0; x < largo; x += vb.w) {
+      ctx.save();
+      ctx.translate(x - vb.x, 0);
+      for (const f of pz.formas) this.forma(ctx, f, {});
+      ctx.restore();
+    }
+    ctx.restore();
+  },
+  marca(nombre, id) { const pz = this.pieza(nombre); return pz && pz.marcas[id] || null; },
+  caja(nombre) { const pz = this.pieza(nombre); return pz && pz.caja; },
+};
+
 class Compas extends Instrumento {
   constructor() {
     super('compas', 'Compás', 'o');
@@ -2581,7 +2804,11 @@ class Compas extends Instrumento {
   }
   // De pie, visto desde arriba, la bisagra queda sobre el centro de las patas
   bisagra() { return [this.r / 2, -this.altura() * (1 - this.alzado)]; }
-  pomo() { const b = this.bisagra(); return [b[0], b[1] - Math.max(20, 26 / Vista.escala) * (1 - this.alzado * 0.85)]; }
+  // Asa: por encima de la cabeza, a la altura de un mango de 13,5 mm (más largo si hay poco zoom, para poder tocarla)
+  pomo() {
+    const b = this.bisagra(), c = PiezasSVG.caja('compas/cabeza') || { y: -6.5 };
+    return [b[0], b[1] - (-c.y + Math.max(13.5, 19.5 / Vista.escala)) * (1 - this.alzado * 0.85)];
+  }
   // Animación al ponerse de pie (1) o tumbarse (0)
   animarAlzado(objetivo, ms = 420) {
     let quieto = false;
@@ -2654,109 +2881,27 @@ class Compas extends Instrumento {
     ctx.stroke();
     ctx.setLineDash([]);
   }
-  // Medidas del cabezal (mm locales): de pie se ve más grande, porque está más cerca de quien mira
+  // Medidas de la cabeza (mm locales), sacadas de su pieza SVG. De pie se ve desde arriba: más ancha y aplastada
   cabezal() {
-    // De pie, la cabeza se ve desde arriba: más ancha pero aplastada en altura
     const b = this.bisagra(), s = 1 + this.alzado * 0.5, f = 1 - this.alzado * 0.8;
-    return { s, f, x: b[0], arriba: b[1] - 6.5 * s * f, abajo: b[1] + 13 * s * f, ancho: 12 * s };
+    const c = PiezasSVG.caja('compas/cabeza') || { x: -6, y: -6.5, w: 12, h: 19.5 };
+    return { s, f, x: b[0] + (c.x + c.w / 2) * s, arriba: b[1] + c.y * s * f, abajo: b[1] + (c.y + c.h) * s * f, ancho: c.w * s };
   }
-  // Pieza recta con los extremos redondeados, de p a q y de ancho w
-  barra(ctx, p, q, w, relleno, borde) {
-    const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1, ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
-    ctx.save();
-    ctx.translate(p[0], p[1]);
-    ctx.rotate(ang);
-    ctx.beginPath();
-    ctx.roundRect(-w * 0.1, -w / 2, L + w * 0.2, w, w * 0.25);
-    ctx.fillStyle = relleno;
-    ctx.fill();
-    if (borde) { ctx.strokeStyle = borde; ctx.lineWidth = 0.7 / Vista.escala; ctx.stroke(); }
-    ctx.restore();
-  }
-  // Tornillo plateado con su ranura
-  tornillo(ctx, x, y, r, ang = 0.6) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Geom.DOS_PI);
-    ctx.fillStyle = '#d9dce2';
-    ctx.fill();
-    ctx.strokeStyle = '#6e737d';
-    ctx.lineWidth = Math.max(0.12, 0.6 / Vista.escala);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x - Math.cos(ang) * r * 0.75, y - Math.sin(ang) * r * 0.75);
-    ctx.lineTo(x + Math.cos(ang) * r * 0.75, y + Math.sin(ang) * r * 0.75);
-    ctx.strokeStyle = '#4a4f59';
-    ctx.lineWidth = r * 0.28;
-    ctx.stroke();
-  }
-  // Ruedecita negra con arandela clara, sobresaliendo de la pieza negra de la pata
-  rueda(ctx, x, y, r, n) {
-    ctx.beginPath();
-    ctx.arc(x - n[0] * r * 0.35, y - n[1] * r * 0.35, r * 0.95, 0, Geom.DOS_PI);
-    ctx.fillStyle = '#c9ccd3';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Geom.DOS_PI);
-    ctx.fillStyle = '#16181c';
-    ctx.fill();
-    ctx.strokeStyle = '#3c3f47';
-    ctx.lineWidth = Math.max(0.12, 0.6 / Vista.escala);
-    ctx.beginPath();
-    for (let i = 0; i < 10; i++) {   // estrías del borde
-      const t = i * Math.PI / 5;
-      ctx.moveTo(x + Math.cos(t) * r * 0.55, y + Math.sin(t) * r * 0.55);
-      ctx.lineTo(x + Math.cos(t) * r * 0.95, y + Math.sin(t) * r * 0.95);
-    }
-    ctx.stroke();
-  }
-  // Pata: brazo metálico plateado y, abajo, la pieza negra que sujeta la aguja o la mina
-  pata(ctx, b, t, otra, s) {
-    const L = Math.hypot(t[0] - b[0], t[1] - b[1]) || 1;
-    const v = [(t[0] - b[0]) / L, (t[1] - b[1]) / L];
+  // Pata desde la bisagra hasta la punta t; n: hacia fuera (al otro lado de la otra pata)
+  ladoPata(b, t, otra) {
+    const L = Math.hypot(t[0] - b[0], t[1] - b[1]) || 1e-6, v = [(t[0] - b[0]) / L, (t[1] - b[1]) / L];
     let n = [-v[1], v[0]];
-    if ((otra[0] - t[0]) * n[0] + (otra[1] - t[1]) * n[1] > 0) n = [-n[0], -n[1]];   // n: hacia fuera
-    const en = d => [b[0] + v[0] * d, b[1] + v[1] * d];
-    const punta = Math.min(5, L * 0.09), corte = L * 0.66, fin = L - punta;
-    // Brazo metálico (de la bisagra a la pieza negra)
-    const w = 4.2 * s;
-    ctx.beginPath();
-    ctx.moveTo(b[0] + n[0] * w / 2, b[1] + n[1] * w / 2);
-    ctx.lineTo(en(corte)[0] + n[0] * w * 0.4, en(corte)[1] + n[1] * w * 0.4);
-    ctx.lineTo(en(corte)[0] - n[0] * w * 0.4, en(corte)[1] - n[1] * w * 0.4);
-    ctx.lineTo(b[0] - n[0] * w / 2, b[1] - n[1] * w / 2);
-    ctx.closePath();
-    const g = ctx.createLinearGradient(b[0] + n[0] * w / 2, b[1] + n[1] * w / 2, b[0] - n[0] * w / 2, b[1] - n[1] * w / 2);
-    g.addColorStop(0, '#eceef1'); g.addColorStop(0.45, '#c3c7ce'); g.addColorStop(1, '#9ea3ac');
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.strokeStyle = '#7d828c';
-    ctx.lineWidth = 0.7 / Vista.escala;
-    ctx.stroke();
-    // Pieza negra de abajo, algo más ancha
-    const a0 = en(corte - 2), a1 = en(fin), wn = 4.4 * s;
-    ctx.beginPath();
-    ctx.moveTo(a0[0] + n[0] * wn / 2, a0[1] + n[1] * wn / 2);
-    ctx.lineTo(a1[0] + n[0] * wn * 0.32, a1[1] + n[1] * wn * 0.32);
-    ctx.lineTo(a1[0] - n[0] * wn * 0.32, a1[1] - n[1] * wn * 0.32);
-    ctx.lineTo(a0[0] - n[0] * wn / 2, a0[1] - n[1] * wn / 2);
-    ctx.closePath();
-    ctx.fillStyle = '#1b1d22';
-    ctx.fill();
-    // Estrías de la pieza negra
-    ctx.strokeStyle = '#3d4049';
-    ctx.lineWidth = Math.max(0.1, 0.5 / Vista.escala);
-    ctx.beginPath();
-    for (const f of [-0.18, 0, 0.18]) {
-      const p0 = en(corte + 3), p1 = en(corte + (fin - corte) * 0.55);
-      ctx.moveTo(p0[0] + n[0] * wn * f, p0[1] + n[1] * wn * f);
-      ctx.lineTo(p1[0] + n[0] * wn * f, p1[1] + n[1] * wn * f);
-    }
-    ctx.stroke();
-    return { v, n, en, corte, fin, s };
+    if ((otra[0] - t[0]) * n[0] + (otra[1] - t[1]) * n[1] > 0) n = [-n[0], -n[1]];
+    return { L, v, n };
   }
+  // Dibujado con las piezas SVG de instrumentos/compas (ver instrumentos/LEEME.md)
   dibujar(ctx) {
     const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala, a = this.alzado;
-    const cab = this.cabezal(), s = cab.s, punta = [0, 0], mina = [this.r, 0];
+    const cab = this.cabezal(), s = cab.s, punta = [0, 0], mina = [this.r, 0], P = PiezasSVG;
+    const pi = this.ladoPata(b, punta, mina), pd = this.ladoPata(b, mina, punta);
+    // Cada pata se estira a lo largo hasta su punta (la marca «punta» de la pieza) y se ensancha de pie
+    const largo = nombre => (P.marca(nombre, 'punta') || { y: 75 }).y;
+    const matPata = (p, nombre) => { const e = p.L / largo(nombre); return [p.n[0] * s, p.n[1] * s, p.v[0] * e, p.v[1] * e, b[0], b[1]]; };
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
@@ -2766,23 +2911,9 @@ class Compas extends Instrumento {
     ctx.shadowBlur = (8 + a * 14) * Capas.dpr;
     ctx.shadowOffsetY = (3 + a * 9) * Capas.dpr;
     ctx.shadowOffsetX = a * 5 * Capas.dpr;
-    const pi = this.pata(ctx, b, punta, mina, s);
-    const pd = this.pata(ctx, b, mina, punta, s);
+    P.dibujar(ctx, 'compas/pata-aguja', matPata(pi, 'compas/pata-aguja'));
+    P.dibujar(ctx, 'compas/pata-mina', matPata(pd, 'compas/pata-mina'), { colorMina: Paleta.lapizActual(), minaLevantada: this.levantada });
     ctx.restore();
-    // Aguja de la punta seca y mina de grafito (más clara si está levantada)
-    const aguja = (q, t, w, color, alfa) => {
-      ctx.beginPath();
-      ctx.moveTo(q[0] + pi.n[0] * 0 + (t === punta ? pi : pd).n[0] * w, q[1] + (t === punta ? pi : pd).n[1] * w);
-      ctx.lineTo(t[0], t[1]);
-      ctx.lineTo(q[0] - (t === punta ? pi : pd).n[0] * w, q[1] - (t === punta ? pi : pd).n[1] * w);
-      ctx.closePath();
-      ctx.globalAlpha = alfa;
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    };
-    aguja(pi.en(pi.fin - 0.5), punta, 0.5, '#9aa0aa', 1);
-    aguja(pd.en(pd.fin - 0.5), mina, 0.95, Paleta.lapizActual(), this.levantada ? 0.35 : 1);
     if (this.levantada) {
       // Sombra de la punta: la mina no toca el papel
       ctx.beginPath();
@@ -2791,89 +2922,26 @@ class Compas extends Instrumento {
       ctx.lineWidth = px;
       ctx.stroke();
     }
-    // Tornillos de las piezas negras y ruedecitas (una en la pata de la aguja, dos en la de la mina)
-    const ladoRueda = (p, d, r) => { const q = p.en(d); this.rueda(ctx, q[0] + p.n[0] * 2.6 * s, q[1] + p.n[1] * 2.6 * s, r, p.n); };
-    for (const p of [pi, pd]) { const q = p.en(p.corte + 1.2 * s); this.tornillo(ctx, q[0], q[1], 1.1 * s); }
-    ladoRueda(pi, pi.fin - 3 * s, 1.5 * s);
-    ladoRueda(pd, pd.corte + 4 * s, 1.5 * s);
-    ladoRueda(pd, pd.fin - 3 * s, 1.5 * s);
-    // Tornillo de ajuste entre las patas: varilla roscada, dos tacos negros y la rueda del centro
-    const tq = Math.min(pi.corte, pd.corte) * 0.42, ql = pi.en(tq), qr = pd.en(tq);
-    const dl = Math.hypot(qr[0] - ql[0], qr[1] - ql[1]) || 1, u = [(qr[0] - ql[0]) / dl, (qr[1] - ql[1]) / dl];
-    const e0 = [ql[0] - u[0] * 4 * s, ql[1] - u[1] * 4 * s], e1 = [qr[0] + u[0] * 4 * s, qr[1] + u[1] * 4 * s];
-    this.barra(ctx, e0, e1, 0.9 * s, '#8d929b');
-    ctx.strokeStyle = '#5d626c';
-    ctx.lineWidth = Math.max(0.08, 0.35 * px);
-    ctx.beginPath();
-    const largo = dl + 8 * s;
-    for (let d = 0.6; d < largo; d += 0.7) {   // rosca
-      const c = [e0[0] + u[0] * d, e0[1] + u[1] * d];
-      ctx.moveTo(c[0] - u[1] * 0.45 * s - u[0] * 0.2, c[1] + u[0] * 0.45 * s - u[1] * 0.2);
-      ctx.lineTo(c[0] + u[1] * 0.45 * s + u[0] * 0.2, c[1] - u[0] * 0.45 * s + u[1] * 0.2);
-    }
-    ctx.stroke();
-    for (const [q, sg] of [[ql, -1], [qr, 1]]) {
-      this.barra(ctx, [q[0] - u[0] * (sg < 0 ? 4.6 : 1.4) * s, q[1] - u[1] * (sg < 0 ? 4.6 : 1.4) * s],
-                      [q[0] + u[0] * (sg < 0 ? 1.4 : 4.6) * s, q[1] + u[1] * (sg < 0 ? 1.4 : 4.6) * s], 4.6 * s, '#1b1d22');
-    }
-    const m = [(ql[0] + qr[0]) / 2, (ql[1] + qr[1]) / 2], hw = Math.min(0.9 * s, dl * 0.12);
-    if (dl > 6 * s) {
-      this.barra(ctx, [m[0] - u[0] * hw, m[1] - u[1] * hw], [m[0] + u[0] * hw, m[1] + u[1] * hw], 5.4 * s, '#1b1d22');
-      ctx.strokeStyle = '#41444d';
-      ctx.beginPath();
-      for (const f of [-1.8, -0.6, 0.6, 1.8]) {
-        ctx.moveTo(m[0] - u[0] * hw + u[1] * f * s, m[1] - u[1] * hw - u[0] * f * s);
-        ctx.lineTo(m[0] + u[0] * hw + u[1] * f * s, m[1] + u[1] * hw - u[0] * f * s);
-      }
-      ctx.stroke();
-    }
-    // Mango estriado, de la cabeza al asa
+    // Tornillo de ajuste: varilla roscada entre las marcas «ajuste» de las patas, un taco en cada pata y la rueda
+    const ajuste = (p, nombre) => { const d = (P.marca(nombre, 'ajuste') || { y: 20.8 }).y * p.L / largo(nombre); return [b[0] + p.v[0] * d, b[1] + p.v[1] * d]; };
+    const ql = ajuste(pi, 'compas/pata-aguja'), qr = ajuste(pd, 'compas/pata-mina');
+    const dl = Math.hypot(qr[0] - ql[0], qr[1] - ql[1]) || 1e-6, u = [(qr[0] - ql[0]) / dl, (qr[1] - ql[1]) / dl], w = [-u[1], u[0]];
+    const e0 = [ql[0] - u[0] * 4 * s, ql[1] - u[1] * 4 * s];
+    P.repetir(ctx, 'compas/varilla', [u[0], u[1], w[0] * s, w[1] * s, e0[0], e0[1]], dl + 8 * s);
+    P.dibujar(ctx, 'compas/taco', [-u[0] * s, -u[1] * s, w[0] * s, w[1] * s, ql[0], ql[1]]);
+    P.dibujar(ctx, 'compas/taco', [u[0] * s, u[1] * s, w[0] * s, w[1] * s, qr[0], qr[1]]);
+    if (dl > 6 * s) P.dibujar(ctx, 'compas/rueda-ajuste', [u[0] * s, u[1] * s, w[0] * s, w[1] * s, (ql[0] + qr[0]) / 2, (ql[1] + qr[1]) / 2]);
+    // Mango: de la cabeza al asa (se estira hasta la marca «asa» de su pieza)
     if (k[1] < cab.arriba - 1) {
-      const wm = 4.6 * s;
-      ctx.beginPath();
-      ctx.roundRect(k[0] - wm / 2, k[1] - wm * 0.2, wm, cab.arriba - k[1] + wm * 0.2, [wm * 0.45, wm * 0.45, 0, 0]);
-      ctx.fillStyle = '#1b1d22';
-      ctx.fill();
-      ctx.strokeStyle = '#3f424b';
-      ctx.lineWidth = Math.max(0.1, 0.5 * px);
-      ctx.beginPath();
-      for (const f of [-0.3, -0.1, 0.1, 0.3]) { ctx.moveTo(k[0] + wm * f, k[1] + wm * 0.3); ctx.lineTo(k[0] + wm * f, cab.arriba - 0.6 * s); }
-      ctx.stroke();
+      const alto = -(P.marca('compas/mango', 'asa') || { y: -13 }).y || 13;
+      P.dibujar(ctx, 'compas/mango', [s, 0, 0, (cab.arriba - k[1]) / alto, k[0], cab.arriba]);
     }
-    // Cabeza negra: rectángulo que se estrecha abajo, con los dos tornillos de las patas
-    const W = cab.ancho, x = cab.x;
-    ctx.save();
-    ctx.translate(0, b[1]);
-    ctx.scale(1, cab.f);
-    ctx.translate(0, -b[1]);
-    const y0 = b[1] - 6.5 * s, y1 = b[1] + 13 * s;
+    // Cabeza, con su sombra
     ctx.save();
     ctx.shadowColor = 'rgba(30, 40, 60, .25)';
     ctx.shadowBlur = (6 + a * 10) * Capas.dpr;
     ctx.shadowOffsetY = (2 + a * 7) * Capas.dpr;
-    ctx.beginPath();
-    ctx.moveTo(x - W / 2 + 1.5 * s, y0);
-    ctx.lineTo(x + W / 2 - 1.5 * s, y0);
-    ctx.quadraticCurveTo(x + W / 2, y0, x + W / 2, y0 + 1.5 * s);
-    ctx.lineTo(x + W / 2, y1 - 5 * s);
-    ctx.lineTo(x + W * 0.3, y1);
-    ctx.lineTo(x - W * 0.3, y1);
-    ctx.lineTo(x - W / 2, y1 - 5 * s);
-    ctx.lineTo(x - W / 2, y0 + 1.5 * s);
-    ctx.quadraticCurveTo(x - W / 2, y0, x - W / 2 + 1.5 * s, y0);
-    ctx.closePath();
-    ctx.fillStyle = '#17191d';
-    ctx.fill();
-    ctx.restore();
-    // Brillos verticales del plástico
-    ctx.strokeStyle = 'rgba(255, 255, 255, .13)';
-    ctx.lineWidth = 0.6 * s;
-    ctx.beginPath();
-    for (const f of [-0.36, 0.36]) { ctx.moveTo(x + W * f, y0 + 1 * s); ctx.lineTo(x + W * f, y0 + 3 * s); }
-    ctx.stroke();
-    // Los tornillos son los ejes de las patas: a la altura de la bisagra
-    this.tornillo(ctx, x - 2.8 * s, b[1], 1.3 * s, 0.9);
-    this.tornillo(ctx, x + 2.8 * s, b[1], 1.3 * s, 2.2);
+    P.dibujar(ctx, 'compas/cabeza', [s, 0, 0, s * cab.f, b[0], b[1]]);
     ctx.restore();
     // Punta seca
     ctx.beginPath();
@@ -5676,6 +5744,7 @@ function aplicarConfig(clave) {
 function iniciar() {
   Config.cargar();
   Cartela.cargar();
+  PiezasSVG.cargar();
   Hoja.actualizar();
   Capas.iniciar();
   UI.iniciar();

@@ -23,6 +23,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 12 | Ejercicios guiados agrupados por temas, en grupos desplegables que cada persona puede reordenar | ✅ Hecha |
 | 13 | Editor gráfico de ejercicios guiados (`editor.html`): enunciado sobre la hoja, pasos y objetivos, construcción esperada, revisión y prueba en DibuTec | ✅ Hecha |
 | 14 | Tema «Currículum 1º ESO»: los ejercicios de la guía de dibujo técnico de EPVA de 1.º de ESO; el motor gana `posteriorA` y `radioComo` con dos puntos | ✅ Hecha |
+| 15 | Compás dibujado con piezas SVG retocables (`instrumentos/compas/`), con copia incrustada para abrir con doble clic | ✅ Hecha |
 
 ---
 

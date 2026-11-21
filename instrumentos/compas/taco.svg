@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="8mm" height="6mm" viewBox="-2.5 -3 8 6">
+  <!--
+    DibuTec · compás · taco del tornillo de ajuste (uno en cada pata)
+    Unidades: milímetros. (0, 0) es el eje de la pata; la varilla va en horizontal y hacia +x queda el lado de FUERA.
+  -->
+  <rect id="taco" x="-1.86" y="-2.3" width="6.92" height="4.6" rx="1.15" fill="#1b1d22"/>
+</svg>
