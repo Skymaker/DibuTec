@@ -1,13 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="12mm" height="9mm" viewBox="-3.75 -4.5 12 9">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="8.2966mm" height="5.4165mm" viewBox="-2.5917 -2.8093 8.2966 5.4165">
   <!--
-    DibuTec · compás DE PIE (visto desde arriba) · taco
-    Es la pieza tumbada (../tumbado/taco.svg) con la deformación que le aplica DibuTec al ponerse de pie:
-    1,5 veces más grande.
-    Mismo anclaje, mismas marcas y mismos nombres que la pieza tumbada.
-    La deformación está en el grupo «de-pie» (transform). Para editar los nodos ya deformados,
-    en Inkscape: selecciona el grupo y Objeto › Desagrupar (Mayús+Ctrl+G); la transformación pasa a los trazados.
+    DibuTec · compás · pinza del tornillo de ajuste (de pie, desde arriba; la misma, en espejo, en las dos patas)
+    Unidades: milímetros. (0, 0) es el eje de la pata a la altura de la varilla, que va en horizontal;
+    hacia +x queda el lado de FUERA. Incluye el extremo de la varilla que asoma por fuera.
   -->
-  <g id="de-pie" transform="scale(1.5 1.5)">
-  <rect id="taco" x="-1.86" y="-2.3" width="6.92" height="4.6" rx="1.15" fill="#1b1d22"/>
+  <defs>
+    <linearGradient id="_Linear29" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,141.666667,-141.666667,0,750,3849.897003)"><stop offset="0" style="stop-color:#141517;stop-opacity:1"/><stop offset="0.35" style="stop-color:#35383c;stop-opacity:1"/><stop offset="0.65" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#101113;stop-opacity:1"/></linearGradient>
+    <linearGradient id="_Linear30" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,183.333333,-183.333333,0,808.333333,3824.897003)"><stop offset="0" style="stop-color:#141517;stop-opacity:1"/><stop offset="0.35" style="stop-color:#35383c;stop-opacity:1"/><stop offset="0.65" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#101113;stop-opacity:1"/></linearGradient>
+  </defs>
+  <g id="dibujo" transform="matrix(-0.023 0 0 0.023 20.6576 -90.3411)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path id="tornillo-exterior-izquierdo1" d="M875.094,3895.885c4.599,0 8.333,3.734 8.333,8.333l0,33.333c0,4.599 -3.734,8.333 -8.333,8.333l-191.76,0c-4.599,0 -8.333,-3.734 -8.333,-8.333l0,-33.333c0,-4.599 3.734,-8.333 8.333,-8.333l191.76,0Z" style="fill:#bebebe;stroke:#555a60;stroke-width:2.4px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <g id="left-clamp-top"><path d="M925,3849.897c32.195,0 58.333,26.138 58.333,58.333l0,25c0,32.195 -26.138,58.333 -58.333,58.333l-116.667,0c-32.195,0 -58.333,-26.138 -58.333,-58.333l0,-25c0,-32.195 26.138,-58.333 58.333,-58.333l116.667,0Z" style="fill:url(#_Linear29);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M891.667,3824.897c9.199,0 16.667,7.468 16.667,16.667l0,150c0,9.199 -7.468,16.667 -16.667,16.667l-66.667,0c-9.199,0 -16.667,-7.468 -16.667,-16.667l0,-150c0,-9.199 7.468,-16.667 16.667,-16.667l66.667,0Z" style="fill:url(#_Linear30);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M775,3874.897l183.333,0" style="fill:none;fill-rule:nonzero;stroke:#4d5258;stroke-width:5px;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
   </g>
 </svg>

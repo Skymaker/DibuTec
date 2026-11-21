@@ -1,17 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="14mm" height="21.5mm" viewBox="-7 -7.5 14 21.5">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="10.0324mm" height="17.2327mm" viewBox="-5.0127 0.4808 10.0324 17.2327">
   <!--
-    DibuTec · compás · cabeza
+    DibuTec · compás · cabeza (tumbado)
     Unidades: milímetros. La bisagra de las patas está en (0, 0).
-    El mango sale del borde de arriba de la cabeza; la zona para mover el compás es el contorno de la pieza.
+    El mango sale del borde de arriba de la cabeza; su contorno es la zona para agarrar el compás.
   -->
-  <path id="cuerpo" d="M -4.5 -6.5 L 4.5 -6.5 Q 6 -6.5 6 -5 L 6 8 L 3.6 13 L -3.6 13 L -6 8 L -6 -5 Q -6 -6.5 -4.5 -6.5 Z" fill="#17191d"/>
-  <path id="brillos" d="M -4.32 -5.5 L -4.32 -3.5 M 4.32 -5.5 L 4.32 -3.5" stroke="#ffffff" stroke-opacity="0.13" stroke-width="0.6" fill="none"/>
-  <g id="tornillo-izquierdo">
-    <circle cx="-2.8" cy="0" r="1.3" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
-    <path d="M -3.406 -0.764 L -2.194 0.764" stroke="#4a4f59" stroke-width="0.364"/>
-  </g>
-  <g id="tornillo-derecho">
-    <circle cx="2.8" cy="0" r="1.3" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
-    <path d="M 3.374 -0.788 L 2.226 0.788" stroke="#4a4f59" stroke-width="0.364"/>
+  <defs>
+    <linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(183.333333,0,0,183.333333,1158.333333,470.93633)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <linearGradient id="_Linear3" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(383.333333,0,0,383.333333,1058.333333,533.43633)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <radialGradient id="_Radial4" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(47.5,0,0,47.5,1133.75,729.894663)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
+    <radialGradient id="_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(47.5,0,0,47.5,1350.416667,729.894663)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
+  </defs>
+  <g id="dibujo" transform="matrix(0.023 0 0 0.023 -28.7977 -9.77)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path d="M1158.333,541.77c0,-58.333 25,-70.833 91.667,-70.833c66.667,0 91.667,12.5 91.667,70.833l-183.333,0Z" style="fill:url(#_Linear2);fill-rule:nonzero;"/>
+    <path d="M1058.333,554.27c0,-13.889 8.333,-20.833 25,-20.833l333.333,0c16.667,0 25,6.944 25,20.833l0,458.333c0,47.222 -26.389,98.611 -79.167,154.167l-225,0c-52.778,-55.556 -79.167,-106.944 -79.167,-154.167l0,-458.333Z" style="fill:url(#_Linear3);fill-rule:nonzero;stroke:#121315;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1058.333,595.936l383.333,0" style="fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1058.333,602.186l383.333,0" style="fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1058.333,650.103l383.333,0" style="fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1058.333,656.353l383.333,0" style="fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <rect x="1204.167" y="533.436" width="91.667" height="633.333" style="fill:#1e2023;stroke:#111214;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1208.333,537.603l0,625" style="fill:none;fill-rule:nonzero;stroke:#42464b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <g><circle cx="1141.667" cy="741.77" r="39.583" style="fill:url(#_Radial4);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1114.583,714.686l54.167,54.167" style="fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
+    <g><circle cx="1358.333" cy="741.77" r="39.583" style="fill:url(#_Radial5);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1358.333,704.27l0,75" style="fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
   </g>
 </svg>

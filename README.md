@@ -23,7 +23,7 @@ Pruébalo: https://skymaker.github.io/DibuTec/
 | `ejercicios/` | Ejercicios guiados, uno por archivo JSON. |
 | `ejercicios/indice.json` | Temas y ejercicios que aparecen en la aplicación, en orden. |
 | `ejercicios/LEEME.md` | Formato de los ejercicios y cómo añadir otros nuevos. |
-| `instrumentos/` | Piezas SVG del compás (`compas/tumbado/` y `compas/de-pie/`), para retocar su aspecto (ver `instrumentos/LEEME.md`). |
+| `instrumentos/` | Piezas SVG del compás: alzado (`compas/tumbado/`) y planta (`compas/de-pie/`), para retocar su aspecto (ver `instrumentos/LEEME.md`). |
 | `iconos/` | Icono de la aplicación (`icono.svg` es el original; los PNG se generan a partir de él). |
 | `manifest.webmanifest` | Datos para instalar la aplicación en la pantalla de inicio. |
 | `PLAN.md` | Plan de desarrollo. |

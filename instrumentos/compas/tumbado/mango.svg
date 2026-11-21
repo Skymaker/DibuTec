@@ -1,10 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="6mm" height="15.5mm" viewBox="-3 -14.5 6 15.5">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="4.2721mm" height="9.8404mm" viewBox="-2.1325 -8.7604 4.2721 9.8404">
   <!--
-    DibuTec · compás · mango
-    Unidades: milímetros. Abajo, en (0, 0), se apoya en la cabeza; arriba, en la marca «asa» (0, −13), va el asa para girar.
-    DibuTec lo estira o lo encoge en vertical para que llegue al asa.
+    DibuTec · compás · mango (tumbado)
+    Unidades: milímetros. Abajo, en (0, 0), se apoya en el borde de arriba de la cabeza;
+    arriba, en la marca «asa», va el asa para girar. DibuTec lo estira o encoge en vertical para llegar al asa.
   -->
-  <circle id="asa" cx="0" cy="-13" r="0.3" fill="none"/>
-  <rect id="cuerpo" x="-2.3" y="-13.92" width="4.6" height="14.5" rx="2" fill="#1b1d22"/>
-  <path id="estrias" d="M -1.38 -12.6 L -1.38 -0.6 M -0.46 -12.6 L -0.46 -0.6 M 0.46 -12.6 L 0.46 -0.6 M 1.38 -12.6 L 1.38 -0.6" stroke="#3f424b" stroke-width="0.15" fill="none"/>
+  <defs>
+    <linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(133.333333,0,0,133.333333,1183.333333,116.769663)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+  </defs>
+  <circle id="asa" cx="0" cy="-8.1604" r="0.2" fill="none"/>
+  <g id="dibujo" transform="matrix(0.023 0 0 0.023 -28.7977 -10.8509)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path d="M1291.667,116.77c13.798,0 25,11.202 25,25l0,325c0,13.798 -11.202,25 -25,25l-83.333,0c-13.798,0 -25,-11.202 -25,-25l0,-325c0,-13.798 11.202,-25 25,-25l83.333,0Z" style="fill:url(#_Linear1);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <g><path d="M1200,125.103l0,358.333" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1233.333,116.77l0,375" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1250,116.77l0,375" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1266.667,116.77l0,375" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1283.333,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1300,125.103l0,358.333" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
+    <g><path d="M1237.5,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1254.167,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1270.833,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
+  </g>
 </svg>

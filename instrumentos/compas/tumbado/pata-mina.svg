@@ -1,36 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="12mm" height="78mm" viewBox="-6 -1 12 78">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="12mm" height="76.8893mm" viewBox="-6 -1 12 76.8893">
   <!--
-    DibuTec · compás · pata de la mina
-    Unidades: milímetros. La bisagra está en (0, 0) y la punta en (0, 75), hacia abajo.
-    Hacia +x queda el lado de FUERA del compás (la otra pata está hacia −x).
-    Marcas (no se dibujan): «punta» fija el largo de la pata; «ajuste», dónde va el tornillo de ajuste.
+    DibuTec · compás · pata de la mina (tumbado)
+    Unidades: milímetros. La bisagra está en (0, 0) y la punta hacia abajo (+y): marca «punta».
+    Hacia +x queda el lado de FUERA del compás. La marca «ajuste» fija la altura del tornillo de ajuste.
+    DibuTec gira la pata según lo abierto que esté el compás y la estira o encoge a lo largo hasta la punta.
+    La forma con id="mina" se pinta del color del portaminas.
   -->
   <defs>
-    <linearGradient id="metal" gradientUnits="userSpaceOnUse" x1="2.1" y1="0" x2="-2.1" y2="0">
-      <stop offset="0" stop-color="#eceef1"/>
-      <stop offset="0.45" stop-color="#c3c7ce"/>
-      <stop offset="1" stop-color="#9ea3ac"/>
-    </linearGradient>
+    <linearGradient id="_Linear16" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(11.400671,31.323087,-31.323087,11.400671,2299.746779,3149.70532)"><stop offset="0" style="stop-color:#7c8288;stop-opacity:1"/><stop offset="0.4" style="stop-color:#edf1f5;stop-opacity:1"/><stop offset="0.7" style="stop-color:#9ea5ac;stop-opacity:1"/><stop offset="1" style="stop-color:#5a5f64;stop-opacity:1"/></linearGradient>
+    <linearGradient id="_Linear17" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(65.553861,180.107752,-180.107752,65.553861,2313.249128,3064.977534)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <linearGradient id="_Linear18" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(133.123121,-48.452854,48.452854,133.123121,1934.320598,2511.180687)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <radialGradient id="_Radial19" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(44.635399,-16.245957,16.245957,44.635399,2020.733282,2564.64156)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
   </defs>
-  <circle id="punta" cx="0" cy="75" r="0.3" fill="none"/>
-  <circle id="ajuste" cx="0" cy="20.8" r="0.3" fill="none"/>
-  <path id="brazo" d="M 2.1 0 L 1.68 49.5 L -1.68 49.5 L -2.1 0 Z" fill="url(#metal)" stroke="#7d828c" stroke-width="0.25"/>
-  <path id="pieza-negra" d="M 2.2 47.5 L 1.41 70 L -1.41 70 L -2.2 47.5 Z" fill="#1b1d22"/>
-  <path id="estrias" d="M 0.79 52.5 L 0.79 61.9 M 0 52.5 L 0 61.9 M -0.79 52.5 L -0.79 61.9" stroke="#3d4049" stroke-width="0.15" fill="none"/>
-  <g id="tornillo">
-    <circle cx="0" cy="50.7" r="1.1" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
-    <path d="M -0.681 50.234 L 0.681 51.166" stroke="#4a4f59" stroke-width="0.308"/>
+  <circle id="punta" cx="0" cy="74.8893" r="0.2" fill="none"/>
+  <circle id="ajuste" cx="0" cy="23.9248" r="0.2" fill="none"/>
+  <g id="dibujo" transform="matrix(0.0217 0.0079 -0.0079 0.0217 -23.7375 -19.0077)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="right-arm"><path d="M1300,770.936l133.333,-50l653.4,1795.833l-136.733,50l-650,-1795.833Z" style="fill:#bebebe;stroke:#000;stroke-width:4.17px;"/></g>
+    <g id="right-leg-bottom"><path id="mina" d="M2290.189,3330.547l31.323,-11.401l37.052,101.8l-14.222,58.385l-54.153,-148.785Z" style="fill:#464a4f;fill-rule:nonzero;stroke:#222528;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2346.731,3132.604l11.401,31.323l-46.985,17.101l-11.401,-31.323l46.985,-17.101Z" style="fill:url(#_Linear16);"/><path d="M2360.234,3047.877c8.644,-3.146 18.216,1.317 21.362,9.961l54.153,148.785c3.146,8.644 -1.317,18.216 -9.961,21.362l-31.323,11.401c-8.644,3.146 -18.216,-1.317 -21.362,-9.961l-54.153,-148.785c-3.146,-8.644 1.317,-18.216 9.961,-21.362l31.323,-11.401Z" style="fill:url(#_Linear17);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M2325.715,3087.045l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2334.266,3110.537l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2342.816,3134.029l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2351.367,3157.522l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2359.917,3181.014l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2368.468,3204.506l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2375.593,3224.083l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g><path d="M1945.721,2542.504c-7.6,-20.882 0.345,-35.598 23.838,-44.149l62.646,-22.801c23.492,-8.551 39.039,-2.385 46.639,18.497l276.121,795.183c5.7,15.662 0.72,26.342 -14.942,32.043l-62.646,22.801c-15.662,5.7 -26.342,0.72 -32.043,-14.942l-299.613,-786.633Z" style="fill:url(#_Linear18);fill-rule:nonzero;stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M2040.094,2667.782l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2063.586,2659.231l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2087.078,2650.681l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2132.724,2922.282l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2156.216,2913.731l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2179.709,2905.181l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g><path d="M2083.235,2895.954l117.462,-42.753" style="fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2085.372,2901.827l117.462,-42.753" style="fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M2018.696,2535.897c20.529,-7.472 43.262,3.129 50.734,23.658c7.472,20.529 -3.129,43.262 -23.658,50.734c-20.529,7.472 -43.262,-3.129 -50.734,-23.658c-7.472,-20.529 3.129,-43.262 23.658,-50.734Z" style="fill:url(#_Radial19);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2016.047,2607.806l32.374,-69.426" style="fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g></g>
   </g>
-  <g id="rueda1">
-    <circle cx="2.075" cy="53.5" r="1.425" fill="#c9ccd3"/>
-    <circle cx="2.6" cy="53.5" r="1.5" fill="#16181c"/>
-    <path d="M 3.425 53.500 L 4.025 53.500 M 3.267 53.985 L 3.753 54.338 M 2.855 54.285 L 3.040 54.855 M 2.345 54.285 L 2.160 54.855 M 1.933 53.985 L 1.447 54.338 M 1.775 53.500 L 1.175 53.500 M 1.933 53.015 L 1.447 52.662 M 2.345 52.715 L 2.160 52.145 M 2.855 52.715 L 3.040 52.145 M 3.267 53.015 L 3.753 52.662" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
-  </g>
-  <g id="rueda2">
-    <circle cx="2.075" cy="67" r="1.425" fill="#c9ccd3"/>
-    <circle cx="2.6" cy="67" r="1.5" fill="#16181c"/>
-    <path d="M 3.425 67.000 L 4.025 67.000 M 3.267 67.485 L 3.753 67.838 M 2.855 67.785 L 3.040 68.355 M 2.345 67.785 L 2.160 68.355 M 1.933 67.485 L 1.447 67.838 M 1.775 67.000 L 1.175 67.000 M 1.933 66.515 L 1.447 66.162 M 2.345 66.215 L 2.160 65.645 M 2.855 66.215 L 3.040 65.645 M 3.267 66.515 L 3.753 66.162" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
-  </g>
-  <!-- id="mina": DibuTec la pinta del color del portaminas (y más clara si está levantada) -->
-  <path id="mina" d="M 0.95 69.5 L 0 75 L -0.95 69.5 Z" fill="#757575"/>
 </svg>

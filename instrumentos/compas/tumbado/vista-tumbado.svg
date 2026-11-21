@@ -1,221 +1,104 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="62mm" height="105.7107mm" viewBox="-6 -97.7107 62 105.7107">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="67.1mm" height="85.5934mm" viewBox="-8 -81.5934 67.1 85.5934">
   <!--
-    DibuTec · compás completo TUMBADO, como lo pinta DibuTec
-    (abierto 50 mm: la punta seca en (0, 0) y la mina en (50, 0); zoom normal).
-    Montado con las piezas de compas/tumbado y la misma geometría que usa DibuTec. Solo de referencia:
+    DibuTec · compás completo TUMBADO (alzado), como lo pinta DibuTec
+    (abierto 51.1 mm: la punta seca en (0, 0) y la mina en (51.1, 0); zoom normal).
+    Montado con las piezas de esta carpeta y la misma geometría que usa DibuTec. Solo de referencia:
     DibuTec no lee este archivo. Se rehace con instrumentos/compas-vistas.py.
     No incluye el asa ni el botón de la mina, que dibuja DibuTec encima.
   -->
-  <g id="pata-aguja" transform="matrix(-0.9428 -0.3333 -0.3333 0.9428 25 -70.7107)">
+  <g id="pata-aguja" transform="matrix(-0.9402 -0.3407 -0.3402 0.9388 25.55 -70.5138)">
   <defs>
-    <linearGradient id="pata-aguja-metal" gradientUnits="userSpaceOnUse" x1="2.1" y1="0" x2="-2.1" y2="0">
-      <stop offset="0" stop-color="#eceef1"/>
-      <stop offset="0.45" stop-color="#c3c7ce"/>
-      <stop offset="1" stop-color="#9ea3ac"/>
-    </linearGradient>
+    <linearGradient id="pata-aguja-_Linear11" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-52.728105,144.869279,-144.869279,-52.728105,177.235996,3340.861067)"><stop offset="0" style="stop-color:#7c8288;stop-opacity:1"/><stop offset="0.4" style="stop-color:#edf1f5;stop-opacity:1"/><stop offset="0.7" style="stop-color:#9ea5ac;stop-opacity:1"/><stop offset="1" style="stop-color:#5a5f64;stop-opacity:1"/></linearGradient>
+    <linearGradient id="pata-aguja-_Linear12" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-11.400671,31.323087,-31.323087,-11.400671,153.26859,3132.604312)"><stop offset="0" style="stop-color:#7c8288;stop-opacity:1"/><stop offset="0.4" style="stop-color:#edf1f5;stop-opacity:1"/><stop offset="0.7" style="stop-color:#9ea5ac;stop-opacity:1"/><stop offset="1" style="stop-color:#5a5f64;stop-opacity:1"/></linearGradient>
+    <linearGradient id="pata-aguja-_Linear13" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-65.553861,180.107752,-180.107752,-65.553861,124.104698,3042.176191)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <linearGradient id="pata-aguja-_Linear14" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(133.123121,48.452854,-48.452854,133.123121,432.556281,2462.727834)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <radialGradient id="pata-aguja-_Radial15" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(44.635399,16.245957,-16.245957,44.635399,464.388251,2559.226241)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
   </defs>
-  <circle id="pata-aguja-punta" cx="0" cy="75" r="0.3" fill="none"/>
-  <circle id="pata-aguja-ajuste" cx="0" cy="20.8" r="0.3" fill="none"/>
-  <path id="pata-aguja-brazo" d="M 2.1 0 L 1.68 49.5 L -1.68 49.5 L -2.1 0 Z" fill="url(#pata-aguja-metal)" stroke="#7d828c" stroke-width="0.25"/>
-  <path id="pata-aguja-pieza-negra" d="M 2.2 47.5 L 1.41 70 L -1.41 70 L -2.2 47.5 Z" fill="#1b1d22"/>
-  <path id="pata-aguja-estrias" d="M 0.79 52.5 L 0.79 61.9 M 0 52.5 L 0 61.9 M -0.79 52.5 L -0.79 61.9" stroke="#3d4049" stroke-width="0.15" fill="none"/>
-  <g id="pata-aguja-tornillo">
-    <circle cx="0" cy="50.7" r="1.1" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
-    <path d="M -0.681 50.234 L 0.681 51.166" stroke="#4a4f59" stroke-width="0.308"/>
+  <circle id="pata-aguja-punta" cx="0" cy="75.1107" r="0.2" fill="none"/>
+  <circle id="pata-aguja-ajuste" cx="0" cy="23.9175" r="0.2" fill="none"/>
+  <g id="pata-aguja-dibujo" transform="matrix(-0.0217 -0.0078 -0.0078 0.0217 30.4037 0.6143)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="pata-aguja-left-arm"><path d="M1200,770.936l-133.333,-50l-650,1795.833l133.333,50l650,-1795.833Z" style="fill:#bebebe;stroke:#000;stroke-width:4.17px;"/></g>
+    <g id="pata-aguja-left-leg-bottom"><path d="M177.236,3340.861l19.577,7.125l-42.393,104.29l-20.124,37.016l8.378,-41.291l34.562,-107.141Z" style="fill:url(#pata-aguja-_Linear11);fill-rule:nonzero;stroke:#5c6268;stroke-width:2.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M209.811,3330.547l-8.551,23.492l-31.323,-11.401l8.551,-23.492l31.323,11.401Z" style="fill:#9ea5ac;"/><path d="M200.253,3149.705l-11.401,31.323l-46.985,-17.101l11.401,-31.323l46.985,17.101Z" style="fill:url(#pata-aguja-_Linear12);"/><path d="M171.089,3059.277c8.644,3.146 13.107,12.718 9.961,21.362l-54.153,148.785c-3.146,8.644 -12.718,13.107 -21.362,9.961l-31.323,-11.401c-8.644,-3.146 -13.107,-12.718 -9.961,-21.362l54.153,-148.785c3.146,-8.644 12.718,-13.107 21.362,-9.961l31.323,11.401Z" style="fill:url(#pata-aguja-_Linear13);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M119.47,3067.094l54.815,19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M110.919,3090.586l54.815,19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M102.369,3114.078l54.815,19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M93.818,3137.571l54.815,19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M85.268,3161.063l54.815,19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M76.717,3184.555l54.815,19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M69.592,3204.132l54.815,19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g><path d="M421.156,2494.051c7.6,-20.882 23.147,-27.048 46.639,-18.497l62.646,22.801c23.492,8.551 31.438,23.267 23.838,44.149l-299.613,786.633c-5.7,15.662 -16.381,20.642 -32.043,14.942l-62.646,-22.801c-15.662,-5.7 -20.642,-16.381 -14.942,-32.043l276.121,-795.183Z" style="fill:url(#pata-aguja-_Linear14);fill-rule:nonzero;stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M412.922,2650.681l-64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M436.414,2659.231l-64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M459.906,2667.782l-64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M320.291,2905.181l-64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M343.784,2913.731l-64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M367.276,2922.282l-64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g><path d="M299.304,2853.201l117.462,42.753" style="fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M297.166,2859.074l117.462,42.753" style="fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M481.304,2535.897c20.529,7.472 31.13,30.205 23.658,50.734c-7.472,20.529 -30.205,31.13 -50.734,23.658c-20.529,-7.472 -31.13,-30.205 -23.658,-50.734c7.472,-20.529 30.205,-31.13 50.734,-23.658Z" style="fill:url(#pata-aguja-_Radial15);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M433.053,2589.28l69.426,-32.374" style="fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g></g>
   </g>
-  <g id="pata-aguja-rueda1">
-    <circle cx="2.075" cy="67" r="1.425" fill="#c9ccd3"/>
-    <circle cx="2.6" cy="67" r="1.5" fill="#16181c"/>
-    <path d="M 3.425 67.000 L 4.025 67.000 M 3.267 67.485 L 3.753 67.838 M 2.855 67.785 L 3.040 68.355 M 2.345 67.785 L 2.160 68.355 M 1.933 67.485 L 1.447 67.838 M 1.775 67.000 L 1.175 67.000 M 1.933 66.515 L 1.447 66.162 M 2.345 66.215 L 2.160 65.645 M 2.855 66.215 L 3.040 65.645 M 3.267 66.515 L 3.753 66.162" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
   </g>
-  <path id="pata-aguja-aguja" d="M 0.5 69.5 L 0 75 L -0.5 69.5 Z" fill="#9aa0aa"/>
-  </g>
-  <g id="pata-mina" transform="matrix(0.9428 -0.3333 0.3333 0.9428 25 -70.7107)">
+  <g id="pata-mina" transform="matrix(0.9402 -0.3407 0.3412 0.9416 25.55 -70.5138)">
   <defs>
-    <linearGradient id="pata-mina-metal" gradientUnits="userSpaceOnUse" x1="2.1" y1="0" x2="-2.1" y2="0">
-      <stop offset="0" stop-color="#eceef1"/>
-      <stop offset="0.45" stop-color="#c3c7ce"/>
-      <stop offset="1" stop-color="#9ea3ac"/>
-    </linearGradient>
+    <linearGradient id="pata-mina-_Linear16" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(11.400671,31.323087,-31.323087,11.400671,2299.746779,3149.70532)"><stop offset="0" style="stop-color:#7c8288;stop-opacity:1"/><stop offset="0.4" style="stop-color:#edf1f5;stop-opacity:1"/><stop offset="0.7" style="stop-color:#9ea5ac;stop-opacity:1"/><stop offset="1" style="stop-color:#5a5f64;stop-opacity:1"/></linearGradient>
+    <linearGradient id="pata-mina-_Linear17" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(65.553861,180.107752,-180.107752,65.553861,2313.249128,3064.977534)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <linearGradient id="pata-mina-_Linear18" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(133.123121,-48.452854,48.452854,133.123121,1934.320598,2511.180687)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <radialGradient id="pata-mina-_Radial19" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(44.635399,-16.245957,16.245957,44.635399,2020.733282,2564.64156)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
   </defs>
-  <circle id="pata-mina-punta" cx="0" cy="75" r="0.3" fill="none"/>
-  <circle id="pata-mina-ajuste" cx="0" cy="20.8" r="0.3" fill="none"/>
-  <path id="pata-mina-brazo" d="M 2.1 0 L 1.68 49.5 L -1.68 49.5 L -2.1 0 Z" fill="url(#pata-mina-metal)" stroke="#7d828c" stroke-width="0.25"/>
-  <path id="pata-mina-pieza-negra" d="M 2.2 47.5 L 1.41 70 L -1.41 70 L -2.2 47.5 Z" fill="#1b1d22"/>
-  <path id="pata-mina-estrias" d="M 0.79 52.5 L 0.79 61.9 M 0 52.5 L 0 61.9 M -0.79 52.5 L -0.79 61.9" stroke="#3d4049" stroke-width="0.15" fill="none"/>
-  <g id="pata-mina-tornillo">
-    <circle cx="0" cy="50.7" r="1.1" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
-    <path d="M -0.681 50.234 L 0.681 51.166" stroke="#4a4f59" stroke-width="0.308"/>
+  <circle id="pata-mina-punta" cx="0" cy="74.8893" r="0.2" fill="none"/>
+  <circle id="pata-mina-ajuste" cx="0" cy="23.9248" r="0.2" fill="none"/>
+  <g id="pata-mina-dibujo" transform="matrix(0.0217 0.0079 -0.0079 0.0217 -23.7375 -19.0077)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="pata-mina-right-arm"><path d="M1300,770.936l133.333,-50l653.4,1795.833l-136.733,50l-650,-1795.833Z" style="fill:#bebebe;stroke:#000;stroke-width:4.17px;"/></g>
+    <g id="pata-mina-right-leg-bottom"><path id="pata-mina-mina" d="M2290.189,3330.547l31.323,-11.401l37.052,101.8l-14.222,58.385l-54.153,-148.785Z" style="fill:#464a4f;fill-rule:nonzero;stroke:#222528;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2346.731,3132.604l11.401,31.323l-46.985,17.101l-11.401,-31.323l46.985,-17.101Z" style="fill:url(#pata-mina-_Linear16);"/><path d="M2360.234,3047.877c8.644,-3.146 18.216,1.317 21.362,9.961l54.153,148.785c3.146,8.644 -1.317,18.216 -9.961,21.362l-31.323,11.401c-8.644,3.146 -18.216,-1.317 -21.362,-9.961l-54.153,-148.785c-3.146,-8.644 1.317,-18.216 9.961,-21.362l31.323,-11.401Z" style="fill:url(#pata-mina-_Linear17);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M2325.715,3087.045l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2334.266,3110.537l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2342.816,3134.029l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2351.367,3157.522l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2359.917,3181.014l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2368.468,3204.506l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2375.593,3224.083l54.815,-19.951" style="fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g><path d="M1945.721,2542.504c-7.6,-20.882 0.345,-35.598 23.838,-44.149l62.646,-22.801c23.492,-8.551 39.039,-2.385 46.639,18.497l276.121,795.183c5.7,15.662 0.72,26.342 -14.942,32.043l-62.646,22.801c-15.662,5.7 -26.342,0.72 -32.043,-14.942l-299.613,-786.633Z" style="fill:url(#pata-mina-_Linear18);fill-rule:nonzero;stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M2040.094,2667.782l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2063.586,2659.231l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2087.078,2650.681l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2132.724,2922.282l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2156.216,2913.731l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2179.709,2905.181l64.129,176.192" style="fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g><path d="M2083.235,2895.954l117.462,-42.753" style="fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2085.372,2901.827l117.462,-42.753" style="fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M2018.696,2535.897c20.529,-7.472 43.262,3.129 50.734,23.658c7.472,20.529 -3.129,43.262 -23.658,50.734c-20.529,7.472 -43.262,-3.129 -50.734,-23.658c-7.472,-20.529 3.129,-43.262 23.658,-50.734Z" style="fill:url(#pata-mina-_Radial19);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M2016.047,2607.806l32.374,-69.426" style="fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g></g>
   </g>
-  <g id="pata-mina-rueda1">
-    <circle cx="2.075" cy="53.5" r="1.425" fill="#c9ccd3"/>
-    <circle cx="2.6" cy="53.5" r="1.5" fill="#16181c"/>
-    <path d="M 3.425 53.500 L 4.025 53.500 M 3.267 53.985 L 3.753 54.338 M 2.855 54.285 L 3.040 54.855 M 2.345 54.285 L 2.160 54.855 M 1.933 53.985 L 1.447 54.338 M 1.775 53.500 L 1.175 53.500 M 1.933 53.015 L 1.447 52.662 M 2.345 52.715 L 2.160 52.145 M 2.855 52.715 L 3.040 52.145 M 3.267 53.015 L 3.753 52.662" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
   </g>
-  <g id="pata-mina-rueda2">
-    <circle cx="2.075" cy="67" r="1.425" fill="#c9ccd3"/>
-    <circle cx="2.6" cy="67" r="1.5" fill="#16181c"/>
-    <path d="M 3.425 67.000 L 4.025 67.000 M 3.267 67.485 L 3.753 67.838 M 2.855 67.785 L 3.040 68.355 M 2.345 67.785 L 2.160 68.355 M 1.933 67.485 L 1.447 67.838 M 1.775 67.000 L 1.175 67.000 M 1.933 66.515 L 1.447 66.162 M 2.345 66.215 L 2.160 65.645 M 2.855 66.215 L 3.040 65.645 M 3.267 66.515 L 3.753 66.162" stroke="#3c3f47" stroke-width="0.18" fill="none"/>
-  </g>
-  <!-- id="pata-mina-mina": DibuTec la pinta del color del portaminas (y más clara si está levantada) -->
-  <path id="pata-mina-mina" d="M 0.95 69.5 L 0 75 L -0.95 69.5 Z" fill="#757575"/>
-  </g>
-  <clipPath id="corte-varilla"><rect x="0" y="-0.6" width="21.8667" height="1.2"/></clipPath>
-  <g id="varilla" transform="matrix(1 0 -0 1 14.0667 -51.1003)" clip-path="url(#corte-varilla)">
+  <clipPath id="corte-varilla-tumbado"><rect x="0" y="-0.676" width="24.2985" height="1.352"/></clipPath>
+  <g id="varilla" transform="matrix(1 0.0045 -0.0045 1 13.4142 -48.0781)" clip-path="url(#corte-varilla-tumbado)">
     <g transform="translate(0 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(0.7 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(1.4 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(2.1 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(2.8 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(3.5 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(4.2 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(4.9 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(5.6 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(6.3 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(7 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(7.7 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(8.4 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(9.1 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(9.8 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(10.5 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(11.2 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(11.9 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(12.6 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(13.3 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(14 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(14.7 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(15.4 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(16.1 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(16.8 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(17.5 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(18.2 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(18.9 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(19.6 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(20.3 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(21 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
-    </g>
-    <g transform="translate(21.7 0)">
-  <rect id="varilla" x="0" y="-0.45" width="0.7" height="0.9" fill="#8d929b"/>
-  <path id="rosca" d="M 0.15 0.45 L 0.55 -0.45" stroke="#5d626c" stroke-width="0.12" fill="none"/>
+  <rect id="varilla" x="0" y="-0.576" width="160" height="1.152" fill="#bebebe"/>
+  <path id="bordes" d="M 0 -0.576 L 160 -0.576 M 0 0.576 L 160 0.576" stroke="#555a60" stroke-width="0.0645" fill="none"/>
     </g>
   </g>
-  <g id="taco-aguja" transform="matrix(-1 -0 -0 1 18.0667 -51.1003)">
-  <rect id="taco-aguja-taco" x="-1.86" y="-2.3" width="6.92" height="4.6" rx="1.15" fill="#1b1d22"/>
+  <g id="taco-aguja" transform="matrix(-1 -0.0045 -0.0045 1 17.4141 -48.0601)">
+  <defs>
+    <linearGradient id="taco-aguja-_Linear6" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,300,-300,0,711.086715,1254.269663)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <linearGradient id="taco-aguja-_Linear7" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,162.5,-162.5,0,691.666667,1320.93633)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+  </defs>
+  <g id="taco-aguja-dibujo" transform="matrix(-0.023 0 0 0.023 20.6576 -32.2598)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path id="taco-aguja-tornillo-exterior-izquierdo" d="M875.094,1375.103c4.599,0 8.333,3.734 8.333,8.333l0,33.333c0,4.599 -3.734,8.333 -8.333,8.333l-191.76,0c-4.599,0 -8.333,-3.734 -8.333,-8.333l0,-33.333c0,-4.599 3.734,-8.333 8.333,-8.333l191.76,0Z" style="fill:#bebebe;stroke:#555a60;stroke-width:2.4px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <g id="taco-aguja-left-clamp"><path d="M783.333,1254.27l108.333,0l-41.667,300l-91.667,0c-66.667,-62.5 -66.667,-237.5 25,-300Z" style="fill:url(#taco-aguja-_Linear6);fill-rule:nonzero;stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M933.333,1320.936c36.794,0 66.667,29.872 66.667,66.667l0,29.167c0,36.794 -29.872,66.667 -66.667,66.667l-175,0c-36.794,0 -66.667,-29.872 -66.667,-66.667l0,-29.167c0,-36.794 29.872,-66.667 66.667,-66.667l175,0Z" style="fill:url(#taco-aguja-_Linear7);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M729.167,1337.603l229.167,0" style="fill:none;fill-rule:nonzero;stroke:#4a4e54;stroke-width:6.25px;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
   </g>
-  <g id="taco-mina" transform="matrix(1 0 -0 1 31.9333 -51.1003)">
-  <rect id="taco-mina-taco" x="-1.86" y="-2.3" width="6.92" height="4.6" rx="1.15" fill="#1b1d22"/>
   </g>
-  <g id="rueda-ajuste" transform="matrix(1 0 -0 1 25 -51.1003)">
-  <rect id="rueda-ajuste-rueda" x="-1.08" y="-2.7" width="2.16" height="5.4" rx="1.35" fill="#1b1d22"/>
-  <path id="rueda-ajuste-estrias" d="M -1.08 -1.8 L 1.08 -1.8 M -1.08 -0.6 L 1.08 -0.6 M -1.08 0.6 L 1.08 0.6 M -1.08 1.8 L 1.08 1.8" stroke="#41444d" stroke-width="0.15" fill="none"/>
+  <g id="taco-mina" transform="matrix(1 0.0045 -0.0045 1 33.7124 -47.9868)">
+  <defs>
+    <linearGradient id="taco-mina-_Linear6" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,300,-300,0,711.086715,1254.269663)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <linearGradient id="taco-mina-_Linear7" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,162.5,-162.5,0,691.666667,1320.93633)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+  </defs>
+  <g id="taco-mina-dibujo" transform="matrix(-0.023 0 0 0.023 20.6576 -32.2598)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path id="taco-mina-tornillo-exterior-izquierdo" d="M875.094,1375.103c4.599,0 8.333,3.734 8.333,8.333l0,33.333c0,4.599 -3.734,8.333 -8.333,8.333l-191.76,0c-4.599,0 -8.333,-3.734 -8.333,-8.333l0,-33.333c0,-4.599 3.734,-8.333 8.333,-8.333l191.76,0Z" style="fill:#bebebe;stroke:#555a60;stroke-width:2.4px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <g id="taco-mina-left-clamp"><path d="M783.333,1254.27l108.333,0l-41.667,300l-91.667,0c-66.667,-62.5 -66.667,-237.5 25,-300Z" style="fill:url(#taco-mina-_Linear6);fill-rule:nonzero;stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M933.333,1320.936c36.794,0 66.667,29.872 66.667,66.667l0,29.167c0,36.794 -29.872,66.667 -66.667,66.667l-175,0c-36.794,0 -66.667,-29.872 -66.667,-66.667l0,-29.167c0,-36.794 29.872,-66.667 66.667,-66.667l175,0Z" style="fill:url(#taco-mina-_Linear7);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M729.167,1337.603l229.167,0" style="fill:none;fill-rule:nonzero;stroke:#4a4e54;stroke-width:6.25px;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
   </g>
-  <g id="mango" transform="matrix(1 0 0 1.0385 25 -77.2107)">
-  <circle id="mango-asa" cx="0" cy="-13" r="0.3" fill="none"/>
-  <rect id="mango-cuerpo" x="-2.3" y="-13.92" width="4.6" height="14.5" rx="2" fill="#1b1d22"/>
-  <path id="mango-estrias" d="M -1.38 -12.6 L -1.38 -0.6 M -0.46 -12.6 L -0.46 -0.6 M 0.46 -12.6 L 0.46 -0.6 M 1.38 -12.6 L 1.38 -0.6" stroke="#3f424b" stroke-width="0.15" fill="none"/>
   </g>
-  <g id="cabeza" transform="matrix(1 0 0 1 25 -70.7107)">
-  <path id="cabeza-cuerpo" d="M -4.5 -6.5 L 4.5 -6.5 Q 6 -6.5 6 -5 L 6 8 L 3.6 13 L -3.6 13 L -6 8 L -6 -5 Q -6 -6.5 -4.5 -6.5 Z" fill="#17191d"/>
-  <path id="cabeza-brillos" d="M -4.32 -5.5 L -4.32 -3.5 M 4.32 -5.5 L 4.32 -3.5" stroke="#ffffff" stroke-opacity="0.13" stroke-width="0.6" fill="none"/>
-  <g id="cabeza-tornillo-izquierdo">
-    <circle cx="-2.8" cy="0" r="1.3" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
-    <path d="M -3.406 -0.764 L -2.194 0.764" stroke="#4a4f59" stroke-width="0.364"/>
+  <g id="rueda-ajuste" transform="matrix(1 0.0045 -0.0045 1 25.5633 -48.0235)">
+  <defs>
+    <linearGradient id="rueda-ajuste-_Linear10" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,300,-300,0,1216.666667,1258.43633)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+  </defs>
+  <g id="rueda-ajuste-dibujo" transform="matrix(0.023 0 0 0.023 -28.8012 -32.2598)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="rueda-ajuste-center-thumbwheel"><path d="M1270.833,1258.436c6.899,0 12.5,5.601 12.5,12.5l0,275c0,6.899 -5.601,12.5 -12.5,12.5l-41.667,0c-6.899,0 -12.5,-5.601 -12.5,-12.5l0,-275c0,-6.899 5.601,-12.5 12.5,-12.5l41.667,0Z" style="fill:url(#rueda-ajuste-_Linear10);stroke:#0f1011;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><g><path d="M1216.667,1279.27l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1300.103l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1320.936l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1341.77l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1362.603l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1383.436l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1404.27l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1425.103l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1445.936l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1466.77l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1487.603l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1508.436l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,1529.27l66.667,0" style="fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g><g><path d="M1225,1289.686l50,0" style="fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1225,1331.353l50,0" style="fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1225,1373.02l50,0" style="fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1225,1414.686l50,0" style="fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1225,1456.353l50,0" style="fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1225,1498.02l50,0" style="fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g></g>
   </g>
-  <g id="cabeza-tornillo-derecho">
-    <circle cx="2.8" cy="0" r="1.3" fill="#d9dce2" stroke="#6e737d" stroke-width="0.2"/>
-    <path d="M 3.374 -0.788 L 2.226 0.788" stroke="#4a4f59" stroke-width="0.364"/>
+  </g>
+  <g id="mango" transform="matrix(1 0 0 1 25.55 -69.433)">
+  <defs>
+    <linearGradient id="mango-_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(133.333333,0,0,133.333333,1183.333333,116.769663)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+  </defs>
+  <circle id="mango-asa" cx="0" cy="-8.1604" r="0.2" fill="none"/>
+  <g id="mango-dibujo" transform="matrix(0.023 0 0 0.023 -28.7977 -10.8509)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path d="M1291.667,116.77c13.798,0 25,11.202 25,25l0,325c0,13.798 -11.202,25 -25,25l-83.333,0c-13.798,0 -25,-11.202 -25,-25l0,-325c0,-13.798 11.202,-25 25,-25l83.333,0Z" style="fill:url(#mango-_Linear1);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <g><path d="M1200,125.103l0,358.333" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1216.667,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1233.333,116.77l0,375" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1250,116.77l0,375" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1266.667,116.77l0,375" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1283.333,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1300,125.103l0,358.333" style="fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
+    <g><path d="M1237.5,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1254.167,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1270.833,120.936l0,366.667" style="fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
+  </g>
+  </g>
+  <g id="cabeza" transform="matrix(1 0 0 1 25.55 -70.5138)">
+  <defs>
+    <linearGradient id="cabeza-_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(183.333333,0,0,183.333333,1158.333333,470.93633)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <linearGradient id="cabeza-_Linear3" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(383.333333,0,0,383.333333,1058.333333,533.43633)"><stop offset="0" style="stop-color:#18191b;stop-opacity:1"/><stop offset="0.3" style="stop-color:#34373b;stop-opacity:1"/><stop offset="0.7" style="stop-color:#222427;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <radialGradient id="cabeza-_Radial4" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(47.5,0,0,47.5,1133.75,729.894663)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
+    <radialGradient id="cabeza-_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(47.5,0,0,47.5,1350.416667,729.894663)"><stop offset="0" style="stop-color:#fff;stop-opacity:1"/><stop offset="0.55" style="stop-color:#c4cad0;stop-opacity:1"/><stop offset="1" style="stop-color:#6c7278;stop-opacity:1"/></radialGradient>
+  </defs>
+  <g id="cabeza-dibujo" transform="matrix(0.023 0 0 0.023 -28.7977 -9.77)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path d="M1158.333,541.77c0,-58.333 25,-70.833 91.667,-70.833c66.667,0 91.667,12.5 91.667,70.833l-183.333,0Z" style="fill:url(#cabeza-_Linear2);fill-rule:nonzero;"/>
+    <path d="M1058.333,554.27c0,-13.889 8.333,-20.833 25,-20.833l333.333,0c16.667,0 25,6.944 25,20.833l0,458.333c0,47.222 -26.389,98.611 -79.167,154.167l-225,0c-52.778,-55.556 -79.167,-106.944 -79.167,-154.167l0,-458.333Z" style="fill:url(#cabeza-_Linear3);fill-rule:nonzero;stroke:#121315;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1058.333,595.936l383.333,0" style="fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1058.333,602.186l383.333,0" style="fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1058.333,650.103l383.333,0" style="fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1058.333,656.353l383.333,0" style="fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <rect x="1204.167" y="533.436" width="91.667" height="633.333" style="fill:#1e2023;stroke:#111214;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <path d="M1208.333,537.603l0,625" style="fill:none;fill-rule:nonzero;stroke:#42464b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <g><circle cx="1141.667" cy="741.77" r="39.583" style="fill:url(#cabeza-_Radial4);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1114.583,714.686l54.167,54.167" style="fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
+    <g><circle cx="1358.333" cy="741.77" r="39.583" style="fill:url(#cabeza-_Radial5);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M1358.333,704.27l0,75" style="fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
   </g>
   </g>
 </svg>

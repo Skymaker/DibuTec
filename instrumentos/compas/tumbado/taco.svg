@@ -1,7 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="8mm" height="6mm" viewBox="-2.5 -3 8 6">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="8.6883mm" height="8.2045mm" viewBox="-2.9834 -3.9663 8.6883 8.2045">
   <!--
-    DibuTec · compás · taco del tornillo de ajuste (uno en cada pata)
-    Unidades: milímetros. (0, 0) es el eje de la pata; la varilla va en horizontal y hacia +x queda el lado de FUERA.
+    DibuTec · compás · pinza del tornillo de ajuste (tumbado; la misma, en espejo, en las dos patas)
+    Unidades: milímetros. (0, 0) es el eje de la pata a la altura de la varilla, que va en horizontal;
+    hacia +x queda el lado de FUERA. Incluye el extremo de la varilla que asoma por fuera.
   -->
-  <rect id="taco" x="-1.86" y="-2.3" width="6.92" height="4.6" rx="1.15" fill="#1b1d22"/>
+  <defs>
+    <linearGradient id="_Linear6" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,300,-300,0,711.086715,1254.269663)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+    <linearGradient id="_Linear7" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,162.5,-162.5,0,691.666667,1320.93633)"><stop offset="0" style="stop-color:#2e3135;stop-opacity:1"/><stop offset="0.5" style="stop-color:#1b1c1f;stop-opacity:1"/><stop offset="1" style="stop-color:#111214;stop-opacity:1"/></linearGradient>
+  </defs>
+  <g id="dibujo" transform="matrix(-0.023 0 0 0.023 20.6576 -32.2598)" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <path id="tornillo-exterior-izquierdo" d="M875.094,1375.103c4.599,0 8.333,3.734 8.333,8.333l0,33.333c0,4.599 -3.734,8.333 -8.333,8.333l-191.76,0c-4.599,0 -8.333,-3.734 -8.333,-8.333l0,-33.333c0,-4.599 3.734,-8.333 8.333,-8.333l191.76,0Z" style="fill:#bebebe;stroke:#555a60;stroke-width:2.4px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/>
+    <g id="left-clamp"><path d="M783.333,1254.27l108.333,0l-41.667,300l-91.667,0c-66.667,-62.5 -66.667,-237.5 25,-300Z" style="fill:url(#_Linear6);fill-rule:nonzero;stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M933.333,1320.936c36.794,0 66.667,29.872 66.667,66.667l0,29.167c0,36.794 -29.872,66.667 -66.667,66.667l-175,0c-36.794,0 -66.667,-29.872 -66.667,-66.667l0,-29.167c0,-36.794 29.872,-66.667 66.667,-66.667l175,0Z" style="fill:url(#_Linear7);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;"/><path d="M729.167,1337.603l229.167,0" style="fill:none;fill-rule:nonzero;stroke:#4a4e54;stroke-width:6.25px;stroke-linejoin:miter;stroke-miterlimit:4;"/></g>
+  </g>
 </svg>
