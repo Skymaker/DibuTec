@@ -87,7 +87,14 @@ const Construir = {
   // Grosores (mm) sacados de la planta del dibujo
   GROSOR: { cabeza: 5.4, mango: 3.1, pata: 2.7, pinza: 4.2 },
   CAPA: 0.012,   // cada capa del SVG sobresale un poco más que la anterior (sin parpadeos)
+  // Un material por color: las piezas del mismo color lo comparten (y así se exporta al .glb)
+  materiales: new Map(),
   material(color, nombre) {
+    const k = String(color).toLowerCase() + '|' + (nombre || '');
+    if (!this.materiales.has(k)) this.materiales.set(k, this.materialNuevo(color, nombre));
+    return this.materiales.get(k);
+  },
+  materialNuevo(color, nombre) {
     const c = new THREE.Color(color);
     const hsl = {}; c.getHSL(hsl);
     const metal = hsl.s < 0.12 && hsl.l > 0.45;   // grises claros: metal
@@ -156,7 +163,7 @@ const Construir = {
       const g = grosor + 2 * capa * this.CAPA;
       const geo = new THREE.ExtrudeGeometry(shapes, { depth: g, bevelEnabled: false, curveSegments: 8 });
       geo.translate(0, 0, -g / 2);
-      const mat = this.material(r.esMina ? COLOR_MINA : r.relleno);
+      const mat = r.esMina ? this.materialNuevo(COLOR_MINA, 'mina') : r.op < 1 ? this.materialNuevo(r.relleno) : this.material(r.relleno);
       if (r.op < 1) { mat.transparent = true; mat.opacity = r.op; }
       const mesh = new THREE.Mesh(geo, mat);
       mesh.castShadow = true;

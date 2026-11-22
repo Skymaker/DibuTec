@@ -43,6 +43,12 @@ cierra hasta que las pinzas tocan la rueda y se abre hasta que la varilla se
 acaba. Alargar la varilla deja abrir más; adelgazar las pinzas o la rueda deja
 cerrar más.
 
+**Materiales:** las piezas del mismo color comparten material, con nombres
+como `metal-gris-claro-bebebe` o `plastico-negro-111111` (tipo, tono y color).
+Cambiar uno cambia todas las piezas que lo usan; para cambiar solo una, dale
+un material propio. La mina tiene el suyo (`mina`): la prueba le pone el
+color del portaminas y la aclara cuando está levantada.
+
 ## Guardarlo
 
 *Archivo › Exportar › glTF 2.0*, formato **glTF Binary (.glb)**, con *+Y Up*
