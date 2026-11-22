@@ -361,6 +361,8 @@
   .cl-botones .btn-texto { margin: 0; }
   .cl-botones .btn-texto[hidden] { display: none; }
   .cartela-texto { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--texto-suave); }
+  .cartela-fila { display: flex; gap: 10px; }
+  .cartela-fila > * { flex: 1; min-width: 0; }
   .cartela-texto input { height: var(--ctl); padding: 0 10px; border: 1px solid var(--borde); border-radius: 10px; font: inherit; font-size: 15px; color: var(--texto); }
   .cartela-texto input:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
   .paleta-editor { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
@@ -974,18 +976,61 @@ const Zona = {
 };
 
 /* =====================================================================
-   Cartela: logotipo y nombre del colegio, nombre del alumno, nivel y clase
+   Cartela: logotipo y nombre del colegio, nombre del alumno, nivel, clase y fecha
    ===================================================================== */
 const Cartela = {
   clave: 'dibutec.cartela',
-  datos: { activa: false, logo: '', colegio: '', alumno: '', nivel: '' },
+  datos: { activa: false, logo: '', colegio: '', alumno: '', nivel: '', clase: '', fecha: '' },   // fecha: AAAA-MM-DD
   img: null,
   cargar() {
     let d = null;
     try { d = JSON.parse(localStorage.getItem(this.clave)); } catch (_) { d = null; }
     if (d && typeof d === 'object') for (const k in this.datos) if (typeof d[k] === typeof this.datos[k]) this.datos[k] = d[k];
     if (this.datos.logo && !/^data:image\/(png|jpeg);base64,/.test(this.datos.logo)) this.datos.logo = '';
+    if (!this.fechaValida(this.datos.fecha)) this.datos.fecha = this.hoy();
     this.prepararLogo();
+  },
+  // Fecha de hoy (AAAA-MM-DD, la hora de aquí)
+  hoy() {
+    const d = new Date(), dos = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
+  },
+  fechaValida(f) { return typeof f === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(f) && !isNaN(new Date(f + 'T12:00')); },
+  fechaTexto() { const [a, m, d] = this.datos.fecha.split('-'); return this.fechaValida(this.datos.fecha) ? `${d}/${m}/${a}` : ''; },
+  ponerFecha(f) {
+    if (!this.fechaValida(f)) return;
+    this.datos.fecha = f;
+    this.guardar();
+    if (this.alCambiarFecha) this.alCambiarFecha();
+  },
+  // Casilla de la fecha en la hoja (mm): la última de la fila de abajo
+  casillas() {
+    const c = this.caja();
+    if (!c) return null;
+    const h = c.y1 - c.y0, L = h, x = c.x0 + L, w = c.x1 - x, f2 = c.y0 + h * 0.7;
+    const x1 = x + w * 0.38, x2 = x + w * 0.62;
+    return { y0: f2, y1: c.y1, nivel: [x, x1], clase: [x1, x2], fecha: [x2, c.x1] };
+  },
+  enFecha(x, y) {
+    const k = this.casillas();
+    return !!k && x >= k.fecha[0] && x <= k.fecha[1] && y >= k.y0 && y <= k.y1;
+  },
+  // Calendario para cambiar la fecha, junto a (sx, sy) en la pantalla; empieza en el día de hoy
+  elegirFecha(sx, sy) {
+    let i = this.selector;
+    if (!i) {
+      i = this.selector = document.createElement('input');
+      i.type = 'date';
+      i.setAttribute('aria-label', 'Fecha de la cartela');
+      i.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;border:0;padding:0;pointer-events:none';
+      i.addEventListener('change', () => { if (i.value) { this.ponerFecha(i.value); UI.mensaje(`Fecha de la cartela: ${this.fechaTexto()}.`); } });
+      document.body.appendChild(i);
+    }
+    const r = Capas.contenedor.getBoundingClientRect();
+    i.style.left = `${r.left + sx}px`; i.style.top = `${r.top + sy}px`;
+    i.value = this.hoy();
+    try { if (i.showPicker) { i.showPicker(); return; } } catch (_) { /* sin calendario emergente */ }
+    i.focus(); i.click();
   },
   guardar() {
     try { localStorage.setItem(this.clave, JSON.stringify(this.datos)); }
@@ -1039,9 +1084,12 @@ const Cartela = {
     ctx.lineWidth = 0.25;
     ctx.beginPath();
     ctx.moveTo(c.x0 + L, c.y0); ctx.lineTo(c.x0 + L, c.y1);
-    const f1 = c.y0 + h * 0.4, f2 = c.y0 + h * 0.7;
+    const f1 = c.y0 + h * 0.4, f2 = c.y0 + h * 0.7, k = this.casillas();
     ctx.moveTo(c.x0 + L, f1); ctx.lineTo(c.x1, f1);
     ctx.moveTo(c.x0 + L, f2); ctx.lineTo(c.x1, f2);
+    // Abajo, tres casillas: nivel, clase y fecha
+    ctx.moveTo(k.clase[0], f2); ctx.lineTo(k.clase[0], c.y1);
+    ctx.moveTo(k.fecha[0], f2); ctx.lineTo(k.fecha[0], c.y1);
     ctx.stroke();
     // Logotipo, entero dentro de su casilla
     if (this.img) {
@@ -1055,9 +1103,9 @@ const Cartela = {
       ctx.fillText('Logotipo', c.x0 + L / 2, c.y0 + L / 2);
     }
     // Texto que cabe en su casilla (se reduce si es largo)
-    const ancho = w - L - 4, x = c.x0 + L + 2;
-    const escribir = (t, y, tam, peso, color) => {
+    const escribir = (t, y, tam, peso, color, col = [c.x0 + L, c.x1]) => {
       if (!t) return;
+      const ancho = col[1] - col[0] - 4, x = col[0] + 2;
       ctx.font = `${peso} ${tam}px ${fuente}`;
       const m = ctx.measureText(t).width;
       if (m > ancho) ctx.font = `${peso} ${tam * ancho / m}px ${fuente}`;
@@ -1068,10 +1116,14 @@ const Cartela = {
     escribir(this.datos.colegio.trim() || 'Nombre del colegio', c.y0 + h * 0.2, 4.6, 700, this.datos.colegio.trim() ? tinta : '#b9bccb');
     ctx.textBaseline = 'top';
     escribir('Alumno/a', f1 + 0.8, 2.2, 500, suave);
-    escribir('Nivel y clase', f2 + 0.8, 2.2, 500, suave);
+    escribir('Nivel', f2 + 0.8, 2.2, 500, suave, k.nivel);
+    escribir('Clase', f2 + 0.8, 2.2, 500, suave, k.clase);
+    escribir('Fecha', f2 + 0.8, 2.2, 500, suave, k.fecha);
     ctx.textBaseline = 'alphabetic';
     escribir(this.datos.alumno.trim(), f2 - 1.4, 4, 600, tinta);
-    escribir(this.datos.nivel.trim(), c.y1 - 1.4, 4, 600, tinta);
+    escribir(this.datos.nivel.trim(), c.y1 - 1.4, 4, 600, tinta, k.nivel);
+    escribir(this.datos.clase.trim(), c.y1 - 1.4, 4, 600, tinta, k.clase);
+    escribir(this.fechaTexto(), c.y1 - 1.4, 4, 600, tinta, k.fecha);
     ctx.restore();
   },
 };
@@ -4294,6 +4346,13 @@ const Entrada = {
       }
     }
 
+    // Fecha de la cartela: al soltar encima se abre el calendario
+    if (e.button === 0 && !this.accion && !this.espacio && App.herramienta !== 'mover' && Cartela.enFecha(info.x, info.y)) {
+      e.preventDefault();
+      this.fechaPendiente = e.pointerId;
+      return;
+    }
+
     const quiereMover =
       App.herramienta === 'mover' ||
       e.button === 1 ||
@@ -4329,7 +4388,7 @@ const Entrada = {
       if (e.pointerType === 'touch' || this.arrastre || this.espacio) return;
       const info = this.info(e, p);
       const hit = !App.debajo() && Instrumentos.tocar(info, App.herramienta === 'lapiz');
-      this.cursorInstrumento(hit);
+      this.cursorInstrumento(hit || (App.herramienta !== 'mover' && Cartela.enFecha(info.x, info.y) ? { modo: 'candado' } : null));
       const acc = Acciones.actual();
       if (acc) { if (hit) acc.salir(); else acc.pasar(info); }
       return;
@@ -4364,6 +4423,12 @@ const Entrada = {
   arriba(e) {
     if (!this.punteros.has(e.pointerId)) return;
     this.punteros.delete(e.pointerId);
+    if (this.fechaPendiente === e.pointerId) {
+      this.fechaPendiente = null;
+      const p = this.local(e), m = Vista.aMundo(p.x, p.y);
+      if (e.type === 'pointerup' && Cartela.enFecha(m.x, m.y)) Cartela.elegirFecha(p.x, p.y);
+      return;
+    }
     if (e.pointerType === 'touch') Lupa.ocultar();
     if (e.pointerType === 'pen') this.lapizDigitalActivo = false;
     if (this.accion && this.accion.manip) {
@@ -4925,11 +4990,23 @@ const Panel = {
       f.append(t, i);
       return f;
     };
+    // Fecha: la de la hoja nueva; se puede cambiar con el calendario (aquí o pulsando en la cartela)
+    const ff = document.createElement('label');
+    ff.className = 'cartela-texto';
+    const ft = document.createElement('span'); ft.textContent = 'Fecha (la de la hoja nueva)';
+    const fi2 = document.createElement('input');
+    fi2.type = 'date'; fi2.value = d.fecha;
+    fi2.addEventListener('change', () => { if (fi2.value) Cartela.ponerFecha(fi2.value); });
+    Cartela.alCambiarFecha = () => { fi2.value = Cartela.datos.fecha; };
+    ff.append(ft, fi2);
+    const fila = document.createElement('div');
+    fila.className = 'cartela-fila';
+    fila.append(texto('nivel', 'Nivel', '2.º ESO'), texto('clase', 'Clase', 'B'));
     campos.append(logo, texto('colegio', 'Nombre del colegio', 'IES …'), texto('alumno', 'Nombre del alumno o alumna', 'Nombre y apellidos'),
-      texto('nivel', 'Nivel y clase', '2.º ESO B'));
+      fila, ff);
     const nota = document.createElement('div');
     nota.className = 'nota';
-    nota.textContent = 'La cartela va abajo a la derecha, apoyada en el marco, y sale también en la imagen exportada. No se puede dibujar encima de ella. Se guarda en este navegador.';
+    nota.textContent = 'La cartela va abajo a la derecha, apoyada en el marco, y sale también en la imagen exportada. No se puede dibujar encima de ella. La fecha se pone sola al empezar una hoja nueva; para cambiarla, pulsa sobre ella en la hoja o aquí. Se guarda en este navegador.';
     campos.appendChild(nota);
     caja.append(fi, campos);
     reflejar();
@@ -5209,6 +5286,7 @@ const Archivo = {
     if (!vacia) Historial.registrar();
     Escena.vaciar();
     Instrumentos.reiniciar();
+    Cartela.ponerFecha(Cartela.hoy());
     Config.set('colorLapiz', Paleta.lista()[0].id);
     Config.set('grosorLapiz', SelectorLapiz.grosores()[0]);
     Sonido.tocar('borrar');
