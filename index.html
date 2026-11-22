@@ -3447,13 +3447,73 @@ const Instrumentos = {
     Render.pedir('instrumentos');
     return true;
   },
+  // Al sacarlo, cada instrumento va a su sitio ordenado de la hoja (ver sitios). Si ese sitio no se ve
+  // (con mucho zoom), aparece sin girar en el centro de la vista
   colocarEnVista(inst) {
-    const c = Vista.aMundo(Capas.w / 2, Capas.h / 2);
-    const cx = Geom.clamp(c.x, 0, Hoja.ancho), cy = Geom.clamp(c.y, 0, Hoja.alto);
-    const cl = inst.centroLocal();
-    inst.rot = 0;
-    inst.x = cx - cl[0]; inst.y = cy - cl[1];
+    const s = this.sitios()[inst.tipo], v0 = Vista.aMundo(0, 0), v1 = Vista.aMundo(Capas.w, Capas.h);
+    inst.rot = s.rot; inst.x = s.x; inst.y = s.y;
+    const c = inst.centroMundo();
+    if (c.x < v0.x || c.x > v1.x || c.y < v0.y || c.y > v1.y) {
+      const v = Vista.aMundo(Capas.w / 2, Capas.h / 2), cl = inst.centroLocal();
+      inst.rot = 0;
+      inst.x = Geom.clamp(v.x, 0, Hoja.ancho) - cl[0] * inst.sx; inst.y = Geom.clamp(v.y, 0, Hoja.alto) - cl[1];
+    }
     inst.colocado = true;
+  },
+  ORDEN: ['regla', 'escuadra', 'cartabon', 'transportador', 'compas'],
+  // Caja del instrumento girado rot (mm, respecto a su origen)
+  cajaLocal(inst, rot = 0) {
+    const pts = inst.tipo === 'compas'
+      ? [[-6, -(inst.altura() + 24)], [inst.r + 6, -(inst.altura() + 24)], [inst.r + 6, 6], [-6, 6]]
+      : inst.poligono.map(v => [v[0] * inst.sx, v[1]]);
+    const c = Math.cos(rot), s = Math.sin(rot);
+    const xs = pts.map(([x, y]) => x * c - y * s), ys = pts.map(([x, y]) => x * s + y * c);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    return { x0, y0, x1, y1, w: x1 - x0, h: y1 - y0 };
+  },
+  // Sitios ordenados en la hoja, como sobre una mesa: la regla arriba; debajo, la escuadra con el ángulo
+  // recto arriba a la izquierda y el cartabón con el ángulo recto abajo a la derecha (las hipotenusas,
+  // enfrentadas, dejan libre una franja en diagonal, donde va el transportador) y el compás arriba a la derecha
+  sitios() {
+    const W = Hoja.ancho, H = Hoja.alto, m = 8, hueco = 6, P = this.porTipo, sitios = {};
+    // Pone la caja del instrumento (girado rot) con su esquina izquierda/derecha y arriba/abajo en (x, y)
+    const poner = (tipo, rot, x, y, derecha = false, abajo = false) => {
+      const i = P[tipo];
+      if (!i) return null;
+      const c = this.cajaLocal(i, rot);
+      const left = derecha ? x - c.w : x, top = abajo ? y - c.h : y;
+      sitios[tipo] = { x: left - c.x0, y: top - c.y0, rot };
+      return { left, top, right: left + c.w, bottom: top + c.h, w: c.w, h: c.h };
+    };
+    const ancho = tipo => P[tipo] ? this.cajaLocal(P[tipo]).w : 0;
+    const regla = poner('regla', 0, (W - ancho('regla')) / 2, m) || { bottom: m };
+    const arriba = regla.bottom + hueco;
+    poner('escuadra', Math.PI / 2, m, arriba);
+    poner('cartabon', -Math.PI / 2, W - m, H - m, true, true);
+    // Transportador: en la franja, con la base a lo largo de la hipotenusa del cartabón
+    const sc = sitios.cartabon, T = P.transportador;
+    if (sc && T) {
+      const mundo = (v, r) => ({ x: sc.x + v[0] * Math.cos(r) - v[1] * Math.sin(r), y: sc.y + v[0] * Math.sin(r) + v[1] * Math.cos(r) });
+      const pc = P.cartabon.poligono, A = mundo(pc[1], sc.rot), B = mundo(pc[2], sc.rot);
+      const L = Math.hypot(B.x - A.x, B.y - A.y), d = [(B.x - A.x) / L, (B.y - A.y) / L];
+      const rot = Math.atan2(d[1], d[0]) + Math.PI, n = [Math.sin(rot), -Math.cos(rot)];   // de la base hacia el arco, fuera del cartabón
+      const k = Math.min(0.5, (L - this.cajaLocal(T).w / 2 - hueco) / L);
+      sitios.transportador = { x: A.x + d[0] * L * k + n[0] * hueco / 2, y: A.y + d[1] * L * k + n[1] * hueco / 2, rot };
+    } else if (T) poner('transportador', 0, (W - this.cajaLocal(T).w) / 2, arriba);
+    // Compás: arriba a la derecha, junto a la punta del cartabón
+    poner('compas', 0, W - m, arriba, true);
+    return sitios;
+  },
+  // Hoja nueva: todos guardados, sin girar, voltear ni bloquear; al sacarlos vuelven a su sitio ordenado
+  reiniciar() {
+    if (Manip.estado) Manip.fin(false);
+    for (const i of this.lista) {
+      Object.assign(i, { visible: false, colocado: false, rot: 0, bloqueado: false, volteado: false });
+      if (i.tipo === 'compas') Object.assign(i, { r: 40, alzado: 0, levantada: false, _anim: null });
+    }
+    this.lista = this.ORDEN.map(t => this.porTipo[t]).filter(Boolean).concat(this.lista.filter(i => !this.ORDEN.includes(i.tipo)));
+    UI.marcarInstrumentos();
+    Render.pedir('instrumentos');
   },
 
   // Aplica los tamaños de la configuración a todos los instrumentos
@@ -5085,13 +5145,18 @@ const Archivo = {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
   },
+  // Hoja nueva: sin dibujo, con los instrumentos guardados (y en su sitio ordenado al sacarlos) y el
+  // portaminas con el primer color de la paleta y el primer grosor
   nueva() {
     UI.cerrarPanel();
-    if (Escena.estaVacia()) { UI.aviso('La hoja ya está limpia.'); return; }
-    Historial.registrar();
+    const vacia = Escena.estaVacia();
+    if (!vacia) Historial.registrar();
     Escena.vaciar();
+    Instrumentos.reiniciar();
+    Config.set('colorLapiz', Paleta.lista()[0].id);
+    Config.set('grosorLapiz', SelectorLapiz.grosores()[0]);
     Sonido.tocar('borrar');
-    UI.mensaje('Hoja nueva. Si te has equivocado, pulsa deshacer.');
+    UI.mensaje(vacia ? 'Hoja nueva: instrumentos guardados y portaminas como al principio.' : 'Hoja nueva. Si te has equivocado, pulsa deshacer.');
   },
   guardar() {
     const papel = {};
@@ -5214,7 +5279,7 @@ const Ayuda = {
       b('nombrar', 'Nombrar', 'Toca un punto para cambiarle el nombre o una línea (recta, arco o circunferencia) para ponerle uno; el nombre de una línea se escribe en su centro. No puede haber dos elementos con el mismo nombre. Si dejas vacío el nombre de una línea, se le quita.'),
       b('deshacer', 'Deshacer', 'Deshace puntos, líneas y también los movimientos de los instrumentos.'),
       b('mover', 'Mover y acercar la hoja', '<span class="solo-raton">Rueda del ratón para acercar; botón central, la barra espaciadora o la herramienta mover para desplazar la hoja.</span><span class="solo-tactil">Dos dedos sobre la hoja para acercar y moverla. Dos dedos sobre un instrumento lo mueven y lo giran.</span>'),
-      b('guardar', 'Tu dibujo', 'Se guarda solo en este navegador. Desde el botón del disquete puedes empezar una hoja nueva, guardarlo en un archivo, abrirlo o exportarlo como imagen.'),
+      b('guardar', 'Tu dibujo', 'Se guarda solo en este navegador. Desde el botón del disquete puedes empezar una hoja nueva (se guardan los instrumentos, que vuelven a su sitio ordenado, y el portaminas vuelve al primer color y grosor), guardarlo en un archivo, abrirlo o exportarlo como imagen.'),
       `<div class="solo-raton"><h3>Teclas</h3><table class="atajos">
         <tr><td><kbd>P</kbd> Portaminas</td><td><kbd>B</kbd> Goma</td></tr>
         <tr><td><kbd>R</kbd> Regla</td><td><kbd>E</kbd> Escuadra</td></tr>
