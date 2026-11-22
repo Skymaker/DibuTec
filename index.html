@@ -5327,26 +5327,26 @@ const Ayuda = {
     const b = (icono, titulo, texto) => `<div class="ayuda-bloque"><div class="ico">${Iconos[icono]}</div><div><h4>${titulo}</h4><p>${texto}</p></div></div>`;
     document.getElementById('ayuda-cuerpo').innerHTML = [
       b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta. En la barrita de abajo eliges el color y el grosor de la mina; el compás pinta con ellos. En Configuración › Imán decides qué atrae a la punta.'),
+      b('mover', 'Mover y acercar la hoja', '<span class="solo-raton">Rueda del ratón para acercar; botón central, la barra espaciadora o la herramienta mover para desplazar la hoja.</span><span class="solo-tactil">Dos dedos sobre la hoja para acercar y moverla. Dos dedos sobre un instrumento lo mueven y lo giran.</span>'),
+      b('goma', 'Goma', 'Tiene dos modos, en la barrita que aparece abajo a la izquierda: «A trozos» borra solo lo que pisa (para recortar poco a poco los extremos de las líneas y los arcos) y «Enteras» borra la línea, el arco o el punto que toques. Pulsa otra vez la goma para cambiar de modo. El deslizador elige su tamaño.'),
+      b('nombrar', 'Nombrar', 'Toca un punto para cambiarle el nombre o una línea (recta, arco o circunferencia) para ponerle uno; el nombre de una línea se escribe en su centro. No puede haber dos elementos con el mismo nombre. Si dejas vacío el nombre de una línea, se le quita.'),
       b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos. La escuadra y el cartabón tienen además un botón con dos medios triángulos que les da la vuelta, como al girar el plástico: los números y el nombre se ven al revés.'),
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
       b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Para radios muy pequeños (menos de 12 mm), las partes negras de las patas giran hacia dentro en su tornillo, hasta 5 mm. Para afinar la abertura, gira la rueda del tornillo de ajuste: arrástrala hacia la cabeza para abrir y hacia las puntas para cerrar, o usa encima la rueda del ratón. Gira el asa de arriba para trazar: el compás se pone de pie mientras gira y, al soltarlo, se tumba con la mina levantada. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar, así puedes llevar la mina hasta donde quieras empezar y apoyarla allí. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt). En Configuración › Instrumentos puedes verlo en 3D.'),
       b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
-      b('goma', 'Goma', 'Tiene dos modos, en la barrita que aparece abajo a la izquierda: «A trozos» borra solo lo que pisa (para recortar poco a poco los extremos de las líneas y los arcos) y «Enteras» borra la línea, el arco o el punto que toques. Pulsa otra vez la goma para cambiar de modo. El deslizador elige su tamaño.'),
-      b('nombrar', 'Nombrar', 'Toca un punto para cambiarle el nombre o una línea (recta, arco o circunferencia) para ponerle uno; el nombre de una línea se escribe en su centro. No puede haber dos elementos con el mismo nombre. Si dejas vacío el nombre de una línea, se le quita.'),
       b('deshacer', 'Deshacer', 'Deshace puntos, líneas y también los movimientos de los instrumentos.'),
-      b('mover', 'Mover y acercar la hoja', '<span class="solo-raton">Rueda del ratón para acercar; botón central, la barra espaciadora o la herramienta mover para desplazar la hoja.</span><span class="solo-tactil">Dos dedos sobre la hoja para acercar y moverla. Dos dedos sobre un instrumento lo mueven y lo giran.</span>'),
       b('guardar', 'Tu dibujo', 'Se guarda solo en este navegador. Desde el botón del disquete puedes empezar una hoja nueva (se guardan los instrumentos, que vuelven a su sitio ordenado, y el portaminas vuelve al primer color y grosor), guardarlo en un archivo, abrirlo o exportarlo como imagen.'),
       `<div class="solo-raton"><h3>Teclas</h3><table class="atajos">
-        <tr><td><kbd>P</kbd> Portaminas</td><td><kbd>B</kbd> Goma</td></tr>
-        <tr><td><kbd>R</kbd> Regla</td><td><kbd>E</kbd> Escuadra</td></tr>
-        <tr><td><kbd>T</kbd> Cartabón</td><td><kbd>C</kbd> Compás</td></tr>
-        <tr><td><kbd>A</kbd> Transportador</td><td><kbd>M</kbd> Mover la hoja</td></tr>
-        <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> Deshacer</td><td><kbd>Ctrl</kbd>+<kbd>Y</kbd> Rehacer</td></tr>
-        <tr><td><kbd>+</kbd> <kbd>−</kbd> Zoom</td><td><kbd>0</kbd> Ver la hoja entera</td></tr>
-        <tr><td><kbd>Mayús</kbd> Girar de 15° en 15°</td><td><kbd>Alt</kbd> Separar / girar sin trazar</td></tr>
-        <tr><td><kbd>Espacio</kbd> Mover la hoja</td><td><kbd>?</kbd> Esta ayuda</td></tr>
-        <tr><td><kbd>L</kbd> Levantar o apoyar la mina del compás</td><td><kbd>B</kbd> otra vez: modo de la goma</td></tr>
-        <tr><td><kbd>[</kbd> <kbd>]</kbd> Tamaño de la goma</td><td><kbd>N</kbd> Nombrar puntos y líneas</td></tr>
+        <tr><td><kbd>P</kbd> Portaminas</td><td><kbd>M</kbd> Mover la hoja</td></tr>
+        <tr><td><kbd>Espacio</kbd> Mover la hoja</td><td><kbd>B</kbd> Goma</td></tr>
+        <tr><td><kbd>B</kbd> otra vez: modo de la goma</td><td><kbd>[</kbd> <kbd>]</kbd> Tamaño de la goma</td></tr>
+        <tr><td><kbd>N</kbd> Nombrar puntos y líneas</td><td><kbd>R</kbd> Regla</td></tr>
+        <tr><td><kbd>E</kbd> Escuadra</td><td><kbd>T</kbd> Cartabón</td></tr>
+        <tr><td><kbd>C</kbd> Compás</td><td><kbd>L</kbd> Levantar o apoyar la mina del compás</td></tr>
+        <tr><td><kbd>A</kbd> Transportador</td><td><kbd>Mayús</kbd> Girar de 15° en 15°</td></tr>
+        <tr><td><kbd>Alt</kbd> Separar / girar sin trazar</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> Deshacer</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Y</kbd> Rehacer</td><td><kbd>+</kbd> <kbd>−</kbd> Zoom</td></tr>
+        <tr><td><kbd>0</kbd> Ver la hoja entera</td><td><kbd>?</kbd> Esta ayuda</td></tr>
       </table></div>`,
     ].join('');
   },
