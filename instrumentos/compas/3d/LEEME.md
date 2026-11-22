@@ -25,7 +25,8 @@ detalles libremente, pero hay que conservar:
 | `compas` | Todo el compás (padre de lo demás). | La aguja, en (0, 0, 0). |
 | `cabeza` | Cabeza. Hijo: `mango`. | La bisagra (entre los dos tornillos). |
 | `mango` | Mango. Hijo: `asa` (vacío). | El borde de arriba de la cabeza. |
-| `pata-aguja`, `pata-mina` | Patas. Hijos: `punta-…` y `ajuste-…` (vacíos). | El **tornillo** en el que gira la pata. |
+| `pata-aguja`, `pata-mina` | Brazos metálicos de las patas. Hijos: `ajuste-…` (vacío) y `codo-…`. | El **tornillo** en el que gira la pata. |
+| `codo-aguja`, `codo-mina` | Parte negra de abajo de cada pata, con la aguja o la mina, la ruedecita y el vacío `punta-…`. Gira hacia dentro para radios de menos de 12 mm. Opcional: sin ella, el compás no baja de 12 mm. | El **tornillo** que la une al brazo metálico (el eje de giro va a lo largo de Z). |
 | `mina` | La mina (dentro de `pata-mina`): toma el color del portaminas. | — |
 | `pinza-aguja`, `pinza-mina` | Pinzas del tornillo de ajuste. | Donde se enganchan a su pata (el vacío `ajuste-…`). |
 | `varilla` | Varilla roscada, a lo largo de X. | Su centro. |

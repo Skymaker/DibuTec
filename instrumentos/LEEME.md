@@ -62,6 +62,9 @@ Si falta una pieza en una carpeta, DibuTec no la dibuja en esa vista.
     ajuste.
   - `eje` en las patas y `eje-aguja` / `eje-mina` en la cabeza tumbada: el
     tornillo en el que gira cada pata.
+  - `codo` en las patas tumbadas: el tornillo que une la parte negra de abajo
+    (el grupo `left-leg-bottom` / `right-leg-bottom`, o lo que tenga
+    `class="codo"`) con el brazo metálico. Esa parte gira en él.
   - `asa` en el mango: dónde termina; ahí va el asa para girar.
 - **La mina:** la forma con `id="mina"` (o `class="mina"`, o lo que haya dentro
   de un grupo así) se pinta del color elegido para el portaminas y se aclara
@@ -82,12 +85,19 @@ piezas: los dibuja DibuTec encima.
 
 ## Abertura mínima y máxima
 
-El compás se abre entre **12 y 105,8 mm de radio** (`rMin` y `rMax` en la
-clase `Compas` de `index.html`), los mismos topes que el compás 3D: por debajo
-de 12 mm, las pinzas del tornillo de ajuste chocarían con la rueda; por encima
-de 105,8 mm, las pinzas llegan al final de la varilla. Si cambias las piezas
-(sobre todo las pinzas, la rueda o la separación de los tornillos), revisa el
-mínimo.
+El compás se abre entre **5 y 105,8 mm de radio** (`rMin` y `rMax` en la
+clase `Compas` de `index.html`), los mismos topes que el compás 3D:
+
+- Los brazos metálicos no se cierran más de **12 mm** (`rBrazos`): las pinzas
+  del tornillo de ajuste tocan la rueda.
+- Para radios más estrechos, las **partes negras** de las patas giran hacia
+  dentro en su codo (el tornillo que las une al brazo), como en un compás de
+  verdad, hasta que las puntas llegan a su sitio. Por debajo de 5 mm las
+  partes negras chocarían.
+- Por encima de 105,8 mm, las pinzas llegan al final de la varilla.
+
+Si cambias las piezas (sobre todo las pinzas, la rueda, la separación de los
+tornillos o la marca `codo`), revisa los topes.
 
 ## Vistas completas
 

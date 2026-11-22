@@ -321,14 +321,55 @@ const Mecanica = {
     this.dlMin = 2 * dentro + (cR.max.x - cR.min.x) + 0.2;
     this.dlMax = (cV.max.x - cV.min.x) - 2 * fuera - 0.4;
     this.paso = 0.7;   // mm que se separan las pinzas por vuelta de rueda (cada una, 0,35)
-    this.rMin = this.radioDe(this.dlMin);
+    // Codos (opcionales): la parte negra de cada pata gira en el tornillo que la une al brazo metálico
+    this.codo = { aguja: g('codo-aguja'), mina: g('codo-mina') };
+    this.conCodos = !!(this.codo.aguja && this.codo.mina);
+    if (this.conCodos) {
+      for (const lado of ['aguja', 'mina']) reposo[`codo-${lado}`] = { quat: this.codo[lado].quaternion.clone() };
+      const Ka = W(this.codo.aguja), Km = W(this.codo.mina);
+      this.rodilla = { aguja: Ka.clone().sub(Sa), mina: Km.clone().sub(Sm) };
+      this.dk = { aguja: Ka.distanceTo(Ta), mina: Km.distanceTo(Tm) };
+      // Eje de giro de los codos (el Z del modelo) visto desde cada pata
+      this.ejeCodo = {};
+      for (const lado of ['aguja', 'mina']) {
+        const q = this.p[`pata-${lado}`].getWorldQuaternion(new THREE.Quaternion()).invert();
+        this.ejeCodo[lado] = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize();
+      }
+    }
+    this.rBrazos = this.radioDe(this.dlMin);   // abertura mínima de los brazos (las pinzas tocan la rueda)
+    this.rMin = this.conCodos ? Math.min(5, this.rBrazos) : this.rBrazos;
     this.rMax = Math.min(this.radioDe(this.dlMax), 2 * (Math.abs(this.ejes.mina.x) + Math.min(this.largo.aguja, this.largo.mina) * 0.97));
     this.dl0 = this.separacion(this.r0);
     this.r = this.r0;
     this.aplicar();
   },
-  // Postura de las patas para una abertura r (plano del alzado; aguja en el origen)
+  // Postura para una abertura r (plano del alzado; aguja en el origen). Por debajo de rBrazos, los brazos
+  // se quedan en rBrazos y las partes negras giran en el codo hacia dentro hasta llegar a las puntas
   postura(r) {
+    const rb = this.rBrazos;
+    if (!this.conCodos || rb === undefined || r >= rb) return this.posturaRecta(r);
+    const p = this.posturaRecta(rb), dx = (rb - r) / 2, z = new THREE.Vector3(0, 0, 1);
+    const mover = v => { v.x -= dx; };
+    mover(p.b);
+    let sube = 0;
+    for (const lado of ['aguja', 'mina']) {
+      const l = p[lado];
+      mover(l.S); mover(l.q);
+      l.K = this.rodilla[lado].clone().applyAxisAngle(z, l.giro).add(l.S);
+      l.Tv = new THREE.Vector3(lado === 'aguja' ? -dx : r + dx, 0, 0);
+      const x = lado === 'aguja' ? 0 : r, hx = x - l.K.x, dk = this.dk[lado];
+      l.T = new THREE.Vector3(x, l.K.y - Math.sqrt(Math.max(0, dk * dk - hx * hx)), 0);
+      sube += l.T.y / 2;
+    }
+    p.b.y -= sube;
+    for (const lado of ['aguja', 'mina']) {
+      const l = p[lado];
+      for (const v of [l.S, l.q, l.K, l.Tv, l.T]) v.y -= sube;
+      l.codo = Math.atan2(l.T.y - l.K.y, l.T.x - l.K.x) - Math.atan2(l.Tv.y - l.K.y, l.Tv.x - l.K.x);
+    }
+    return p;
+  },
+  posturaRecta(r) {
     const ex = (this.ejes.mina.x - this.ejes.aguja.x) / 2, ey = -(this.ejes.aguja.y + this.ejes.mina.y) / 2;
     const L = (this.largo.aguja + this.largo.mina) / 2, h = r / 2 - ex;
     const b = new THREE.Vector3(r / 2, ey + Math.sqrt(Math.max(L * L - h * h, 0)), 0);
@@ -337,7 +378,7 @@ const Mecanica = {
       const S = b.clone().add(this.ejes[lado]), T = new THREE.Vector3(lado === 'aguja' ? 0 : r, 0, 0);
       const ang = Math.atan2(T.y - S.y, T.x - S.x), giro = ang - this.ang0[lado];
       const q = this.ajuste[lado].clone().applyAxisAngle(new THREE.Vector3(0, 0, 1), giro).add(S);
-      out[lado] = { S, giro, q };
+      out[lado] = { S, giro, q, codo: 0 };
     }
     return out;
   },
@@ -351,7 +392,12 @@ const Mecanica = {
   // Vueltas de la rueda respecto a la abertura del dibujo
   vueltas() { return (this.separacion(this.r) - this.dl0) / this.paso; },
   ponerRadio(r) { this.r = THREE.MathUtils.clamp(r, this.rMin, this.rMax); this.aplicar(); return this.r; },
-  girarRueda(dv) { return this.ponerRadio(this.radioDe(this.separacion(this.r) + dv * this.paso)); },
+  // Con las partes negras giradas (por debajo de rBrazos), la rueda mueve los brazos y las puntas a la vez
+  girarRueda(dv) {
+    const rb = this.rBrazos, base = Math.max(this.r, rb), doblado = this.r - base;
+    const brazos = THREE.MathUtils.clamp(this.radioDe(this.separacion(base) + dv * this.paso), rb, this.rMax);
+    return this.ponerRadio(brazos + doblado);
+  },
   aplicar() {
     const p = this.postura(this.r), R = this.reposo, z = new THREE.Vector3(0, 0, 1);
     this.p.cabeza.position.copy(p.b);
@@ -360,6 +406,10 @@ const Mecanica = {
       o.position.copy(p[lado].S);
       o.quaternion.copy(R[`pata-${lado}`].quat).premultiply(new THREE.Quaternion().setFromAxisAngle(z, p[lado].giro));
       this.p[`pinza-${lado}`].position.copy(p[lado].q);
+      if (this.conCodos) {
+        const c = this.codo[lado];
+        c.quaternion.copy(R[`codo-${lado}`].quat).premultiply(new THREE.Quaternion().setFromAxisAngle(this.ejeCodo[lado], p[lado].codo));
+      }
     }
     const medio = p.aguja.q.clone().add(p.mina.q).multiplyScalar(0.5);
     this.p.varilla.position.copy(medio);
