@@ -25,6 +25,7 @@ Optimizada para **ordenador con ratón** y **tablet táctil**.
 | 14 | Tema «Currículum 1º ESO»: los ejercicios de la guía de dibujo técnico de EPVA de 1.º de ESO; el motor gana `posteriorA` y `radioComo` con dos puntos | ✅ Hecha |
 | 15 | Compás dibujado con piezas SVG retocables (`instrumentos/compas/`), con copia incrustada para abrir con doble clic | ✅ Hecha |
 | 16 | Prueba de compás 3D con mecánica (rueda y varilla roscada, patas en sus tornillos), modelo glTF retocable en Blender (`compas3d.html`) | 🧪 Prueba |
+| 17 | Opción «Compás en 3D» en Configuración › Instrumentos: el compás de la aplicación dibujado con el modelo 3D (abertura de 12 a 105,8 mm) | ✅ Hecha |
 
 ---
 

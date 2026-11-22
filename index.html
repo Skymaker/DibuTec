@@ -609,6 +609,7 @@ const Config = {
     tamEscuadra:    { def: 16,       ops: [12, 16, 20] },        // cm de cateto
     tamCartabon:    { def: 23,       ops: [17, 23, 28] },        // cm del cateto mayor (a juego con la escuadra)
     tamTransportador: { def: 13,     ops: [10, 13, 16] },        // cm de diámetro
+    compas3d:       { def: false,    ops: [true, false] },       // compás dibujado con su modelo 3D
   },
   valores: {},
   oyentes: [],
@@ -2793,6 +2794,131 @@ const PiezasSVG = {
   caja(nombre) { const pz = this.pieza(nombre); return pz && pz.caja; },
 };
 
+/* =====================================================================
+   Compás en 3D (opción de la configuración): el mismo compás, dibujado con su
+   modelo 3D (instrumentos/compas/3d/compas.glb, o construido desde las piezas
+   SVG). Three.js y el motor (compas3d.js) se cargan solo al activarlo. Se pinta
+   en un lienzo WebGL aparte y se copia en la capa de los instrumentos, en su
+   sitio; el asa y el botón de la mina los sigue dibujando la clase Compas.
+   ===================================================================== */
+const Compas3D = {
+  estado: 'apagado',   // apagado | cargando | listo | error
+  SCRIPTS: ['vendor/three-r147/three.min.js', 'vendor/three-r147/GLTFLoader.js', 'vendor/three-r147/SVGLoader.js',
+            'vendor/three-r147/RoomEnvironment.js', 'compas3d.js'],
+  usar() { return !!Config.get('compas3d'); },
+  alCambiar() {
+    if (this.usar()) this.preparar();
+    this.ponerLimites();
+    this.ultima = null;
+    Render.pedir('instrumentos');
+  },
+  script(src) {
+    return new Promise((ok, mal) => {
+      if (document.querySelector(`script[data-compas3d="${src}"]`)) { ok(); return; }
+      const sc = document.createElement('script');
+      sc.src = src; sc.dataset.compas3d = src;
+      sc.onload = () => ok(); sc.onerror = () => mal(new Error('No se ha podido cargar ' + src));
+      document.head.appendChild(sc);
+    });
+  },
+  async preparar() {
+    if (this.estado !== 'apagado') return;
+    this.estado = 'cargando';
+    UI.mensaje('Preparando el compás en 3D…');
+    try {
+      for (const src of this.SCRIPTS) await this.script(src);   // en orden: cada uno usa los anteriores
+      const { modelo } = await DibuTecCompas3D.cargarModelo('instrumentos/compas/3d/compas.glb', n => PiezasSVG.incrustadas[n]);
+      this.montar(modelo);
+      this.estado = 'listo';
+      this.ponerLimites();
+      this.ultima = null;
+      Render.pedir('instrumentos');
+      if (this.usar()) UI.mensaje('Compás en 3D listo.');
+    } catch (e) {
+      console.warn('Compás 3D:', e);
+      this.estado = 'error';
+      UI.aviso('No se ha podido preparar el compás en 3D: se usa el de siempre.');
+    }
+  },
+  montar(modelo) {
+    THREE.ColorManagement.legacyMode = false;   // los colores del modelo son sRGB
+    const lienzo = this.lienzo = document.createElement('canvas');
+    const r = this.renderer = new THREE.WebGLRenderer({ canvas: lienzo, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    r.setClearColor(0x000000, 0);
+    r.shadowMap.enabled = true;
+    r.shadowMap.type = THREE.PCFSoftShadowMap;
+    r.outputEncoding = THREE.sRGBEncoding;
+    const e = this.escena = new THREE.Scene();
+    e.environment = new THREE.PMREMGenerator(r).fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+    e.add(new THREE.HemisphereLight('#ffffff', '#b9ab90', 0.4));
+    const sol = this.sol = new THREE.DirectionalLight('#ffffff', 0.7);
+    sol.castShadow = true;
+    sol.shadow.mapSize.set(1024, 1024);
+    Object.assign(sol.shadow.camera, { left: -130, right: 130, top: 130, bottom: -130, near: 10, far: 500 });
+    sol.shadow.bias = -0.0008;
+    e.add(sol, sol.target);
+    // Suelo invisible que solo recoge la sombra del compás sobre la hoja
+    const suelo = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000).rotateX(-Math.PI / 2), new THREE.ShadowMaterial({ opacity: 0.22 }));
+    suelo.receiveShadow = true;
+    e.add(suelo);
+    // Cámara desde arriba, como la hoja: x a la derecha y la y de la hoja hacia abajo (−z en la pantalla es arriba)
+    this.camara = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 1000);
+    this.camara.up.set(0, 0, -1);
+    this.sitio = new THREE.Group();     // aguja en la hoja y giro
+    this.alzadoG = new THREE.Group();   // tumbado o de pie
+    this.sitio.add(this.alzadoG);
+    e.add(this.sitio);
+    this.alzadoG.add(modelo);
+    modelo.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    const M = this.M = DibuTecCompas3D.Mecanica;
+    M.init(modelo);
+    M.reposar();
+    this.grosor = Math.max(1, -new THREE.Box3().setFromObject(modelo).min.z);   // para apoyarlo tumbado
+    M.p.mina.traverse(o => { if (o.isMesh) o.material = o.material.clone(); });
+  },
+  // Con el compás 3D, la abertura va de un tope a otro del tornillo de ajuste (dentro de 12-110 mm)
+  ponerLimites() {
+    const c = Instrumentos.porTipo.compas;
+    if (!c) return;
+    if (this.estado === 'listo' && this.usar()) {
+      c.rMin = Math.max(12, Math.ceil(this.M.rMin * 10) / 10);
+      c.rMax = Math.min(110, Math.floor(this.M.rMax * 10) / 10);
+    } else { c.rMin = 12; c.rMax = 110; }
+    c.r = c.limitarRadio(c.r);
+  },
+  // Dibuja el compás c en ctx (capa de instrumentos). false si no se usa o aún no está listo
+  dibujar(ctx, c) {
+    if (!this.usar()) return false;
+    if (this.estado !== 'listo') { if (this.estado === 'apagado') this.preparar(); return false; }
+    const w = Capas.w, h = Capas.h, d = Capas.dpr, color = Paleta.lapizActual();
+    const clave = [c.x, c.y, c.rot, c.r, c.alzado, c.levantada, color, Vista.escala, Vista.ox, Vista.oy, w, h, d].join('|');
+    if (clave !== this.ultima) {   // solo se vuelve a pintar si algo ha cambiado
+      this.ultima = clave;
+      const M = this.M, a = c.alzado, s = Vista.escala, cam = this.camara;
+      M.ponerRadio(c.r);
+      this.sitio.position.set(c.x, 0, c.y);
+      this.sitio.rotation.set(0, -c.rot, 0);
+      this.alzadoG.rotation.set(-(1 - a) * Math.PI / 2, 0, 0);
+      this.alzadoG.position.set(0, (1 - a) * this.grosor, 0);
+      M.p.mina.traverse(o => { if (o.isMesh) { o.material.color.set(color); o.material.transparent = c.levantada; o.material.opacity = c.levantada ? 0.35 : 1; } });
+      this.sol.position.set(c.x - 60, 160, c.y - 90);
+      this.sol.target.position.set(c.x, 0, c.y);
+      Object.assign(cam, { left: -Vista.ox / s, right: (w - Vista.ox) / s, top: Vista.oy / s, bottom: -(h - Vista.oy) / s });
+      cam.position.set(0, 400, 0);
+      cam.lookAt(0, 0, 0);
+      cam.updateProjectionMatrix();
+      this.renderer.setPixelRatio(d);
+      this.renderer.setSize(w, h, false);
+      this.renderer.render(this.escena, cam);
+    }
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(this.lienzo, 0, 0);
+    ctx.restore();
+    return true;
+  },
+};
+
 class Compas extends Instrumento {
   constructor() {
     super('compas', 'Compás', 'o');
@@ -2926,11 +3052,12 @@ class Compas extends Instrumento {
   dibujar(ctx) {
     const b = this.bisagra(), k = this.pomo(), px = 1 / Vista.escala, a = this.alzado;
     const t = Geom.clamp((a - 0.35) / 0.3, 0, 1);   // 0: alzado; 1: planta
+    const en3D = Compas3D.dibujar(ctx, this);        // con la opción «Compás en 3D»
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
-    if (t < 1) { ctx.save(); ctx.globalAlpha = 1 - t; this.dibujarTumbado(ctx, b, k); ctx.restore(); }
-    if (t > 0) { ctx.save(); ctx.globalAlpha = t; this.dibujarDePie(ctx, b); ctx.restore(); }
+    if (!en3D && t < 1) { ctx.save(); ctx.globalAlpha = 1 - t; this.dibujarTumbado(ctx, b, k); ctx.restore(); }
+    if (!en3D && t > 0) { ctx.save(); ctx.globalAlpha = t; this.dibujarDePie(ctx, b); ctx.restore(); }
     if (this.levantada) {
       // Sombra de la punta: la mina no toca el papel
       ctx.beginPath();
@@ -2939,11 +3066,13 @@ class Compas extends Instrumento {
       ctx.lineWidth = px;
       ctx.stroke();
     }
-    // Punta seca
-    ctx.beginPath();
-    ctx.arc(0, 0, Math.max(0.5, 2 * px), 0, Geom.DOS_PI);
-    ctx.fillStyle = '#2b2f3a';
-    ctx.fill();
+    // Punta seca (en 3D ya se ve la aguja)
+    if (!en3D) {
+      ctx.beginPath();
+      ctx.arc(0, 0, Math.max(0.5, 2 * px), 0, Geom.DOS_PI);
+      ctx.fillStyle = '#2b2f3a';
+      ctx.fill();
+    }
     // Asa para girar y trazar
     this.dibujarAsa(ctx, { x: k[0], y: k[1] });
     this.dibujarBotonMina(ctx);
@@ -4424,6 +4553,8 @@ const Panel = {
     ni.className = 'nota';
     ni.textContent = 'La escuadra y el cartabón del mismo tamaño forman juego: el cateto mayor del cartabón mide lo que la hipotenusa de la escuadra.';
     c.lastChild.appendChild(ni);
+    this.interruptor(c, 'compas3d', 'Compás en 3D',
+      'Dibuja el compás con su modelo en tres dimensiones: se ve como uno de verdad y se pone de pie al trazar. Pide más al ordenador o la tableta; si va lento, desactívalo. Se abre de 12 a 105 mm.');
 
     titulo('Ayudas');
     this.interruptor(c, 'sonidos', 'Sonidos');
@@ -4894,7 +5025,7 @@ const Ayuda = {
       b('lapiz', 'Portaminas', 'Toca la hoja para marcar un punto. La punta se pega a los puntos, a los extremos y cruces de las líneas y a cualquier lugar de su trazo. Junto al canto de un instrumento, arrastra para trazar una recta. En la barrita de abajo eliges el color y el grosor de la mina; el compás pinta con ellos. En Configuración › Imán decides qué atrae a la punta.'),
       b('regla', 'Regla, escuadra y cartabón', 'Arrástralos por el cuerpo para moverlos. Las asas redondas los giran; si un canto pasa por un punto marcado, giran alrededor de ese punto hasta encontrar la línea con otro. El candado los deja fijos. La escuadra y el cartabón tienen además un botón con dos medios triángulos que les da la vuelta, como al girar el plástico: los números y el nombre se ven al revés.'),
       b('escuadra', 'Paralelas y perpendiculares', 'Acerca un canto de la escuadra o el cartabón al canto de otro instrumento: se apoyan y se deslizan a lo largo, como en la mesa. Aléjalos para separarlos.'),
-      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar: el compás se pone de pie mientras gira y, al soltarlo, se tumba con la mina levantada. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar, así puedes llevar la mina hasta donde quieras empezar y apoyarla allí. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt).'),
+      b('compas', 'Compás', 'Lleva la punta seca a un punto. Arrastra la mina para abrirlo: se pega a los puntos y a las marcas de la regla. Gira el asa de arriba para trazar: el compás se pone de pie mientras gira y, al soltarlo, se tumba con la mina levantada. El botón rojo junto al asa apoya o levanta la mina: levantada, el compás gira sin pintar, así puedes llevar la mina hasta donde quieras empezar y apoyarla allí. Puedes cambiarlo a mitad del giro (con otro dedo, con la tecla L o manteniendo Alt). En Configuración › Instrumentos puedes verlo en 3D.'),
       b('transportador', 'Transportador', 'Pon el centro en el vértice del ángulo, gíralo hasta que la base pase por la recta y toca el borde con el portaminas para marcar los grados.'),
       b('goma', 'Goma', 'Tiene dos modos, en la barrita que aparece abajo a la izquierda: «A trozos» borra solo lo que pisa (para recortar poco a poco los extremos de las líneas y los arcos) y «Enteras» borra la línea, el arco o el punto que toques. Pulsa otra vez la goma para cambiar de modo. El deslizador elige su tamaño.'),
       b('nombrar', 'Nombrar', 'Toca un punto para cambiarle el nombre o una línea (recta, arco o circunferencia) para ponerle uno; el nombre de una línea se escribe en su centro. No puede haber dos elementos con el mismo nombre. Si dejas vacío el nombre de una línea, se le quita.'),
@@ -5794,6 +5925,7 @@ function aplicarConfig(clave) {
     Render.pedir('instrumentos');   // punta del portaminas y mina del compás
   }
   if (clave === 'colorInstrumentos') Render.pedir('instrumentos');
+  if (todo || clave === 'compas3d') Compas3D.alCambiar();
   if (clave === 'tamGoma') {
     UI.mensaje(`Tamaño de la goma: ${Config.get('tamGoma')} mm.`);
     Goma.mostrarTamano();

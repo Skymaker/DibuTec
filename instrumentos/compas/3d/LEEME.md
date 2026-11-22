@@ -1,7 +1,9 @@
 # Compás en 3D (prueba)
 
-`compas.glb` es el modelo 3D del compás que usa `compas3d.html`, la prueba del
-compás tridimensional con funcionamiento mecánico. Se ha construido a partir
+`compas.glb` es el modelo 3D del compás que usan `compas3d.html`, la prueba del
+compás tridimensional con funcionamiento mecánico, y la aplicación cuando se
+activa *Configuración › Instrumentos › Compás en 3D* (el modelo y su mecánica
+están en `compas3d.js`). Se ha construido a partir
 de las piezas SVG del alzado (`../tumbado/`), dándoles el grosor de la planta,
 y se puede retocar en **Blender** (o cualquier programa que abra glTF).
 
