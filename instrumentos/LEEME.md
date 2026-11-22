@@ -25,8 +25,7 @@ En `compas/3d/` está el modelo 3D del compás para la prueba `compas3d.html`
 | `cabeza.svg` | Cabeza negra con sus tornillos. | La cabeza y el mango vistos desde arriba. | La bisagra. |
 | `mango.svg` | Mango estriado. | — (lo tapa la cabeza) | Su base, sobre la cabeza. |
 | `taco.svg` | Pinza del tornillo de ajuste, con el extremo de la varilla. | Igual, desde arriba. | El eje de la pata a la altura de la varilla. |
-| `rueda-ajuste.svg` | Rueda del tornillo de ajuste. | Igual, desde arriba. | Su centro, en la varilla. |
-| `varilla.svg` | Trozo de varilla que se repite a lo largo. | — (queda bajo las patas) | Su borde izquierdo. |
+| `varilla.svg` | Trozo de varilla que se repite a lo largo. | — (usa la del alzado) | Su borde izquierdo. |
 
 Si falta una pieza en una carpeta, DibuTec no la dibuja en esa vista.
 
@@ -49,6 +48,14 @@ Si falta una pieza en una carpeta, DibuTec no la dibuja en esa vista.
 - **Pinzas, rueda y varilla:** la varilla va en horizontal (+x, de la pata de
   la aguja a la de la mina); en las pinzas, +x es el lado de fuera (la misma
   pieza, en espejo, sirve para las dos patas).
+- **Tornillo de ajuste con las medidas del 3D** (`AJUSTE_COMPAS` en
+  `index.html`): varilla de 40 mm y Ø 1,3 mm, centrada entre las pinzas, que
+  se deslizan por ella; pinzas de 7,56 × 7 mm (4,3 mm de grueso, de pie);
+  rueda de Ø 7,18 × 1,58 mm. DibuTec escala la pieza `taco` a ese tamaño. La
+  rueda no tiene pieza SVG: se dibuja en el código para que sus estrías giren
+  al abrir o cerrar el compás (0,7 mm de separación entre pinzas por vuelta,
+  como en el 3D). Si cambias estas medidas en el modelo de Blender, cámbialas
+  también en `AJUSTE_COMPAS`.
 - **Marcas** (círculos con un `id`, sin relleno ni borde, que no se dibujan):
   - `punta` en las patas: dónde está la punta. Fija el largo de la pata.
   - `ajuste` en las patas: a qué distancia de la bisagra va el tornillo de
@@ -78,8 +85,9 @@ piezas: los dibuja DibuTec encima.
 El compás se abre entre **12 y 105,8 mm de radio** (`rMin` y `rMax` en la
 clase `Compas` de `index.html`), los mismos topes que el compás 3D: por debajo
 de 12 mm, las pinzas del tornillo de ajuste chocarían con la rueda; por encima
-de 105,8 mm, la varilla del tornillo de ajuste se acaba. Si cambias las piezas (sobre todo las pinzas, la rueda o
-la separación de los tornillos), revisa el mínimo.
+de 105,8 mm, las pinzas llegan al final de la varilla. Si cambias las piezas
+(sobre todo las pinzas, la rueda o la separación de los tornillos), revisa el
+mínimo.
 
 ## Vistas completas
 

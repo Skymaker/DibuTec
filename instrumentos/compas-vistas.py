@@ -60,7 +60,7 @@ class Montaje:
         self.grupos.append(f'  <g id="{pre}" transform="matrix({" ".join(fmt(v) for v in mat)})">{cuerpo}  </g>\n')
 
     def varilla(self, vista, mat, largo):
-        p = leer(vista, 'varilla')
+        p = leer('tumbado', 'varilla')
         if not p:
             return
         (vx, vy, vw, vh), cv = p
@@ -71,14 +71,22 @@ class Montaje:
 ''')
 
     def ajuste(self, vista, ql, qr):
+        """Tornillo de ajuste con las medidas del compás 3D (AJUSTE_COMPAS en index.html): varilla de 40 mm
+        centrada entre las pinzas y la rueda (que DibuTec dibuja sin pieza SVG, para que sus estrías giren)."""
         dl = math.hypot(qr[0] - ql[0], qr[1] - ql[1]) or 1e-6
         u = ((qr[0] - ql[0]) / dl, (qr[1] - ql[1]) / dl)
         w = (-u[1], u[0])
-        self.varilla(vista, [u[0], u[1], w[0], w[1], ql[0] - u[0] * 4, ql[1] - u[1] * 4], dl + 8)
-        self.pieza(vista, 'taco', [-u[0], -u[1], w[0], w[1], ql[0], ql[1]], 'taco-aguja')
-        self.pieza(vista, 'taco', [u[0], u[1], w[0], w[1], qr[0], qr[1]], 'taco-mina')
-        self.pieza(vista, 'rueda-ajuste', [u[0], u[1], w[0], w[1], (ql[0] + qr[0]) / 2, (ql[1] + qr[1]) / 2], 'rueda-ajuste')
-
+        m = ((ql[0] + qr[0]) / 2, (ql[1] + qr[1]) / 2)
+        g = 1.3 / 1.352
+        self.varilla(vista, [u[0], u[1], w[0] * g, w[1] * g, m[0] - u[0] * 20, m[1] - u[1] * 20], 40)
+        vb, _ = leer(vista, 'taco')
+        sx, sy = 7.56 / (vb[2] - 1.2), (4.3 if vista == 'de-pie' else 7) / (vb[3] - 1.2)
+        self.pieza(vista, 'taco', [-u[0] * sx, -u[1] * sx, w[0] * sy, w[1] * sy, ql[0], ql[1]], 'taco-aguja')
+        self.pieza(vista, 'taco', [u[0] * sx, u[1] * sx, w[0] * sy, w[1] * sy, qr[0], qr[1]], 'taco-mina')
+        self.grupos.append(f'''  <g id="rueda-ajuste" transform="matrix({' '.join(fmt(v) for v in (u[0], u[1], w[0], w[1], m[0], m[1]))})">
+    <rect x="-0.79" y="-3.59" width="1.58" height="7.18" rx="0.3" fill="#202226" stroke="#0b0c0d" stroke-width="0.08"/>
+  </g>
+''')
 
 def tumbado(r=ABERTURA):
     M, V = Montaje(), 'tumbado'
