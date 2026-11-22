@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copia las piezas SVG de esta carpeta dentro de index.html.
+"""Copia las piezas SVG de esta carpeta dentro de index.html (y de compas3d.html).
 
 DibuTec lee las piezas de sus archivos cuando se abre desde un servidor web
 (GitHub Pages, python3 -m http.server…). Al abrir index.html con doble clic,
@@ -35,16 +35,20 @@ def main():
         cadena = json.dumps(texto, ensure_ascii=False).replace('</', '<\\/')
         lineas.append(f'    {json.dumps(nombre)}: {cadena},')
     lineas.append('  },')
-    html = INDEX.read_text(encoding='utf-8')
-    i, j = html.find(INICIO), html.find(FIN)
-    if i < 0 or j < i:
-        sys.exit('No encuentro las marcas PIEZAS-SVG en index.html')
-    nuevo = html[:i + len(INICIO)] + '\n' + '\n'.join(lineas) + '\n  ' + html[j:]
-    if nuevo == html:
-        print('index.html ya tenía estas piezas.')
-        return
-    INDEX.write_text(nuevo, encoding='utf-8')
-    print(f'{len(piezas)} piezas copiadas en index.html: ' + ', '.join(piezas))
+    # index.html (la aplicación) y compas3d.html (la prueba del compás en 3D, que se construye desde ellas)
+    for destino in (INDEX, AQUI.parent / 'compas3d.html'):
+        if not destino.exists():
+            continue
+        html = destino.read_text(encoding='utf-8')
+        i, j = html.find(INICIO), html.find(FIN)
+        if i < 0 or j < i:
+            sys.exit(f'No encuentro las marcas PIEZAS-SVG en {destino.name}')
+        nuevo = html[:i + len(INICIO)] + '\n' + '\n'.join(lineas) + '\n  ' + html[j:]
+        if nuevo == html:
+            print(f'{destino.name} ya tenía estas piezas.')
+            continue
+        destino.write_text(nuevo, encoding='utf-8')
+        print(f'{len(piezas)} piezas copiadas en {destino.name}: ' + ', '.join(piezas))
 
 
 if __name__ == '__main__':

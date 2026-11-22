@@ -20,6 +20,8 @@ Pruébalo: https://skymaker.github.io/DibuTec/
 |---|---|
 | `index.html` | La aplicación completa (HTML, CSS y JavaScript en un único archivo). |
 | `editor.html` | Editor gráfico de ejercicios guiados (también en un único archivo). |
+| `compas3d.html` | Prueba de un compás en 3D con funcionamiento mecánico (modelo en `instrumentos/compas/3d/`). |
+| `vendor/three-r147/` | Three.js (licencia MIT), para el compás 3D. |
 | `ejercicios/` | Ejercicios guiados, uno por archivo JSON. |
 | `ejercicios/indice.json` | Temas y ejercicios que aparecen en la aplicación, en orden. |
 | `ejercicios/LEEME.md` | Formato de los ejercicios y cómo añadir otros nuevos. |

@@ -1,0 +1,1 @@
+Three.js r147 (https://threejs.org), licencia MIT (ver LICENSE). Versión «clásica» (sin módulos) para que compas3d.html funcione también abriéndolo con doble clic.

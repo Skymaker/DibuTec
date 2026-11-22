@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DibuTec · Compás 3D (prueba)</title>
+<style>
+  :root { --texto: #1f2433; --suave: #5d6375; --borde: #d6d1c4; --activo: #2f6fd0; --fondo: #cdbb9b; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--texto); background: var(--fondo); }
+  #lienzo { position: fixed; inset: 0; touch-action: none; display: block; }
+  .barra { position: fixed; left: 12px; top: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; pointer-events: none; }
+  .barra > * { pointer-events: auto; }
+  .barra h1 { font-size: 16px; margin: 0 8px 0 0; padding: 8px 12px; background: #fff; border: 1px solid var(--borde); border-radius: 10px; }
+  button { font: inherit; font-size: 14px; min-height: 38px; padding: 0 12px; border: 1px solid var(--borde); border-radius: 10px; background: #fff; color: var(--texto); cursor: pointer; }
+  button[aria-pressed="true"] { border-color: var(--activo); color: var(--activo); background: #e8f0fc; font-weight: 600; }
+  button:focus-visible { outline: 3px solid #8ab4f8; outline-offset: 1px; }
+  #estado { position: fixed; left: 12px; right: 12px; bottom: 12px; padding: 8px 12px; background: #fff; border: 1px solid var(--borde); border-radius: 10px; font-size: 14px; display: flex; gap: 16px; flex-wrap: wrap; }
+  #estado b { font-variant-numeric: tabular-nums; }
+  #ayuda { position: fixed; right: 12px; top: 62px; width: min(360px, calc(100% - 24px)); padding: 10px 12px; background: #fff; border: 1px solid var(--borde); border-radius: 10px; font-size: 13px; line-height: 1.45; color: var(--suave); }
+  #ayuda[hidden] { display: none; }
+  #ayuda strong { color: var(--texto); }
+</style>
+</head>
+<body>
+<canvas id="lienzo" aria-label="Compás en 3D sobre una hoja"></canvas>
+<div class="barra">
+  <h1>Compás 3D · prueba</h1>
+  <button id="b-mina" aria-pressed="false" title="Tecla L">Mina apoyada</button>
+  <button id="b-vista" aria-pressed="false" title="Tecla V">Vista libre</button>
+  <button id="b-borrar">Borrar arcos</button>
+  <button id="b-glb">Descargar modelo (.glb)</button>
+  <button id="b-ayuda" aria-pressed="true">Ayuda</button>
+</div>
+<div id="ayuda">
+  <strong>Cómo se usa.</strong> Arrastra la <strong>mina</strong> para abrir el compás, o gira la <strong>rueda</strong> del tornillo de ajuste
+  (arrástrala hacia arriba o hacia abajo): el compás se abre o se cierra como uno de verdad.
+  Arrastra el <strong>mango</strong> para trazar: el compás se pone de pie y gira sobre la aguja.
+  Arrastra cualquier otra parte para moverlo. <strong>L</strong> levanta o apoya la mina.
+  En la <strong>vista libre</strong> puedes girar la cámara (arrastrando fuera del compás) y acercarte con la rueda del ratón.
+</div>
+<div id="estado" role="status"><span>Radio: <b id="e-radio">—</b></span><span>Rueda: <b id="e-rueda">—</b></span><span id="e-modelo"></span><span id="e-msg"></span></div>
+
+<script src="vendor/three-r147/three.min.js"></script>
+<script src="vendor/three-r147/SVGLoader.js"></script>
+<script src="vendor/three-r147/GLTFLoader.js"></script>
+<script src="vendor/three-r147/GLTFExporter.js"></script>
+<script src="vendor/three-r147/OrbitControls.js"></script>
+<script src="vendor/three-r147/RoomEnvironment.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+   Compás 3D de DibuTec (prueba)
+
+   Unidades: milímetros. El modelo (instrumentos/compas/3d/compas.glb) está en el
+   plano del alzado: X a la derecha (de la aguja a la mina), Y hacia arriba (hacia
+   la cabeza) y Z hacia delante. La aguja está en (0, 0, 0).
+
+   Si se sirve desde una web, se carga compas.glb (retocable en Blender). Si no
+   existe o se abre con doble clic, el modelo se construye a partir de las piezas
+   SVG del alzado (instrumentos/compas/tumbado), incrustadas abajo.
+   ===================================================================== */
+const PIEZAS = {
+  /* PIEZAS-SVG:INICIO (lo escribe instrumentos/incrustar.py; no editar a mano) */
+  incrustadas: {
+    "compas/de-pie/cabeza": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"10.4164mm\" height=\"6.5762mm\" viewBox=\"-5.2082 -3.2917 10.4164 6.5762\">\n  <!--\n    DibuTec · compás · cabeza (de pie, desde arriba: se ve la parte de arriba del mango)\n    Unidades: milímetros. La bisagra (bajo la cabeza) está en (0, 0).\n  -->\n  <defs>\n    <linearGradient id=\"_Linear34\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,233.333333,-233.333333,0,1050,3804.06367)\"><stop offset=\"0\" style=\"stop-color:#141517;stop-opacity:1\"/><stop offset=\"0.35\" style=\"stop-color:#35383c;stop-opacity:1\"/><stop offset=\"0.65\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#101113;stop-opacity:1\"/><\/linearGradient>\n    <radialGradient id=\"_Radial35\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(82.5,0,0,82.5,1239,3904.230337)\"><stop offset=\"0\" style=\"stop-color:#4e5359;stop-opacity:1\"/><stop offset=\"0.45\" style=\"stop-color:#25272a;stop-opacity:1\"/><stop offset=\"0.85\" style=\"stop-color:#141517;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#0b0c0d;stop-opacity:1\"/><\/radialGradient>\n    <radialGradient id=\"_Radial36\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(62.5,0,0,62.5,1241.666667,3908.230337)\"><stop offset=\"0\" style=\"stop-color:#4e5359;stop-opacity:1\"/><stop offset=\"0.45\" style=\"stop-color:#25272a;stop-opacity:1\"/><stop offset=\"0.85\" style=\"stop-color:#141517;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#0b0c0d;stop-opacity:1\"/><\/radialGradient>\n  <\/defs>\n  <g id=\"dibujo\" transform=\"matrix(0.023 0 0 0.023 -28.8012 -90.3411)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <g id=\"top-head-zenith\"><path d=\"M1358.333,3804.064c50.592,0 91.667,41.074 91.667,91.667l0,50c0,50.592 -41.074,91.667 -91.667,91.667l-216.667,0c-50.592,0 -91.667,-41.074 -91.667,-91.667l0,-50c0,-50.592 41.074,-91.667 91.667,-91.667l216.667,0Z\" style=\"fill:url(#_Linear34);stroke:#101113;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1358.333,3816.564c43.693,0 79.167,35.473 79.167,79.167l0,50c0,43.693 -35.473,79.167 -79.167,79.167l-216.667,0c-43.693,0 -79.167,-35.473 -79.167,-79.167l0,-50c0,-43.693 35.473,-79.167 79.167,-79.167l216.667,0Z\" style=\"fill:none;stroke:#474c52;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><rect x=\"1200\" y=\"3804.064\" width=\"100\" height=\"233.333\" style=\"fill:#1d1f22;stroke:#111214;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1204.167,3808.23l0,225\" style=\"fill:none;fill-rule:nonzero;stroke:#464b51;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1295.833,3808.23l0,225\" style=\"fill:none;fill-rule:nonzero;stroke:#464b51;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><circle cx=\"1250\" cy=\"3920.73\" r=\"91.667\" style=\"fill:#18191b;stroke:#0d0e0f;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><circle cx=\"1250\" cy=\"3920.73\" r=\"85.417\" style=\"fill:none;stroke:#3f4348;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><circle cx=\"1250\" cy=\"3920.73\" r=\"68.75\" style=\"fill:url(#_Radial35);stroke:#0c0d0e;stroke-width:5.83px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M1250,3851.98l0,12.5\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1250,3976.98l0,12.5\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1181.25,3920.73l12.5,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1306.25,3920.73l12.5,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1201.25,3871.98l9.167,9.167\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1289.583,3960.314l9.167,9.167\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1298.75,3871.98l-9.167,9.167\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1210.417,3960.314l-9.167,9.167\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1223.75,3857.397l4.583,11.25\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1271.667,3972.814l4.583,11.25\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1276.25,3857.397l-4.583,11.25\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1228.333,3972.814l-4.583,11.25\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1186.667,3894.48l11.25,4.583\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1302.083,3942.397l11.25,4.583\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1313.333,3894.48l-11.25,4.583\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1197.917,3942.397l-11.25,4.583\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><circle cx=\"1250\" cy=\"3920.73\" r=\"52.083\" style=\"fill:url(#_Radial36);stroke:#4c5157;stroke-width:3.75px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3895.73c13.715,-18.286 40.047,-22.048 58.333,-8.333\" style=\"fill:none;fill-rule:nonzero;stroke:#6c727a;stroke-opacity:0.7;stroke-width:5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/de-pie/pata-aguja": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"8mm\" height=\"27.6421mm\" viewBox=\"-4 -1 8 27.6421\">\n  <!--\n    DibuTec · compás · pata de la punta seca (de pie, desde arriba)\n    Vista desde arriba con el compás de pie: las patas, tumbadas en la línea de las puntas.\n    Unidades: milímetros. El centro del compás está en (0, 0) y la punta hacia abajo (+y): marca «punta».\n    La marca «eje» es donde queda, visto desde arriba, el tornillo en el que gira la pata.\n    Hacia +x queda el lado que, en la pantalla, está por encima de la línea de las puntas.\n    DibuTec estira o encoge la pata a lo largo según lo abierto que esté el compás.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear20\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,116.666667,-99.983761,0,445.291378,3862.551776)\"><stop offset=\"0\" style=\"stop-color:#9ca3ab;stop-opacity:1\"/><stop offset=\"0.3\" style=\"stop-color:#e3e8ec;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#cdd3d9;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#8b929a;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear21\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,12.5,-12.5,0,136.958044,3914.635109)\"><stop offset=\"0\" style=\"stop-color:#6c7278;stop-opacity:1\"/><stop offset=\"0.45\" style=\"stop-color:#eef2f6;stop-opacity:1\"/><stop offset=\"0.75\" style=\"stop-color:#9aa1a8;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#555a60;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear22\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,116.666667,-116.666667,0,203.624711,3862.551776)\"><stop offset=\"0\" style=\"stop-color:#141517;stop-opacity:1\"/><stop offset=\"0.35\" style=\"stop-color:#35383c;stop-opacity:1\"/><stop offset=\"0.65\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#101113;stop-opacity:1\"/><\/linearGradient>\n    <radialGradient id=\"_Radial23\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(97.5,0,0,97.5,317.791378,3898.385109)\"><stop offset=\"0\" style=\"stop-color:#4a4f55;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#232528;stop-opacity:1\"/><stop offset=\"0.88\" style=\"stop-color:#121315;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#090a0b;stop-opacity:1\"/><\/radialGradient>\n    <radialGradient id=\"_Radial24\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(65,0,0,65,322.791378,3905.885109)\"><stop offset=\"0\" style=\"stop-color:#4a4f55;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#232528;stop-opacity:1\"/><stop offset=\"0.88\" style=\"stop-color:#121315;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#090a0b;stop-opacity:1\"/><\/radialGradient>\n  <\/defs>\n  <circle id=\"punta\" cx=\"0\" cy=\"25.6421\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"ajuste\" cx=\"0\" cy=\"8.1401\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"eje\" cx=\"0\" cy=\"2.4964\" r=\"0.2\" fill=\"none\"/>\n  <g id=\"dibujo\" transform=\"matrix(0 -0.023 -0.023 0 90.3411 28.7977)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <g id=\"left-leg-horizontal\"><rect x=\"445.291\" y=\"3862.552\" width=\"621.328\" height=\"116.667\" style=\"fill:url(#_Linear20);fill-rule:nonzero;stroke:#7c838a;stroke-width:3.88px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1170.291,3864.635l-725,0\" style=\"fill:none;fill-rule:nonzero;stroke:#f0f4f8;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g id=\"left-tip-horizontal\"><path d=\"M203.625,3914.635l0,12.5l-66.667,-6.25l66.667,-6.25Z\" style=\"fill:url(#_Linear21);fill-rule:nonzero;stroke:#5c6268;stroke-width:2.08px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M428.625,3862.552c18.397,0 33.333,14.936 33.333,33.333l0,50c0,18.397 -14.936,33.333 -33.333,33.333l-191.667,0c-18.397,0 -33.333,-14.936 -33.333,-33.333l0,-50c0,-18.397 14.936,-33.333 33.333,-33.333l191.667,0Z\" style=\"fill:url(#_Linear22);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M261.958,3904.218l133.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M261.958,3920.885l133.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M261.958,3937.552l133.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><g id=\"left-knob-top\"><circle cx=\"332.791\" cy=\"3920.885\" r=\"75\" style=\"fill:url(#_Radial23);stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M332.791,3845.885l0,16.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M332.791,3979.218l0,16.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M257.791,3920.885l16.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M391.125,3920.885l16.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M279.875,3867.968l11.667,11.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M374.041,3962.135l11.667,11.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M385.708,3867.968l-11.667,11.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M291.541,3962.135l-11.667,11.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><circle cx=\"332.791\" cy=\"3920.885\" r=\"50\" style=\"fill:url(#_Radial24);stroke:#4c5157;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/de-pie/pata-mina": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"8mm\" height=\"27.229mm\" viewBox=\"-4 -1 8 27.229\">\n  <!--\n    DibuTec · compás · pata de la mina (de pie, desde arriba)\n    Vista desde arriba con el compás de pie: las patas, tumbadas en la línea de las puntas.\n    Unidades: milímetros. El centro del compás está en (0, 0) y la punta hacia abajo (+y): marca «punta».\n    La marca «eje» es donde queda, visto desde arriba, el tornillo en el que gira la pata.\n    Hacia +x queda el lado que, en la pantalla, está por encima de la línea de las puntas.\n    DibuTec estira o encoge la pata a lo largo según lo abierto que esté el compás.\n    La forma con id=\"mina\" se pinta del color del portaminas.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear25\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,116.666667,-98.162602,0,1434.798305,3862.551776)\"><stop offset=\"0\" style=\"stop-color:#9ca3ab;stop-opacity:1\"/><stop offset=\"0.3\" style=\"stop-color:#e3e8ec;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#cdd3d9;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#8b929a;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear26\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,116.666667,-116.666667,0,2028.142095,3862.551776)\"><stop offset=\"0\" style=\"stop-color:#141517;stop-opacity:1\"/><stop offset=\"0.35\" style=\"stop-color:#35383c;stop-opacity:1\"/><stop offset=\"0.65\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#101113;stop-opacity:1\"/><\/linearGradient>\n    <radialGradient id=\"_Radial27\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(97.5,0,0,97.5,2146.475429,3898.385109)\"><stop offset=\"0\" style=\"stop-color:#4a4f55;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#232528;stop-opacity:1\"/><stop offset=\"0.88\" style=\"stop-color:#121315;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#090a0b;stop-opacity:1\"/><\/radialGradient>\n    <radialGradient id=\"_Radial28\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(65,0,0,65,2151.475429,3905.885109)\"><stop offset=\"0\" style=\"stop-color:#4a4f55;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#232528;stop-opacity:1\"/><stop offset=\"0.88\" style=\"stop-color:#121315;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#090a0b;stop-opacity:1\"/><\/radialGradient>\n  <\/defs>\n  <circle id=\"punta\" cx=\"0\" cy=\"25.229\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"ajuste\" cx=\"0\" cy=\"8.1614\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"eje\" cx=\"0\" cy=\"2.5035\" r=\"0.2\" fill=\"none\"/>\n  <g id=\"dibujo\" transform=\"matrix(0 0.023 -0.023 0 90.3411 -28.7977)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <g id=\"right-leg-horizontal\"><rect x=\"1434.798\" y=\"3862.552\" width=\"610.01\" height=\"116.667\" style=\"fill:url(#_Linear25);fill-rule:nonzero;stroke:#7c838a;stroke-width:3.85px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1319.809,3864.635l725,0\" style=\"fill:none;fill-rule:nonzero;stroke:#f0f4f8;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g id=\"right-tip-horizontal\"><path id=\"mina\" d=\"M2286.475,3910.468l0,20.833l58.333,-4.167l0,-16.667l-58.333,0Z\" style=\"fill:#464a4f;fill-rule:nonzero;stroke:#222528;stroke-width:2.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2253.142,3862.552c18.397,0 33.333,14.936 33.333,33.333l0,50c0,18.397 -14.936,33.333 -33.333,33.333l-191.667,0c-18.397,0 -33.333,-14.936 -33.333,-33.333l0,-50c0,-18.397 14.936,-33.333 33.333,-33.333l191.667,0Z\" style=\"fill:url(#_Linear26);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2094.809,3904.218l133.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2094.809,3920.885l133.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2094.809,3937.552l133.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><g id=\"right-knob-top-1\"><circle cx=\"2161.475\" cy=\"3920.885\" r=\"75\" style=\"fill:url(#_Radial27);stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M2161.475,3845.885l0,16.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2161.475,3979.218l0,16.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2086.475,3920.885l16.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2219.809,3920.885l16.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2108.559,3867.968l11.667,11.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2202.725,3962.135l11.667,11.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2214.392,3867.968l-11.667,11.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2120.225,3962.135l-11.667,11.667\" style=\"fill:none;fill-rule:nonzero;stroke:#090a0b;stroke-width:7.5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><circle cx=\"2161.475\" cy=\"3920.885\" r=\"50\" style=\"fill:url(#_Radial28);stroke:#4c5157;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/de-pie/rueda-ajuste": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"2.7361mm\" height=\"7.1522mm\" viewBox=\"-1.368 -3.5797 2.7361 7.1522\">\n  <!--\n    DibuTec · compás · rueda del tornillo de ajuste (de pie, desde arriba)\n    Unidades: milímetros. Centrada en (0, 0), en medio de la varilla, que va en horizontal.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear33\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,258.333333,-258.333333,0,1216.666667,3791.56367)\"><stop offset=\"0\" style=\"stop-color:#141517;stop-opacity:1\"/><stop offset=\"0.35\" style=\"stop-color:#35383c;stop-opacity:1\"/><stop offset=\"0.65\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#101113;stop-opacity:1\"/><\/linearGradient>\n  <\/defs>\n  <g id=\"dibujo\" transform=\"matrix(0.023 0 0 0.023 -28.8012 -90.3411)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <g id=\"center-wheel-top\"><path d=\"M1270.833,3791.564c6.899,0 12.5,5.601 12.5,12.5l0,233.333c0,6.899 -5.601,12.5 -12.5,12.5l-41.667,0c-6.899,0 -12.5,-5.601 -12.5,-12.5l0,-233.333c0,-6.899 5.601,-12.5 12.5,-12.5l41.667,0Z\" style=\"fill:url(#_Linear33);stroke:#0e0f10;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M1216.667,3812.397l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3833.23l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3854.064l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3874.897l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3895.73l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3916.564l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3937.397l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3958.23l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3979.064l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,3999.897l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,4020.73l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:6.67px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><g><path d=\"M1225,3822.814l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#555a60;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,3864.48l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#555a60;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,3906.147l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#555a60;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,3947.814l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#555a60;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,3989.48l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#555a60;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/de-pie/taco": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"8.2966mm\" height=\"5.4165mm\" viewBox=\"-2.5917 -2.8093 8.2966 5.4165\">\n  <!--\n    DibuTec · compás · pinza del tornillo de ajuste (de pie, desde arriba; la misma, en espejo, en las dos patas)\n    Unidades: milímetros. (0, 0) es el eje de la pata a la altura de la varilla, que va en horizontal;\n    hacia +x queda el lado de FUERA. Incluye el extremo de la varilla que asoma por fuera.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear29\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,141.666667,-141.666667,0,750,3849.897003)\"><stop offset=\"0\" style=\"stop-color:#141517;stop-opacity:1\"/><stop offset=\"0.35\" style=\"stop-color:#35383c;stop-opacity:1\"/><stop offset=\"0.65\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#101113;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear30\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,183.333333,-183.333333,0,808.333333,3824.897003)\"><stop offset=\"0\" style=\"stop-color:#141517;stop-opacity:1\"/><stop offset=\"0.35\" style=\"stop-color:#35383c;stop-opacity:1\"/><stop offset=\"0.65\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#101113;stop-opacity:1\"/><\/linearGradient>\n  <\/defs>\n  <g id=\"dibujo\" transform=\"matrix(-0.023 0 0 0.023 20.6576 -90.3411)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <path id=\"tornillo-exterior-izquierdo1\" d=\"M875.094,3895.885c4.599,0 8.333,3.734 8.333,8.333l0,33.333c0,4.599 -3.734,8.333 -8.333,8.333l-191.76,0c-4.599,0 -8.333,-3.734 -8.333,-8.333l0,-33.333c0,-4.599 3.734,-8.333 8.333,-8.333l191.76,0Z\" style=\"fill:#bebebe;stroke:#555a60;stroke-width:2.4px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <g id=\"left-clamp-top\"><path d=\"M925,3849.897c32.195,0 58.333,26.138 58.333,58.333l0,25c0,32.195 -26.138,58.333 -58.333,58.333l-116.667,0c-32.195,0 -58.333,-26.138 -58.333,-58.333l0,-25c0,-32.195 26.138,-58.333 58.333,-58.333l116.667,0Z\" style=\"fill:url(#_Linear29);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M891.667,3824.897c9.199,0 16.667,7.468 16.667,16.667l0,150c0,9.199 -7.468,16.667 -16.667,16.667l-66.667,0c-9.199,0 -16.667,-7.468 -16.667,-16.667l0,-150c0,-9.199 7.468,-16.667 16.667,-16.667l66.667,0Z\" style=\"fill:url(#_Linear30);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M775,3874.897l183.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#4d5258;stroke-width:5px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/tumbado/cabeza": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"10.0324mm\" height=\"17.2327mm\" viewBox=\"-5.0127 0.4808 10.0324 17.2327\">\n  <!--\n    DibuTec · compás · cabeza (tumbado)\n    Unidades: milímetros. La bisagra de las patas está en (0, 0).\n    El mango sale del borde de arriba de la cabeza; su contorno es la zona para agarrar el compás.\n    Las marcas «eje-aguja» y «eje-mina» son los tornillos en los que giran las patas.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear2\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(183.333333,0,0,183.333333,1158.333333,470.93633)\"><stop offset=\"0\" style=\"stop-color:#18191b;stop-opacity:1\"/><stop offset=\"0.3\" style=\"stop-color:#34373b;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear3\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(383.333333,0,0,383.333333,1058.333333,533.43633)\"><stop offset=\"0\" style=\"stop-color:#18191b;stop-opacity:1\"/><stop offset=\"0.3\" style=\"stop-color:#34373b;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n    <radialGradient id=\"_Radial4\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(47.5,0,0,47.5,1133.75,729.894663)\"><stop offset=\"0\" style=\"stop-color:#fff;stop-opacity:1\"/><stop offset=\"0.55\" style=\"stop-color:#c4cad0;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#6c7278;stop-opacity:1\"/><\/radialGradient>\n    <radialGradient id=\"_Radial5\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(47.5,0,0,47.5,1350.416667,729.894663)\"><stop offset=\"0\" style=\"stop-color:#fff;stop-opacity:1\"/><stop offset=\"0.55\" style=\"stop-color:#c4cad0;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#6c7278;stop-opacity:1\"/><\/radialGradient>\n  <\/defs>\n  <circle id=\"eje-aguja\" cx=\"-2.4964\" cy=\"7.3149\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"eje-mina\" cx=\"2.5035\" cy=\"7.3149\" r=\"0.2\" fill=\"none\"/>\n  <g id=\"dibujo\" transform=\"matrix(0.023 0 0 0.023 -28.7977 -9.77)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <path d=\"M1158.333,541.77c0,-58.333 25,-70.833 91.667,-70.833c66.667,0 91.667,12.5 91.667,70.833l-183.333,0Z\" style=\"fill:url(#_Linear2);fill-rule:nonzero;\"/>\n    <path d=\"M1058.333,554.27c0,-13.889 8.333,-20.833 25,-20.833l333.333,0c16.667,0 25,6.944 25,20.833l0,458.333c0,47.222 -26.389,98.611 -79.167,154.167l-225,0c-52.778,-55.556 -79.167,-106.944 -79.167,-154.167l0,-458.333Z\" style=\"fill:url(#_Linear3);fill-rule:nonzero;stroke:#121315;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <path d=\"M1058.333,595.936l383.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <path d=\"M1058.333,602.186l383.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <path d=\"M1058.333,650.103l383.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <path d=\"M1058.333,656.353l383.333,0\" style=\"fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <rect x=\"1204.167\" y=\"533.436\" width=\"91.667\" height=\"633.333\" style=\"fill:#1e2023;stroke:#111214;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <path d=\"M1208.333,537.603l0,625\" style=\"fill:none;fill-rule:nonzero;stroke:#42464b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <g><circle cx=\"1141.667\" cy=\"741.77\" r=\"39.583\" style=\"fill:url(#_Radial4);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1114.583,714.686l54.167,54.167\" style=\"fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g>\n    <g><circle cx=\"1358.333\" cy=\"741.77\" r=\"39.583\" style=\"fill:url(#_Radial5);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1358.333,704.27l0,75\" style=\"fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/tumbado/mango": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"4.2721mm\" height=\"9.8404mm\" viewBox=\"-2.1325 -8.7604 4.2721 9.8404\">\n  <!--\n    DibuTec · compás · mango (tumbado)\n    Unidades: milímetros. Abajo, en (0, 0), se apoya en el borde de arriba de la cabeza;\n    arriba, en la marca «asa», va el asa para girar. DibuTec lo estira o encoge en vertical para llegar al asa.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear1\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(133.333333,0,0,133.333333,1183.333333,116.769663)\"><stop offset=\"0\" style=\"stop-color:#18191b;stop-opacity:1\"/><stop offset=\"0.3\" style=\"stop-color:#34373b;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n  <\/defs>\n  <circle id=\"asa\" cx=\"0\" cy=\"-8.1604\" r=\"0.2\" fill=\"none\"/>\n  <g id=\"dibujo\" transform=\"matrix(0.023 0 0 0.023 -28.7977 -10.8509)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <path d=\"M1291.667,116.77c13.798,0 25,11.202 25,25l0,325c0,13.798 -11.202,25 -25,25l-83.333,0c-13.798,0 -25,-11.202 -25,-25l0,-325c0,-13.798 11.202,-25 25,-25l83.333,0Z\" style=\"fill:url(#_Linear1);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <g><path d=\"M1200,125.103l0,358.333\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,120.936l0,366.667\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1233.333,116.77l0,375\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1250,116.77l0,375\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1266.667,116.77l0,375\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1283.333,120.936l0,366.667\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1300,125.103l0,358.333\" style=\"fill:none;fill-rule:nonzero;stroke:#0e0f10;stroke-width:6.25px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g>\n    <g><path d=\"M1237.5,120.936l0,366.667\" style=\"fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1254.167,120.936l0,366.667\" style=\"fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1270.833,120.936l0,366.667\" style=\"fill:none;fill-rule:nonzero;stroke:#4b4f54;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/tumbado/pata-aguja": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"12mm\" height=\"77.1107mm\" viewBox=\"-6 -1 12 77.1107\">\n  <!--\n    DibuTec · compás · pata de la punta seca (tumbado)\n    Unidades: milímetros. El eje de la pata va de (0, 0) hacia abajo (+y), hasta la marca «punta».\n    La pata gira en la marca «eje» (el tornillo de la cabeza). Hacia +x queda el lado de FUERA del compás.\n    La marca «ajuste» fija la altura del tornillo de ajuste.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear11\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(-52.728105,144.869279,-144.869279,-52.728105,177.235996,3340.861067)\"><stop offset=\"0\" style=\"stop-color:#7c8288;stop-opacity:1\"/><stop offset=\"0.4\" style=\"stop-color:#edf1f5;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#9ea5ac;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#5a5f64;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear12\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(-11.400671,31.323087,-31.323087,-11.400671,153.26859,3132.604312)\"><stop offset=\"0\" style=\"stop-color:#7c8288;stop-opacity:1\"/><stop offset=\"0.4\" style=\"stop-color:#edf1f5;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#9ea5ac;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#5a5f64;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear13\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(-65.553861,180.107752,-180.107752,-65.553861,124.104698,3042.176191)\"><stop offset=\"0\" style=\"stop-color:#2e3135;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#1b1c1f;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear14\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(133.123121,48.452854,-48.452854,133.123121,432.556281,2462.727834)\"><stop offset=\"0\" style=\"stop-color:#18191b;stop-opacity:1\"/><stop offset=\"0.3\" style=\"stop-color:#34373b;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n    <radialGradient id=\"_Radial15\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(44.635399,16.245957,-16.245957,44.635399,464.388251,2559.226241)\"><stop offset=\"0\" style=\"stop-color:#fff;stop-opacity:1\"/><stop offset=\"0.55\" style=\"stop-color:#c4cad0;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#6c7278;stop-opacity:1\"/><\/radialGradient>\n  <\/defs>\n  <circle id=\"punta\" cx=\"0\" cy=\"75.1107\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"ajuste\" cx=\"0\" cy=\"23.9175\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"eje\" cx=\"0\" cy=\"7.7278\" r=\"0.2\" fill=\"none\"/>\n  <g id=\"dibujo\" transform=\"matrix(-0.0217 -0.0078 -0.0078 0.0217 30.4037 0.6143)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <g id=\"left-arm\"><path d=\"M1200,770.936l-133.333,-50l-650,1795.833l133.333,50l650,-1795.833Z\" style=\"fill:#bebebe;stroke:#000;stroke-width:4.17px;\"/><\/g>\n    <g id=\"left-leg-bottom\"><path d=\"M177.236,3340.861l19.577,7.125l-42.393,104.29l-20.124,37.016l8.378,-41.291l34.562,-107.141Z\" style=\"fill:url(#_Linear11);fill-rule:nonzero;stroke:#5c6268;stroke-width:2.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M209.811,3330.547l-8.551,23.492l-31.323,-11.401l8.551,-23.492l31.323,11.401Z\" style=\"fill:#9ea5ac;\"/><path d=\"M200.253,3149.705l-11.401,31.323l-46.985,-17.101l11.401,-31.323l46.985,17.101Z\" style=\"fill:url(#_Linear12);\"/><path d=\"M171.089,3059.277c8.644,3.146 13.107,12.718 9.961,21.362l-54.153,148.785c-3.146,8.644 -12.718,13.107 -21.362,9.961l-31.323,-11.401c-8.644,-3.146 -13.107,-12.718 -9.961,-21.362l54.153,-148.785c3.146,-8.644 12.718,-13.107 21.362,-9.961l31.323,11.401Z\" style=\"fill:url(#_Linear13);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M119.47,3067.094l54.815,19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M110.919,3090.586l54.815,19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M102.369,3114.078l54.815,19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M93.818,3137.571l54.815,19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M85.268,3161.063l54.815,19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M76.717,3184.555l54.815,19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M69.592,3204.132l54.815,19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><path d=\"M421.156,2494.051c7.6,-20.882 23.147,-27.048 46.639,-18.497l62.646,22.801c23.492,8.551 31.438,23.267 23.838,44.149l-299.613,786.633c-5.7,15.662 -16.381,20.642 -32.043,14.942l-62.646,-22.801c-15.662,-5.7 -20.642,-16.381 -14.942,-32.043l276.121,-795.183Z\" style=\"fill:url(#_Linear14);fill-rule:nonzero;stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M412.922,2650.681l-64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M436.414,2659.231l-64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M459.906,2667.782l-64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M320.291,2905.181l-64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M343.784,2913.731l-64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M367.276,2922.282l-64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><path d=\"M299.304,2853.201l117.462,42.753\" style=\"fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M297.166,2859.074l117.462,42.753\" style=\"fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M481.304,2535.897c20.529,7.472 31.13,30.205 23.658,50.734c-7.472,20.529 -30.205,31.13 -50.734,23.658c-20.529,-7.472 -31.13,-30.205 -23.658,-50.734c7.472,-20.529 30.205,-31.13 50.734,-23.658Z\" style=\"fill:url(#_Radial15);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M433.053,2589.28l69.426,-32.374\" style=\"fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/tumbado/pata-mina": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"12mm\" height=\"76.8893mm\" viewBox=\"-6 -1 12 76.8893\">\n  <!--\n    DibuTec · compás · pata de la mina (tumbado)\n    Unidades: milímetros. El eje de la pata va de (0, 0) hacia abajo (+y), hasta la marca «punta».\n    La pata gira en la marca «eje» (el tornillo de la cabeza). Hacia +x queda el lado de FUERA del compás.\n    La marca «ajuste» fija la altura del tornillo de ajuste.\n    La forma con id=\"mina\" se pinta del color del portaminas.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear16\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(11.400671,31.323087,-31.323087,11.400671,2299.746779,3149.70532)\"><stop offset=\"0\" style=\"stop-color:#7c8288;stop-opacity:1\"/><stop offset=\"0.4\" style=\"stop-color:#edf1f5;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#9ea5ac;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#5a5f64;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear17\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(65.553861,180.107752,-180.107752,65.553861,2313.249128,3064.977534)\"><stop offset=\"0\" style=\"stop-color:#2e3135;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#1b1c1f;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear18\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(133.123121,-48.452854,48.452854,133.123121,1934.320598,2511.180687)\"><stop offset=\"0\" style=\"stop-color:#18191b;stop-opacity:1\"/><stop offset=\"0.3\" style=\"stop-color:#34373b;stop-opacity:1\"/><stop offset=\"0.7\" style=\"stop-color:#222427;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n    <radialGradient id=\"_Radial19\" cx=\"0\" cy=\"0\" r=\"1\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(44.635399,-16.245957,16.245957,44.635399,2020.733282,2564.64156)\"><stop offset=\"0\" style=\"stop-color:#fff;stop-opacity:1\"/><stop offset=\"0.55\" style=\"stop-color:#c4cad0;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#6c7278;stop-opacity:1\"/><\/radialGradient>\n  <\/defs>\n  <circle id=\"punta\" cx=\"0\" cy=\"74.8893\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"ajuste\" cx=\"0\" cy=\"23.9248\" r=\"0.2\" fill=\"none\"/>\n  <circle id=\"eje\" cx=\"0\" cy=\"7.7301\" r=\"0.2\" fill=\"none\"/>\n  <g id=\"dibujo\" transform=\"matrix(0.0217 0.0079 -0.0079 0.0217 -23.7375 -19.0077)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <g id=\"right-arm\"><path d=\"M1300,770.936l133.333,-50l653.4,1795.833l-136.733,50l-650,-1795.833Z\" style=\"fill:#bebebe;stroke:#000;stroke-width:4.17px;\"/><\/g>\n    <g id=\"right-leg-bottom\"><path id=\"mina\" d=\"M2290.189,3330.547l31.323,-11.401l37.052,101.8l-14.222,58.385l-54.153,-148.785Z\" style=\"fill:#464a4f;fill-rule:nonzero;stroke:#222528;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2346.731,3132.604l11.401,31.323l-46.985,17.101l-11.401,-31.323l46.985,-17.101Z\" style=\"fill:url(#_Linear16);\"/><path d=\"M2360.234,3047.877c8.644,-3.146 18.216,1.317 21.362,9.961l54.153,148.785c3.146,8.644 -1.317,18.216 -9.961,21.362l-31.323,11.401c-8.644,3.146 -18.216,-1.317 -21.362,-9.961l-54.153,-148.785c-3.146,-8.644 1.317,-18.216 9.961,-21.362l31.323,-11.401Z\" style=\"fill:url(#_Linear17);stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M2325.715,3087.045l54.815,-19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2334.266,3110.537l54.815,-19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2342.816,3134.029l54.815,-19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2351.367,3157.522l54.815,-19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2359.917,3181.014l54.815,-19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2368.468,3204.506l54.815,-19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2375.593,3224.083l54.815,-19.951\" style=\"fill:none;fill-rule:nonzero;stroke:#4c5056;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><path d=\"M1945.721,2542.504c-7.6,-20.882 0.345,-35.598 23.838,-44.149l62.646,-22.801c23.492,-8.551 39.039,-2.385 46.639,18.497l276.121,795.183c5.7,15.662 0.72,26.342 -14.942,32.043l-62.646,22.801c-15.662,5.7 -26.342,0.72 -32.043,-14.942l-299.613,-786.633Z\" style=\"fill:url(#_Linear18);fill-rule:nonzero;stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M2040.094,2667.782l64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2063.586,2659.231l64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2087.078,2650.681l64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2132.724,2922.282l64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2156.216,2913.731l64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2179.709,2905.181l64.129,176.192\" style=\"fill:none;fill-rule:nonzero;stroke:#101112;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><path d=\"M2083.235,2895.954l117.462,-42.753\" style=\"fill:none;fill-rule:nonzero;stroke:#0d0e0f;stroke-width:8.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2085.372,2901.827l117.462,-42.753\" style=\"fill:none;fill-rule:nonzero;stroke:#45494e;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M2018.696,2535.897c20.529,-7.472 43.262,3.129 50.734,23.658c7.472,20.529 -3.129,43.262 -23.658,50.734c-20.529,7.472 -43.262,-3.129 -50.734,-23.658c-7.472,-20.529 3.129,-43.262 23.658,-50.734Z\" style=\"fill:url(#_Radial19);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M2016.047,2607.806l32.374,-69.426\" style=\"fill:none;fill-rule:nonzero;stroke:#2c3034;stroke-width:9.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/tumbado/rueda-ajuste": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"2.7668mm\" height=\"8.2275mm\" viewBox=\"-1.3834 -3.9663 2.7668 8.2275\">\n  <!--\n    DibuTec · compás · rueda del tornillo de ajuste (tumbado)\n    Unidades: milímetros. Centrada en (0, 0), en medio de la varilla, que va en horizontal.\n    No se dibuja si el compás está casi cerrado.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear10\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,300,-300,0,1216.666667,1258.43633)\"><stop offset=\"0\" style=\"stop-color:#2e3135;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#1b1c1f;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n  <\/defs>\n  <g id=\"dibujo\" transform=\"matrix(0.023 0 0 0.023 -28.8012 -32.2598)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <g id=\"center-thumbwheel\"><path d=\"M1270.833,1258.436c6.899,0 12.5,5.601 12.5,12.5l0,275c0,6.899 -5.601,12.5 -12.5,12.5l-41.667,0c-6.899,0 -12.5,-5.601 -12.5,-12.5l0,-275c0,-6.899 5.601,-12.5 12.5,-12.5l41.667,0Z\" style=\"fill:url(#_Linear10);stroke:#0f1011;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><g><path d=\"M1216.667,1279.27l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1300.103l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1320.936l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1341.77l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1362.603l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1383.436l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1404.27l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1425.103l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1445.936l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1466.77l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1487.603l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1508.436l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1216.667,1529.27l66.667,0\" style=\"fill:none;fill-rule:nonzero;stroke:#0b0c0d;stroke-width:7.5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><g><path d=\"M1225,1289.686l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,1331.353l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,1373.02l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,1414.686l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,1456.353l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M1225,1498.02l50,0\" style=\"fill:none;fill-rule:nonzero;stroke:#50555b;stroke-width:3.33px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/tumbado/taco": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"8.6883mm\" height=\"8.2045mm\" viewBox=\"-2.9834 -3.9663 8.6883 8.2045\">\n  <!--\n    DibuTec · compás · pinza del tornillo de ajuste (tumbado; la misma, en espejo, en las dos patas)\n    Unidades: milímetros. (0, 0) es el eje de la pata a la altura de la varilla, que va en horizontal;\n    hacia +x queda el lado de FUERA. Incluye el extremo de la varilla que asoma por fuera.\n  -->\n  <defs>\n    <linearGradient id=\"_Linear6\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,300,-300,0,711.086715,1254.269663)\"><stop offset=\"0\" style=\"stop-color:#2e3135;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#1b1c1f;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n    <linearGradient id=\"_Linear7\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(0,162.5,-162.5,0,691.666667,1320.93633)\"><stop offset=\"0\" style=\"stop-color:#2e3135;stop-opacity:1\"/><stop offset=\"0.5\" style=\"stop-color:#1b1c1f;stop-opacity:1\"/><stop offset=\"1\" style=\"stop-color:#111214;stop-opacity:1\"/><\/linearGradient>\n  <\/defs>\n  <g id=\"dibujo\" transform=\"matrix(-0.023 0 0 0.023 20.6576 -32.2598)\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;\">\n    <path id=\"tornillo-exterior-izquierdo\" d=\"M875.094,1375.103c4.599,0 8.333,3.734 8.333,8.333l0,33.333c0,4.599 -3.734,8.333 -8.333,8.333l-191.76,0c-4.599,0 -8.333,-3.734 -8.333,-8.333l0,-33.333c0,-4.599 3.734,-8.333 8.333,-8.333l191.76,0Z\" style=\"fill:#bebebe;stroke:#555a60;stroke-width:2.4px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/>\n    <g id=\"left-clamp\"><path d=\"M783.333,1254.27l108.333,0l-41.667,300l-91.667,0c-66.667,-62.5 -66.667,-237.5 25,-300Z\" style=\"fill:url(#_Linear6);fill-rule:nonzero;stroke:#111;stroke-width:4.17px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M933.333,1320.936c36.794,0 66.667,29.872 66.667,66.667l0,29.167c0,36.794 -29.872,66.667 -66.667,66.667l-175,0c-36.794,0 -66.667,-29.872 -66.667,-66.667l0,-29.167c0,-36.794 29.872,-66.667 66.667,-66.667l175,0Z\" style=\"fill:url(#_Linear7);stroke:#111;stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\"/><path d=\"M729.167,1337.603l229.167,0\" style=\"fill:none;fill-rule:nonzero;stroke:#4a4e54;stroke-width:6.25px;stroke-linejoin:miter;stroke-miterlimit:4;\"/><\/g>\n  <\/g>\n<\/svg>\n",
+    "compas/tumbado/varilla": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160mm\" height=\"1.352mm\" viewBox=\"0 -0.676 160 1.352\">\n  <!--\n    DibuTec · compás · varilla del tornillo de ajuste (tumbado)\n    Es un TROZO que se repite a lo largo de la varilla, cada 160 mm (el ancho del viewBox).\n    La varilla va en horizontal, centrada en y = 0.\n  -->\n  <rect id=\"varilla\" x=\"0\" y=\"-0.576\" width=\"160\" height=\"1.152\" fill=\"#bebebe\"/>\n  <path id=\"bordes\" d=\"M 0 -0.576 L 160 -0.576 M 0 0.576 L 160 0.576\" stroke=\"#555a60\" stroke-width=\"0.0645\" fill=\"none\"/>\n<\/svg>\n",
+  },
+  /* PIEZAS-SVG:FIN */
+};
+const NOMBRES = ['cabeza', 'mango', 'pata-aguja', 'pata-mina', 'pinza-aguja', 'pinza-mina', 'varilla', 'rueda',
+                 'punta-aguja', 'punta-mina', 'ajuste-aguja', 'ajuste-mina', 'asa', 'mina'];
+const COLOR_MINA = '#757575';
+
+// ------------------------------------------------------------------ construcción del modelo desde los SVG
+const Construir = {
+  // Grosores (mm) sacados de la planta del dibujo
+  GROSOR: { cabeza: 5.4, mango: 3.1, pata: 2.7, pinza: 4.2 },
+  CAPA: 0.012,   // cada capa del SVG sobresale un poco más que la anterior (sin parpadeos)
+  material(color, nombre) {
+    const c = new THREE.Color(color);
+    const hsl = {}; c.getHSL(hsl);
+    const metal = hsl.s < 0.12 && hsl.l > 0.45;   // grises claros: metal
+    return new THREE.MeshStandardMaterial({ color: c, metalness: metal ? 0.8 : 0.1, roughness: metal ? 0.38 : 0.55, envMapIntensity: metal ? 0.55 : 0.25, side: THREE.DoubleSide, name: nombre || '' });
+  },
+  // Color de un relleno: los degradados se sustituyen por su color central
+  color(valor, doc) {
+    if (!valor || valor === 'none') return null;
+    const m = /url\(\s*["']?#([^"')]+)["']?\s*\)/.exec(valor);
+    if (!m) return valor;
+    let g = doc.getElementById(m[1]);
+    for (let i = 0; i < 5 && g && !g.querySelector('stop'); i++) {
+      const h = g.getAttribute('href') || g.getAttribute('xlink:href');
+      g = h ? doc.getElementById(h.slice(1)) : null;
+    }
+    if (!g) return '#888888';
+    const stops = [...g.querySelectorAll('stop')].map(s => {
+      const st = s.getAttribute('style') || '', c = /stop-color:\s*([^;]+)/.exec(st);
+      return { o: parseFloat(s.getAttribute('offset')) || 0, c: (c && c[1]) || s.getAttribute('stop-color') || '#888' };
+    });
+    if (!stops.length) return '#888888';
+    stops.sort((a, b) => Math.abs(a.o - 0.5) - Math.abs(b.o - 0.5));
+    return stops[0].c.trim();
+  },
+  // Escala de las transformaciones de un elemento y sus grupos (el grosor de los trazos no la lleva)
+  escala(nodo) {
+    let k = 1;
+    for (let e = nodo; e && e.getAttribute; e = e.parentNode) {
+      const t = e.getAttribute('transform') || '';
+      for (const m of t.matchAll(/(matrix|scale)\s*\(([^)]*)\)/g)) {
+        const v = m[2].split(/[\s,]+/).filter(Boolean).map(Number);
+        if (m[1] === 'matrix') k *= Math.sqrt(Math.abs(v[0] * v[3] - v[1] * v[2]));
+        else k *= Math.sqrt(Math.abs(v[0] * (v.length > 1 ? v[1] : v[0])));
+      }
+    }
+    return k;
+  },
+  // Forma con y hacia arriba (el SVG la tiene hacia abajo)
+  voltear(shape, espejoX) {
+    const sx = espejoX ? -1 : 1;
+    const pts = shape.extractPoints(8);
+    const s = new THREE.Shape(pts.shape.map(p => new THREE.Vector2(p.x * sx, -p.y)));
+    s.holes = pts.holes.map(h => new THREE.Path(h.map(p => new THREE.Vector2(p.x * sx, -p.y))));
+    return s;
+  },
+  // Pieza en relieve: cada relleno del SVG se extruye; cada trazo, una lámina delante y detrás
+  pieza(texto, grosor, espejoX = false) {
+    const doc = new DOMParser().parseFromString(texto, 'image/svg+xml');
+    // Los degradados pasan a su color central (Three.js no los lee)
+    texto = texto.replace(/url\(\s*["']?#([^"')]+)["']?\s*\)/g, m => this.color(m, doc) || 'none');
+    const datos = new THREE.SVGLoader().parse(texto);
+    const grupo = new THREE.Group();
+    let capa = 0, minaMesh = null;
+    const rellenos = [], trazos = [];
+    for (const p of datos.paths) {
+      const st = p.userData.style || {}, nodo = p.userData.node;
+      if (nodo && nodo.closest && nodo.closest('defs')) continue;
+      const esMina = !!(nodo && nodo.closest && nodo.closest('#mina, .mina'));
+      const relleno = this.color(st.fill, doc), borde = this.color(st.stroke, doc);
+      if (relleno && st.fillOpacity !== 0) rellenos.push({ p, relleno, esMina, op: st.fillOpacity });
+      if (borde && st.strokeWidth > 0 && st.strokeOpacity !== 0) trazos.push({ p, borde, st: Object.assign({}, st, { strokeWidth: st.strokeWidth * (nodo ? this.escala(nodo) : 1) }) });
+    }
+    for (const r of rellenos) {
+      const shapes = THREE.SVGLoader.createShapes(r.p).map(s => this.voltear(s, espejoX));
+      if (!shapes.length) continue;
+      const g = grosor + 2 * capa * this.CAPA;
+      const geo = new THREE.ExtrudeGeometry(shapes, { depth: g, bevelEnabled: false, curveSegments: 8 });
+      geo.translate(0, 0, -g / 2);
+      const mat = this.material(r.esMina ? COLOR_MINA : r.relleno);
+      if (r.op < 1) { mat.transparent = true; mat.opacity = r.op; }
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      if (r.esMina) { mesh.name = 'mina'; minaMesh = mesh; }
+      grupo.add(mesh);
+      capa++;
+    }
+    let k = 0;
+    for (const t of trazos) {
+      for (const sp of t.p.subPaths) {
+        const pts = sp.getPoints(8);
+        if (pts.length < 2) continue;
+        const geo = THREE.SVGLoader.pointsToStroke(pts, t.st);
+        if (!geo) continue;
+        geo.applyMatrix4(new THREE.Matrix4().makeScale(espejoX ? -1 : 1, -1, 1));
+        const z = grosor / 2 + capa * this.CAPA + (k + 1) * 0.004;
+        for (const lado of [1, -1]) {
+          const m = new THREE.Mesh(geo.clone().translate(0, 0, z * lado), this.material(t.borde));
+          grupo.add(m);
+        }
+        k++;
+      }
+    }
+    return { grupo, minaMesh };
+  },
+  // Marca (círculo con id) de un SVG, en coordenadas del SVG (y hacia abajo)
+  marca(texto, id) {
+    const doc = new DOMParser().parseFromString(texto, 'image/svg+xml');
+    const c = doc.getElementById(id);
+    return c ? { x: parseFloat(c.getAttribute('cx')), y: parseFloat(c.getAttribute('cy')) } : null;
+  },
+  // Pone la geometría de un grupo en otro sistema: x → ejeX, y → ejeY, origen en «o» (todo en el plano XY)
+  colocar(grupo, ejeX, ejeY, o) {
+    const det = ejeX.x * ejeY.y - ejeX.y * ejeY.x;
+    const m = new THREE.Matrix4().set(ejeX.x, ejeY.x, 0, o.x, ejeX.y, ejeY.y, 0, o.y, 0, 0, det < 0 ? -1 : 1, 0, 0, 0, 0, 1);
+    grupo.traverse(o3 => { if (o3.isMesh) o3.geometry.applyMatrix4(m); });
+  },
+  // Modelo completo en su posición de reposo (la del dibujo)
+  modelo() {
+    const P = PIEZAS.incrustadas, T = n => P[`compas/tumbado/${n}`];
+    const raiz = new THREE.Group(); raiz.name = 'compas';
+    const V2 = THREE.Vector2;
+    const ejeA = this.marca(T('cabeza'), 'eje-aguja'), ejeM = this.marca(T('cabeza'), 'eje-mina');
+    const lp = n => ({ punta: this.marca(T(n), 'punta').y, eje: this.marca(T(n), 'eje').y, ajuste: this.marca(T(n), 'ajuste').y });
+    const pa = lp('pata-aguja'), pm = lp('pata-mina');
+    const L = ((pa.punta - pa.eje) + (pm.punta - pm.eje)) / 2, ex = (ejeM.x - ejeA.x) / 2, ey = (ejeA.y + ejeM.y) / 2;
+    const r0 = 51.1;   // abertura del dibujo original
+    const altura = ey + Math.sqrt(L * L - (r0 / 2 - ex) ** 2);
+    const b = new V2(r0 / 2, altura);
+    const S = { aguja: new V2(b.x + ejeA.x, b.y - ejeA.y), mina: new V2(b.x + ejeM.x, b.y - ejeM.y) };
+    const tips = { aguja: new V2(0, 0), mina: new V2(r0, 0) };
+    // Cabeza (origen en la bisagra) y mango (origen en el borde de arriba de la cabeza)
+    const cab = this.pieza(T('cabeza'), this.GROSOR.cabeza).grupo;
+    cab.name = 'cabeza';
+    cab.position.set(b.x, b.y, 0);
+    raiz.add(cab);
+    const caja = new THREE.Box3().setFromObject(cab);
+    const man = this.pieza(T('mango'), this.GROSOR.mango).grupo;
+    man.name = 'mango';
+    man.position.set(0, caja.max.y - b.y, 0);
+    cab.add(man);
+    const asaM = this.marca(T('mango'), 'asa');
+    const asa = new THREE.Object3D(); asa.name = 'asa'; asa.position.set(0, -asaM.y, 0); man.add(asa);
+    // Patas: origen en su tornillo, el eje de la pieza hacia la punta
+    for (const [lado, nombre, info, signo] of [['aguja', 'pata-aguja', pa, -1], ['mina', 'pata-mina', pm, 1]]) {
+      const { grupo } = this.pieza(T(nombre), this.GROSOR.pata);
+      const s = S[lado], t = tips[lado], v = t.clone().sub(s).normalize();
+      let n = new V2(-v.y, v.x); if (Math.sign(n.x) !== signo) n.negate();
+      // punto de la pieza (px, py↓) → s + n·px + v·(py − eje); en la geometría y va hacia arriba: (px, −py)
+      this.colocar(grupo, n, v.clone().negate(), v.clone().multiplyScalar(-info.eje));
+      grupo.name = nombre;
+      grupo.position.set(s.x, s.y, 0);
+      raiz.add(grupo);
+      const punta = new THREE.Object3D(); punta.name = `punta-${lado}`;
+      punta.position.set(v.x * (info.punta - info.eje), v.y * (info.punta - info.eje), 0); grupo.add(punta);
+      const aj = new THREE.Object3D(); aj.name = `ajuste-${lado}`;
+      aj.position.set(v.x * (info.ajuste - info.eje), v.y * (info.ajuste - info.eje), 0); grupo.add(aj);
+    }
+    // Pinzas (origen en el punto de ajuste de cada pata), horizontales
+    raiz.updateMatrixWorld(true);
+    for (const [lado, signo] of [['aguja', -1], ['mina', 1]]) {
+      const { grupo } = this.pieza(T('taco'), this.GROSOR.pinza);
+      this.colocar(grupo, new V2(signo, 0), new V2(0, 1), new V2(0, 0));
+      grupo.name = `pinza-${lado}`;
+      const q = raiz.getObjectByName(`ajuste-${lado}`).getWorldPosition(new THREE.Vector3());
+      grupo.position.copy(q);
+      raiz.add(grupo);
+    }
+    // Varilla roscada y rueda (cilindros, en horizontal a lo largo de X)
+    const qa = raiz.getObjectByName('ajuste-aguja').getWorldPosition(new THREE.Vector3());
+    const qm = raiz.getObjectByName('ajuste-mina').getWorldPosition(new THREE.Vector3());
+    const medio = qa.clone().add(qm).multiplyScalar(0.5);
+    const varilla = new THREE.Group(); varilla.name = 'varilla';
+    const largoVarilla = 40;
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, largoVarilla, 20).rotateZ(Math.PI / 2), this.material('#c4c8cd', 'metal'));
+    rod.castShadow = true;
+    varilla.add(rod);
+    for (let x = -largoVarilla / 2 + 0.35; x < largoVarilla / 2; x += 0.7) {   // rosca
+      const anillo = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.07, 4, 16).rotateY(Math.PI / 2), this.material('#8d939a'));
+      anillo.position.x = x; varilla.add(anillo);
+    }
+    varilla.position.copy(medio);
+    raiz.add(varilla);
+    const rueda = new THREE.Group(); rueda.name = 'rueda';
+    const R = 3.45, ancho = 1.55;
+    const disco = new THREE.Mesh(new THREE.CylinderGeometry(R, R, ancho, 40).rotateZ(Math.PI / 2), this.material('#1b1c1f'));
+    disco.castShadow = true;
+    rueda.add(disco);
+    for (let i = 0; i < 24; i++) {   // estrías
+      const e = new THREE.Mesh(new THREE.BoxGeometry(ancho * 1.02, 0.28, 0.28), this.material('#3a3d42'));
+      const a = i / 24 * Math.PI * 2;
+      e.position.set(0, Math.cos(a) * R, Math.sin(a) * R);
+      e.rotation.x = -a;
+      rueda.add(e);
+    }
+    rueda.position.copy(medio);
+    raiz.add(rueda);
+    return raiz;
+  },
+};
+
+// ------------------------------------------------------------------ mecánica
+// Se apoya solo en los nombres y en las posiciones de reposo de las piezas (vale para el modelo de Blender)
+const Mecanica = {
+  init(modelo) {
+    this.m = modelo;
+    const g = n => modelo.getObjectByName(n);
+    this.p = {};
+    for (const n of NOMBRES) this.p[n] = g(n);
+    const faltan = NOMBRES.filter(n => !this.p[n]);
+    if (faltan.length) throw new Error('Faltan piezas en el modelo: ' + faltan.join(', '));
+    modelo.updateMatrixWorld(true);
+    const W = o => o.getWorldPosition(new THREE.Vector3());
+    const reposo = this.reposo = {};
+    for (const n of ['cabeza', 'pata-aguja', 'pata-mina', 'pinza-aguja', 'pinza-mina', 'varilla', 'rueda'])
+      reposo[n] = { pos: this.p[n].position.clone(), quat: this.p[n].quaternion.clone() };
+    // Geometría que no cambia: tornillos respecto a la bisagra, largo de las patas, puntos de ajuste
+    const b = W(this.p.cabeza), Sa = W(this.p['pata-aguja']), Sm = W(this.p['pata-mina']);
+    const Ta = W(this.p['punta-aguja']), Tm = W(this.p['punta-mina']);
+    this.r0 = Ta.distanceTo(Tm);
+    this.ejes = { aguja: Sa.clone().sub(b), mina: Sm.clone().sub(b) };
+    this.largo = { aguja: Sa.distanceTo(Ta), mina: Sm.distanceTo(Tm) };
+    this.ang0 = { aguja: Math.atan2(Ta.y - Sa.y, Ta.x - Sa.x), mina: Math.atan2(Tm.y - Sm.y, Tm.x - Sm.x) };
+    // Puntos de ajuste en el sistema de cada pata (girar la pata los lleva consigo)
+    this.ajuste = {
+      aguja: W(this.p['ajuste-aguja']).sub(Sa), mina: W(this.p['ajuste-mina']).sub(Sm),
+    };
+    // Topes del tornillo de ajuste: las pinzas chocan con la rueda (cerrado) o se salen de la varilla (abierto)
+    const caja = o => new THREE.Box3().setFromObject(o);
+    const cP = caja(this.p['pinza-mina']), qm = W(this.p['pinza-mina']);
+    const dentro = qm.x - cP.min.x, fuera = cP.max.x - qm.x;
+    const cR = caja(this.p.rueda), cV = caja(this.p.varilla);
+    this.dlMin = 2 * dentro + (cR.max.x - cR.min.x) + 0.2;
+    this.dlMax = (cV.max.x - cV.min.x) - 2 * fuera - 0.4;
+    this.paso = 0.7;   // mm que se separan las pinzas por vuelta de rueda (cada una, 0,35)
+    this.rMin = this.radioDe(this.dlMin);
+    this.rMax = Math.min(this.radioDe(this.dlMax), 2 * (Math.abs(this.ejes.mina.x) + Math.min(this.largo.aguja, this.largo.mina) * 0.97));
+    this.dl0 = this.separacion(this.r0);
+    this.r = this.r0;
+    this.aplicar();
+  },
+  // Postura de las patas para una abertura r (plano del alzado; aguja en el origen)
+  postura(r) {
+    const ex = (this.ejes.mina.x - this.ejes.aguja.x) / 2, ey = -(this.ejes.aguja.y + this.ejes.mina.y) / 2;
+    const L = (this.largo.aguja + this.largo.mina) / 2, h = r / 2 - ex;
+    const b = new THREE.Vector3(r / 2, ey + Math.sqrt(Math.max(L * L - h * h, 0)), 0);
+    const out = { b };
+    for (const lado of ['aguja', 'mina']) {
+      const S = b.clone().add(this.ejes[lado]), T = new THREE.Vector3(lado === 'aguja' ? 0 : r, 0, 0);
+      const ang = Math.atan2(T.y - S.y, T.x - S.x), giro = ang - this.ang0[lado];
+      const q = this.ajuste[lado].clone().applyAxisAngle(new THREE.Vector3(0, 0, 1), giro).add(S);
+      out[lado] = { S, giro, q };
+    }
+    return out;
+  },
+  separacion(r) { const p = this.postura(r); return p.mina.q.x - p.aguja.q.x; },
+  // Abertura que da una separación de pinzas (la separación crece con la abertura)
+  radioDe(dl) {
+    let a = 1, z = 200;
+    for (let i = 0; i < 60; i++) { const m = (a + z) / 2; if (this.separacion(m) < dl) a = m; else z = m; }
+    return (a + z) / 2;
+  },
+  // Vueltas de la rueda respecto a la abertura del dibujo
+  vueltas() { return (this.separacion(this.r) - this.dl0) / this.paso; },
+  ponerRadio(r) { this.r = THREE.MathUtils.clamp(r, this.rMin, this.rMax); this.aplicar(); return this.r; },
+  girarRueda(dv) { return this.ponerRadio(this.radioDe(this.separacion(this.r) + dv * this.paso)); },
+  aplicar() {
+    const p = this.postura(this.r), R = this.reposo, z = new THREE.Vector3(0, 0, 1);
+    this.p.cabeza.position.copy(p.b);
+    for (const lado of ['aguja', 'mina']) {
+      const o = this.p[`pata-${lado}`];
+      o.position.copy(p[lado].S);
+      o.quaternion.copy(R[`pata-${lado}`].quat).premultiply(new THREE.Quaternion().setFromAxisAngle(z, p[lado].giro));
+      this.p[`pinza-${lado}`].position.copy(p[lado].q);
+    }
+    const medio = p.aguja.q.clone().add(p.mina.q).multiplyScalar(0.5);
+    this.p.varilla.position.copy(medio);
+    this.p.rueda.position.copy(medio);
+    this.p.rueda.quaternion.copy(R.rueda.quat).premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), this.vueltas() * Math.PI * 2));
+  },
+  reposar() { this.ponerRadio(this.r0); },
+};
+
+// ------------------------------------------------------------------ escena
+THREE.ColorManagement.legacyMode = false;   // los colores del SVG son sRGB: así se ven igual
+const lienzo = document.getElementById('lienzo');
+const renderer = new THREE.WebGLRenderer({ canvas: lienzo, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+const escena = new THREE.Scene();
+escena.background = new THREE.Color('#cdbb9b');
+// Una sala alrededor para que el metal tenga algo que reflejar
+escena.environment = new THREE.PMREMGenerator(renderer).fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+escena.add(new THREE.HemisphereLight('#ffffff', '#b9ab90', 0.4));
+const sol = new THREE.DirectionalLight('#ffffff', 0.7);
+sol.position.set(-60, 160, -90);
+sol.castShadow = true;
+sol.shadow.mapSize.set(2048, 2048);
+Object.assign(sol.shadow.camera, { left: -170, right: 170, top: 130, bottom: -130, near: 10, far: 400 });
+sol.shadow.bias = -0.0008;
+escena.add(sol);
+// Hoja A4 horizontal (297 × 210 mm) en el plano y = 0, con el margen
+const hoja = new THREE.Mesh(new THREE.PlaneGeometry(297, 210).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#fbf5e3', roughness: 0.95, envMapIntensity: 0.15 }));
+hoja.receiveShadow = true;
+escena.add(hoja);
+const marco = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([[-138.5, -95], [138.5, -95], [138.5, 95], [-138.5, 95]].map(([x, z]) => new THREE.Vector3(x, 0.02, z))),
+  new THREE.LineBasicMaterial({ color: '#9aa6c8' }));
+escena.add(marco);
+const arcos = new THREE.Group(); escena.add(arcos);
+
+// Cámaras: cenital (como en DibuTec) y libre
+const camCenital = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 1000);
+camCenital.position.set(0, 400, 0); camCenital.up.set(0, 0, -1); camCenital.lookAt(0, 0, 0);
+const camLibre = new THREE.PerspectiveCamera(35, 1, 1, 3000);
+camLibre.position.set(-40, 170, 230);
+const orbita = new THREE.OrbitControls(camLibre, lienzo);
+orbita.target.set(0, 10, 0); orbita.enabled = false; orbita.update();
+let camara = camCenital, zoom = 4.2;
+function encajar() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  lienzo.style.width = w + 'px'; lienzo.style.height = h + 'px';
+  const ah = h / zoom / 2, aw = w / zoom / 2;
+  Object.assign(camCenital, { left: -aw, right: aw, top: ah, bottom: -ah }); camCenital.updateProjectionMatrix();
+  camLibre.aspect = w / h; camLibre.updateProjectionMatrix();
+}
+addEventListener('resize', encajar);
+lienzo.addEventListener('wheel', e => {
+  if (camara !== camCenital) return;
+  e.preventDefault();
+  zoom = THREE.MathUtils.clamp(zoom * Math.exp(-e.deltaY * 0.0015), 0.8, 30);
+  encajar();
+}, { passive: false });
+
+// ------------------------------------------------------------------ el compás sobre la hoja
+const Compas = {
+  sitio: new THREE.Group(),     // posición de la aguja y giro sobre la hoja
+  alzado: new THREE.Group(),    // tumbado (0) o de pie (1)
+  modelo: null,
+  pos: new THREE.Vector2(-25, 35),   // aguja (x, z) en la hoja
+  giro: 0,                          // ángulo (en la hoja) de la aguja a la mina
+  a: 0, aObjetivo: 0,
+  levantada: false,
+  grosorTumbado: 2.7,
+  init(modelo) {
+    if (this.modelo) this.alzado.remove(this.modelo);
+    this.modelo = modelo;
+    modelo.traverse(o => { if (o.isMesh) { o.castShadow = true; } });
+    this.alzado.add(modelo);
+    this.sitio.add(this.alzado);
+    if (!this.sitio.parent) escena.add(this.sitio);
+    Mecanica.init(modelo);
+    // Grosor del compás tumbado (la mitad, para apoyarlo sobre la hoja)
+    Mecanica.reposar();
+    const caja = new THREE.Box3().setFromObject(modelo);
+    this.grosorTumbado = Math.max(1, -caja.min.z);
+    this.ponerMina();
+    this.colocar();
+  },
+  ponerMina() {
+    const m = Mecanica.p.mina;
+    m.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.color.set(COLOR_MINA); o.material.transparent = this.levantada; o.material.opacity = this.levantada ? 0.4 : 1; } });
+  },
+  colocar() {
+    this.sitio.position.set(this.pos.x, 0, this.pos.y);
+    this.sitio.rotation.set(0, -this.giro, 0);
+    // Tumbado: el alzado mira hacia arriba y la cabeza queda hacia «arriba» en la hoja (−z); de pie, vertical
+    this.alzado.rotation.set(-(1 - this.a) * Math.PI / 2, 0, 0);
+    this.alzado.position.set(0, (1 - this.a) * this.grosorTumbado, 0);
+  },
+  puntaMina() { return new THREE.Vector2(this.pos.x + Math.cos(this.giro) * Mecanica.r, this.pos.y + Math.sin(this.giro) * Mecanica.r); },
+};
+
+// ------------------------------------------------------------------ arcos trazados
+const Trazo = {
+  actual: null,
+  empezar() { this.actual = { a0: Compas.giro, a1: Compas.giro, r: Mecanica.r, c: Compas.pos.clone(), malla: null }; },
+  seguir() {
+    const t = this.actual;
+    if (!t) return;
+    t.a1 = Compas.giro;
+    if (t.malla) arcos.remove(t.malla);
+    const da = t.a1 - t.a0;
+    if (Math.abs(da) < 0.002) return;
+    const ancho = 0.25;
+    const geo = new THREE.RingGeometry(t.r - ancho, t.r + ancho, Math.max(8, Math.ceil(Math.abs(da) * t.r / 0.5)), 1, Math.min(t.a0, t.a1), Math.abs(da));
+    geo.rotateX(Math.PI / 2);   // en la hoja: el ángulo crece de x hacia z, como el giro del compás
+    t.malla = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: COLOR_MINA, side: THREE.DoubleSide }));
+    t.malla.position.set(t.c.x, 0.03, t.c.y);
+    arcos.add(t.malla);
+  },
+  acabar() { this.actual = null; },
+};
+
+// ------------------------------------------------------------------ manejo con el puntero
+const ray = new THREE.Raycaster(), plano = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+let arrastre = null;
+function puntero(e) {
+  const r = lienzo.getBoundingClientRect();
+  return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+}
+function enHoja(e) {
+  ray.setFromCamera(puntero(e), camara);
+  const q = new THREE.Vector3();
+  return ray.ray.intersectPlane(plano, q) ? new THREE.Vector2(q.x, q.z) : null;
+}
+// Qué pieza del compás hay bajo el puntero (su nombre «de mecanismo»)
+function piezaBajo(e) {
+  ray.setFromCamera(puntero(e), camara);
+  const hits = ray.intersectObject(Compas.modelo, true);
+  for (const h of hits) {
+    for (let o = h.object; o && o !== Compas.modelo; o = o.parent) {
+      if (['mina', 'rueda', 'mango', 'cabeza', 'pata-aguja', 'pata-mina', 'pinza-aguja', 'pinza-mina', 'varilla'].includes(o.name)) return o.name;
+    }
+  }
+  return null;
+}
+function mensaje(t) { document.getElementById('e-msg').textContent = t || ''; }
+function estado() {
+  document.getElementById('e-radio').textContent = Mecanica.r.toFixed(1).replace('.', ',') + ' mm';
+  document.getElementById('e-rueda').textContent = (Mecanica.vueltas() >= 0 ? '+' : '') + Mecanica.vueltas().toFixed(2).replace('.', ',') + ' vueltas';
+}
+// En captura: si se toca el compás, la cámara de la vista libre no se entera
+lienzo.addEventListener('pointerdown', e => {
+  const pieza = Compas.modelo ? piezaBajo(e) : null;
+  if (!pieza) return;           // fuera del compás: en la vista libre, la cámara gira
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  orbita.enabled = false;
+  lienzo.setPointerCapture(e.pointerId);
+  const p = enHoja(e);
+  if (pieza === 'mina' || (pieza === 'pata-mina' && p && p.distanceTo(Compas.puntaMina()) < 12)) arrastre = { modo: 'abrir' };
+  else if (pieza === 'rueda') arrastre = { modo: 'rueda', y: e.clientY };
+  else if (pieza === 'mango') {
+    arrastre = { modo: 'trazar', ang: p ? Math.atan2(p.y - Compas.pos.y, p.x - Compas.pos.x) : 0 };
+    Compas.aObjetivo = 1;
+    if (!Compas.levantada) Trazo.empezar();
+  } else arrastre = { modo: 'mover', d: p ? Compas.pos.clone().sub(p) : new THREE.Vector2() };
+}, { capture: true });
+lienzo.addEventListener('pointermove', e => {
+  if (!arrastre) {
+    if (Compas.modelo && camara === camCenital) { const pz = piezaBajo(e); lienzo.style.cursor = pz === 'rueda' ? 'ns-resize' : pz === 'mango' ? 'grab' : pz ? 'move' : 'default'; }
+    return;
+  }
+  const p = enHoja(e);
+  if (arrastre.modo === 'abrir' && p) {
+    const d = p.clone().sub(Compas.pos), quiere = d.length();
+    const r = Mecanica.ponerRadio(quiere);
+    Compas.giro = Math.atan2(d.y, d.x);
+    mensaje(r > quiere + 0.05 ? 'El compás no se cierra más: la rueda toca las pinzas.' : r < quiere - 0.05 ? 'El compás no se abre más: la varilla se acaba.' : '');
+  } else if (arrastre.modo === 'rueda') {
+    const dv = (arrastre.y - e.clientY) / 40;   // 40 px de arrastre: una vuelta
+    arrastre.y = e.clientY;
+    const antes = Mecanica.r, r = Mecanica.girarRueda(dv);
+    mensaje(Math.abs(r - antes) < 1e-6 && dv ? (dv < 0 ? 'La rueda no gira más: las pinzas tocan la rueda.' : 'La rueda no gira más: la varilla se acaba.') : '');
+  } else if (arrastre.modo === 'trazar' && p) {
+    const ang = Math.atan2(p.y - Compas.pos.y, p.x - Compas.pos.x);
+    let d = ang - arrastre.ang;
+    if (d > Math.PI) d -= Math.PI * 2; else if (d < -Math.PI) d += Math.PI * 2;
+    arrastre.ang = ang;
+    Compas.giro += d;
+    if (!Compas.levantada) Trazo.seguir();
+  } else if (arrastre.modo === 'mover' && p) {
+    Compas.pos.copy(p.add(arrastre.d));
+  }
+  Compas.colocar(); estado();
+});
+function soltar() {
+  if (!arrastre) return;
+  if (arrastre.modo === 'trazar') { Trazo.acabar(); Compas.aObjetivo = 0; }
+  arrastre = null;
+  orbita.enabled = camara === camLibre;
+}
+lienzo.addEventListener('pointerup', soltar);
+lienzo.addEventListener('pointercancel', soltar);
+
+// ------------------------------------------------------------------ botones
+const bMina = document.getElementById('b-mina'), bVista = document.getElementById('b-vista');
+function alternarMina() {
+  Compas.levantada = !Compas.levantada;
+  bMina.textContent = Compas.levantada ? 'Mina levantada' : 'Mina apoyada';
+  bMina.setAttribute('aria-pressed', String(Compas.levantada));
+  Compas.ponerMina();
+  if (arrastre && arrastre.modo === 'trazar') { if (Compas.levantada) Trazo.acabar(); else Trazo.empezar(); }
+}
+function alternarVista() {
+  camara = camara === camCenital ? camLibre : camCenital;
+  orbita.enabled = camara === camLibre;
+  bVista.setAttribute('aria-pressed', String(camara === camLibre));
+}
+bMina.addEventListener('click', alternarMina);
+bVista.addEventListener('click', alternarVista);
+document.getElementById('b-borrar').addEventListener('click', () => { arcos.clear(); });
+document.getElementById('b-ayuda').addEventListener('click', e => {
+  const a = document.getElementById('ayuda'); a.hidden = !a.hidden; e.currentTarget.setAttribute('aria-pressed', String(!a.hidden));
+});
+addEventListener('keydown', e => {
+  if (e.key === 'l' || e.key === 'L') alternarMina();
+  if (e.key === 'v' || e.key === 'V') alternarVista();
+});
+// Modelo en reposo (abierto como en el dibujo), listo para Blender: 1 unidad = 1 mm
+function exportarGLB(alTerminar) {
+  const r = Mecanica.r;
+  Mecanica.reposar();
+  const copia = Compas.modelo.clone(true);
+  Mecanica.ponerRadio(r);
+  copia.position.set(0, 0, 0); copia.rotation.set(0, 0, 0);
+  new THREE.GLTFExporter().parse(copia, buf => alTerminar(buf), err => mensaje('No se ha podido exportar: ' + err), { binary: true });
+}
+document.getElementById('b-glb').addEventListener('click', () => exportarGLB(buf => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([buf], { type: 'model/gltf-binary' }));
+  a.download = 'compas.glb'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}));
+
+// ------------------------------------------------------------------ arranque
+function animar(t) {
+  // Ponerse de pie o tumbarse: 0,42 s con una curva suave
+  if (Compas.modelo && Compas.a !== Compas.aObjetivo) {
+    const paso = (animar.tPrev ? (t - animar.tPrev) : 16) / 420;
+    Compas.a = Compas.aObjetivo > Compas.a ? Math.min(1, Compas.a + paso) : Math.max(0, Compas.a - paso);
+    Compas.colocar();
+  }
+  animar.tPrev = t;
+  renderer.render(escena, camara);
+  requestAnimationFrame(animar);
+}
+function arrancar(modelo, origen) {
+  Compas.init(modelo);
+  document.getElementById('e-modelo').textContent = origen;
+  estado();
+}
+encajar();
+requestAnimationFrame(animar);
+// Modelo de Blender si se puede leer; si no, el que se construye desde los SVG
+const desdeSVG = () => arrancar(Construir.modelo(), 'Modelo: construido desde las piezas SVG');
+const params = new URLSearchParams(location.search);
+if (location.protocol === 'file:' || params.has('svg')) desdeSVG();
+else {
+  new THREE.GLTFLoader().load('instrumentos/compas/3d/compas.glb', g => {
+    try { arrancar(g.scene, 'Modelo: instrumentos/compas/3d/compas.glb'); }
+    catch (err) { console.warn(err); mensaje(String(err.message || err)); desdeSVG(); }
+  }, undefined, () => desdeSVG());
+}
+window.DibuTec3D = { Compas, Mecanica, Construir, exportarGLB, Trazo, escena, renderer, camaras: { camCenital, camLibre } };
+</script>
+</body>
+</html>

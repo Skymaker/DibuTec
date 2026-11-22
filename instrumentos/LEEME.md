@@ -13,6 +13,9 @@ Al empezar a trazar, el compás se levanta y el alzado da paso a la planta con
 un fundido; al soltar, vuelve. Las piezas salen del dibujo
 `compas/original/compas-alzado-planta.svg` (alzado arriba y planta abajo).
 
+En `compas/3d/` está el modelo 3D del compás para la prueba `compas3d.html`
+(ver `compas/3d/LEEME.md`).
+
 ## Piezas
 
 | Pieza | Tumbado (alzado) | De pie (planta) | Punto de anclaje (0, 0) |
