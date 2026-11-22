@@ -75,10 +75,10 @@ piezas: los dibuja DibuTec encima.
 
 ## Abertura mínima y máxima
 
-El compás se abre entre **12 y 110 mm de radio** (`rMin` y `rMax` en la clase
-`Compas` de `index.html`). Por debajo de 12 mm, las pinzas del tornillo de
-ajuste chocarían con la rueda; por encima de 110 mm, el compás estaría
-demasiado abierto. Si cambias las piezas (sobre todo las pinzas, la rueda o
+El compás se abre entre **12 y 105,8 mm de radio** (`rMin` y `rMax` en la
+clase `Compas` de `index.html`), los mismos topes que el compás 3D: por debajo
+de 12 mm, las pinzas del tornillo de ajuste chocarían con la rueda; por encima
+de 105,8 mm, la varilla del tornillo de ajuste se acaba. Si cambias las piezas (sobre todo las pinzas, la rueda o
 la separación de los tornillos), revisa el mínimo.
 
 ## Vistas completas
