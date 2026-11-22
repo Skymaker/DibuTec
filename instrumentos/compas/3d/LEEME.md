@@ -47,7 +47,8 @@ cerrar más.
 como `metal-gris-claro-bebebe` o `plastico-negro-111111` (tipo, tono y color).
 Cambiar uno cambia todas las piezas que lo usan; para cambiar solo una, dale
 un material propio. La mina tiene el suyo (`mina`): la prueba le pone el
-color del portaminas y la aclara cuando está levantada.
+color del portaminas y la aclara cuando está levantada. La aguja de la punta
+seca (objeto `aguja`) tiene `aguja-metal-azul`, metálico y azul oscuro.
 
 ## Guardarlo
 
