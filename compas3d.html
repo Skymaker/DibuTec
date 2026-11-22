@@ -9,7 +9,7 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--texto); background: var(--fondo); }
   #lienzo { position: fixed; inset: 0; touch-action: none; display: block; }
-  .barra { position: fixed; left: 12px; top: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; pointer-events: none; }
+  .barra { position: fixed; left: 12px; top: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; pointer-events: none; z-index: 2; }
   .barra > * { pointer-events: auto; }
   .barra h1 { font-size: 16px; margin: 0 8px 0 0; padding: 8px 12px; background: #fff; border: 1px solid var(--borde); border-radius: 10px; }
   button { font: inherit; font-size: 14px; min-height: 38px; padding: 0 12px; border: 1px solid var(--borde); border-radius: 10px; background: #fff; color: var(--texto); cursor: pointer; }
@@ -17,7 +17,7 @@
   button:focus-visible { outline: 3px solid #8ab4f8; outline-offset: 1px; }
   #estado { position: fixed; left: 12px; right: 12px; bottom: 12px; padding: 8px 12px; background: #fff; border: 1px solid var(--borde); border-radius: 10px; font-size: 14px; display: flex; gap: 16px; flex-wrap: wrap; }
   #estado b { font-variant-numeric: tabular-nums; }
-  #ayuda { position: fixed; right: 12px; top: 62px; width: min(360px, calc(100% - 24px)); padding: 10px 12px; background: #fff; border: 1px solid var(--borde); border-radius: 10px; font-size: 13px; line-height: 1.45; color: var(--suave); }
+  #ayuda { position: fixed; right: 12px; top: var(--bajo-barra, 62px); z-index: 1; width: min(360px, calc(100% - 24px)); padding: 10px 12px; background: #fff; border: 1px solid var(--borde); border-radius: 10px; font-size: 13px; line-height: 1.45; color: var(--suave); }
   #ayuda[hidden] { display: none; }
   #ayuda strong { color: var(--texto); }
 </style>
@@ -627,6 +627,12 @@ function arrancar(modelo, origen) {
   document.getElementById('e-modelo').textContent = origen;
   estado();
 }
+function colocarAyuda() {
+  const b = document.querySelector('.barra').getBoundingClientRect();
+  document.documentElement.style.setProperty('--bajo-barra', Math.round(b.bottom + 8) + 'px');
+}
+addEventListener('resize', colocarAyuda);
+colocarAyuda();
 encajar();
 requestAnimationFrame(animar);
 // Modelo de Blender si se puede leer; si no, el que se construye desde los SVG
@@ -634,10 +640,14 @@ const desdeSVG = () => arrancar(Construir.modelo(), 'Modelo: construido desde la
 const params = new URLSearchParams(location.search);
 if (location.protocol === 'file:' || params.has('svg')) desdeSVG();
 else {
-  new THREE.GLTFLoader().load('instrumentos/compas/3d/compas.glb', g => {
-    try { arrancar(g.scene, 'Modelo: instrumentos/compas/3d/compas.glb'); }
-    catch (err) { console.warn(err); mensaje(String(err.message || err)); desdeSVG(); }
-  }, undefined, () => desdeSVG());
+  // «no-cache»: el navegador pregunta siempre si el modelo ha cambiado (si no, usaría uno guardado y antiguo)
+  fetch('instrumentos/compas/3d/compas.glb', { cache: 'no-cache' })
+    .then(r => { if (!r.ok) throw new Error('sin modelo'); return r.arrayBuffer(); })
+    .then(buf => new THREE.GLTFLoader().parse(buf, '', g => {
+      try { arrancar(g.scene, 'Modelo: instrumentos/compas/3d/compas.glb'); }
+      catch (err) { console.warn(err); mensaje(String(err.message || err)); desdeSVG(); }
+    }, () => desdeSVG()))
+    .catch(() => desdeSVG());
 }
 window.DibuTec3D = { Compas, Mecanica, Construir, exportarGLB, Trazo, escena, renderer, camaras: { camCenital, camLibre } };
 </script>
