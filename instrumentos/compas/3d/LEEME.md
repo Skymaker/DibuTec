@@ -29,6 +29,11 @@ detalles libremente, pero hay que conservar:
 | `varilla` | Varilla roscada, a lo largo de X. | Su centro. |
 | `rueda` | Rueda del tornillo de ajuste: gira alrededor de X. | Su centro. |
 
+Dentro de cada pata está su **ruedecita** de apriete (`ruedecita-aguja`,
+`ruedecita-mina`): un cilindro estriado con el eje hacia fuera de la pata y su
+tornillo (`tornillo-ruedecita-…`), otro cilindro en el mismo eje. Son solo
+decorativas: se pueden retocar o cambiar sin que la mecánica se entere.
+
 Vacíos (*empties*): `punta-aguja` y `punta-mina` marcan las puntas;
 `ajuste-aguja` y `ajuste-mina`, dónde se enganchan las pinzas; `asa`, dónde
 está el asa para girar.
